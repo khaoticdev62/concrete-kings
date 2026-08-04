@@ -290,6 +290,34 @@ const DICE_EFFECTS = [
   { label:'Double or nothing', fx: (prompt) => prompt + ' Twice.' },
 ];
 
+const RECEIPT_POOL = [
+  {
+    id: 'cousin-bail',
+    earnText: "You helped your cousin bail out of jail. Now they owe you.",
+    resolutionPrompt: "Your cousin who owes you shows up at the cookout with ____"
+  },
+  {
+    id: 'auntie-joke',
+    earnText: "You told that joke at the cookout. Auntie still side-eyeing you.",
+    resolutionPrompt: "Auntie who's still side-eyeing you says ____"
+  },
+  {
+    id: 'side-hustle',
+    earnText: "You invested in that side hustle. It's about to blow up or flop.",
+    resolutionPrompt: "Your side hustle investment just ____"
+  },
+  {
+    id: 'landlord-standoff',
+    earnText: "You stood up to the landlord. They're watching you now.",
+    resolutionPrompt: "The landlord who's watching you just posted ____"
+  },
+  {
+    id: 'best-dish',
+    earnText: "You brought the best dish. Everyone expects excellence forever.",
+    resolutionPrompt: "Everyone's expecting you to top last time's dish, but you brought ____"
+  }
+];
+
 class Deck {
   constructor(items) { this.items = [...items]; this.index = 0; this.shuffle(); }
   shuffle() {
@@ -323,7 +351,11 @@ class Game {
 
   addPlayer(name) {
     if (this.players.length >= 12) throw new Error('Max 12 players');
-    this.players.push({ name, hand: [], points: 0 });
+    this.players.push({
+      name, hand: [], points: 0,
+      stats: { streetCred: 0, community: 0, wisdom: 0, reputation: 0 },
+      receipts: []
+    });
   }
 
   refillHand(player) {
@@ -338,6 +370,17 @@ class Game {
   }
 
   nextBlack() {
+    const trigger = ReceiptSystem.maybeTriggerReceipt(this);
+    if (trigger) {
+      this.currentBlack = {
+        raw: trigger.resolutionPrompt, prompt: trigger.resolutionPrompt,
+        hasDice: false, effect: null, receiptTrigger: trigger
+      };
+      this.diceEffect = null;
+      this.submissions = [];
+      this.selected = new Set();
+      return;
+    }
     const raw = this.blackDeck.draw();
     const hasDice = Math.random() < 0.35;
     const effect = hasDice ? DICE_EFFECTS[Math.floor(Math.random()*DICE_EFFECTS.length)] : null;
@@ -373,6 +416,66 @@ class Game {
     this.selected.delete(playerIndex);
   }
 }
+
+const ReceiptSystem = {
+  maybeTriggerReceipt(game) {
+    const ogName = game.getJudge().name;
+    const candidates = [];
+    for (const p of game.players) {
+      if (p.name === ogName) continue;
+      for (const r of p.receipts) {
+        if (r.status === 'active') candidates.push({ receipt: r, owner: p });
+      }
+    }
+    if (candidates.length === 0) return null;
+    if (Math.random() >= 0.35) return null;
+    const pick = candidates[Math.floor(Math.random() * candidates.length)];
+    return {
+      receiptId: pick.receipt.id,
+      ownerName: pick.owner.name,
+      resolutionPrompt: pick.receipt.resolutionPrompt
+    };
+  },
+
+  resolveTrigger(game, winner) {
+    const trigger = game.currentBlack && game.currentBlack.receiptTrigger;
+    if (!trigger) return;
+    const owner = game.players.find(p => p.name === trigger.ownerName);
+    if (!owner) return;
+    const receipt = owner.receipts.find(r => r.id === trigger.receiptId && r.status === 'active');
+    if (!receipt) return;
+    if (winner.name === trigger.ownerName) {
+      receipt.status = 'resolved';
+      winner.stats.reputation += 2;
+      const og = game.getJudge();
+      og.stats.reputation += 1;
+    } else {
+      receipt.status = 'failed';
+      owner.stats.streetCred -= 1;
+      owner.stats.community -= 1;
+      owner.stats.wisdom -= 1;
+      owner.stats.reputation -= 1;
+    }
+  },
+
+  awardWin(game, winner) {
+    winner.stats.reputation += 1;
+    const activeCount = winner.receipts.filter(r => r.status === 'active').length;
+    if (activeCount >= 5) return;
+    const held = new Set(winner.receipts.filter(r => r.status === 'active').map(r => r.poolId));
+    const options = RECEIPT_POOL.filter(entry => !held.has(entry.id));
+    const pool = options.length > 0 ? options : RECEIPT_POOL;
+    const chosen = pool[Math.floor(Math.random() * pool.length)];
+    winner.receipts.push({
+      id: `${chosen.id}-${game.round}-${winner.name}`,
+      poolId: chosen.id,
+      earnText: chosen.earnText,
+      resolutionPrompt: chosen.resolutionPrompt,
+      roundEarned: game.round,
+      status: 'active'
+    });
+  }
+};
 
 /* ===========================
    UI / STATE
@@ -619,7 +722,11 @@ const app = {
   chooseWinner(index) {
     const win = this.game.submissions[index];
     const winner = this.game.players.find(p => p.name === win.player);
-    if (winner) winner.points++;
+    if (winner) {
+      winner.points++;
+      ReceiptSystem.resolveTrigger(this.game, winner);
+      ReceiptSystem.awardWin(this.game, winner);
+    }
     document.getElementById('winnerName').textContent = winner.name;
     document.getElementById('winnerCard').textContent = win.card;
     document.getElementById('winnerMeta').textContent = `${this.game.currentBlack.prompt}`;

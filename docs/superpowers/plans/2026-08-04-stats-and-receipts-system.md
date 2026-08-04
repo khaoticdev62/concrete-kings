@@ -6,7 +6,7 @@
 
 **Architecture:** A new `ReceiptSystem` object lives alongside the existing `Deck`/`Game` classes inside `index.html`'s single inline `<script>` block (no new files, no build step, no module system change). `Game.addPlayer` gains `stats`/`receipts` fields, `Game.nextBlack()` consults `ReceiptSystem.maybeTriggerReceipt` before drawing a normal black card, and `app.chooseWinner()` calls `ReceiptSystem.resolveTrigger` then `ReceiptSystem.awardWin` after its existing `winner.points++`. A new Node-based test harness (`test/helpers/load-app.js`) extracts and evaluates the testable portion of `index.html`'s inline script in a `vm` context, so the pure game-logic pieces can be unit tested with Node's built-in test runner without a browser.
 
-**Tech Stack:** Vanilla JS (no framework, no bundler), Node.js built-in `node:test` + `node:assert/strict` + `vm` for testing (no new npm dependencies).
+**Tech Stack:** Vanilla JS (no framework, no bundler), Node.js built-in `node:test` + `node:assert` (not `assert/strict` — see Global Constraints) + `vm` for testing (no new npm dependencies).
 
 ## Global Constraints
 
@@ -14,6 +14,7 @@
 - No new files outside `test/` — all production code changes stay inside `index.html`'s existing single inline `<script>` block (per the approved spec's Option B: a small in-file `ReceiptSystem`, not a separate module).
 - `npm test`'s existing smoke check (regex-extracts `index.html`'s `<script>` and `server/server.js`, parses both with `new Function`) must keep passing unmodified in behavior — only extend `package.json`'s `test` script to also run the new Node test suite, don't replace the smoke check.
 - No UI/rendering changes — `app`'s DOM-touching methods are not unit tested in this plan (per spec, UI wiring is out of scope); the one production change inside `app` (`chooseWinner`) is a small, mechanical two-line addition verified via the smoke parse check plus a manual browser QA pass, not new automated DOM tests.
+- Use `require('node:assert')` (not `node:assert/strict`) in every test file. Confirmed empirically during Task 1: `vm` contexts are separate realms, so plain objects/arrays created inside the sandboxed game code have a different `Object`/`Array` prototype identity than literals written in the outer test file; `assert/strict`'s `deepEqual` treats that as a mismatch even when the data is structurally identical, while plain `assert.deepEqual` compares correctly.
 - Exact numbers, field names, and call order are fixed by the spec (`docs/superpowers/specs/2026-08-04-stats-and-receipts-system-design.md`) and must match verbatim: `+1` reputation on any win, `+2` additional reputation (stacking) plus O.G. `+1` on receipt resolve, `-1` to all four stats on receipt fail, 5-receipt active cap, 35% trigger chance, `resolveTrigger` called **before** `awardWin` in `chooseWinner`.
 
 ---
@@ -47,9 +48,14 @@ function loadGameModule() {
   const match = html.match(/<script>([\s\S]*)<\/script>/);
   if (!match) throw new Error('index.html: could not find inline <script> block');
   const script = match[1];
-  const boundaryIndex = script.indexOf(BOUNDARY);
+
+  // document.getElementById('blackCard') appears twice: once inside app.renderGame()
+  // (a method call, not the boundary) and once as the DOM-wiring event listener at the
+  // bottom of the script (the real boundary). Match the .addEventListener variant to
+  // find the second occurrence, not the first.
+  const boundaryIndex = script.indexOf(BOUNDARY + ".addEventListener");
   if (boundaryIndex === -1) {
-    throw new Error(`index.html: could not find test boundary marker "${BOUNDARY}"`);
+    throw new Error(`index.html: could not find test boundary marker "${BOUNDARY}.addEventListener"`);
   }
   const testable = script.slice(0, boundaryIndex);
   const context = { console, Math };
@@ -67,7 +73,7 @@ Create `test/game-loader.smoke.test.js`:
 
 ```js
 const test = require('node:test');
-const assert = require('node:assert/strict');
+const assert = require('node:assert');
 const { loadGameModule } = require('./helpers/load-app');
 
 test('Deck.draw cycles through every item before reshuffling', () => {
@@ -114,9 +120,9 @@ In `package.json`, change:
 ```json
     "test": "node -e \"const fs=require('fs');const html=fs.readFileSync('index.html','utf8');const m=html.match(/<script>([\\s\\S]*)<\\/script>/);if(!m){console.error('NO SCRIPT');process.exit(1)}try{new Function(m[1]);console.log('client JS OK')}catch(e){console.error('CLIENT JS ERROR',e.message);process.exit(1)}const server=fs.readFileSync('server/server.js','utf8');try{new Function(server);console.log('server JS OK')}catch(e){console.error('SERVER JS ERROR',e.message);process.exit(1)}try{require('fs').accessSync('server/server.js');console.log('server file present')}catch(e){console.error('SERVER FILE MISSING');process.exit(1)}\""
 ```
-to (append ` && node --test test/` at the end, keep everything else byte-for-byte identical):
+to (append ` && node --test test/**/*.test.js` at the end, keep everything else byte-for-byte identical — `node --test test/` does not reliably discover files under a directory argument on this Node/OS combination, confirmed empirically during Task 1; the glob form is required and has been verified working via `npm test` in this environment's shell):
 ```json
-    "test": "node -e \"const fs=require('fs');const html=fs.readFileSync('index.html','utf8');const m=html.match(/<script>([\\s\\S]*)<\\/script>/);if(!m){console.error('NO SCRIPT');process.exit(1)}try{new Function(m[1]);console.log('client JS OK')}catch(e){console.error('CLIENT JS ERROR',e.message);process.exit(1)}const server=fs.readFileSync('server/server.js','utf8');try{new Function(server);console.log('server JS OK')}catch(e){console.error('SERVER JS ERROR',e.message);process.exit(1)}try{require('fs').accessSync('server/server.js');console.log('server file present')}catch(e){console.error('SERVER FILE MISSING');process.exit(1)}\" && node --test test/"
+    "test": "node -e \"const fs=require('fs');const html=fs.readFileSync('index.html','utf8');const m=html.match(/<script>([\\s\\S]*)<\\/script>/);if(!m){console.error('NO SCRIPT');process.exit(1)}try{new Function(m[1]);console.log('client JS OK')}catch(e){console.error('CLIENT JS ERROR',e.message);process.exit(1)}const server=fs.readFileSync('server/server.js','utf8');try{new Function(server);console.log('server JS OK')}catch(e){console.error('SERVER JS ERROR',e.message);process.exit(1)}try{require('fs').accessSync('server/server.js');console.log('server file present')}catch(e){console.error('SERVER FILE MISSING');process.exit(1)}\" && node --test test/**/*.test.js"
 ```
 
 - [ ] **Step 7: Run the full suite, verify pass**
@@ -157,7 +163,7 @@ Create `test/receipt-pool-and-player-model.test.js`:
 
 ```js
 const test = require('node:test');
-const assert = require('node:assert/strict');
+const assert = require('node:assert');
 const { loadGameModule } = require('./helpers/load-app');
 
 test('RECEIPT_POOL has 5 seed entries with id/earnText/resolutionPrompt', () => {
@@ -287,7 +293,7 @@ Create `test/receipt-system-award-win.test.js`:
 
 ```js
 const test = require('node:test');
-const assert = require('node:assert/strict');
+const assert = require('node:assert');
 const { loadGameModule } = require('./helpers/load-app');
 
 function makeWinner(Game) {
@@ -412,7 +418,7 @@ Create `test/receipt-system-trigger-selection.test.js`:
 
 ```js
 const test = require('node:test');
-const assert = require('node:assert/strict');
+const assert = require('node:assert');
 const { loadGameModule } = require('./helpers/load-app');
 
 function withMockedRandom(value, fn) {
@@ -567,7 +573,7 @@ Create `test/game-next-black-receipt-integration.test.js`:
 
 ```js
 const test = require('node:test');
-const assert = require('node:assert/strict');
+const assert = require('node:assert');
 const { loadGameModule } = require('./helpers/load-app');
 
 function withMockedRandom(value, fn) {
@@ -688,7 +694,7 @@ Create `test/receipt-system-resolve-trigger.test.js`:
 
 ```js
 const test = require('node:test');
-const assert = require('node:assert/strict');
+const assert = require('node:assert');
 const { loadGameModule } = require('./helpers/load-app');
 
 function makeTriggeredGame(Game) {
@@ -850,7 +856,7 @@ Create `test/receipt-round-integration.test.js`:
 
 ```js
 const test = require('node:test');
-const assert = require('node:assert/strict');
+const assert = require('node:assert');
 const { loadGameModule } = require('./helpers/load-app');
 
 test('resolving a receipt frees a cap slot for a new receipt in the same round (resolveTrigger before awardWin)', () => {
