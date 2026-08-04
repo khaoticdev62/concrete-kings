@@ -722,7 +722,11 @@ const app = {
   chooseWinner(index) {
     const win = this.game.submissions[index];
     const winner = this.game.players.find(p => p.name === win.player);
-    if (winner) winner.points++;
+    if (winner) {
+      winner.points++;
+      ReceiptSystem.resolveTrigger(this.game, winner);
+      ReceiptSystem.awardWin(this.game, winner);
+    }
     document.getElementById('winnerName').textContent = winner.name;
     document.getElementById('winnerCard').textContent = win.card;
     document.getElementById('winnerMeta').textContent = `${this.game.currentBlack.prompt}`;
