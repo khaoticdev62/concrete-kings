@@ -67,3 +67,19 @@ test('maybeTriggerReceipt ignores resolved and failed receipts', () => {
     assert.equal(ReceiptSystem.maybeTriggerReceipt(game), null);
   });
 });
+
+test('maybeTriggerReceipt does not call Math.random when no candidates exist', () => {
+  const { Game, ReceiptSystem } = loadGameModule();
+  const game = makeGameWithJudge(Game);
+
+  let callCount = 0;
+  const original = Math.random;
+  Math.random = () => { callCount++; return original(); };
+
+  try {
+    ReceiptSystem.maybeTriggerReceipt(game);
+    assert.equal(callCount, 0, 'Math.random should not be called when no candidates exist');
+  } finally {
+    Math.random = original;
+  }
+});
