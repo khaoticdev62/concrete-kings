@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Concrete Kings - The Urban Card Game</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(180deg, #1a1a1a 0%, #2b1d0e 100%);
+    color: #f3e7cf;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 4px;
+  }
+  h1 {
+    margin: 0; font-size: 28px; letter-spacing: 1px;
+    background: linear-gradient(90deg,#f7c948,#ff6b35);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .pill {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+    padding: 8px 12px; border-radius: 999px; font-size: 13px;
+  }
+  .panel {
+    background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; padding: 16px; margin-top: 12px;
+  }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  button {
+    background: linear-gradient(180deg,#ff7a1a,#e04b00); color:#fff;
+    border: none; padding: 12px 18px; border-radius: 10px; font-weight: 700;
+    cursor: pointer; font-size: 15px;
+  }
+  button.secondary {
+    background: rgba(255,255,255,0.12); color:#f3e7cf;
+  }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  input[type="text"], input[type="number"] {
+    background: rgba(0,0,0,0.4); color:#fff; border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px; padding: 10px 12px; width: 100%; font-size: 15px;
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+  .player-row { display:flex; justify-content:space-between; align-items:center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .hand { display: grid; grid-template-columns: repeat(auto-fill,minmax(170px,1fr)); gap: 10px; }
+  .card {
+    background: linear-gradient(180deg,#fff7e6,#ffe3b3); color:#1a1105;
+    border-radius: 12px; padding: 12px; min-height: 110px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.25); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    font-weight: 700; font-size: 14px; transition: transform .1s;
+  }
+  .card:active { transform: translateY(3px); }
+  .card.selected { outline: 3px solid #ff6b35; transform: translateY(3px); }
+  .black-card {
+    background: linear-gradient(180deg,#1f1f1f,#0a0a0a); color:#f3e7cf;
+    border-radius: 12px; padding: 18px; min-height: 130px;
+    text-align: center; font-weight: 700; font-size: 16px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.4);
+  }
+  .dice {
+    display: inline-flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+  }
+  .die {
+    width: 44px; height: 44px; background:#fff; color:#000; border-radius:8px;
+    display:flex; align-items:center; justify-content:center; font-weight:900;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.35);
+  }
+  .winner-area { text-align: center; padding: 20px; }
+  .winner-area .card { max-width: 360px; margin: 12px auto; }
+  .topbar { display:flex; gap: 8px; flex-wrap: wrap; }
+  .room-info { font-size: 12px; opacity: .85; }
+  .muted { font-size: 13px; opacity: .8; }
+  .pass-banner { margin-top:8px; font-size:14px; font-weight:700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>CONCRETE KINGS</h1>
+    <div class="topbar">
+      <div class="pill" id="modeBadge">Offline</div>
+      <button class="secondary" onclick="app.showSetup()">Menu</button>
+    </div>
+  </header>
+
+  <!-- SETUP -->
+  <section id="setup" class="screen active">
+    <div class="panel">
+      <h2>New Game</h2>
+      <label>Your Name</label>
+      <input id="hostName" value="Host" />
+      <label style="margin-top:10px;">Players (3-12)</label>
+      <input id="playerCount" type="number" min="3" max="12" value="4" />
+      <label style="margin-top:10px;">Points to Win</label>
+      <input id="pointsToWin" type="number" min="1" max="50" value="7" />
+      <div class="grid-2" style="margin-top:12px;">
+        <button onclick="app.startLocalGame()">Play Offline (Pass & Play)</button>
+        <button class="secondary" onclick="app.openOnlineLobby()">Online Lobby</button>
+      </div>
+      <div class="muted" style="margin-top:10px;">
+        Offline = same device, pass & play.
+      </div>
+    </div>
+  </section>
+
+  <!-- ONLINE LOBBY -->
+  <section id="lobby" class="screen">
+    <div class="panel">
+      <h2>Online Room</h2>
+      <p class="muted">Open this page on every device, enter the same room code, and click Join.</p>
+      <div class="grid-2">
+        <div>
+          <label>Room Name / Code</label>
+          <input id="roomCode" value="concrete-kings-42" />
+          <button class="secondary" style="margin-top:8px;" onclick="app.createRoom()">Create Room</button>
+        </div>
+        <div>
+          <label>Your Name</label>
+          <input id="joinName" value="" />
+          <button class="secondary" style="margin-top:8px;" onclick="app.joinRoom()">Join Room</button>
+        </div>
+      </div>
+      <div id="roomStatus" style="margin-top:10px; font-size:13px;"></div>
+      <button id="startOnlineBtn" style="margin-top:12px;" onclick="app.startOnlineGame()" disabled>Start Game</button>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section id="game" class="screen">
+    <div class="panel">
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+        <div>
+          Round <span id="roundNum">1</span> | Judge: <b id="judgeName">-</b>
+        </div>
+        <div class="dice" id="diceResult"></div>
+        <div>
+          Black cards: <span id="blackRemaining">0</span> | Points to win: <b id="pointsTarget">7</b>
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="black-card" id="blackCard">...</div>
+      </div>
+      <div id="diceNotice" style="margin-top:8px; font-size:13px; opacity:.9;"></div>
+      <div style="margin-top:10px; font-size:13px;">
+        <span id="statusText">Waiting...</span>
+      </div>
+      <div id="turnBanner" class="pass-banner"></div>
+    </div>
+
+    <div class="panel">
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+        <h3 style="margin:0;">Your Hand</h3>
+        <div id="playerLabel" class="muted">Player: -</div>
+      </div>
+      <div id="hand" class="hand"></div>
+      <div style="margin-top:10px;">
+        <button id="submitBtn" onclick="app.submitSelection()" disabled>Submit Selection</button>
+        <button class="secondary" onclick="app.passTurn()">Pass / End Turn</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3 style="margin-top:0;">Scoreboard</h3>
+      <div id="scoreboard"></div>
+    </div>
+  </section>
+
+  <!-- JUDGE / RESULTS -->
+  <section id="judging" class="screen">
+    <div class="panel">
+      <h2>Judge Phase</h2>
+      <p class="muted">All submissions are in. Pick the winner.</p>
+      <div id="submissions" class="hand"></div>
+      <div id="judgeNotice" style="margin-top:10px; font-size:13px;"></div>
+    </div>
+  </section>
+
+  <!-- ROUND RESULT -->
+  <section id="roundResult" class="screen">
+    <div class="panel winner-area">
+      <h2>Round Winner</h2>
+      <div id="winnerName" style="font-size:20px; font-weight:800;"></div>
+      <div id="winnerCard" class="card"></div>
+      <div id="winnerMeta" style="font-size:13px; opacity:.85;"></div>
+      <button onclick="app.nextRound()">Next Round</button>
+    </div>
+  </section>
+
+  <!-- GAME OVER -->
+  <section id="gameOver" class="screen">
+    <div class="panel winner-area">
+      <h2>Game Over</h2>
+      <div id="champion" style="font-size:24px; font-weight:900;"></div>
+      <div id="finalScore" style="margin-top:8px;"></div>
+      <button onclick="app.showSetup()">Play Again</button>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ===========================
+   CONCRETE KINGS - Full Game
+   =========================== */
+
+const MODE = { OFFLINE:'Offline', ONLINE:'Online' };
+
+const BLACK_CARDS = [
+  "____ is the real reason the club closed early.",
+  "____: now with 100% more ____.",
+  "When life gives you ____, make ____.",
+  "The new street legend says ____ beats ____.",
+  "____ ruined Thanksgiving before the food was even served.",
+  "____ is the only acceptable excuse for being late to the cookout.",
+  "____ and ____. Name a better duo. I’ll wait.",
+  "The barber really said ‘____’ and meant it.",
+  "____ got kicked out of the family reunion for ____.",
+  "____ is why the neighbors called the cops.",
+  "____ went viral for all the wrong reasons.",
+  "____ is technically a felony in 12 cities.",
+  "____ is my love language.",
+  "____ plus ____ equals a block party shutdown.",
+  "____: the home-cooked ghetto secret to ____."
+];
+
+const WHITE_CARDS = [
+  "unpaid parking tickets",
+  "a bolo in the backseat",
+  "texting at the stoplight",
+  "the grandma who still cooks like it’s 1999",
+  "a mixtape nobody asked for",
+  "one uncle who brings his own cooler",
+  "a server that only accepts Apple Pay",
+  "the cousin who owes everybody money",
+  "asking ‘you got a light?’ in 2026",
+  "a blunt shaped like a baby bottle",
+  "designer sweatpants at a gas station",
+  "the club promoter with zero followers",
+  "an argument over who makes the best mac & cheese",
+  "a frozen pizza at 2AM",
+  "a side door DJ set with no permit",
+  "a TikTok that started the whole beef",
+  "a blocked-off cul-de-sac",
+  "a cop who knows your middle name",
+  "a tailgate turned neighborhood meeting",
+  "an auntie who drinks you under the table",
+  "a 15-minute phone call about potato salad",
+  "a bodega cat with a restraining order",
+  "a drone footage war crime",
+  "an engagement ring from the vending machine",
+  "a house with 17 cousins in it",
+  "a snow cone truck at a funeral",
+  "a baby with a debit card",
+  "a parking spot named after an ex",
+  "a TikTok dance at a candlelight vigil",
+  "a rent-to-own fridge full of nothing",
+  "a rapper named after a brand of detergent",
+  "a house party that got towed",
+  "a brisket that was paid for in Venmo requests",
+  "a Bluetooth speaker that only plays 90s R&B",
+  "a porch light left on for a ghost",
+  "a counterfeit birkin from the gas station",
+  "a street light that knows your secrets",
+  "a cousin with a food truck permit",
+  "a side hustle in crypto and nail polish",
+  "a step show at a family reunion",
+  "a mattress in the back of an Uber",
+  "a karaoke machine with only Jill Scott songs",
+  "a buttered roll at 5 in the morning",
+  "a porch swing that’s seen too much",
+  "a used car with a fresh coat of paint",
+  "a doorknob that only opens from the inside",
+  "a home-cooked plate with no utensils",
+  "a stray dog with better fits than you",
+  "a dice roll that changed the whole plan"
+];
+
+const DICE_EFFECTS = [
+  { label:'+1 blank', fx: (prompt) => prompt + ' ____' },
+  { label:'Swap words', fx: (prompt) => prompt.replace(/____/g,'__TEMP__').replace(/__TEMP__/,'____') + ' ____' },
+  { label:'Reverse it', fx: (prompt) => '____ ' + prompt.replace(/____/g,'') },
+  { label:'Rap verse mode', fx: (prompt) => 'Bars only: ' + prompt },
+  { label:'Barbershop edition', fx: (prompt) => prompt + ' (and the chair was open)' },
+  { label:'Double or nothing', fx: (prompt) => prompt + ' Twice.' },
+];
+
+class Deck {
+  constructor(items) { this.items = [...items]; this.index = 0; this.shuffle(); }
+  shuffle() {
+    for (let i = this.items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.items[i], this.items[j]] = [this.items[j], this.items[i]];
+    }
+    this.index = 0;
+  }
+  draw() {
+    if (this.index >= this.items.length) this.shuffle();
+    return this.items[this.index++];
+  }
+}
+
+class Game {
+  constructor() {
+    this.players = [];
+    this.round = 0;
+    this.blackDeck = new Deck(BLACK_CARDS);
+    this.whiteDeck = new Deck(WHITE_CARDS);
+    this.currentBlack = null;
+    this.diceEffect = null;
+    this.judgeIndex = 0;
+    this.submissions = [];
+    this.selected = new Set();
+    this.pointsToWin = 7;
+    this.mode = MODE.OFFLINE;
+    this.room = null;
+  }
+
+  addPlayer(name) {
+    if (this.players.length >= 12) throw new Error('Max 12 players');
+    this.players.push({ name, hand: [], points: 0 });
+  }
+
+  refillHand(player) {
+    while (player.hand.length < 8) {
+      const card = this.whiteDeck.draw();
+      player.hand.push(card);
+    }
+  }
+
+  dealAll() {
+    this.players.forEach(p => this.refillHand(p));
+  }
+
+  nextBlack() {
+    const raw = this.blackDeck.draw();
+    const hasDice = Math.random() < 0.35;
+    const effect = hasDice ? DICE_EFFECTS[Math.floor(Math.random()*DICE_EFFECTS.length)] : null;
+    const prompt = effect ? effect.fx(raw) : raw;
+    this.currentBlack = { raw, prompt, hasDice, effect };
+    this.diceEffect = effect;
+    this.submissions = [];
+    this.selected = new Set();
+  }
+
+  rollDice() {
+    if (!this.currentBlack?.hasDice) return null;
+    this.currentBlack.effectRolled = true;
+    const effect = this.currentBlack.effect;
+    this.currentBlack.prompt = effect.fx(this.currentBlack.raw);
+    return effect.label;
+  }
+
+  getJudge() { return this.players[this.judgeIndex % this.players.length]; }
+
+  advanceJudge() {
+    this.judgeIndex++;
+    this.round++;
+  }
+
+  submit(playerIndex, cardIndex) {
+    const player = this.players[playerIndex];
+    const card = player.hand[cardIndex];
+    if (!card) return;
+    player.hand.splice(cardIndex, 1);
+    this.refillHand(player);
+    this.submissions.push({ player: player.name, card });
+    this.selected.delete(playerIndex);
+  }
+}
+
+/* ===========================
+   UI / STATE
+   =========================== */
+const app = {
+  game: new Game(),
+  humanIndex: 0,
+  isHost: true,
+
+  show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  },
+  showSetup() { this.show('setup'); },
+
+  localPlayer(index) {
+    if (index < 0 || index >= this.game.players.length) return;
+    this.humanIndex = index;
+    this.renderGame();
+  },
+
+  startLocalGame() {
+    const host = document.getElementById('hostName').value.trim() || 'Host';
+    const count = Math.min(12, Math.max(3, parseInt(document.getElementById('playerCount').value||'4',10)));
+    const pts = Math.max(1, parseInt(document.getElementById('pointsToWin').value||'7',10));
+
+    this.game = new Game();
+    this.game.mode = MODE.OFFLINE;
+    this.game.pointsToWin = pts;
+
+    for (let i = 0; i < count; i++) {
+      const name = i === 0 ? host : 'Player ' + (i+1);
+      this.game.addPlayer(name);
+    }
+    this.humanIndex = 0;
+    this.game.dealAll();
+    this.game.nextBlack();
+    this.game.advanceJudge();
+    this.game.players.forEach(p => this.game.refillHand(p));
+
+    this.show('game');
+    this.showPassDevice();
+    this.renderGame();
+  },
+
+  showPassDevice() {
+    const banner = document.getElementById('turnBanner');
+    if (!banner) return;
+    const current = this.game.players[this.humanIndex].name;
+    const next = this.game.players[(this.humanIndex + 1) % this.game.players.length].name;
+    const isJudge = this.isJudge();
+    const reason = isJudge
+      ? 'You are judge. Review all submissions and pick the winner.'
+      : 'Pick one card from your hand, then submit.';
+    banner.innerHTML = `
+      <div style="margin-bottom:8px;">Pass device to <b>${current}</b></div>
+      <button onclick="app.localPlayer(${(this.humanIndex + 1) % this.game.players.length})">I am ${next}</button>
+      <div style="margin-top:8px; opacity:.85;">${reason}</div>
+    `;
+  },
+
+  /* ---------- ONLINE ---------- */
+  openOnlineLobby() {
+    this.show('lobby');
+    document.getElementById('roomStatus').textContent = '';
+    document.getElementById('startOnlineBtn').disabled = true;
+    this.detectLocalRoom();
+  },
+  detectLocalRoom() {
+    try {
+      const lastRoom = localStorage.getItem('ck-last-room');
+      if (!lastRoom) return;
+      const room = JSON.parse(lastRoom);
+      if (room?.code) {
+        document.getElementById('roomCode').value = room.code;
+        document.getElementById('roomStatus').textContent =
+          `Found recent room: ${room.code}. You can join or create a new one.`;
+      }
+    } catch {}
+  },
+  createRoom() {
+    const code = document.getElementById('roomCode').value.trim() || 'room-' + Math.floor(Math.random()*9999);
+    const host = document.getElementById('joinName').value.trim() || 'Host';
+    this.game.room = { code, host, state: { players: [] } };
+    this.isHost = true;
+    this.humanIndex = 0;
+    this.game.players = [];
+    this.game.addPlayer(host);
+    try { localStorage.setItem('ck-last-room', JSON.stringify({ code, host })); } catch {}
+    document.getElementById('roomStatus').innerHTML = `<b>Room:</b> ${code}<br><b>Share this code</b> so friends can join.<br>They’ll need to open this same page.`;
+    document.getElementById('startOnlineBtn').disabled = false;
+    this.persistRoom();
+  },
+  joinRoom() {
+    const code = document.getElementById('roomCode').value.trim();
+    const name = document.getElementById('joinName').value.trim();
+    if (!code || !name) return alert('Enter room code and your name');
+    this.game.room = { code, host: name, state: { players: [{ name }] } };
+    this.isHost = false;
+    this.humanIndex = 0;
+    this.game.players = [];
+    this.game.addPlayer(name);
+    try { localStorage.setItem('ck-last-room', JSON.stringify({ code, host: name })); } catch {}
+    document.getElementById('roomStatus').innerHTML = `<b>Joined room:</b> ${code}<br>Waiting for host to start...`;
+    document.getElementById('startOnlineBtn').disabled = true;
+    this.persistRoom();
+  },
+  persistRoom() {
+    if (!this.game.room) return;
+    try { localStorage.setItem('ck-room-' + this.game.room.code, JSON.stringify(this.game.room)); } catch {}
+  },
+  startOnlineGame() {
+    if (!this.game.room) return;
+    this.game.mode = MODE.ONLINE;
+    this.show('game');
+    this.game.pointsToWin = 7;
+    this.game.dealAll();
+    this.game.nextBlack();
+    this.game.advanceJudge();
+    this.game.players.forEach(p => this.game.refillHand(p));
+    this.renderGame();
+    try {
+      localStorage.setItem('ck-room-' + this.game.room.code, JSON.stringify({
+        code: this.game.room.code,
+        host: this.game.room.host,
+        state: { players: this.game.players.map(p => ({ name: p.name, points: p.points })) }
+      }));
+    } catch {}
+  },
+
+  /* ---------- RENDER ---------- */
+  renderGame() {
+    const banner = document.getElementById('turnBanner');
+    if (banner) banner.textContent = '';
+
+    document.getElementById('modeBadge').textContent = this.game.mode;
+    document.getElementById('roundNum').textContent = this.game.round;
+    document.getElementById('judgeName').textContent = this.game.getJudge().name;
+    document.getElementById('blackRemaining').textContent = this.game.blackDeck.items.length;
+    document.getElementById('pointsTarget').textContent = this.game.pointsToWin;
+    document.getElementById('playerLabel').textContent = 'Player: ' + this.game.players[this.humanIndex].name;
+
+    const bc = this.game.currentBlack;
+    document.getElementById('blackCard').innerHTML = (bc.hasDice ? '🎲 ' : '') + (bc.prompt || '...');
+
+    const diceEl = document.getElementById('diceResult');
+    if (bc.hasDice) {
+      diceEl.innerHTML = '<span class="die">?</span>';
+    } else {
+      diceEl.innerHTML = '';
+    }
+    document.getElementById('diceNotice').textContent = '';
+
+    const isJudge = this.isJudge();
+    if (isJudge) {
+      document.getElementById('statusText').textContent = 'You are the judge. Others play first.';
+    } else {
+      document.getElementById('statusText').textContent = 'Your turn: pick a card to play.';
+    }
+
+    this.renderHand();
+    this.renderScoreboard();
+  },
+
+  renderHand() {
+    const handEl = document.getElementById('hand');
+    const me = this.game.players[this.humanIndex];
+    handEl.innerHTML = '';
+    me.hand.forEach((card, i) => {
+      const el = document.createElement('div');
+      el.className = 'card';
+      if (this.game.selected.has(i)) el.classList.add('selected');
+      el.textContent = card;
+      el.onclick = () => this.toggleCard(i);
+      handEl.appendChild(el);
+    });
+    document.getElementById('submitBtn').disabled = this.game.selected.size === 0 || this.isJudge();
+  },
+
+  renderScoreboard() {
+    const el = document.getElementById('scoreboard');
+    el.innerHTML = this.game.players.map(p =>
+      `<div class="player-row"><span>${p.name}</span><span>${p.points} pts</span></div>`
+    ).join('');
+  },
+
+  toggleCard(index) {
+    if (this.isJudge()) return;
+    if (this.game.selected.has(index)) this.game.selected.delete(index);
+    else if (this.game.selected.size < 1) this.game.selected.add(index);
+    this.renderHand();
+  },
+
+  isJudge() {
+    return this.game.judgeIndex % this.game.players.length === this.humanIndex;
+  },
+
+  submitSelection() {
+    if (this.isJudge() || this.game.selected.size === 0) return;
+    const idx = Array.from(this.game.selected)[0];
+    this.game.submit(this.humanIndex, idx);
+    this.checkPhase();
+  },
+
+  passTurn() {
+    if (this.game.selected.size > 0) {
+      if (!confirm('You have a card selected. Submit it?')) return;
+      this.submitSelection();
+      return;
+    }
+    this.checkPhase();
+  },
+
+  checkPhase() {
+    const expected = this.game.players.length - 1;
+    if (this.game.submissions.length >= expected) {
+      this.enterJudging();
+    } else {
+      this.renderGame();
+      document.getElementById('statusText').textContent = 'Submitted! Waiting for more...';
+      const banner = document.getElementById('turnBanner');
+      if (banner) banner.textContent = 'Waiting for more submissions...';
+    }
+  },
+
+  enterJudging() {
+    this.show('judging');
+    const subEl = document.getElementById('submissions');
+    subEl.innerHTML = '';
+    this.game.submissions.forEach((s, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.textContent = s.card;
+      card.onclick = () => {
+        if (this.isJudge()) this.chooseWinner(i);
+      };
+      subEl.appendChild(card);
+    });
+    document.getElementById('judgeNotice').textContent = this.isJudge()
+      ? 'Tap a submission to crown the winner.'
+      : 'Judge is picking...';
+  },
+
+  chooseWinner(index) {
+    const win = this.game.submissions[index];
+    const winner = this.game.players.find(p => p.name === win.player);
+    if (winner) winner.points++;
+    document.getElementById('winnerName').textContent = winner.name;
+    document.getElementById('winnerCard').textContent = win.card;
+    document.getElementById('winnerMeta').textContent = `${this.game.currentBlack.prompt}`;
+    this.show('roundResult');
+    if (winner.points >= this.game.pointsToWin) {
+      setTimeout(() => this.endGame(winner), 800);
+    }
+  },
+
+  nextRound() {
+    this.game.advanceJudge();
+    this.game.nextBlack();
+    this.game.dealAll();
+    this.game.players.forEach(p => this.game.refillHand(p));
+    this.show('game');
+    this.showPassDevice();
+    this.renderGame();
+  },
+
+  endGame(winner) {
+    document.getElementById('champion').textContent = winner.name;
+    document.getElementById('finalScore').innerHTML = this.game.players.map(p =>
+      `${p.name}: ${p.points}`
+    ).join('<br>');
+    this.show('gameOver');
+  }
+};
+
+/* Dice click on black card for judge */
+document.getElementById('blackCard').addEventListener('click', () => {
+  if (!app.game.currentBlack?.hasDice) return;
+  const label = app.game.rollDice();
+  const diceEl = document.getElementById('diceResult');
+  diceEl.innerHTML = '<div class="die">' + Math.floor(Math.random()*6+1) + '</div>';
+  document.getElementById('diceNotice').textContent = 'Dice effect: ' + label;
+  app.renderGame();
+});
+
+/* key submit */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && document.getElementById('game').classList.contains('active')) {
+    const btn = document.getElementById('submitBtn');
+    if (!btn.disabled) app.submitSelection();
+  }
+});
+</script>
+</body>
+</html>

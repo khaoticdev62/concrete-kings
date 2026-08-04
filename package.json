@@ -1,0 +1,16 @@
+{
+  "name": "concrete-kings",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node -e \"const fs=require('fs');const html=fs.readFileSync('index.html','utf8');const m=html.match(/<script>([\\s\\S]*)<\\/script>/);if(!m){console.error('NO SCRIPT');process.exit(1)}try{new Function(m[1]);console.log('client JS OK')}catch(e){console.error('CLIENT JS ERROR',e.message);process.exit(1)}const server=fs.readFileSync('server/server.js','utf8');try{new Function(server);console.log('server JS OK')}catch(e){console.error('SERVER JS ERROR',e.message);process.exit(1)}try{require('fs').accessSync('server/server.js');console.log('server file present')}catch(e){console.error('SERVER FILE MISSING');process.exit(1)}\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "ws": "^8.21.2"
+  }
+}
