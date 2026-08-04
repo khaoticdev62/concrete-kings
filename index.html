@@ -370,6 +370,17 @@ class Game {
   }
 
   nextBlack() {
+    const trigger = ReceiptSystem.maybeTriggerReceipt(this);
+    if (trigger) {
+      this.currentBlack = {
+        raw: trigger.resolutionPrompt, prompt: trigger.resolutionPrompt,
+        hasDice: false, effect: null, receiptTrigger: trigger
+      };
+      this.diceEffect = null;
+      this.submissions = [];
+      this.selected = new Set();
+      return;
+    }
     const raw = this.blackDeck.draw();
     const hasDice = Math.random() < 0.35;
     const effect = hasDice ? DICE_EFFECTS[Math.floor(Math.random()*DICE_EFFECTS.length)] : null;
