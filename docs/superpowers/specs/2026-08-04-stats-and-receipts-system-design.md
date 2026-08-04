@@ -94,7 +94,7 @@ The O.G. bonus only fires on a successful resolution — there is no penalty cas
 
 ## Receipt Lifecycle
 
-**1. Earning** — After stat rewards are applied for a round win (in the same step, order doesn't matter since they touch different fields), check `winner.receipts.filter(r => r.status === 'active').length`. If less than 5, draw one `RECEIPT_POOL` entry the winner doesn't already hold `active` (fall back to any entry if they somehow hold all 5), and push a new `active` `ReceiptInstance` with `roundEarned = game.round`. If already at 5 active, skip — no error, no forced resolution, just no new receipt this round.
+**1. Earning** — Runs *after* Resolving (step 3 below) has already applied for this round, so a receipt that just resolved/failed has already left the `active` pool and freed up a slot. Check `winner.receipts.filter(r => r.status === 'active').length`. If less than 5, draw one `RECEIPT_POOL` entry the winner doesn't already hold `active`, and push a new `active` `ReceiptInstance` with `roundEarned = game.round`. If already at 5 active, skip — no error, no forced resolution, just no new receipt this round. (`RECEIPT_POOL` must stay at 5+ entries for this draw to always have an option — true today since the seed pool below has exactly 5; note this invariant if the pool is ever trimmed.)
 
 **2. Triggering** — In `Game.nextBlack()`, before the existing dice-effect roll:
 1. Build the candidate list: all `active` receipts across all players, **excluding** any owned by the current round's O.G. (the O.G. judges, doesn't submit, so they can never win/fail a round).
@@ -126,7 +126,7 @@ const ReceiptSystem = {
 Integration points (all additive, no existing behavior changed):
 - `Game.addPlayer(name)` — initialize `stats` and `receipts` on new players.
 - `Game.nextBlack()` — call `ReceiptSystem.maybeTriggerReceipt(this)` first; only fall through to the existing `blackDeck.draw()` + dice-effect logic if it returns null.
-- `app.chooseWinner(index)` — after the existing `winner.points++`, call `ReceiptSystem.awardWin(this.game, winner)` then `ReceiptSystem.resolveTrigger(this.game, winner)`.
+- `app.chooseWinner(index)` — after the existing `winner.points++`, call `ReceiptSystem.resolveTrigger(this.game, winner)` **then** `ReceiptSystem.awardWin(this.game, winner)`. Resolving first means if this round's win frees up a receipt slot (owner hits the 5-cap resolving/failing one), that slot is available immediately for the earning step in the same round, rather than lagging a round behind.
 
 `ReceiptSystem`'s functions take `game`/`winner` and mutate the passed-in player/game state directly (matching the existing `Game` class's own style — `submit()`, `advanceJudge()`, etc. all mutate in place rather than returning new state), rather than being purely functional. This keeps the calling code at the integration points simple and consistent with the rest of the file.
 
