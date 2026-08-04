@@ -766,7 +766,7 @@ Power without responsibility ain't O.G. status — it's just being loud.
 
 ### 16.1 Physical Card Deck
 
-**Card Count:** 200 Black Cards · 350 White Cards · 100 Receipt Cards · 12 Cipher Cards
+**Card Count:** 200 Black Cards · 350 White Cards · 100 Receipt Cards · 12 Cipher Cards — a print-sized subset curated for cost from the full pool. The complete, deduplicated database (577 Black / 539 White / 130 Receipts in 14 chains / 12 Ciphers / 8 Origins / 8 Hustles / 24 Locations) lives in `CONCRETE-KINGS-CARD-DATABASE.md`; for digital or online play, ship the whole thing.
 
 **Card Specs:** 2.5" x 3.5" (standard poker size) · 350gsm linen paper · matte front, glossy back · Black cards in black, White cards in cream, Receipts in gold, Ciphers in purple.
 
