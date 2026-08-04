@@ -290,6 +290,34 @@ const DICE_EFFECTS = [
   { label:'Double or nothing', fx: (prompt) => prompt + ' Twice.' },
 ];
 
+const RECEIPT_POOL = [
+  {
+    id: 'cousin-bail',
+    earnText: "You helped your cousin bail out of jail. Now they owe you.",
+    resolutionPrompt: "Your cousin who owes you shows up at the cookout with ____"
+  },
+  {
+    id: 'auntie-joke',
+    earnText: "You told that joke at the cookout. Auntie still side-eyeing you.",
+    resolutionPrompt: "Auntie who's still side-eyeing you says ____"
+  },
+  {
+    id: 'side-hustle',
+    earnText: "You invested in that side hustle. It's about to blow up or flop.",
+    resolutionPrompt: "Your side hustle investment just ____"
+  },
+  {
+    id: 'landlord-standoff',
+    earnText: "You stood up to the landlord. They're watching you now.",
+    resolutionPrompt: "The landlord who's watching you just posted ____"
+  },
+  {
+    id: 'best-dish',
+    earnText: "You brought the best dish. Everyone expects excellence forever.",
+    resolutionPrompt: "Everyone's expecting you to top last time's dish, but you brought ____"
+  }
+];
+
 class Deck {
   constructor(items) { this.items = [...items]; this.index = 0; this.shuffle(); }
   shuffle() {
@@ -323,7 +351,11 @@ class Game {
 
   addPlayer(name) {
     if (this.players.length >= 12) throw new Error('Max 12 players');
-    this.players.push({ name, hand: [], points: 0 });
+    this.players.push({
+      name, hand: [], points: 0,
+      stats: { streetCred: 0, community: 0, wisdom: 0, reputation: 0 },
+      receipts: []
+    });
   }
 
   refillHand(player) {
@@ -373,6 +405,8 @@ class Game {
     this.selected.delete(playerIndex);
   }
 }
+
+const ReceiptSystem = {};
 
 /* ===========================
    UI / STATE

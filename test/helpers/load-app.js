@@ -20,7 +20,7 @@ function loadGameModule() {
   const testable = script.slice(0, boundaryIndex);
   const context = { console, Math };
   vm.createContext(context);
-  const wrapped = `${testable}\n({ Deck, Game, BLACK_CARDS, WHITE_CARDS, DICE_EFFECTS });`;
+  const wrapped = `${testable}\n({ Deck, Game, ReceiptSystem, RECEIPT_POOL, BLACK_CARDS, WHITE_CARDS, DICE_EFFECTS });`;
   return vm.runInContext(wrapped, context);
 }
 
