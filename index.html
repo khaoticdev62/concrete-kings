@@ -407,6 +407,25 @@ class Game {
 }
 
 const ReceiptSystem = {
+  maybeTriggerReceipt(game) {
+    const ogName = game.getJudge().name;
+    const candidates = [];
+    for (const p of game.players) {
+      if (p.name === ogName) continue;
+      for (const r of p.receipts) {
+        if (r.status === 'active') candidates.push({ receipt: r, owner: p });
+      }
+    }
+    if (candidates.length === 0) return null;
+    if (Math.random() >= 0.35) return null;
+    const pick = candidates[Math.floor(Math.random() * candidates.length)];
+    return {
+      receiptId: pick.receipt.id,
+      ownerName: pick.owner.name,
+      resolutionPrompt: pick.receipt.resolutionPrompt
+    };
+  },
+
   awardWin(game, winner) {
     winner.stats.reputation += 1;
     const activeCount = winner.receipts.filter(r => r.status === 'active').length;
