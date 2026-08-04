@@ -437,6 +437,27 @@ const ReceiptSystem = {
     };
   },
 
+  resolveTrigger(game, winner) {
+    const trigger = game.currentBlack && game.currentBlack.receiptTrigger;
+    if (!trigger) return;
+    const owner = game.players.find(p => p.name === trigger.ownerName);
+    if (!owner) return;
+    const receipt = owner.receipts.find(r => r.id === trigger.receiptId && r.status === 'active');
+    if (!receipt) return;
+    if (winner.name === trigger.ownerName) {
+      receipt.status = 'resolved';
+      winner.stats.reputation += 2;
+      const og = game.getJudge();
+      og.stats.reputation += 1;
+    } else {
+      receipt.status = 'failed';
+      owner.stats.streetCred -= 1;
+      owner.stats.community -= 1;
+      owner.stats.wisdom -= 1;
+      owner.stats.reputation -= 1;
+    }
+  },
+
   awardWin(game, winner) {
     winner.stats.reputation += 1;
     const activeCount = winner.receipts.filter(r => r.status === 'active').length;
