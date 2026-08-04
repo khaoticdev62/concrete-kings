@@ -406,7 +406,25 @@ class Game {
   }
 }
 
-const ReceiptSystem = {};
+const ReceiptSystem = {
+  awardWin(game, winner) {
+    winner.stats.reputation += 1;
+    const activeCount = winner.receipts.filter(r => r.status === 'active').length;
+    if (activeCount >= 5) return;
+    const held = new Set(winner.receipts.filter(r => r.status === 'active').map(r => r.poolId));
+    const options = RECEIPT_POOL.filter(entry => !held.has(entry.id));
+    const pool = options.length > 0 ? options : RECEIPT_POOL;
+    const chosen = pool[Math.floor(Math.random() * pool.length)];
+    winner.receipts.push({
+      id: `${chosen.id}-${game.round}-${winner.name}`,
+      poolId: chosen.id,
+      earnText: chosen.earnText,
+      resolutionPrompt: chosen.resolutionPrompt,
+      roundEarned: game.round,
+      status: 'active'
+    });
+  }
+};
 
 /* ===========================
    UI / STATE
