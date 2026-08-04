@@ -2,6 +2,35 @@ const test = require('node:test');
 const assert = require('node:assert');
 const { loadGameModule } = require('./helpers/load-app');
 
+function withMockedRandom(value, fn) {
+  const original = Math.random;
+  Math.random = () => value;
+  try { fn(); } finally { Math.random = original; }
+}
+
+test('nextBlack -> resolveTrigger seam: a trigger produced by the real nextBlack() is resolvable by resolveTrigger', () => {
+  const { Game, ReceiptSystem, RECEIPT_POOL } = loadGameModule();
+  const game = new Game();
+  game.addPlayer('Judge');
+  game.addPlayer('Owner');
+  game.judgeIndex = 0;
+  game.round = 1;
+  const owner = game.players[1];
+  const entry = RECEIPT_POOL[0];
+  owner.receipts.push({
+    id: 'r1', poolId: entry.id, earnText: entry.earnText,
+    resolutionPrompt: entry.resolutionPrompt, roundEarned: 0, status: 'active'
+  });
+
+  withMockedRandom(0, () => {
+    game.nextBlack();
+  });
+
+  ReceiptSystem.resolveTrigger(game, owner);
+
+  assert.equal(owner.receipts[0].status, 'resolved');
+});
+
 test('resolving a receipt frees a cap slot for a new receipt in the same round (resolveTrigger before awardWin)', () => {
   const { Game, ReceiptSystem, RECEIPT_POOL } = loadGameModule();
   const game = new Game();
