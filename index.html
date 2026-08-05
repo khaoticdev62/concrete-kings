@@ -182,32 +182,32 @@
   <!-- GAME -->
   <section id="game" class="screen">
     <div class="panel">
-      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center;">
         <div>
-          Round <span id="roundNum">1</span> | Judge: <b id="judgeName">-</b>
+          <span class="status-pill">Round <b id="roundNum">1</b> · Judge: <b id="judgeName">-</b></span>
         </div>
         <div class="dice" id="diceResult"></div>
-        <div>
-          Black cards: <span id="blackRemaining">0</span> | Points to win: <b id="pointsTarget">7</b>
-          <button class="secondary" style="margin-left:8px;" onclick="app.showBlockMap()">Block Map</button>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <span class="status-pill">Black cards: <b id="blackRemaining">0</b> · Points: <b id="pointsTarget">7</b></span>
+          <button class="secondary" onclick="app.showBlockMap()">Block Map</button>
         </div>
       </div>
-      <div style="margin-top:10px;">
+      <div style="margin-top:12px;">
         <div class="black-card" id="blackCard">...</div>
       </div>
-      <div id="diceNotice" style="margin-top:8px; font-size:13px; opacity:.9;"></div>
-      <div id="weatherNotice" style="margin-top:6px; font-size:13px; opacity:.9;"></div>
-      <div id="weatherAlert" style="margin-top:6px; font-weight:800; font-size:14px; opacity:0;"></div>
-      <div style="margin-top:10px; font-size:13px;">
+      <div id="diceNotice" style="margin-top:8px;" class="muted"></div>
+      <div id="weatherNotice" style="margin-top:6px;" class="muted"></div>
+      <div id="weatherAlert" style="margin-top:6px; font-weight:800; font-size:14px; opacity:0;" class="weather-alert"></div>
+      <div style="margin-top:10px;">
         <span id="statusText">Waiting...</span>
       </div>
       <div id="turnBanner" class="pass-banner"></div>
-      <div id="devControls" style="margin-top:10px; display:grid; gap:8px;">
-        <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
-          <b class="muted">Dev</b>
+      <details class="dev-bar" open>
+        <summary style="cursor:pointer; font-weight:700; letter-spacing:.3px;">Dev Controls</summary>
+        <div class="dev-row">
           <button class="secondary" onclick="app.ogVeto()">O.G. Veto</button>
           <button class="secondary" onclick="app.ogDoubleDown()">Double-Down</button>
-          <select id="weatherSelect" onchange="app.setWeather(this.value)" style="background:#181920;color:#ffc475;border:1px solid #788196;padding:6px 8px;border-radius:8px;">
+          <select id="weatherSelect" onchange="app.setWeather(this.value)" style="background:#181920;color:#ffc475;border:1px solid rgba(255,255,255,0.15);padding:6px 8px;border-radius:8px;">
             <option value="CLEAR">Weather: Clear</option>
             <option value="RAIN">Rain</option>
             <option value="STEAM_VENT">Steam Vent</option>
@@ -217,21 +217,21 @@
           <input id="betInput" type="text" placeholder="Bet target name" style="width:160px;"/>
           <button class="secondary" onclick="app.placeBetFromUI()">Place Bet</button>
         </div>
-        <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+        <div class="dev-row">
           <input id="allianceInput" type="text" placeholder="Alliance target name" style="width:180px;"/>
           <button class="secondary" onclick="app.proposeAllianceFromUI()">Propose Alliance</button>
           <button class="secondary" onclick="app.resolveReceiptFromUI()">Resolve Receipt</button>
         </div>
-      </div>
+      </details>
     </div>
 
     <div class="panel">
-      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center;">
         <h3 style="margin:0;">Your Hand</h3>
         <div id="playerLabel" class="muted">Player: -</div>
       </div>
       <div id="hand" class="hand"></div>
-      <div style="margin-top:10px;">
+      <div class="save-bar">
         <button id="submitBtn" onclick="app.submitSelection()" disabled>Submit Selection</button>
         <button class="secondary" onclick="app.passTurn()">Pass / End Turn</button>
       </div>
@@ -240,7 +240,7 @@
     <div class="panel">
       <h3 style="margin-top:0;">Scoreboard</h3>
       <div id="scoreboard"></div>
-      <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+      <div class="save-bar">
         <button class="secondary" onclick="app.saveGame()">Save Game</button>
         <button class="secondary" onclick="app.loadGame()">Load Game</button>
         <span id="saveStatus" class="muted"></span>
