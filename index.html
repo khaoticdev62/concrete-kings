@@ -119,6 +119,18 @@
     padding: 6px 10px; border-radius: 999px; font-size: 12px;
   }
   .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #4caf50; }
+  .bg-scene { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .bg-scene .orb {
+    position: absolute; border-radius: 50%; filter: blur(90px); opacity: .18;
+    animation: ckDriftUp 22s linear infinite;
+  }
+  .bg-scene .orb:nth-child(odd) { animation-duration: 28s; animation-direction: reverse; }
+  @keyframes ckDriftUp {
+    0% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(-40px) translateX(30px); }
+    100% { transform: translateY(0) translateX(0); }
+  }
+  .screen.active .bg-scene .orb { animation-play-state: running; }
 </style>
 </head>
 <body>
@@ -133,6 +145,7 @@
 
   <!-- SETUP -->
   <section id="setup" class="screen active">
+    <div class="bg-scene" aria-hidden="true"></div>
     <div class="panel">
       <h2 style="margin-top:0;">New Game</h2>
       <label style="font-weight:600;">Your Name</label>
@@ -153,6 +166,7 @@
 
   <!-- ONLINE LOBBY -->
   <section id="lobby" class="screen">
+    <div class="bg-scene" aria-hidden="true"></div>
     <div class="panel">
       <h2 style="margin-top:0;">Online Room</h2>
       <p class="muted">Open this page on every device, enter the same room code, and click Join.</p>
@@ -182,6 +196,7 @@
 
   <!-- GAME -->
   <section id="game" class="screen">
+    <div class="bg-scene" aria-hidden="true"></div>
     <div class="panel">
       <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center;">
         <div>
@@ -258,6 +273,7 @@
 
   <!-- JUDGE / RESULTS -->
   <section id="judging" class="screen">
+    <div class="bg-scene" aria-hidden="true"></div>
     <div class="panel">
       <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center;">
         <h2 style="margin-top:0;">Judge Phase</h2>
@@ -275,6 +291,7 @@
 
   <!-- ROUND RESULT -->
   <section id="roundResult" class="screen">
+    <div class="bg-scene" aria-hidden="true"></div>
     <div class="panel winner-area">
       <h2 class="champion" style="margin-top:0;">Round Winner</h2>
       <div id="winnerName" style="font-size:20px; font-weight:800;"></div>
@@ -289,6 +306,7 @@
 
   <!-- BLOCK MAP -->
   <section id="blockMap" class="screen">
+    <div class="bg-scene" aria-hidden="true"></div>
     <div class="panel">
       <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center;">
         <h2 style="margin-top:0;">Block Map</h2>
