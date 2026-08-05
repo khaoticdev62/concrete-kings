@@ -4,13 +4,17 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Concrete Kings - The Urban Card Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@400;600;700&family=Unbounded:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
   body {
     margin: 0; min-height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Plus Jakarta Sans', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(180deg, #1a1a1a 0%, #2b1d0e 100%);
     color: #f3e7cf;
+    -webkit-font-smoothing: antialiased;
   }
   .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
   header {
@@ -19,8 +23,12 @@
   }
   h1 {
     margin: 0; font-size: 28px; letter-spacing: 1px;
-    background: linear-gradient(90deg,#f7c948,#ff6b35);
+    background: linear-gradient(90deg, #f7c948, #ff6b35);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  h2, h3 {
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: 0.3px;
   }
   .pill {
     background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
@@ -33,10 +41,14 @@
   .screen { display: none; }
   .screen.active { display: block; }
   button {
-    background: linear-gradient(180deg,#ff7a1a,#e04b00); color:#fff;
+    background: linear-gradient(180deg, #ff7a1a, #e04b00); color:#fff;
     border: none; padding: 12px 18px; border-radius: 10px; font-weight: 700;
     cursor: pointer; font-size: 15px;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.25);
+    transition: transform .12s ease, box-shadow .12s ease;
   }
+  button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 5px 0 rgba(0,0,0,0.25); }
+  button:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
   button.secondary {
     background: rgba(255,255,255,0.12); color:#f3e7cf;
   }
@@ -44,40 +56,68 @@
   input[type="text"], input[type="number"] {
     background: rgba(0,0,0,0.4); color:#fff; border: 1px solid rgba(255,255,255,0.15);
     border-radius: 10px; padding: 10px 12px; width: 100%; font-size: 15px;
+    outline: none;
   }
+  input[type="text"]:focus, input[type="number"]:focus { border-color: #ff6b35; }
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
   .player-row { display:flex; justify-content:space-between; align-items:center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
   .hand { display: grid; grid-template-columns: repeat(auto-fill,minmax(170px,1fr)); gap: 10px; }
   .card {
     background: linear-gradient(180deg,#fff7e6,#ffe3b3); color:#1a1105;
-    border-radius: 12px; padding: 12px; min-height: 110px;
+    border-radius: 12px; padding: 14px; min-height: 120px;
     box-shadow: 0 4px 0 rgba(0,0,0,0.25); cursor: pointer;
     display: flex; align-items: center; justify-content: center; text-align: center;
-    font-weight: 700; font-size: 14px; transition: transform .1s;
+    font-weight: 700; font-size: 14px; transition: transform .15s ease, box-shadow .15s ease;
+    will-change: transform;
   }
-  .card:active { transform: translateY(3px); }
-  .card.selected { outline: 3px solid #ff6b35; transform: translateY(3px); }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 8px 0 rgba(0,0,0,0.25); }
+  .card:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
+  .card.selected {
+    outline: 3px solid #ff6b35; transform: translateY(3px);
+    box-shadow: 0 0 0 10px rgba(255,107,53,0.18), 0 4px 0 rgba(0,0,0,0.25);
+  }
   .black-card {
-    background: linear-gradient(180deg,#1f1f1f,#0a0a0a); color:#f3e7cf;
-    border-radius: 12px; padding: 18px; min-height: 130px;
-    text-align: center; font-weight: 700; font-size: 16px;
+    background: linear-gradient(180deg,#26201b,#0f0c0a); color:#f3e7cf;
+    border-radius: 14px; padding: 18px; min-height: 140px;
+    text-align: center; font-weight: 800; font-size: 16px;
     box-shadow: 0 4px 0 rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.06);
   }
-  .dice {
-    display: inline-flex; gap: 8px; flex-wrap: wrap; justify-content: center;
-  }
+  .dice { display: inline-flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
   .die {
-    width: 44px; height: 44px; background:#fff; color:#000; border-radius:8px;
+    width: 46px; height: 46px; background:#fff; color:#000; border-radius:10px;
     display:flex; align-items:center; justify-content:center; font-weight:900;
     box-shadow: 0 3px 0 rgba(0,0,0,0.35);
+    font-family: 'JetBrains Mono', monospace;
   }
   .winner-area { text-align: center; padding: 20px; }
-  .winner-area .card { max-width: 360px; margin: 12px auto; }
+  .winner-area .card { max-width: 380px; margin: 12px auto; }
   .topbar { display:flex; gap: 8px; flex-wrap: wrap; }
   .room-info { font-size: 12px; opacity: .85; }
   .muted { font-size: 13px; opacity: .8; }
   .pass-banner { margin-top:8px; font-size:14px; font-weight:700; }
+  .champion {
+    font-size: 24px; font-weight: 900;
+    background: linear-gradient(90deg,#f7c948,#ff6b35);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .dev-bar { margin-top: 10px; display: grid; gap: 8px; }
+  .dev-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .weather-alert {
+    margin-top: 6px; font-weight: 800; font-size: 14px;
+    transition: opacity .3s ease;
+  }
+  .location-btn { width: 100%; text-align: left; }
+  .design-links { margin-top: 12px; font-size: 12px; opacity: .7; }
+  .design-links a { color: #ff6b35; text-decoration: none; }
+  .save-bar { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .status-pill {
+    display:inline-flex; align-items:center; gap:6px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+    padding: 6px 10px; border-radius: 999px; font-size: 12px;
+  }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #4caf50; }
 </style>
 </head>
 <body>
@@ -93,14 +133,14 @@
   <!-- SETUP -->
   <section id="setup" class="screen active">
     <div class="panel">
-      <h2>New Game</h2>
-      <label>Your Name</label>
+      <h2 style="margin-top:0;">New Game</h2>
+      <label style="font-weight:600;">Your Name</label>
       <input id="hostName" value="Host" />
-      <label style="margin-top:10px;">Players (3-12)</label>
+      <label style="margin-top:10px; font-weight:600;">Players (3-12)</label>
       <input id="playerCount" type="number" min="3" max="12" value="4" />
-      <label style="margin-top:10px;">Points to Win</label>
+      <label style="margin-top:10px; font-weight:600;">Points to Win</label>
       <input id="pointsToWin" type="number" min="1" max="50" value="7" />
-      <div class="grid-2" style="margin-top:12px;">
+      <div class="grid-2" style="margin-top:14px;">
         <button onclick="app.startLocalGame()">Play Offline (Pass & Play)</button>
         <button class="secondary" onclick="app.openOnlineLobby()">Online Lobby</button>
       </div>
@@ -113,29 +153,29 @@
   <!-- ONLINE LOBBY -->
   <section id="lobby" class="screen">
     <div class="panel">
-      <h2>Online Room</h2>
+      <h2 style="margin-top:0;">Online Room</h2>
       <p class="muted">Open this page on every device, enter the same room code, and click Join.</p>
       <div class="grid-2">
         <div>
-          <label>Room Name / Code</label>
+          <label style="font-weight:600;">Room Name / Code</label>
           <input id="roomCode" value="concrete-kings-42" />
           <button class="secondary" style="margin-top:8px;" onclick="app.createRoom()">Create Room</button>
         </div>
         <div>
-          <label>Your Name</label>
+          <label style="font-weight:600;">Your Name</label>
           <input id="joinName" value="" />
           <button class="secondary" style="margin-top:8px;" onclick="app.joinRoom()">Join Room</button>
         </div>
       </div>
-      <div id="roomStatus" style="margin-top:10px; font-size:13px;"></div>
+      <div id="roomStatus" class="status-pill" style="margin-top:10px; display:none;"></div>
       <button id="startOnlineBtn" style="margin-top:12px;" onclick="app.startOnlineGame()" disabled>Start Game</button>
-  <div style="margin-top:12px; font-size:12px; opacity:.7;">
-    Design System Preview:
-    <a href="/design-system/Concrete Kings Game Interfaces.html" target="_blank">Interfaces</a> |
-    <a href="/design-system/Concrete Kings Card Design System.html" target="_blank">Cards</a> |
-    <a href="/design-system/Concrete Kings Card Animation System.html" target="_blank">Animations</a> |
-    <a href="/design-system/Concrete Kings Block Map.html" target="_blank">Block Map</a>
-  </div>
+      <div class="design-links">
+        Design System:
+        <a href="/design-system/Concrete Kings Game Interfaces.html" target="_blank">Interfaces</a> ·
+        <a href="/design-system/Concrete Kings Card Design System.html" target="_blank">Cards</a> ·
+        <a href="/design-system/Concrete Kings Card Animation System.html" target="_blank">Animations</a> ·
+        <a href="/design-system/Concrete Kings Block Map.html" target="_blank">Block Map</a>
+      </div>
     </div>
   </section>
 
@@ -218,44 +258,60 @@
   <!-- JUDGE / RESULTS -->
   <section id="judging" class="screen">
     <div class="panel">
-      <h2>Judge Phase</h2>
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center;">
+        <h2 style="margin-top:0;">Judge Phase</h2>
+        <span class="status-pill"><span class="status-dot"></span><span id="judgeBadge">Judge: -</span></span>
+      </div>
       <p class="muted">All submissions are in. Pick the winner.</p>
       <div id="submissions" class="hand"></div>
-      <div id="judgeNotice" style="margin-top:10px; font-size:13px;"></div>
+      <div id="judgeNotice" style="margin-top:10px;" class="weather-alert"></div>
+      <div style="margin-top:10px;">
+        <button onclick="app.chooseWinner()" disabled id="crownBtn">Crown Winner</button>
+        <button class="secondary" onclick="app.showGame()">Back to Table</button>
+      </div>
     </div>
   </section>
 
   <!-- ROUND RESULT -->
   <section id="roundResult" class="screen">
     <div class="panel winner-area">
-      <h2>Round Winner</h2>
+      <h2 class="champion" style="margin-top:0;">Round Winner</h2>
       <div id="winnerName" style="font-size:20px; font-weight:800;"></div>
       <div id="winnerCard" class="card"></div>
       <div id="winnerMeta" style="font-size:13px; opacity:.85;"></div>
-      <button onclick="app.nextRound()">Next Round</button>
+      <div style="margin-top:10px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <button onclick="app.nextRound()">Next Round</button>
+        <button class="secondary" onclick="app.showGame()">Back to Table</button>
+      </div>
     </div>
   </section>
 
   <!-- BLOCK MAP -->
   <section id="blockMap" class="screen">
     <div class="panel">
-      <h2>Block Map</h2>
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center;">
+        <h2 style="margin-top:0;">Block Map</h2>
+        <span class="status-pill">Reputation: <b id="mapRep">0</b> · Weather: <b id="mapWeather">CLEAR</b></span>
+      </div>
       <p class="muted">Choose your block and travel to a new location.</p>
       <div id="locationList" style="margin-top:10px; display:grid; gap:8px;"></div>
-      <div style="margin-top:10px; font-size:13px;">
-        Reputation: <b id="mapRep">0</b> | Weather: <b id="mapWeather">CLEAR</b>
+      <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="secondary" onclick="app.showGame()">Back to Table</button>
+        <button onclick="app.showSetup()">Exit to Menu</button>
       </div>
-      <button onclick="app.showSetup()">Exit to Menu</button>
     </div>
   </section>
 
   <!-- GAME OVER -->
   <section id="gameOver" class="screen">
     <div class="panel winner-area">
-      <h2>Game Over</h2>
-      <div id="champion" style="font-size:24px; font-weight:900;"></div>
+      <h2 class="champion" style="margin-top:0;">Game Over</h2>
+      <div id="champion" class="champion"></div>
       <div id="finalScore" style="margin-top:8px;"></div>
-      <button onclick="app.showSetup()">Play Again</button>
+      <div style="margin-top:10px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <button onclick="app.showSetup()">Play Again</button>
+        <button class="secondary" onclick="app.showSetup()">Menu</button>
+      </div>
     </div>
   </section>
 </div>
