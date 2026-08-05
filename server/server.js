@@ -42,7 +42,7 @@ wss.on('connection', (ws) => {
     try { msg = JSON.parse(raw); } catch { return; }
 
     if (msg.type === 'join') {
-      const { roomCode, playerName } = msg;
+      const { roomCode, playerName, characterOrigin, cityTheme } = msg;
       if (!roomCode || !playerName) return;
       if (!rooms.has(roomCode)) {
         rooms.set(roomCode, { clients: new Set(), players: [], started: false });
@@ -51,11 +51,55 @@ wss.on('connection', (ws) => {
       if (room.started) return;
       ws.roomCode = roomCode;
       ws.playerName = playerName;
+      ws.characterOrigin = characterOrigin || 'BARBER';
+      ws.cityTheme = cityTheme || 'Harlem';
       room.clients.add(ws);
-      room.players.push({ name: playerName, points: 0, hand: [] });
+      room.players.push({ 
+        name: playerName, 
+        origin: ws.characterOrigin, 
+        cityTheme: ws.cityTheme, 
+        x: 140, 
+        y: 124, 
+        points: 0, 
+        hand: [] 
+      });
       currentRoom = roomCode;
-      broadcast(roomCode, { type:'system', text: `${playerName} joined the room.` }, ws);
-      ws.send(JSON.stringify({ type:'joined', roomCode, playerName, players: room.players.map(p=>p.name) }));
+      broadcast(roomCode, { type:'system', text: `${playerName} (${ws.characterOrigin}) joined the room.` }, ws);
+      ws.send(JSON.stringify({ 
+        type:'joined', 
+        roomCode, 
+        playerName, 
+        players: room.players.map(p => ({ name: p.name, origin: p.origin, cityTheme: p.cityTheme, x: p.x, y: p.y })) 
+      }));
+      return;
+    }
+
+    if (msg.type === 'avatar_update') {
+      const room = rooms.get(ws.roomCode);
+      if (!room) return;
+      const player = room.players.find(p => p.name === ws.playerName);
+      if (player) {
+        if (msg.x !== undefined) player.x = msg.x;
+        if (msg.y !== undefined) player.y = msg.y;
+        if (msg.origin) player.origin = msg.origin;
+        if (msg.cityTheme) player.cityTheme = msg.cityTheme;
+      }
+      broadcast(ws.roomCode, {
+        type: 'avatar_update',
+        player: ws.playerName,
+        origin: msg.origin || ws.characterOrigin,
+        cityTheme: msg.cityTheme || ws.cityTheme,
+        x: msg.x,
+        y: msg.y,
+        frame: msg.frame
+      }, ws);
+      return;
+    }
+
+    if (msg.type === 'chat') {
+      const text = (msg.text || '').trim();
+      if (!text) return;
+      broadcast(ws.roomCode, { type:'chat', playerName: ws.playerName, text }, ws);
       return;
     }
 

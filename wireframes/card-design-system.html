@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Concrete Kings - Card Design System</title>
+<style>
+  /* ============================================
+     CONCRETE KINGS - CARD DESIGN SYSTEM v1.0
+     ============================================ */
+
+  /* ----- DESIGN TOKENS ----- */
+  :root {
+    /* Core Palette */
+    --c-black: #1a1a1a;
+    --c-black-soft: #2b1d0e;
+    --c-orange: #ff6b35;
+    --c-orange-deep: #e04b00;
+    --c-cream: #f3e7cf;
+    --c-cream-light: #fff7e6;
+    --c-cream-mid: #ffe3b3;
+    --c-gold: #f7c948;
+    --c-green: #4caf50;
+    --c-green-light: #e8f5e9;
+    --c-red: #ff4444;
+    --c-red-light: #ffebee;
+    --c-blue: #2196f3;
+    --c-blue-light: #e3f2fd;
+    --c-purple: #9c27b0;
+    --c-purple-light: #f3e5f5;
+
+    /* Typography Scale */
+    --t-hero: 32px;
+    --t-h1: 24px;
+    --t-h2: 20px;
+    --t-h3: 16px;
+    --t-body: 14px;
+    --t-caption: 11px;
+    --t-micro: 9px;
+
+    /* Font Weights */
+    --fw-regular: 400;
+    --fw-semibold: 600;
+    --fw-bold: 700;
+    --fw-black: 900;
+
+    /* Spacing */
+    --s-xs: 4px;
+    --s-sm: 8px;
+    --s-md: 12px;
+    --s-lg: 16px;
+    --s-xl: 24px;
+    --s-2xl: 32px;
+
+    /* Border Radius */
+    --r-sm: 6px;
+    --r-md: 10px;
+    --r-lg: 14px;
+    --r-xl: 20px;
+
+    /* Shadows */
+    --shadow-sm: 0 2px 0 rgba(0,0,0,0.15);
+    --shadow-md: 0 4px 0 rgba(0,0,0,0.2);
+    --shadow-lg: 0 6px 0 rgba(0,0,0,0.25);
+    --shadow-glow: 0 0 0 4px rgba(255,107,53,0.3);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f5f5;
+    color: var(--c-black);
+    padding: 20px;
+    line-height: 1.4;
+  }
+
+  /* ----- PAGE HEADER ----- */
+  .design-system-header {
+    background: linear-gradient(135deg, var(--c-black) 0%, var(--c-black-soft) 100%);
+    color: var(--c-cream);
+    padding: var(--s-xl) var(--s-2xl);
+    border-radius: var(--r-lg);
+    margin-bottom: var(--s-2xl);
+    border: 3px solid var(--c-orange);
+  }
+  .design-system-header h1 {
+    font-size: var(--t-h1);
+    font-weight: var(--fw-black);
+    letter-spacing: 1px;
+    margin-bottom: var(--s-sm);
+  }
+  .design-system-header .meta {
+    font-size: var(--t-caption);
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  /* ----- SECTION HEADERS ----- */
+  .section-header {
+    background: var(--c-black);
+    color: var(--c-cream);
+    padding: var(--s-sm) var(--s-lg);
+    border-radius: var(--r-sm) var(--r-sm) 0 0;
+    font-size: var(--t-h3);
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: var(--s-lg);
+    border-left: 4px solid var(--c-orange);
+  }
+
+  /* ----- CARD GRID ----- */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--s-xl);
+    margin-bottom: var(--s-2xl);
+  }
+  .card-grid.tight {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--s-md);
+  }
+
+  /* ----- CARD BASE ----- */
+  .card {
+    position: relative;
+    border-radius: var(--r-lg);
+    padding: var(--s-xl);
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: currentColor;
+    opacity: 0.3;
+  }
+
+  /* ----- BLACK CARD VARIANTS ----- */
+  .card-black {
+    background: linear-gradient(180deg, #2a2a2a 0%, var(--c-black) 100%);
+    color: var(--c-cream);
+    border: 2px solid #3a3a3a;
+    box-shadow: var(--shadow-lg);
+  }
+  .card-black .card-icon {
+    font-size: var(--t-hero);
+    margin-bottom: var(--s-sm);
+    opacity: 0.9;
+  }
+  .card-black .card-type {
+    font-size: var(--t-micro);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    opacity: 0.6;
+    margin-bottom: var(--s-sm);
+    font-weight: var(--fw-semibold);
+  }
+  .card-black .card-prompt {
+    font-size: var(--t-h2);
+    font-weight: var(--fw-bold);
+    line-height: 1.3;
+    flex: 1;
+  }
+  .card-black .card-prompt .blank {
+    display: inline-block;
+    min-width: 80px;
+    border-bottom: 3px solid var(--c-orange);
+    margin: 0 4px;
+    opacity: 0.9;
+  }
+  .card-black .card-footer {
+    margin-top: var(--s-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--t-caption);
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Black Card - Dice Variant */
+  .card-black.dice::after {
+    content: '🎲';
+    position: absolute;
+    top: var(--s-md);
+    right: var(--s-md);
+    width: 40px;
+    height: 40px;
+    background: var(--c-orange);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Black Card - Receipt Variant */
+  .card-black.receipt {
+    border-color: var(--c-gold);
+  }
+  .card-black.receipt::before {
+    background: var(--c-gold);
+  }
+  .card-black.receipt .card-type {
+    color: var(--c-gold);
+  }
+
+  /* ----- WHITE CARD VARIANTS ----- */
+  .card-white {
+    background: linear-gradient(180deg, var(--c-cream-light) 0%, var(--c-cream-mid) 100%);
+    color: var(--c-black);
+    border: 2px solid #e0d4b0;
+    box-shadow: var(--shadow-md);
+  }
+  .card-white .card-icon {
+    font-size: var(--t-h1);
+    margin-bottom: var(--s-sm);
+  }
+  .card-white .card-type {
+    font-size: var(--t-micro);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0.6;
+    margin-bottom: var(--s-sm);
+    font-weight: var(--fw-semibold);
+    color: #8b7355;
+  }
+  .card-white .card-text {
+    font-size: var(--t-body);
+    font-weight: var(--fw-semibold);
+    line-height: 1.4;
+    flex: 1;
+  }
+  .card-white .card-footer {
+    margin-top: var(--s-lg);
+    font-size: var(--t-caption);
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* White Card - Selected State */
+  .card-white.selected {
+    outline: 4px solid var(--c-orange);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+  }
+
+  /* White Card - Hustle Variant */
+  .card-white.hustle {
+    border-color: var(--c-blue);
+    background: linear-gradient(135deg, var(--c-cream-light) 0%, var(--c-blue-light) 100%);
+  }
+  .card-white.hustle .card-type {
+    color: var(--c-blue);
+  }
+
+  /* ----- RECEIPT CARD ----- */
+  .card-receipt {
+    background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+    color: var(--c-black);
+    border: 3px solid var(--c-gold);
+    box-shadow: var(--shadow-md);
+    transform: rotate(-1deg);
+  }
+  .card-receipt .receipt-seal {
+    position: absolute;
+    top: var(--s-md);
+    right: var(--s-md);
+    width: 48px;
+    height: 48px;
+    background: var(--c-gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .card-receipt .card-type {
+    font-size: var(--t-micro);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #b8860b;
+    margin-bottom: var(--s-sm);
+    font-weight: var(--fw-bold);
+  }
+  .card-receipt .card-title {
+    font-size: var(--t-h3);
+    font-weight: var(--fw-black);
+    margin-bottom: var(--s-sm);
+    font-style: italic;
+  }
+  .card-receipt .card-text {
+    font-size: var(--t-body);
+    font-weight: var(--fw-semibold);
+    line-height: 1.5;
+    flex: 1;
+  }
+  .card-receipt .card-footer {
+    margin-top: var(--s-md);
+    padding-top: var(--s-sm);
+    border-top: 2px dashed var(--c-gold);
+    font-size: var(--t-caption);
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #b8860b;
+  }
+
+  /* ----- CIPHER CARD ----- */
+  .card-cipher {
+    background: linear-gradient(135deg, var(--c-purple-light) 0%, #e1bee7 100%);
+    color: var(--c-black);
+    border: 3px solid var(--c-purple);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+  }
+  .card-cipher .cipher-symbol {
+    font-size: 64px;
+    margin-bottom: var(--s-md);
+  }
+  .card-cipher .cipher-label {
+    font-size: var(--t-h3);
+    font-weight: var(--fw-black);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: var(--s-sm);
+  }
+  .card-cipher .cipher-desc {
+    font-size: var(--t-body);
+    font-weight: var(--fw-semibold);
+    opacity: 0.8;
+  }
+  .card-cipher.active {
+    border-color: var(--c-orange);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+  }
+
+  /* ----- ORIGIN CARD ----- */
+  .card-origin {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    color: var(--c-black);
+    border: 2px solid var(--c-green);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+  }
+  .card-origin .origin-icon {
+    font-size: 48px;
+    margin-bottom: var(--s-md);
+  }
+  .card-origin .card-type {
+    font-size: var(--t-micro);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #2e7d32;
+    margin-bottom: var(--s-sm);
+    font-weight: var(--fw-bold);
+  }
+  .card-origin .card-title {
+    font-size: var(--t-h3);
+    font-weight: var(--fw-black);
+    margin-bottom: var(--s-sm);
+  }
+  .card-origin .card-text {
+    font-size: var(--t-body);
+    font-weight: var(--fw-regular);
+    line-height: 1.5;
+    margin-bottom: var(--s-md);
+  }
+  .card-origin .stat-bonuses {
+    background: var(--c-green-light);
+    border-radius: var(--r-sm);
+    padding: var(--s-sm);
+    font-size: var(--t-caption);
+    font-weight: var(--fw-semibold);
+    color: #2e7d32;
+  }
+
+  /* ----- HUSTLE CARD ----- */
+  .card-hustle {
+    background: linear-gradient(135deg, var(--c-blue-light) 0%, #bbdefb 100%);
+    color: var(--c-black);
+    border: 3px solid var(--c-blue);
+    box-shadow: var(--shadow-md);
+  }
+  .card-hustle .hustle-icon {
+    font-size: 40px;
+    text-align: center;
+    margin-bottom: var(--s-md);
+  }
+  .card-hustle .card-type {
+    font-size: var(--t-micro);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #1565c0;
+    margin-bottom: var(--s-sm);
+    font-weight: var(--fw-bold);
+    text-align: center;
+  }
+  .card-hustle .card-title {
+    font-size: var(--t-h2);
+    font-weight: var(--fw-black);
+    text-align: center;
+    margin-bottom: var(--s-sm);
+  }
+  .card-hustle .card-text {
+    font-size: var(--t-body);
+    font-weight: var(--fw-semibold);
+    line-height: 1.5;
+    margin-bottom: var(--s-md);
+    text-align: center;
+  }
+  .card-hustle .power-box {
+    background: #fff;
+    border-radius: var(--r-sm);
+    padding: var(--s-sm) var(--s-md);
+    font-size: var(--t-caption);
+    font-weight: var(--fw-bold);
+    color: #1565c0;
+    text-align: center;
+    border: 2px solid var(--c-blue);
+  }
+
+  /* ----- COOKOUT CARD ----- */
+  .card-cookout {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    color: var(--c-black);
+    border: 3px dashed var(--c-orange);
+    box-shadow: var(--shadow-md);
+    transform: rotate(1deg);
+  }
+  .card-cookout .card-type {
+    font-size: var(--t-micro);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--c-orange-deep);
+    margin-bottom: var(--s-sm);
+    font-weight: var(--fw-bold);
+    text-align: center;
+  }
+  .card-cookout .card-title {
+    font-size: var(--t-h2);
+    font-weight: var(--fw-black);
+    text-align: center;
+    margin-bottom: var(--s-md);
+  }
+  .card-cookout .members-list {
+    background: #fff;
+    border-radius: var(--r-sm);
+    padding: var(--s-sm);
+    font-size: var(--t-caption);
+    font-weight: var(--fw-semibold);
+    margin-bottom: var(--s-sm);
+  }
+  .card-cookout .bonus-text {
+    font-size: var(--t-caption);
+    opacity: 0.8;
+    text-align: center;
+    font-style: italic;
+  }
+
+  /* ----- STATE VARIANTS ----- */
+  .card.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(40%);
+  }
+  .card.hovered {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+  .card.active {
+    outline: 4px solid var(--c-orange);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+  }
+
+  /* ----- CARD COMPONENT SHOWCASE ----- */
+  .component-showcase {
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: var(--r-md);
+    padding: var(--s-xl);
+    margin-bottom: var(--s-lg);
+  }
+  .component-showcase h3 {
+    font-size: var(--t-h3);
+    margin-bottom: var(--s-md);
+    color: var(--c-black);
+    font-weight: var(--fw-bold);
+  }
+  .component-row {
+    display: flex;
+    gap: var(--s-md);
+    flex-wrap: wrap;
+    margin-bottom: var(--s-md);
+  }
+
+  /* ----- COLOR SWATCHES ----- */
+  .swatch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--s-md);
+    margin-bottom: var(--s-lg);
+  }
+  .swatch {
+    border-radius: var(--r-sm);
+    padding: var(--s-md);
+    text-align: center;
+    font-size: var(--t-caption);
+    font-weight: var(--fw-semibold);
+    border: 2px solid rgba(0,0,0,0.1);
+  }
+  .swatch .hex {
+    font-size: var(--t-micro);
+    opacity: 0.8;
+    margin-top: var(--s-xs);
+    font-family: monospace;
+  }
+
+  /* ----- TYPOGRAPHY SPECIMEN ----- */
+  .type-specimen {
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: var(--r-md);
+    padding: var(--s-xl);
+    margin-bottom: var(--s-lg);
+  }
+  .type-specimen .type-row {
+    border-bottom: 1px solid #e0e0e0;
+    padding: var(--s-md) 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .type-specimen .type-row:last-child {
+    border-bottom: none;
+  }
+  .type-specimen .type-sample {
+    font-weight: var(--fw-regular);
+  }
+  .type-specimen .type-meta {
+    font-size: var(--t-caption);
+    color: #888;
+    text-align: right;
+  }
+
+  /* ----- ICON GRID ----- */
+  .icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: var(--s-md);
+    margin-bottom: var(--s-lg);
+  }
+  .icon-item {
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: var(--r-sm);
+    padding: var(--s-md);
+    text-align: center;
+    font-size: 28px;
+  }
+  .icon-item .icon-label {
+    font-size: var(--t-micro);
+    color: #888;
+    margin-top: var(--s-xs);
+  }
+
+  /* ----- ANNOTATIONS ----- */
+  .annotations {
+    background: var(--c-cream-light);
+    border-left: 4px solid var(--c-orange);
+    border-radius: var(--r-sm);
+    padding: var(--s-lg);
+    margin-top: var(--s-lg);
+    font-size: var(--t-body);
+    line-height: 1.6;
+  }
+  .annotations h3 {
+    font-size: var(--t-h3);
+    margin-bottom: var(--s-sm);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .annotations ul {
+    margin-left: var(--s-lg);
+    margin-top: var(--s-sm);
+  }
+  .annotations li {
+    margin-bottom: var(--s-xs);
+  }
+
+  /* ----- PRINT MEDIA ----- */
+  @media print {
+    body { background: #fff; padding: 0; }
+    .card { break-inside: avoid; page-break-inside: avoid; }
+    .section-header { background: #fff; color: #000; border: 2px solid #000; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="design-system-header">
+  <h1>CONCRETE KINGS - CARD DESIGN SYSTEM</h1>
+  <div class="meta">Production Design Tokens · Typography · Iconography · States · v1.0</div>
+</div>
+
+<!-- 1. COLOR PALETTE -->
+<div class="section-header">01 · Color Palette</div>
+<div class="swatch-grid">
+  <div class="swatch" style="background: #1a1a1a; color: #fff;">
+    Black<div class="hex">#1A1A1A</div>
+  </div>
+  <div class="swatch" style="background: #2b1d0e; color: #fff;">
+    Black Soft<div class="hex">#2B1D0E</div>
+  </div>
+  <div class="swatch" style="background: #ff6b35; color: #fff;">
+    Orange<div class="hex">#FF6B35</div>
+  </div>
+  <div class="swatch" style="background: #e04b00; color: #fff;">
+    Orange Deep<div class="hex">#E04B00</div>
+  </div>
+  <div class="swatch" style="background: #f3e7cf; color: #1a1a1a;">
+    Cream<div class="hex">#F3E7CF</div>
+  </div>
+  <div class="swatch" style="background: #f7c948; color: #1a1a1a;">
+    Gold<div class="hex">#F7C948</div>
+  </div>
+  <div class="swatch" style="background: #4caf50; color: #fff;">
+    Green<div class="hex">#4CAF50</div>
+  </div>
+  <div class="swatch" style="background: #ff4444; color: #fff;">
+    Red<div class="hex">#FF4444</div>
+  </div>
+  <div class="swatch" style="background: #2196f3; color: #fff;">
+    Blue<div class="hex">#2196F3</div>
+  </div>
+  <div class="swatch" style="background: #9c27b0; color: #fff;">
+    Purple<div class="hex">#9C27B0</div>
+  </div>
+</div>
+
+<!-- 2. TYPOGRAPHY SCALE -->
+<div class="section-header">02 · Typography Scale</div>
+<div class="type-specimen">
+  <div class="type-row">
+    <span class="type-sample" style="font-size: 32px; font-weight: 900;">Hero Text</span>
+    <span class="type-meta">32px / Black / -</span>
+  </div>
+  <div class="type-row">
+    <span class="type-sample" style="font-size: 24px; font-weight: 700;">Heading 1</span>
+    <span class="type-meta">24px / Bold / Segoe UI</span>
+  </div>
+  <div class="type-row">
+    <span class="type-sample" style="font-size: 20px; font-weight: 700;">Heading 2</span>
+    <span class="type-meta">20px / Bold / -</span>
+  </div>
+  <div class="type-row">
+    <span class="type-sample" style="font-size: 16px; font-weight: 700;">Heading 3</span>
+    <span class="type-meta">16px / Bold / -</span>
+  </div>
+  <div class="type-row">
+    <span class="type-sample" style="font-size: 14px; font-weight: 400;">Body text regular</span>
+    <span class="type-meta">14px / Regular / -</span>
+  </div>
+  <div class="type-row">
+    <span class="type-sample" style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Caption Uppercase</span>
+    <span class="type-meta">11px / Semibold / Uppercase</span>
+  </div>
+  <div class="type-row">
+    <span class="type-sample" style="font-size: 9px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;">Micro Label</span>
+    <span class="type-meta">9px / Semibold / Spaced</span>
+  </div>
+</div>
+
+<!-- 3. ICON SYSTEM -->
+<div class="section-header">03 · Iconography System</div>
+<div class="icon-grid">
+  <div class="icon-item">✂️<div class="icon-label">Barbershop</div></div>
+  <div class="icon-item">🏪<div class="icon-label">Bodega</div></div>
+  <div class="icon-item">🌳<div class="icon-label">Park</div></div>
+  <div class="icon-item">🏠<div class="icon-label">Home</div></div>
+  <div class="icon-item">🍖<div class="icon-label">Cookout</div></div>
+  <div class="icon-item">⚡<div class="icon-label">Corner</div></div>
+  <div class="icon-item">👑<div class="icon-label">Crown</div></div>
+  <div class="icon-item">📜<div class="icon-label">Receipt</div></div>
+  <div class="icon-item">🎲<div class="icon-label">Cipher</div></div>
+  <div class="icon-item">🤝<div class="icon-label">Alliance</div></div>
+  <div class="icon-item">🔥<div class="icon-label">Fire</div></div>
+  <div class="icon-item">💰<div class="icon-label">Bread</div></div>
+  <div class="icon-item">📻<div class="icon-label">Radio</div></div>
+  <div class="icon-item">🎤<div class="icon-label">Mic</div></div>
+  <div class="icon-item">☮<div class="icon-label">Peace</div></div>
+  <div class="icon-item">🏆<div class="icon-label">Trophy</div></div>
+</div>
+
+<!-- 4. BLACK CARDS -->
+<div class="section-header">04 · Black Cards (Scenarios)</div>
+<div class="card-grid">
+  <div class="card card-black">
+    <div class="card-icon">🎲</div>
+    <div class="card-type">Scenario · Cipher</div>
+    <div class="card-prompt">The new luxury building opened across the street and <span class="blank">____</span></div>
+    <div class="card-footer">
+      <span>Round 3</span>
+      <span>🔥 Barbershop Truth</span>
+    </div>
+  </div>
+  <div class="card card-black dice">
+    <div class="card-icon">🏪</div>
+    <div class="card-type">Scenario · Cipher Active</div>
+    <div class="card-prompt">____ is why the neighbors called the cops</div>
+    <div class="card-footer">
+      <span>Round 5</span>
+      <span>💰 Block Watch</span>
+    </div>
+  </div>
+  <div class="card card-black receipt">
+    <div class="card-icon">📜</div>
+    <div class="card-type">Receipt Trigger</div>
+    <div class="card-prompt">Your cousin who owes you shows up at the cookout with <span class="blank">____</span></div>
+    <div class="card-footer">
+      <span>Active Thread</span>
+      <span>👑 O.G. Choice</span>
+    </div>
+  </div>
+</div>
+
+<div class="annotations">
+  <h3>Black Card Design Notes</h3>
+  <ul>
+    <li>Dark gradient creates visual authority; cream text provides high contrast</li>
+    <li>Dice badge positioned top-right for immediate recognition</li>
+    <li>Prompt uses orange underline for blanks—consistent with brand</li>
+    <li>Receipt variant uses gold border and seal to distinguish from regular scenarios</li>
+    <li>Footer shows round number and active cipher effect for context</li>
+    <li>Mobile: prompt font reduces to 16px, card min-height adjusts</li>
+  </ul>
+</div>
+
+<!-- 5. WHITE CARDS -->
+<div class="section-header">05 · White Cards (Responses)</div>
+<div class="card-grid tight">
+  <div class="card card-white">
+    <div class="card-icon">💬</div>
+    <div class="card-type">Response</div>
+    <div class="card-text">a community land trust proposal</div>
+    <div class="card-footer">Standard</div>
+  </div>
+  <div class="card card-white selected">
+    <div class="card-icon">🔥</div>
+    <div class="card-type">Response · Selected</div>
+    <div class="card-text">a protest that got co-opted by a corporation</div>
+    <div class="card-footer">Active</div>
+  </div>
+  <div class="card card-white hustle">
+    <div class="card-icon">🎵</div>
+    <div class="card-type">Response · Hustle</div>
+    <div class="card-text">a step show that started a beef</div>
+    <div class="card-footer">Creative Bonus</div>
+  </div>
+  <div class="card card-white disabled">
+    <div class="card-icon">😴</div>
+    <div class="card-type">Response · Locked</div>
+    <div class="card-text">the cousin who posts every family business</div>
+    <div class="card-footer">Unavailable</div>
+  </div>
+</div>
+
+<div class="annotations">
+  <h3>White Card Design Notes</h3>
+  <ul>
+    <li>Cream gradient maintains brand warmth; orange text for selected state</li>
+    <li>Selected state uses thick orange outline with glow—immediately visible</li>
+    <li>Hustle variant shifts to blue accent for character identity</li>
+    <li>Disabled state reduces opacity and adds grayscale filter</li>
+    <li>Cards are 180px min-width in tight grid for hand playability</li>
+    <li>Hover lifts card 4px with enhanced shadow</li>
+  </ul>
+</div>
+
+<!-- 6. RECEIPT CARDS -->
+<div class="section-header">06 · Receipt Cards (Story Threads)</div>
+<div class="card-grid">
+  <div class="card card-receipt">
+    <div class="receipt-seal">📜</div>
+    <div class="card-type">Active Receipt</div>
+    <div class="card-title">"The Cousin Bailout"</div>
+    <div class="card-text">You helped your cousin get out of jail. They owe you big time. Watch for their move.</div>
+    <div class="card-footer">Round 2 · Triggers: Next 3 Rounds</div>
+  </div>
+  <div class="card card-receipt" style="border-color: var(--c-green); background: linear-gradient(135deg, #f1f8f4 0%, #c8e6c9 100%);">
+    <div class="receipt-seal" style="background: var(--c-green);">✓</div>
+    <div class="card-type" style="color: #2e7d32;">Resolved</div>
+    <div class="card-title">"The Cookout Joke"</div>
+    <div class="card-text">Auntie still side-eyeing you, but the crowd laughed. Reputation holds.</div>
+    <div class="card-footer" style="color: #2e7d32; border-top-color: var(--c-green);">Round 1 · +2 Reputation</div>
+  </div>
+</div>
+
+<div class="annotations">
+  <h3>Receipt Card Design Notes</h3>
+  <ul>
+    <li>Gold/yellow palette distinguishes narrative threads from gameplay cards</li>
+    <li>Slight rotation (-1deg) gives organic, "pinned to board" feel</li>
+    <li>Seal icon in top-right indicates status (scroll = active, checkmark = resolved)</li>
+    <li>Title in quotes mimics oral storytelling tradition</li>
+    <li>Green variant signals resolution with positive feedback</li>
+    <li>Footer shows origin round and trigger window for strategic planning</li>
+  </ul>
+</div>
+
+<!-- 7. CIPHER / DICE CARDS -->
+<div class="section-header">07 · Cipher Cards (Dice Effects)</div>
+<div class="card-grid tight">
+  <div class="card card-cipher active">
+    <div class="cipher-symbol">🔥</div>
+    <div class="cipher-label">Barbershop Truth</div>
+    <div class="cipher-desc">Cards read anonymously. No one knows who played what until after judging.</div>
+  </div>
+  <div class="card card-cipher">
+    <div class="cipher-symbol">💰</div>
+    <div class="cipher-label">Block Watch</div>
+    <div class="cipher-desc">Everyone re-plays from hand. Chaos ensues.</div>
+  </div>
+  <div class="card card-cipher">
+    <div class="cipher-symbol">📻</div>
+    <div class="cipher-label">Side Door</div>
+    <div class="cipher-desc">Lowest-Rep player gets one free submission from the discard pile.</div>
+  </div>
+  <div class="card card-cipher">
+    <div class="cipher-symbol">👑</div>
+    <div class="cipher-label">Crown</div>
+    <div class="cipher-desc">O.G. wins automatically. Their word is final.</div>
+  </div>
+  <div class="card card-cipher">
+    <div class="cipher-symbol">☮</div>
+    <div class="cipher-label">Peace</div>
+    <div class="cipher-desc">No winner this round. Everyone gains +1 Community.</div>
+  </div>
+  <div class="card card-cipher">
+    <div class="cipher-symbol">🎤</div>
+    <div class="cipher-label">Mic Drop</div>
+    <div class="cipher-desc">Winner gets to draw one extra Receipt.</div>
+  </div>
+</div>
+
+<div class="annotations">
+  <h3>Cipher Card Design Notes</h3>
+  <ul>
+    <li>Purple palette differentiates cipher from scenario/response cards</li>
+    <li>Large cultural symbol (🔥 💰 📻 👑 ☮ 🎤) as primary visual anchor</li>
+    <li>Centered layout creates ceremonial feel—cipher is a moment, not just a mechanic</li>
+    <li>Active state uses orange border/glow to show current effect</li>
+    <li>Description explains mechanical effect in plain language</li>
+    <li>Symbols chosen from Black cultural lexicon: fire = truth, crown = authority, mic = voice</li>
+  </ul>
+</div>
+
+<!-- 8. ORIGIN CARDS -->
+<div class="section-header">08 · Origin Cards (Character Creation)</div>
+<div class="card-grid tight">
+  <div class="card card-origin">
+    <div class="origin-icon">🍬</div>
+    <div class="card-type">Origin</div>
+    <div class="card-title">The Hustler</div>
+    <div class="card-text">You sold candy out of your locker and never stopped grinding.</div>
+    <div class="stat-bonuses">+2 Street Cred · +1 Community</div>
+  </div>
+  <div class="card card-origin">
+    <div class="origin-icon">✂️</div>
+    <div class="card-type">Origin</div>
+    <div class="card-title">The Barber</div>
+    <div class="card-text">You've heard every secret on The Block while giving fades.</div>
+    <div class="stat-bonuses">+2 Community · +1 Wisdom</div>
+  </div>
+  <div class="card card-origin">
+    <div class="origin-icon">📚</div>
+    <div class="card-type">Origin</div>
+    <div class="card-title">The Student</div>
+    <div class="card-text">You organized the walkout. You see patterns others miss.</div>
+    <div class="stat-bonuses">+2 Wisdom · +1 Reputation</div>
+  </div>
+  <div class="card card-origin">
+    <div class="origin-icon">👵🏾</div>
+    <div class="card-type">Origin</div>
+    <div class="card-title">The Elder</div>
+    <div class="card-text">You've been on The Block longer than anyone. Your word is law.</div>
+    <div class="stat-bonuses">+3 Reputation · -1 Street Cred</div>
+  </div>
+</div>
+
+<div class="annotations">
+  <h3>Origin Card Design Notes</h3>
+  <ul>
+    <li>Green palette signals growth, choice, character identity</li>
+    <li>Large cultural icon makes origins instantly recognizable</li>
+    <li>Stat bonuses shown openly (unlike CAH where everything is hidden)</li>
+    <li>Centered layout creates "character select" feel</li>
+    <li>Typography: title bold, description regular, bonuses in monospace for clarity</li>
+  </ul>
+</div>
+
+<!-- 9. HUSTLE CARDS -->
+<div class="section-header">09 · Hustle Cards (Character Classes)</div>
+<div class="card-grid tight">
+  <div class="card card-hustle">
+    <div class="hustle-icon">🏃</div>
+    <div class="card-type">Hustle</div>
+    <div class="card-title">Street Hustler</div>
+    <div class="card-text">Re-roll the Cipher once per round.</div>
+    <div class="power-box">⚡ Re-roll Cipher</div>
+  </div>
+  <div class="card card-hustle">
+    <div class="hustle-icon">🤝</div>
+    <div class="card-type">Hustle</div>
+    <div class="card-title">Organizer</div>
+    <div class="card-text">Form Cookouts with +1 member bonus.</div>
+    <div class="power-box">🔥 +1 Cookout Member</div>
+  </div>
+  <div class="card card-hustle">
+    <div class="hustle-icon">🎨</div>
+    <div class="card-type">Hustle</div>
+    <div class="card-title">Creative</div>
+    <div class="card-text">Add one extra blank to any black card.</div>
+    <div class="power-box">✨ +1 Blank</div>
+  </div>
+  <div class="card card-hustle">
+    <div class="hustle-icon">💼</div>
+    <div class="card-type">Hustle</div>
+    <div class="card-title">Entrepreneur</div>
+    <div class="card-text">Keep half your winnings even when you lose.</div>
+    <div class="power-box">💰 Half Winnings Always</div>
+  </div>
+  <div class="card card-hustle">
+    <div class="hustle-icon">🎓</div>
+    <div class="card-type">Hustle</div>
+    <div class="card-title">Student</div>
+    <div class="card-text">Peek at one opponent's hand per round.</div>
+    <div class="power-box">👁️ Peek Hand</div>
+  </div>
+  <div class="card card-hustle">
+    <div class="hustle-icon">👑</div>
+    <div class="card-type">Hustle</div>
+    <div class="card-title">Elder</div>
+    <div class="card-text">Veto one Receipt per game.</div>
+    <div class="power-box">🛡️ Receipt Veto</div>
+  </div>
+</div>
+
+<div class="annotations">
+  <h3>Hustle Card Design Notes</h3>
+  <ul>
+    <li>Blue palette creates distinct identity from origins (green) and scenarios (black)</li>
+    <li>Power box at bottom uses icon + text for quick comprehension</li>
+    <li>Centered layout emphasizes character identity over tactical info</li>
+    <li>Icons chosen for instant recognition: hustle = runner, organizer = hands, creative = art</li>
+    <li>Typography hierarchy: icon → type → title → description → power</li>
+  </ul>
+</div>
+
+<!-- 10. COOKOUT CARDS -->
+<div class="section-header">10 · Cookout Alliance Cards</div>
+<div class="card-grid">
+  <div class="card card-cookout">
+    <div class="card-type">Alliance</div>
+    <div class="card-title">🍖 The Cookout</div>
+    <div class="members-list"><strong>Members:</strong> Aisha, Marcus, Dante</div>
+    <div class="bonus-text">3 members: Can trigger Block Party dice effect automatically</div>
+  </div>
+  <div class="card card-receipt" style="border-style: dashed; transform: rotate(2deg);">
+    <div class="receipt-seal" style="background: var(--c-red); color: #fff;">⚠️</div>
+    <div class="card-type" style="color: var(--c-red);">Betrayal</div>
+    <div class="card-title">"Ghosted"</div>
+    <div class="card-text">You left the Cookout. Playing solo. If you win: +2 Rep. If you lose: -1 Community.</div>
+    <div class="card-footer" style="color: var(--c-red); border-top-color: var(--c-red);">Round 4 · Active</div>
+  </div>
+</div>
+
+<div class="annotations">
+  <h3>Cookout Card Design Notes</h3>
+  <ul>
+    <li>Dashed orange border signals "temporary/conditional" state</li>
+    <li>Slight rotation (1-2deg) creates organic, informal feel matching cookout vibe</li>
+    <li>Member list shows alliance composition at a glance</li>
+    <li>Betrayal card uses red to signal danger/consequence</li>
+    <li>Both use receipt-style seal for consistency in narrative objects</li>
+  </ul>
+</div>
+
+<!-- 11. STATE VARIANTS -->
+<div class="section-header">11 · Card States & Interactions</div>
+<div class="component-showcase">
+  <h3>Interactive States</h3>
+  <div class="component-row">
+    <div class="card card-white" style="min-height: 140px;">
+      <div class="card-text">Default State</div>
+    </div>
+    <div class="card card-white hovered" style="min-height: 140px;">
+      <div class="card-text">Hover State</div>
+    </div>
+    <div class="card card-white selected" style="min-height: 140px;">
+      <div class="card-text">Selected State</div>
+    </div>
+    <div class="card card-white disabled" style="min-height: 140px;">
+      <div class="card-text">Disabled State</div>
+    </div>
+    <div class="card card-white active" style="min-height: 140px;">
+      <div class="card-text">Active/Focus State</div>
+    </div>
+  </div>
+</div>
+
+<!-- 12. COMPONENT BREAKDOWN -->
+<div class="section-header">12 · Card Component Anatomy</div>
+<div class="component-showcase">
+  <h3>Standard Card Structure</h3>
+  <div class="card card-black" style="min-height: 320px;">
+    <div class="card-icon">🎲</div>
+    <div class="card-type">Scenario · Cipher</div>
+    <div class="card-prompt">The prompt text goes here with <span class="blank">____</span> for blanks</div>
+    <div class="card-footer">
+      <span>Round X</span>
+      <span>Effect Label</span>
+    </div>
+  </div>
+  <div class="annotations">
+    <h3>Component Layers</h3>
+    <ul>
+      <li><strong>Top accent bar:</strong> 4px color indicator, 30% opacity</li>
+      <li><strong>Icon:</strong> Cultural or contextual emoji, 32-64px depending on card type</li>
+      <li><strong>Type label:</strong> Micro text, uppercase, letter-spaced—classifies card category</li>
+      <li><strong>Title/Prompt:</strong> Primary text, bold, largest element</li>
+      <li><strong>Body text:</strong> Secondary info, regular weight, slightly smaller</li>
+      <li><strong>Footer:</strong> Metadata (round, effect, status), smallest text, uppercase</li>
+      <li><strong>Seal/Badge:</strong> Absolute positioned status indicator (optional)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="section-header" style="margin-top: var(--s-2xl);">Design System Info</div>
+<div class="component-showcase">
+  <ul>
+    <li><strong>File:</strong> wireframes/card-design-system.html</li>
+    <li><strong>Version:</strong> 1.0</li>
+    <li><strong>Usage:</strong> Reference for all card implementations in game code</li>
+    <li><strong>Print:</strong> Use browser print dialog; cards avoid page breaks</li>
+    <li><strong>Assets:</strong> Icons via Unicode emoji; no external font dependencies</li>
+  </ul>
+</div>
+
+</body>
+</html>

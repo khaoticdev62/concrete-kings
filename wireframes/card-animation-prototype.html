@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Concrete Kings - Card Design & Animation Prototype</title>
+<style>
+  /* ============================================
+     CONCRETE KINGS - CARD DESIGN PROTOTYPE
+     ============================================ */
+
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Unbounded:wght@400;700;900&display=swap');
+
+  :root {
+    --c-black: #1a1a1a;
+    --c-black-soft: #2b1d0e;
+    --c-orange: #ff6b35;
+    --c-orange-deep: #e04b00;
+    --c-cream: #f3e7cf;
+    --c-cream-light: #fff7e6;
+    --c-cream-mid: #ffe3b3;
+    --c-gold: #f7c948;
+    --c-green: #4caf50;
+    --c-green-light: #e8f5e9;
+    --c-red: #ff4444;
+    --c-red-light: #ffebee;
+    --c-blue: #2196f3;
+    --c-blue-light: #e3f2fd;
+    --c-purple: #9c27b0;
+    --c-purple-light: #f3e5f5;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #f5f5f5;
+    color: var(--c-black);
+    padding: 20px;
+    line-height: 1.4;
+  }
+
+  .prototype-header {
+    background: linear-gradient(135deg, var(--c-black) 0%, var(--c-black-soft) 100%);
+    color: var(--c-cream);
+    padding: 30px 40px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    border: 3px solid var(--c-orange);
+  }
+  .prototype-header h1 {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .prototype-header p {
+    opacity: 0.85;
+    font-size: 14px;
+  }
+
+  .section {
+    margin-bottom: 40px;
+  }
+  .section-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid var(--c-orange);
+    display: inline-block;
+  }
+
+  .card-showcase {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+    margin-bottom: 30px;
+  }
+
+  /* ============================================
+     CARD BASE
+     ============================================ */
+  .card {
+    position: relative;
+    border-radius: 14px;
+    padding: 24px;
+    min-height: 340px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    overflow: hidden;
+    will-change: transform, opacity;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: currentColor;
+    opacity: 0.4;
+  }
+
+  /* ============================================
+     BLACK CARDS
+     ============================================ */
+  .card-black {
+    background: linear-gradient(180deg, #2a2a2a 0%, var(--c-black) 100%);
+    color: var(--c-cream);
+    border: 2px solid #3a3a3a;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.25);
+  }
+  .card-black .card-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+    opacity: 0.9;
+  }
+  .card-black .card-type {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    opacity: 0.6;
+    margin-bottom: 12px;
+    font-weight: 600;
+    color: var(--c-orange);
+  }
+  .card-black .card-prompt {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.35;
+    flex: 1;
+  }
+  .card-black .card-prompt .blank {
+    display: inline-block;
+    min-width: 90px;
+    border-bottom: 3px solid var(--c-orange);
+    margin: 0 6px;
+    opacity: 0.9;
+  }
+  .card-black .card-footer {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 500;
+  }
+  .card-black.dice::after {
+    content: '🎲';
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+    background: var(--c-orange);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.3);
+    animation: dicePulse 2s ease-in-out infinite;
+  }
+  .card-black.receipt {
+    border-color: var(--c-gold);
+    background: linear-gradient(180deg, #2a2520 0%, #1a1510 100%);
+  }
+  .card-black.receipt::before {
+    background: var(--c-gold);
+  }
+  .card-black.receipt .card-type {
+    color: var(--c-gold);
+  }
+
+  /* ============================================
+     WHITE CARDS
+     ============================================ */
+  .card-white {
+    background: linear-gradient(180deg, var(--c-cream-light) 0%, var(--c-cream-mid) 100%);
+    color: var(--c-black);
+    border: 2px solid #e0d4b0;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+  }
+  .card-white .card-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+  }
+  .card-white .card-type {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0.5;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #8b7355;
+  }
+  .card-white .card-text {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.45;
+    flex: 1;
+  }
+  .card-white .card-footer {
+    margin-top: 16px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    opacity: 0.5;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 500;
+  }
+  .card-white.selected {
+    outline: 4px solid var(--c-orange);
+    transform: translateY(-8px);
+    box-shadow: 0 8px 0 rgba(0,0,0,0.2), 0 0 0 8px rgba(255,107,53,0.25);
+  }
+  .card-white.hustle {
+    border-color: var(--c-blue);
+    background: linear-gradient(135deg, var(--c-cream-light) 0%, var(--c-blue-light) 100%);
+  }
+  .card-white.hustle .card-type {
+    color: var(--c-blue);
+  }
+
+  /* ============================================
+     RECEIPT CARDS
+     ============================================ */
+  .card-receipt {
+    background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+    color: var(--c-black);
+    border: 3px solid var(--c-gold);
+    box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+    transform: rotate(-1deg);
+    min-height: 340px;
+  }
+  .card-receipt .receipt-seal {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 52px;
+    height: 52px;
+    background: var(--c-gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.2);
+    animation: sealDrop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .card-receipt .card-type {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #b8860b;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+  .card-receipt .card-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    font-style: italic;
+  }
+  .card-receipt .card-text {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.6;
+    flex: 1;
+  }
+  .card-receipt .card-footer {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 2px dashed var(--c-gold);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+    color: #b8860b;
+  }
+
+  /* ============================================
+     CIPHER CARDS
+     ============================================ */
+  .card-cipher {
+    background: linear-gradient(135deg, var(--c-purple-light) 0%, #e1bee7 100%);
+    color: var(--c-black);
+    border: 3px solid var(--c-purple);
+    box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    min-height: 280px;
+  }
+  .card-cipher .cipher-symbol {
+    font-size: 72px;
+    margin-bottom: 16px;
+    animation: symbolFloat 3s ease-in-out infinite;
+  }
+  .card-cipher .cipher-label {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+  .card-cipher .cipher-desc {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0.8;
+    line-height: 1.5;
+  }
+  .card-cipher.active {
+    border-color: var(--c-orange);
+    box-shadow: 0 6px 0 rgba(0,0,0,0.25), 0 0 0 6px rgba(255,107,53,0.3);
+    animation: cipherGlow 2s ease-in-out infinite;
+  }
+
+  /* ============================================
+     ORIGIN CARDS
+     ============================================ */
+  .card-origin {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    color: var(--c-black);
+    border: 2px solid var(--c-green);
+    box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+    text-align: center;
+    min-height: 320px;
+  }
+  .card-origin .origin-icon {
+    font-size: 56px;
+    margin-bottom: 16px;
+    animation: iconBounce 2s ease-in-out infinite;
+  }
+  .card-origin .card-type {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #2e7d32;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+  .card-origin .card-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+  .card-origin .card-text {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .card-origin .stat-bonuses {
+    background: var(--c-green-light);
+    border-radius: 8px;
+    padding: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #2e7d32;
+  }
+
+  /* ============================================
+     HUSTLE CARDS
+     ============================================ */
+  .card-hustle {
+    background: linear-gradient(135deg, var(--c-blue-light) 0%, #bbdefb 100%);
+    color: var(--c-black);
+    border: 3px solid var(--c-blue);
+    box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+    text-align: center;
+    min-height: 320px;
+  }
+  .card-hustle .hustle-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+  .card-hustle .card-type {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #1565c0;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+  .card-hustle .card-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+  .card-hustle .card-text {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .card-hustle .power-box {
+    background: #fff;
+    border-radius: 8px;
+    padding: 12px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1565c0;
+    border: 2px solid var(--c-blue);
+    margin-top: auto;
+  }
+
+  /* ============================================
+     INTERACTIVE DEMO AREA
+     ============================================ */
+  .demo-controls {
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .demo-controls button {
+    padding: 10px 18px;
+    border: 2px solid var(--c-black);
+    background: #fff;
+    color: var(--c-black);
+    border-radius: 8px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .demo-controls button:hover {
+    background: var(--c-black);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .demo-controls button.active {
+    background: var(--c-orange);
+    color: #fff;
+    border-color: var(--c-orange);
+  }
+
+  .demo-stage {
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 30px;
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ============================================
+     ANIMATIONS
+     ============================================ */
+  @keyframes dicePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  @keyframes sealDrop {
+    from {
+      transform: translateY(-100px) scale(0) rotate(-10deg);
+      opacity: 0;
+    }
+    60% {
+      transform: translateY(8px) scale(1.15) rotate(2deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(0) scale(1) rotate(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes symbolFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(5deg); }
+  }
+
+  @keyframes iconBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  @keyframes cipherGlow {
+    0%, 100% {
+      box-shadow: 0 6px 0 rgba(0,0,0,0.25), 0 0 0 6px rgba(255,107,53,0.3);
+    }
+    50% {
+      box-shadow: 0 6px 0 rgba(0,0,0,0.25), 0 0 0 12px rgba(255,107,53,0.1);
+    }
+  }
+
+  @keyframes dealCard {
+    from {
+      transform: translateY(-200px) rotate(-10deg) scale(0.8);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0) rotate(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes submitCard {
+    0% {
+      transform: translateY(0) rotate(0) scale(1);
+      opacity: 1;
+    }
+    30% {
+      transform: translateY(-20px) rotate(0) scale(1.05);
+      opacity: 1;
+    }
+    60% {
+      transform: translateY(-20px) rotate(180deg) scale(1.05);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(0) rotate(180deg) scale(0.5);
+      opacity: 0;
+    }
+  }
+
+  @keyframes cipherSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(1080deg); }
+  }
+
+  @keyframes victoryCascade {
+    from {
+      transform: translateY(-100px) scale(0.8);
+      opacity: 0;
+    }
+    60% {
+      transform: translateY(10px) scale(1.05);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes confettiFall {
+    to {
+      transform: translateY(600px) rotate(720deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes receiptUnfurl {
+    from {
+      clip-path: inset(0 0 100% 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  @keyframes cardFlip {
+    from { transform: rotateY(0deg); }
+    to { transform: rotateY(180deg); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+  }
+
+  @keyframes statFill {
+    from { width: 0; }
+    to { width: var(--target-width); }
+  }
+
+  @keyframes statCount {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Animation Classes */
+  .anim-deal {
+    animation: dealCard 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    opacity: 0;
+  }
+  .anim-submit {
+    animation: submitCard 0.6s ease-in-out forwards;
+  }
+  .anim-cipher-spin {
+    animation: cipherSpin 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  .anim-victory {
+    animation: victoryCascade 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    opacity: 0;
+  }
+  .anim-shake {
+    animation: shake 0.5s ease-in-out;
+  }
+  .anim-unfurl {
+    animation: receiptUnfurl 0.6s ease-out;
+  }
+
+  /* Confetti */
+  .confetti {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: var(--c-orange);
+    border-radius: 2px;
+    animation: confettiFall 2s ease-in forwards;
+    opacity: 0.8;
+  }
+
+  /* ============================================
+     RESPONSIVE
+     ============================================ */
+  @media (max-width: 768px) {
+    .card-showcase {
+      grid-template-columns: 1fr;
+    }
+    .card {
+      min-height: 280px;
+    }
+  }
+
+  /* Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="prototype-header">
+  <h1>CONCRETE KINGS - CARD DESIGN & ANIMATION PROTOTYPE</h1>
+  <p>Production-ready card variants, typography system, and interactive animations. Click cards to see states. Use buttons below to trigger animations.</p>
+</div>
+
+<!-- DEMO CONTROLS -->
+<div class="demo-controls">
+  <strong>Animation Triggers:</strong>
+  <button onclick="triggerDeal()">Deal Cards</button>
+  <button onclick="triggerSubmit()">Submit Card</button>
+  <button onclick="triggerCipher()">Spin Cipher</button>
+  <button onclick="triggerVictory()">Victory Cascade</button>
+  <button onclick="triggerReceipt()">Receipt Award</button>
+  <button onclick="triggerShake()">Veto Shake</button>
+  <button onclick="toggleStates()">Toggle States</button>
+  <button onclick="resetDemo()">Reset</button>
+</div>
+
+<!-- DEMO STAGE -->
+<div class="demo-stage" id="demoStage">
+  <div class="card-showcase" id="cardShowcase">
+    <!-- Black Card -->
+    <div class="card card-black anim-deal" style="animation-delay: 0ms;">
+      <div class="card-icon">🎲</div>
+      <div class="card-type">Scenario · Cipher</div>
+      <div class="card-prompt">The new luxury building opened across the street and <span class="blank">____</span></div>
+      <div class="card-footer">
+        <span>Round 3</span>
+        <span>🔥 Barbershop Truth</span>
+      </div>
+    </div>
+
+    <!-- White Card -->
+    <div class="card card-white anim-deal" style="animation-delay: 100ms;">
+      <div class="card-icon">💬</div>
+      <div class="card-type">Response</div>
+      <div class="card-text">a community land trust proposal</div>
+      <div class="card-footer">Standard</div>
+    </div>
+
+    <!-- Receipt Card -->
+    <div class="card card-receipt anim-deal" style="animation-delay: 200ms;">
+      <div class="receipt-seal">📜</div>
+      <div class="card-type">Active Receipt</div>
+      <div class="card-title">"The Cousin Bailout"</div>
+      <div class="card-text">You helped your cousin get out of jail. They owe you big time.</div>
+      <div class="card-footer">Round 2 · Triggers: Next 3 Rounds</div>
+    </div>
+
+    <!-- Cipher Card -->
+    <div class="card card-cipher anim-deal" style="animation-delay: 300ms;">
+      <div class="cipher-symbol">🔥</div>
+      <div class="cipher-label">Barbershop Truth</div>
+      <div class="cipher-desc">Cards read anonymously. No one knows who played what until after judging.</div>
+    </div>
+
+    <!-- Origin Card -->
+    <div class="card card-origin anim-deal" style="animation-delay: 400ms;">
+      <div class="origin-icon">🍬</div>
+      <div class="card-type">Origin</div>
+      <div class="card-title">The Hustler</div>
+      <div class="card-text">You sold candy out of your locker and never stopped grinding.</div>
+      <div class="stat-bonuses">+2 Street Cred · +1 Community</div>
+    </div>
+
+    <!-- Hustle Card -->
+    <div class="card card-hustle anim-deal" style="animation-delay: 500ms;">
+      <div class="hustle-icon">🏃</div>
+      <div class="card-type">Hustle</div>
+      <div class="card-title">Street Hustler</div>
+      <div class="card-text">Re-roll the Cipher once per round.</div>
+      <div class="power-box">⚡ Re-roll Cipher</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const stage = document.getElementById('demoStage');
+  const showcase = document.getElementById('cardShowcase');
+  let stateToggle = false;
+
+  function clearStage() {
+    stage.querySelectorAll('.confetti').forEach(el => el.remove());
+  }
+
+  function triggerDeal() {
+    resetDemo();
+    const cards = showcase.querySelectorAll('.card');
+    cards.forEach((card, i) => {
+      card.style.animation = 'none';
+      card.offsetHeight; // trigger reflow
+      card.style.animation = `dealCard 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 100}ms forwards`;
+      card.style.opacity = '0';
+    });
+  }
+
+  function triggerSubmit() {
+    const cards = showcase.querySelectorAll('.card');
+    if (cards.length > 1) {
+      const target = cards[1]; // white card
+      target.style.animation = 'submitCard 0.6s ease-in-out forwards';
+    }
+  }
+
+  function triggerCipher() {
+    const cipher = showcase.querySelector('.card-cipher');
+    if (cipher) {
+      cipher.classList.add('active');
+      cipher.style.animation = 'cipherSpin 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      setTimeout(() => {
+        cipher.style.animation = '';
+      }, 900);
+    }
+  }
+
+  function triggerVictory() {
+    clearStage();
+    const cards = showcase.querySelectorAll('.card');
+    cards.forEach((card, i) => {
+      card.style.animation = 'none';
+      card.offsetHeight;
+      card.style.animation = `victoryCascade 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 100}ms forwards`;
+      card.style.opacity = '0';
+    });
+
+    // Spawn confetti
+    setTimeout(() => {
+      for (let i = 0; i < 30; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.top = '-20px';
+        confetti.style.background = ['#ff6b35', '#f7c948', '#4caf50', '#9c27b0'][Math.floor(Math.random() * 4)];
+        confetti.style.animationDelay = Math.random() * 2 + 's';
+        confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
+        stage.appendChild(confetti);
+      }
+    }, 600);
+  }
+
+  function triggerReceipt() {
+    const receipt = showcase.querySelector('.card-receipt');
+    if (receipt) {
+      receipt.style.animation = 'none';
+      receipt.offsetHeight;
+      receipt.style.animation = 'receiptDrop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      
+      const seal = receipt.querySelector('.receipt-seal');
+      if (seal) {
+        seal.style.animation = 'none';
+        seal.offsetHeight;
+        seal.style.animation = 'sealDrop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both';
+      }
+    }
+  }
+
+  function triggerShake() {
+    const blackCard = showcase.querySelector('.card-black');
+    if (blackCard) {
+      blackCard.classList.add('anim-shake');
+      setTimeout(() => blackCard.classList.remove('anim-shake'), 500);
+    }
+  }
+
+  function toggleStates() {
+    stateToggle = !stateToggle;
+    const whiteCard = showcase.querySelector('.card-white');
+    if (whiteCard) {
+      if (stateToggle) {
+        whiteCard.classList.add('selected');
+      } else {
+        whiteCard.classList.remove('selected');
+      }
+    }
+  }
+
+  function resetDemo() {
+    clearStage();
+    const cards = showcase.querySelectorAll('.card');
+    cards.forEach(card => {
+      card.style.animation = 'none';
+      card.style.opacity = '1';
+      card.classList.remove('selected', 'active');
+    });
+    stateToggle = false;
+  }
+
+  // Magnetic hover effect
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      
+      if (!card.classList.contains('selected')) {
+        card.style.transform = `
+          translateY(-4px)
+          translate(${x * 0.05}px, ${y * 0.05}px)
+        `;
+      }
+    });
+
+    card.addEventListener('mouseleave', () => {
+      if (!card.classList.contains('selected')) {
+        card.style.transform = '';
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

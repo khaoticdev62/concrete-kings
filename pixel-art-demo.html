@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concrete Kings - Pixel Art Engine Demo</title>
+<link rel="stylesheet" href="src/pixel_engine/pixel-engine.css">
+<style>
+  #ui-toolbar {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 100;
+    background: rgba(8, 8, 10, 0.85);
+    border: 1px solid #474d5e;
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: #f4f7ff;
+    font-family: monospace;
+    font-size: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  select, button {
+    background: #181920;
+    color: #ffc475;
+    border: 1px solid #788196;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  select:hover, button:hover {
+    background: #22252e;
+    border-color: #f0ab43;
+  }
+  #scale-info {
+    color: #85c4ff;
+  }
+</style>
+</head>
+<body>
+
+<div id="ui-toolbar">
+  <label for="city-select">City Theme:</label>
+  <select id="city-select">
+    <option value="Harlem">Harlem (Brownstone)</option>
+    <option value="Detroit">Detroit (Rust/Steel)</option>
+    <option value="Chicago">Chicago (Greystone)</option>
+    <option value="Miami">Miami (Art Deco Neon)</option>
+    <option value="Baltimore">Baltimore (Formstone)</option>
+    <option value="Atlanta">Atlanta (Red Clay/Pine)</option>
+    <option value="Oakland">Oakland (Victorian Bay)</option>
+    <option value="NOLA">New Orleans (French Quarter)</option>
+  </select>
+
+  <span id="scale-info">Scale: --x</span>
+</div>
+
+<canvas id="game-canvas" class="pixel-canvas"></canvas>
+
+<script src="src/pixel_engine/pixel-engine.js"></script>
+<script>
+  const canvas = document.getElementById("game-canvas");
+  const scaleInfoEl = document.getElementById("scale-info");
+  const citySelect = document.getElementById("city-select");
+
+  const engine = new PixelCanvasEngine(canvas, {
+    nativeWidth: 320,
+    nativeHeight: 180,
+    cityTheme: "Harlem"
+  });
+
+  citySelect.addEventListener("change", (e) => {
+    engine.setCityTheme(e.target.value);
+  });
+
+  window.addEventListener("resize", () => {
+    engine.resize();
+    updateScaleDisplay();
+  });
+
+  function updateScaleDisplay() {
+    if (engine.currentScaleInfo) {
+      scaleInfoEl.textContent = `Scale: ${engine.currentScaleInfo.scale}x (${engine.currentScaleInfo.renderWidth}x${engine.currentScaleInfo.renderHeight})`;
+    }
+  }
+
+  // Draw procedural test scene demonstrating 320x180 pixel rendering
+  let animTick = 0;
+
+  function renderLoop() {
+    animTick++;
+    const frame = Math.floor(animTick / 15) % 4; // 4-frame animation budget
+
+    const ctx = engine.virtualCtx;
+    engine.clearNative("#0a1526"); // Midnight navy background
+
+    const colorMap = CITY_THEME_OVERRIDES[engine.activeCity] || {};
+    const brickColor = colorMap["7a1d1c"] ? "#" + colorMap["7a1d1c"] : "#7a1d1c";
+    const accentColor = colorMap["474d5e"] ? "#" + colorMap["474d5e"] : "#474d5e";
+
+    // Draw horizon sky gradient
+    ctx.fillStyle = "#11233f";
+    ctx.fillRect(0, 0, 320, 60);
+
+    // Draw streetlamps in background
+    ctx.fillStyle = "#ffc475";
+    ctx.fillRect(40, 70 - (frame % 2), 4, 4); // Streetlamp pulse
+    ctx.fillRect(270, 70 - (frame % 2), 4, 4);
+
+    ctx.fillStyle = "#666e82";
+    ctx.fillRect(41, 74, 2, 46);
+    ctx.fillRect(271, 74, 2, 46);
+
+    // Draw procedural building facade
+    ctx.fillStyle = brickColor;
+    ctx.fillRect(60, 40, 200, 80);
+
+    // Draw windows
+    ctx.fillStyle = "#ffe299";
+    for (let row = 0; row < 2; row++) {
+      for (let col = 0; col < 5; col++) {
+        ctx.fillRect(75 + col * 35, 52 + row * 25, 16, 16);
+      }
+    }
+
+    // Draw sidewalk
+    ctx.fillStyle = "#474d5e";
+    ctx.fillRect(0, 120, 320, 20);
+
+    // Draw asphalt road
+    ctx.fillStyle = "#101116";
+    ctx.fillRect(0, 140, 320, 40);
+
+    // Draw road markings
+    ctx.fillStyle = "#ffcd68";
+    for (let x = 10; x < 320; x += 40) {
+      ctx.fillRect(x, 158, 20, 4);
+    }
+
+    // Draw Barber character (32x32 bounding box) with 4-frame breathing idle
+    const heroY = 98 - (frame === 1 ? 1 : 0);
+    ctx.fillStyle = "#26120b"; // Skin base
+    ctx.fillRect(148, heroY, 8, 8); // Head
+
+    ctx.fillStyle = "#3d2218"; // Locs
+    ctx.fillRect(146, heroY - 2, 12, 4);
+
+    ctx.fillStyle = "#d9382e"; // Hoodie
+    ctx.fillRect(144, heroY + 8, 16, 10);
+
+    ctx.fillStyle = "#f4f7ff"; // Apron
+    ctx.fillRect(147, heroY + 9, 10, 9);
+
+    ctx.fillStyle = "#274f80"; // Jeans
+    ctx.fillRect(146, heroY + 18, 12, 10);
+
+    ctx.fillStyle = "#f4f7ff"; // Fresh sneakers
+    ctx.fillRect(144, heroY + 28, 6, 4);
+    ctx.fillRect(154, heroY + 28, 6, 4);
+
+    // Present virtual 320x180 to screen
+    engine.present();
+    requestAnimationFrame(renderLoop);
+  }
+
+  updateScaleDisplay();
+  requestAnimationFrame(renderLoop);
+</script>
+</body>
+</html>

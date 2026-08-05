@@ -152,6 +152,27 @@
         <span id="statusText">Waiting...</span>
       </div>
       <div id="turnBanner" class="pass-banner"></div>
+      <div id="devControls" style="margin-top:10px; display:grid; gap:8px;">
+        <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+          <b class="muted">Dev</b>
+          <button class="secondary" onclick="app.ogVeto()">O.G. Veto</button>
+          <button class="secondary" onclick="app.ogDoubleDown()">Double-Down</button>
+          <select id="weatherSelect" onchange="app.setWeather(this.value)" style="background:#181920;color:#ffc475;border:1px solid #788196;padding:6px 8px;border-radius:8px;">
+            <option value="CLEAR">Weather: Clear</option>
+            <option value="RAIN">Rain</option>
+            <option value="STEAM_VENT">Steam Vent</option>
+            <option value="POLICE_SIRENS">Police Sirens</option>
+            <option value="NEON_FLICKER">Neon Flicker</option>
+          </select>
+          <input id="betInput" type="text" placeholder="Bet target name" style="width:160px;"/>
+          <button class="secondary" onclick="app.placeBetFromUI()">Place Bet</button>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+          <input id="allianceInput" type="text" placeholder="Alliance target name" style="width:180px;"/>
+          <button class="secondary" onclick="app.proposeAllianceFromUI()">Propose Alliance</button>
+          <button class="secondary" onclick="app.resolveReceiptFromUI()">Resolve Receipt</button>
+        </div>
+      </div>
     </div>
 
     <div class="panel">
@@ -169,6 +190,13 @@
     <div class="panel">
       <h3 style="margin-top:0;">Scoreboard</h3>
       <div id="scoreboard"></div>
+      <div id="chatBox" style="margin-top:10px; display:none;">
+        <div id="chatLog" style="max-height:140px; overflow:auto; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px; font-size:13px;"></div>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <input id="chatInput" type="text" placeholder="Say something..." style="flex:1;"/>
+          <button onclick="app.sendChat()">Send</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -204,82 +232,13 @@
   </section>
 </div>
 
+<script src="cards.js"></script>
 <script>
 /* ===========================
    CONCRETE KINGS - Full Game
    =========================== */
 
 const MODE = { OFFLINE:'Offline', ONLINE:'Online' };
-
-const BLACK_CARDS = [
-  "____ is the real reason the club closed early.",
-  "____: now with 100% more ____.",
-  "When life gives you ____, make ____.",
-  "The new street legend says ____ beats ____.",
-  "____ ruined Thanksgiving before the food was even served.",
-  "____ is the only acceptable excuse for being late to the cookout.",
-  "____ and ____. Name a better duo. I’ll wait.",
-  "The barber really said ‘____’ and meant it.",
-  "____ got kicked out of the family reunion for ____.",
-  "____ is why the neighbors called the cops.",
-  "____ went viral for all the wrong reasons.",
-  "____ is technically a felony in 12 cities.",
-  "____ is my love language.",
-  "____ plus ____ equals a block party shutdown.",
-  "____: the home-cooked ghetto secret to ____."
-];
-
-const WHITE_CARDS = [
-  "unpaid parking tickets",
-  "a bolo in the backseat",
-  "texting at the stoplight",
-  "the grandma who still cooks like it’s 1999",
-  "a mixtape nobody asked for",
-  "one uncle who brings his own cooler",
-  "a server that only accepts Apple Pay",
-  "the cousin who owes everybody money",
-  "asking ‘you got a light?’ in 2026",
-  "a blunt shaped like a baby bottle",
-  "designer sweatpants at a gas station",
-  "the club promoter with zero followers",
-  "an argument over who makes the best mac & cheese",
-  "a frozen pizza at 2AM",
-  "a side door DJ set with no permit",
-  "a TikTok that started the whole beef",
-  "a blocked-off cul-de-sac",
-  "a cop who knows your middle name",
-  "a tailgate turned neighborhood meeting",
-  "an auntie who drinks you under the table",
-  "a 15-minute phone call about potato salad",
-  "a bodega cat with a restraining order",
-  "a drone footage war crime",
-  "an engagement ring from the vending machine",
-  "a house with 17 cousins in it",
-  "a snow cone truck at a funeral",
-  "a baby with a debit card",
-  "a parking spot named after an ex",
-  "a TikTok dance at a candlelight vigil",
-  "a rent-to-own fridge full of nothing",
-  "a rapper named after a brand of detergent",
-  "a house party that got towed",
-  "a brisket that was paid for in Venmo requests",
-  "a Bluetooth speaker that only plays 90s R&B",
-  "a porch light left on for a ghost",
-  "a counterfeit birkin from the gas station",
-  "a street light that knows your secrets",
-  "a cousin with a food truck permit",
-  "a side hustle in crypto and nail polish",
-  "a step show at a family reunion",
-  "a mattress in the back of an Uber",
-  "a karaoke machine with only Jill Scott songs",
-  "a buttered roll at 5 in the morning",
-  "a porch swing that’s seen too much",
-  "a used car with a fresh coat of paint",
-  "a doorknob that only opens from the inside",
-  "a home-cooked plate with no utensils",
-  "a stray dog with better fits than you",
-  "a dice roll that changed the whole plan"
-];
 
 const DICE_EFFECTS = [
   { label:'+1 blank', fx: (prompt) => prompt + ' ____' },
@@ -347,6 +306,11 @@ class Game {
     this.pointsToWin = 7;
     this.mode = MODE.OFFLINE;
     this.room = null;
+    this.currentAlliance = null;
+    this.bets = {};
+    this.vetoUsed = false;
+    this.doubleDownActive = false;
+    this.weatherMode = 'CLEAR';
   }
 
   addPlayer(name) {
@@ -396,6 +360,12 @@ class Game {
     this.currentBlack.effectRolled = true;
     const effect = this.currentBlack.effect;
     this.currentBlack.prompt = effect.fx(this.currentBlack.raw);
+    let roll = Math.floor(Math.random() * 6) + 1;
+    if (this.weatherMode === 'RAIN' && roll === 1) roll = 2;
+    this.currentBlack.rollResult = roll;
+    if (this.bets && Object.keys(this.bets).length > 0) {
+      CornerHustleBetting.resolveBets(this, roll);
+    }
     return effect.label;
   }
 
@@ -415,11 +385,29 @@ class Game {
     this.submissions.push({ player: player.name, card });
     this.selected.delete(playerIndex);
   }
+
+  placeBet(playerName, pick) {
+    return CornerHustleBetting.placeBet(this, playerName, pick);
+  }
+
+  triggerVeto() {
+    if (this.vetoUsed) return false;
+    this.vetoUsed = true;
+    this.nextBlack();
+    return true;
+  }
+
+  triggerDoubleDown() {
+    if (this.doubleDownActive) return false;
+    this.doubleDownActive = true;
+    return true;
+  }
 }
 
 const ReceiptSystem = {
   maybeTriggerReceipt(game) {
-    const ogName = game.getJudge().name;
+    const ogName = game.getJudge()?.name;
+    if (!ogName) return null;
     const candidates = [];
     for (const p of game.players) {
       if (p.name === ogName) continue;
@@ -477,6 +465,76 @@ const ReceiptSystem = {
   }
 };
 
+const AllianceSystem = {
+  proposeAlliance(game, proposer, target) {
+    if (!game.currentAlliance) {
+      game.currentAlliance = { proposer, target, status: 'active', formedRound: game.round };
+      return game.currentAlliance;
+    }
+    return game.currentAlliance;
+  },
+
+  resolveRound(game, winner) {
+    if (!game.currentAlliance) return { status: 'normal' };
+    const { proposer, target } = game.currentAlliance;
+    const isMember = winner.name === proposer || winner.name === target;
+    const submissionText = (game.submissions.find(s => s.player === winner.name)?.card || '').toLowerCase();
+    const isSnake = submissionText.includes('snake') || submissionText.includes('police') && submissionText.includes('partner');
+    if (isSnake && isMember) {
+      const victim = winner.name === proposer ? target : proposer;
+      const victimObj = game.players.find(p => p.name === victim);
+      if (victimObj) {
+        victimObj.stats.reputation -= 2;
+        winner.stats.reputation += 2;
+      }
+      game.currentAlliance = null;
+      return { status: 'betrayed', snakePlayer: winner.name, victimPlayer: victim };
+    }
+    if (isMember) {
+      const repGain = game.weatherMode === 'POLICE_SIRENS' ? 2 : 1;
+      winner.stats.streetCred = (winner.stats.streetCred || 0) + 1;
+      winner.stats.reputation = (winner.stats.reputation || 0) + repGain;
+      const ally = game.players.find(p => p.name === (winner.name === proposer ? target : proposer));
+      if (ally) {
+        ally.stats.streetCred = (ally.stats.streetCred || 0) + 1;
+        ally.stats.reputation = (ally.stats.reputation || 0) + repGain;
+      }
+      game.currentAlliance = null;
+      return { status: 'coop_success' };
+    }
+    return { status: 'normal' };
+  }
+};
+
+const CornerHustleBetting = {
+  placeBet(game, playerName, pick) {
+    const player = game.players.find(p => p.name === playerName);
+    if (!player || !game.currentBlack?.hasDice) return false;
+    const cost = game.weatherMode === 'NEON_FLICKER' ? 2 : 1;
+    if ((player.stats.streetCred || 0) < cost) return false;
+    player.stats.streetCred -= cost;
+    game.bets = game.bets || {};
+    game.bets[playerName] = pick;
+    return true;
+  },
+  resolveBets(game, roll) {
+    game.bets = game.bets || {};
+    const repMult = game.weatherMode === 'POLICE_SIRENS' ? 2 : 1;
+    for (const [name, pick] of Object.entries(game.bets)) {
+      const player = game.players.find(p => p.name === name);
+      if (!player) continue;
+      const won = (pick === 'high' && roll >= 4) || (pick === 'low' && roll <= 3);
+      const baseRep = won ? 1 : -1;
+      player.stats.reputation = (player.stats.reputation || 0) + baseRep * repMult;
+      if (won) {
+        const payout = game.weatherMode === 'NEON_FLICKER' ? 4 : 2;
+        player.stats.streetCred = (player.stats.streetCred || 0) + payout;
+      }
+    }
+    game.bets = {};
+  }
+};
+
 /* ===========================
    UI / STATE
    =========================== */
@@ -530,6 +588,9 @@ const app = {
     const reason = isJudge
       ? 'You are judge. Review all submissions and pick the winner.'
       : 'Pick one card from your hand, then submit.';
+    banner.style.display = 'block';
+    banner.style.visibility = 'visible';
+    banner.style.opacity = '1';
     banner.innerHTML = `
       <div style="margin-bottom:8px;">Pass device to <b>${current}</b></div>
       <button onclick="app.localPlayer(${(this.humanIndex + 1) % this.game.players.length})">I am ${next}</button>
@@ -565,9 +626,12 @@ const app = {
     this.game.players = [];
     this.game.addPlayer(host);
     try { localStorage.setItem('ck-last-room', JSON.stringify({ code, host })); } catch {}
-    document.getElementById('roomStatus').innerHTML = `<b>Room:</b> ${code}<br><b>Share this code</b> so friends can join.<br>They’ll need to open this same page.`;
+    document.getElementById('roomStatus').innerHTML = `<b>Room:</b> ${code}<br><b>Share this code</b> so friends can join.<br>They'll need to open this same page.`;
     document.getElementById('startOnlineBtn').disabled = false;
     this.persistRoom();
+    if (this.ws && this.ws.readyState === 1) {
+      this.ws.send(JSON.stringify({ type:'join', roomCode: code, playerName: host }));
+    }
   },
   joinRoom() {
     const code = document.getElementById('roomCode').value.trim();
@@ -582,6 +646,9 @@ const app = {
     document.getElementById('roomStatus').innerHTML = `<b>Joined room:</b> ${code}<br>Waiting for host to start...`;
     document.getElementById('startOnlineBtn').disabled = true;
     this.persistRoom();
+    if (this.ws && this.ws.readyState === 1) {
+      this.ws.send(JSON.stringify({ type:'join', roomCode: code, playerName: name }));
+    }
   },
   persistRoom() {
     if (!this.game.room) return;
@@ -592,6 +659,14 @@ const app = {
     this.game.mode = MODE.ONLINE;
     this.show('game');
     this.game.pointsToWin = 7;
+    this.initOnline();
+    setTimeout(() => {
+      if (this.ws && this.ws.readyState === 1) {
+        this.ws.send(JSON.stringify({ type:'start', roomCode: this.game.room.code }));
+      }
+    }, 0);
+    const chat = document.getElementById('chatBox');
+    if (chat) chat.style.display = 'block';
     this.game.dealAll();
     this.game.nextBlack();
     this.game.advanceJudge();
@@ -609,7 +684,11 @@ const app = {
   /* ---------- RENDER ---------- */
   renderGame() {
     const banner = document.getElementById('turnBanner');
-    if (banner) banner.textContent = '';
+    if (banner && this.game.mode === MODE.OFFLINE) {
+      this.showPassDevice();
+    } else if (banner) {
+      banner.textContent = '';
+    }
 
     document.getElementById('modeBadge').textContent = this.game.mode;
     document.getElementById('roundNum').textContent = this.game.round;
@@ -714,9 +793,10 @@ const app = {
       };
       subEl.appendChild(card);
     });
-    document.getElementById('judgeNotice').textContent = this.isJudge()
-      ? 'Tap a submission to crown the winner.'
-      : 'Judge is picking...';
+    document.getElementById('judgeNotice').innerHTML = `
+      ${this.isJudge() ? '<b>Judge time.</b> Tap a submission to crown it.' : 'Judge is picking...'}<br/>
+      <span class="muted">Weather: ${this.game.weatherMode}${this.game.currentAlliance ? ' | Alliance active' : ''}</span>
+    `;
   },
 
   chooseWinner(index) {
@@ -724,8 +804,13 @@ const app = {
     const winner = this.game.players.find(p => p.name === win.player);
     if (winner) {
       winner.points++;
+      const allianceResult = AllianceSystem.resolveRound(this.game, winner);
       ReceiptSystem.resolveTrigger(this.game, winner);
       ReceiptSystem.awardWin(this.game, winner);
+      if (this.game.doubleDownActive) {
+        winner.points++;
+        this.game.doubleDownActive = false;
+      }
     }
     document.getElementById('winnerName').textContent = winner.name;
     document.getElementById('winnerCard').textContent = win.card;
@@ -752,6 +837,119 @@ const app = {
       `${p.name}: ${p.points}`
     ).join('<br>');
     this.show('gameOver');
+  },
+
+  /* ---------- ONLINE / CHAT ---------- */
+  initOnline() {
+    const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    this.ws = new WebSocket(`${protocol}//${location.host}`);
+    this.ws.onmessage = (ev) => {
+      let msg;
+      try { msg = JSON.parse(ev.data); } catch { return; }
+      if (msg.type === 'joined') {
+        this.game.players = msg.players.map(p => ({ name: p.name, hand: [], points: p.points || 0, stats: { streetCred:0, community:0, wisdom:0, reputation:0 }, receipts: [] }));
+        this.humanIndex = this.game.players.findIndex(p => p.name === msg.playerName);
+        this.renderGame();
+      }
+      if (msg.type === 'game_start') {
+        this.game.mode = MODE.ONLINE;
+        this.game.dealAll();
+        this.game.nextBlack();
+        this.game.advanceJudge();
+        this.game.players.forEach(p => this.game.refillHand(p));
+        this.show('game');
+        this.renderGame();
+      }
+      if (msg.type === 'black') {
+        this.game.currentBlack = { raw: msg.prompt, prompt: msg.prompt, hasDice: !!msg.hasDice, effect: null };
+        this.renderGame();
+      }
+      if (msg.type === 'roll') {
+        this.game.currentBlack.prompt = msg.prompt;
+        document.getElementById('diceResult').innerHTML = '<div class="die">' + Math.floor(Math.random()*6+1) + '</div>';
+        this.renderGame();
+      }
+      if (msg.type === 'submission') {
+        this.game.submissions.push({ player: msg.player, card: msg.card });
+        this.checkPhase();
+      }
+      if (msg.type === 'judge_phase') this.enterJudging();
+      if (msg.type === 'winner') {
+        const w = this.game.players.find(p => p.name === msg.player);
+        if (w) {
+          w.points++;
+          AllianceSystem.resolveRound(this.game, w);
+          ReceiptSystem.resolveTrigger(this.game, w);
+          ReceiptSystem.awardWin(this.game, w);
+        }
+        document.getElementById('winnerName').textContent = msg.player;
+        document.getElementById('winnerCard').textContent = msg.card;
+        document.getElementById('winnerMeta').textContent = this.game.currentBlack.prompt;
+        this.show('roundResult');
+      }
+      if (msg.type === 'chat') this.appendChat(msg.playerName, msg.text);
+      if (msg.type === 'system') {
+        this.appendChat('System', msg.text, true);
+      }
+    };
+  },
+
+  sendChat() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text || !this.ws) return;
+    this.ws.send(JSON.stringify({ type: 'chat', text }));
+    input.value = '';
+  },
+
+  appendChat(name, text, muted) {
+    const log = document.getElementById('chatLog');
+    if (!log) return;
+    const line = document.createElement('div');
+    line.textContent = `${name}: ${text}`;
+    if (muted) line.style.opacity = '.7';
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+  },
+
+  /* ---------- DEV CONTROLS ---------- */
+  ogVeto() {
+    if (!this.game.triggerVeto()) {
+      alert('Veto unavailable or already used.');
+    } else {
+      this.renderGame();
+    }
+  },
+  ogDoubleDown() {
+    if (!this.game.triggerDoubleDown()) {
+      alert('Double-Down already active.');
+    } else {
+      alert('Double-Down active. Next win = +2 points.');
+    }
+  },
+  setWeather(mode) {
+    this.game.weatherMode = mode;
+    this.renderGame();
+  },
+  placeBetFromUI() {
+    const input = document.getElementById('betInput');
+    const target = input.value.trim();
+    if (!target) return alert('Enter a bet target name');
+    const ok = this.game.placeBet(this.game.players[this.humanIndex].name, 'high');
+    input.value = '';
+    alert(ok ? 'Bet placed.' : 'Bet failed.');
+  },
+  proposeAllianceFromUI() {
+    const input = document.getElementById('allianceInput');
+    const target = input.value.trim();
+    if (!target) return alert('Enter an alliance target name');
+    const result = AllianceSystem.proposeAlliance(this.game, this.game.players[this.humanIndex].name, target);
+    input.value = '';
+    alert(result.status);
+  },
+  resolveReceiptFromUI() {
+    const trigger = ReceiptSystem.maybeTriggerReceipt(this.game);
+    alert(trigger ? 'Receipt trigger found.' : 'No receipt trigger this round.');
   }
 };
 

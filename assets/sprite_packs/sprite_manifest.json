@@ -1,0 +1,1682 @@
+{
+  "BARBER_L1": {
+    "origin": "BARBER",
+    "hustleLevel": 1,
+    "hustleName": "Novice",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 32,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 64,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 96,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "BARBER_L2": {
+    "origin": "BARBER",
+    "hustleLevel": 2,
+    "hustleName": "Apprentice",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 128,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 160,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 192,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 224,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "BARBER_L3": {
+    "origin": "BARBER",
+    "hustleLevel": 3,
+    "hustleName": "Journeyman",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 256,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 288,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 320,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 352,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "BARBER_L4": {
+    "origin": "BARBER",
+    "hustleLevel": 4,
+    "hustleName": "Master",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 384,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 416,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 448,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 480,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "BARBER_L5": {
+    "origin": "BARBER",
+    "hustleLevel": 5,
+    "hustleName": "Kingpin",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 0,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 32,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 64,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 96,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "BARBER_L6": {
+    "origin": "BARBER",
+    "hustleLevel": 6,
+    "hustleName": "Legend",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 128,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 160,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 192,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 224,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "STREET_SCHOLAR_L1": {
+    "origin": "STREET_SCHOLAR",
+    "hustleLevel": 1,
+    "hustleName": "Novice",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 256,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 288,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 320,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 352,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "STREET_SCHOLAR_L2": {
+    "origin": "STREET_SCHOLAR",
+    "hustleLevel": 2,
+    "hustleName": "Apprentice",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 384,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 416,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 448,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 480,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "STREET_SCHOLAR_L3": {
+    "origin": "STREET_SCHOLAR",
+    "hustleLevel": 3,
+    "hustleName": "Journeyman",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 0,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 32,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 64,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 96,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "STREET_SCHOLAR_L4": {
+    "origin": "STREET_SCHOLAR",
+    "hustleLevel": 4,
+    "hustleName": "Master",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 128,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 160,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 192,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 224,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "STREET_SCHOLAR_L5": {
+    "origin": "STREET_SCHOLAR",
+    "hustleLevel": 5,
+    "hustleName": "Kingpin",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 256,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 288,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 320,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 352,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "STREET_SCHOLAR_L6": {
+    "origin": "STREET_SCHOLAR",
+    "hustleLevel": 6,
+    "hustleName": "Legend",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 384,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 416,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 448,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 480,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "LOCAL_LEGEND_L1": {
+    "origin": "LOCAL_LEGEND",
+    "hustleLevel": 1,
+    "hustleName": "Novice",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 0,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 32,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 64,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 96,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "LOCAL_LEGEND_L2": {
+    "origin": "LOCAL_LEGEND",
+    "hustleLevel": 2,
+    "hustleName": "Apprentice",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 128,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 160,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 192,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 224,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "LOCAL_LEGEND_L3": {
+    "origin": "LOCAL_LEGEND",
+    "hustleLevel": 3,
+    "hustleName": "Journeyman",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 256,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 288,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 320,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 352,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "LOCAL_LEGEND_L4": {
+    "origin": "LOCAL_LEGEND",
+    "hustleLevel": 4,
+    "hustleName": "Master",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 384,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 416,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 448,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 480,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "LOCAL_LEGEND_L5": {
+    "origin": "LOCAL_LEGEND",
+    "hustleLevel": 5,
+    "hustleName": "Kingpin",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 0,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 32,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 64,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 96,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "LOCAL_LEGEND_L6": {
+    "origin": "LOCAL_LEGEND",
+    "hustleLevel": 6,
+    "hustleName": "Legend",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 128,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 160,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 192,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 224,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "CORNER_MERCHANT_L1": {
+    "origin": "CORNER_MERCHANT",
+    "hustleLevel": 1,
+    "hustleName": "Novice",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 256,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 288,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 320,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 352,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "CORNER_MERCHANT_L2": {
+    "origin": "CORNER_MERCHANT",
+    "hustleLevel": 2,
+    "hustleName": "Apprentice",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 384,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 416,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 448,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 480,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "CORNER_MERCHANT_L3": {
+    "origin": "CORNER_MERCHANT",
+    "hustleLevel": 3,
+    "hustleName": "Journeyman",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 0,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 32,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 64,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 96,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "CORNER_MERCHANT_L4": {
+    "origin": "CORNER_MERCHANT",
+    "hustleLevel": 4,
+    "hustleName": "Master",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 128,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 160,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 192,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 224,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "CORNER_MERCHANT_L5": {
+    "origin": "CORNER_MERCHANT",
+    "hustleLevel": 5,
+    "hustleName": "Kingpin",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 256,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 288,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 320,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 352,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "CORNER_MERCHANT_L6": {
+    "origin": "CORNER_MERCHANT",
+    "hustleLevel": 6,
+    "hustleName": "Legend",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 384,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 416,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 448,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 480,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "COMMUNITY_ORGANIZER_L1": {
+    "origin": "COMMUNITY_ORGANIZER",
+    "hustleLevel": 1,
+    "hustleName": "Novice",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 0,
+        "y": 192,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 32,
+        "y": 192,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 64,
+        "y": 192,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 96,
+        "y": 192,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "COMMUNITY_ORGANIZER_L2": {
+    "origin": "COMMUNITY_ORGANIZER",
+    "hustleLevel": 2,
+    "hustleName": "Apprentice",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 128,
+        "y": 192,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 160,
+        "y": 192,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 192,
+        "y": 192,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 224,
+        "y": 192,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "COMMUNITY_ORGANIZER_L3": {
+    "origin": "COMMUNITY_ORGANIZER",
+    "hustleLevel": 3,
+    "hustleName": "Journeyman",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 256,
+        "y": 192,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 288,
+        "y": 192,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 320,
+        "y": 192,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 352,
+        "y": 192,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "COMMUNITY_ORGANIZER_L4": {
+    "origin": "COMMUNITY_ORGANIZER",
+    "hustleLevel": 4,
+    "hustleName": "Master",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 384,
+        "y": 192,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 416,
+        "y": 192,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 448,
+        "y": 192,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 480,
+        "y": 192,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "COMMUNITY_ORGANIZER_L5": {
+    "origin": "COMMUNITY_ORGANIZER",
+    "hustleLevel": 5,
+    "hustleName": "Kingpin",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 0,
+        "y": 224,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 32,
+        "y": 224,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 64,
+        "y": 224,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 96,
+        "y": 224,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "COMMUNITY_ORGANIZER_L6": {
+    "origin": "COMMUNITY_ORGANIZER",
+    "hustleLevel": 6,
+    "hustleName": "Legend",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 128,
+        "y": 224,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 160,
+        "y": 224,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 192,
+        "y": 224,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 224,
+        "y": 224,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "UNDERGROUND_DJ_L1": {
+    "origin": "UNDERGROUND_DJ",
+    "hustleLevel": 1,
+    "hustleName": "Novice",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 256,
+        "y": 224,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 288,
+        "y": 224,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 320,
+        "y": 224,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 352,
+        "y": 224,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "UNDERGROUND_DJ_L2": {
+    "origin": "UNDERGROUND_DJ",
+    "hustleLevel": 2,
+    "hustleName": "Apprentice",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 384,
+        "y": 224,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 416,
+        "y": 224,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 448,
+        "y": 224,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 480,
+        "y": 224,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "UNDERGROUND_DJ_L3": {
+    "origin": "UNDERGROUND_DJ",
+    "hustleLevel": 3,
+    "hustleName": "Journeyman",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 0,
+        "y": 256,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 32,
+        "y": 256,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 64,
+        "y": 256,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 96,
+        "y": 256,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "UNDERGROUND_DJ_L4": {
+    "origin": "UNDERGROUND_DJ",
+    "hustleLevel": 4,
+    "hustleName": "Master",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 128,
+        "y": 256,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 160,
+        "y": 256,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 192,
+        "y": 256,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 224,
+        "y": 256,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "UNDERGROUND_DJ_L5": {
+    "origin": "UNDERGROUND_DJ",
+    "hustleLevel": 5,
+    "hustleName": "Kingpin",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 256,
+        "y": 256,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 288,
+        "y": 256,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 320,
+        "y": 256,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 352,
+        "y": 256,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "UNDERGROUND_DJ_L6": {
+    "origin": "UNDERGROUND_DJ",
+    "hustleLevel": 6,
+    "hustleName": "Legend",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 384,
+        "y": 256,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 416,
+        "y": 256,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 448,
+        "y": 256,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 480,
+        "y": 256,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "BLOCK_ARCHITECT_L1": {
+    "origin": "BLOCK_ARCHITECT",
+    "hustleLevel": 1,
+    "hustleName": "Novice",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 0,
+        "y": 288,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 32,
+        "y": 288,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 64,
+        "y": 288,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 96,
+        "y": 288,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "BLOCK_ARCHITECT_L2": {
+    "origin": "BLOCK_ARCHITECT",
+    "hustleLevel": 2,
+    "hustleName": "Apprentice",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 128,
+        "y": 288,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 160,
+        "y": 288,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 192,
+        "y": 288,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 224,
+        "y": 288,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "BLOCK_ARCHITECT_L3": {
+    "origin": "BLOCK_ARCHITECT",
+    "hustleLevel": 3,
+    "hustleName": "Journeyman",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 256,
+        "y": 288,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 288,
+        "y": 288,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 320,
+        "y": 288,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 352,
+        "y": 288,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "BLOCK_ARCHITECT_L4": {
+    "origin": "BLOCK_ARCHITECT",
+    "hustleLevel": 4,
+    "hustleName": "Master",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 384,
+        "y": 288,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 416,
+        "y": 288,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 448,
+        "y": 288,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 480,
+        "y": 288,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "BLOCK_ARCHITECT_L5": {
+    "origin": "BLOCK_ARCHITECT",
+    "hustleLevel": 5,
+    "hustleName": "Kingpin",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 0,
+        "y": 320,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 32,
+        "y": 320,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 64,
+        "y": 320,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 96,
+        "y": 320,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "BLOCK_ARCHITECT_L6": {
+    "origin": "BLOCK_ARCHITECT",
+    "hustleLevel": 6,
+    "hustleName": "Legend",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 128,
+        "y": 320,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 160,
+        "y": 320,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 192,
+        "y": 320,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 224,
+        "y": 320,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "HUSTLE_VETERAN_L1": {
+    "origin": "HUSTLE_VETERAN",
+    "hustleLevel": 1,
+    "hustleName": "Novice",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 256,
+        "y": 320,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 288,
+        "y": 320,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 320,
+        "y": 320,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 352,
+        "y": 320,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "HUSTLE_VETERAN_L2": {
+    "origin": "HUSTLE_VETERAN",
+    "hustleLevel": 2,
+    "hustleName": "Apprentice",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 384,
+        "y": 320,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 416,
+        "y": 320,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 448,
+        "y": 320,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 480,
+        "y": 320,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "HUSTLE_VETERAN_L3": {
+    "origin": "HUSTLE_VETERAN",
+    "hustleLevel": 3,
+    "hustleName": "Journeyman",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 0,
+        "y": 352,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 32,
+        "y": 352,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 64,
+        "y": 352,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 96,
+        "y": 352,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "HUSTLE_VETERAN_L4": {
+    "origin": "HUSTLE_VETERAN",
+    "hustleLevel": 4,
+    "hustleName": "Master",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 128,
+        "y": 352,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 160,
+        "y": 352,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 192,
+        "y": 352,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 224,
+        "y": 352,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "HUSTLE_VETERAN_L5": {
+    "origin": "HUSTLE_VETERAN",
+    "hustleLevel": 5,
+    "hustleName": "Kingpin",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 256,
+        "y": 352,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 288,
+        "y": 352,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 320,
+        "y": 352,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 352,
+        "y": 352,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  },
+  "HUSTLE_VETERAN_L6": {
+    "origin": "HUSTLE_VETERAN",
+    "hustleLevel": 6,
+    "hustleName": "Legend",
+    "frames": [
+      {
+        "frame": 0,
+        "x": 384,
+        "y": 352,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 1,
+        "x": 416,
+        "y": 352,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 2,
+        "x": 448,
+        "y": 352,
+        "w": 32,
+        "h": 32
+      },
+      {
+        "frame": 3,
+        "x": 480,
+        "y": 352,
+        "w": 32,
+        "h": 32
+      }
+    ]
+  }
+}
