@@ -131,9 +131,13 @@
     100% { transform: translateY(0) translateX(0); }
   }
   .screen.active .bg-scene .orb { animation-play-state: running; }
+  [data-bg-theme="warm"] .bg-scene .orb { background: #ff6b35, #f7c948, #ffeb3b; }
+  [data-bg-theme="cool"] .bg-scene .orb { background: #4caf50, #2196f3, #03a9f4; }
+  [data-bg-theme="night"] .bg-scene .orb { background: #9c27b0, #ff6b35, #f7c948; }
 </style>
 </head>
 <body>
+<div class="bg-scene" aria-hidden="true"></div>
 <div class="wrap">
   <header>
     <h1>CONCRETE KINGS</h1>
@@ -145,7 +149,6 @@
 
   <!-- SETUP -->
   <section id="setup" class="screen active">
-    <div class="bg-scene" aria-hidden="true"></div>
     <div class="panel">
       <h2 style="margin-top:0;">New Game</h2>
       <label style="font-weight:600;">Your Name</label>
