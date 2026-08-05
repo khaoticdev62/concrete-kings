@@ -142,12 +142,15 @@
         <div class="dice" id="diceResult"></div>
         <div>
           Black cards: <span id="blackRemaining">0</span> | Points to win: <b id="pointsTarget">7</b>
+          <button class="secondary" style="margin-left:8px;" onclick="app.showBlockMap()">Block Map</button>
         </div>
       </div>
       <div style="margin-top:10px;">
         <div class="black-card" id="blackCard">...</div>
       </div>
       <div id="diceNotice" style="margin-top:8px; font-size:13px; opacity:.9;"></div>
+      <div id="weatherNotice" style="margin-top:6px; font-size:13px; opacity:.9;"></div>
+      <div id="weatherAlert" style="margin-top:6px; font-weight:800; font-size:14px; opacity:0;"></div>
       <div style="margin-top:10px; font-size:13px;">
         <span id="statusText">Waiting...</span>
       </div>
@@ -190,6 +193,11 @@
     <div class="panel">
       <h3 style="margin-top:0;">Scoreboard</h3>
       <div id="scoreboard"></div>
+      <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <button class="secondary" onclick="app.saveGame()">Save Game</button>
+        <button class="secondary" onclick="app.loadGame()">Load Game</button>
+        <span id="saveStatus" class="muted"></span>
+      </div>
       <div id="chatBox" style="margin-top:10px; display:none;">
         <div id="chatLog" style="max-height:140px; overflow:auto; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px; font-size:13px;"></div>
         <div style="display:flex; gap:8px; margin-top:8px;">
@@ -218,6 +226,19 @@
       <div id="winnerCard" class="card"></div>
       <div id="winnerMeta" style="font-size:13px; opacity:.85;"></div>
       <button onclick="app.nextRound()">Next Round</button>
+    </div>
+  </section>
+
+  <!-- BLOCK MAP -->
+  <section id="blockMap" class="screen">
+    <div class="panel">
+      <h2>Block Map</h2>
+      <p class="muted">Choose your block and travel to a new location.</p>
+      <div id="locationList" style="margin-top:10px; display:grid; gap:8px;"></div>
+      <div style="margin-top:10px; font-size:13px;">
+        Reputation: <b id="mapRep">0</b> | Weather: <b id="mapWeather">CLEAR</b>
+      </div>
+      <button onclick="app.showSetup()">Exit to Menu</button>
     </div>
   </section>
 
@@ -708,6 +729,13 @@ const app = {
     }
     document.getElementById('diceNotice').textContent = '';
 
+    const weatherNotice = document.getElementById('weatherNotice');
+    if (weatherNotice && this.game.weatherMode && this.game.weatherMode !== 'CLEAR') {
+      weatherNotice.textContent = 'Weather: ' + this.game.weatherMode;
+    } else if (weatherNotice) {
+      weatherNotice.textContent = '';
+    }
+
     const isJudge = this.isJudge();
     if (isJudge) {
       document.getElementById('statusText').textContent = 'You are the judge. Others play first.';
@@ -928,8 +956,87 @@ const app = {
     }
   },
   setWeather(mode) {
+    const prev = this.game.weatherMode;
     this.game.weatherMode = mode;
+    if (prev !== mode) {
+      this.animateWeatherNotice(mode);
+    }
     this.renderGame();
+  },
+  animateWeatherNotice(mode) {
+    const el = document.getElementById('weatherAlert');
+    const notice = document.getElementById('weatherNotice');
+    if (!el || !notice) return;
+    const label = mode === 'CLEAR' ? '' : mode.replace(/_/g, ' ');
+    if (!label) {
+      el.textContent = '';
+      el.style.opacity = '0';
+      notice.textContent = '';
+      return;
+    }
+    el.textContent = label;
+    el.style.opacity = '1';
+    setTimeout(() => { el.style.opacity = '0'; }, 1200);
+    notice.textContent = 'Weather: ' + label;
+  },
+  saveGame() {
+    try {
+      const state = {
+        mode: this.game.mode,
+        pointsToWin: this.game.pointsToWin,
+        round: this.game.round,
+        players: this.game.players.map(p => ({
+          name: p.name,
+          points: p.points,
+          hand: p.hand,
+          streetCred: p.stats?.streetCred,
+          community: p.stats?.community,
+          wisdom: p.stats?.wisdom,
+          reputation: p.stats?.reputation,
+          receipts: p.receipts
+        })),
+        weatherMode: this.game.weatherMode,
+        currentBlack: this.game.currentBlack,
+        submissions: this.game.submissions
+      };
+      localStorage.setItem('ck-save', JSON.stringify(state));
+      const el = document.getElementById('saveStatus');
+      if (el) el.textContent = 'Game saved.';
+      setTimeout(() => { if (el) el.textContent = ''; }, 1500);
+    } catch (e) {
+      alert('Save failed: ' + e.message);
+    }
+  },
+  loadGame() {
+    try {
+      const raw = localStorage.getItem('ck-save');
+      if (!raw) return alert('No save found.');
+      const state = JSON.parse(raw);
+      this.game.mode = state.mode || MODE.OFFLINE;
+      this.game.pointsToWin = state.pointsToWin || 7;
+      this.game.round = state.round || 1;
+      this.game.weatherMode = state.weatherMode || 'CLEAR';
+      this.game.players = (state.players || []).map(p => ({
+        name: p.name,
+        points: p.points || 0,
+        hand: p.hand || [],
+        stats: {
+          streetCred: p.streetCred || 0,
+          community: p.community || 0,
+          wisdom: p.wisdom || 0,
+          reputation: p.reputation || 0
+        },
+        receipts: p.receipts || []
+      }));
+      this.game.currentBlack = state.currentBlack || null;
+      this.game.submissions = state.submissions || [];
+      this.humanIndex = 0;
+      this.show('game');
+      this.showPassDevice();
+      this.renderGame();
+    } catch (e) {
+      alert('Load failed: ' + e.message);
+    }
   },
   placeBetFromUI() {
     const input = document.getElementById('betInput');
@@ -950,6 +1057,46 @@ const app = {
   resolveReceiptFromUI() {
     const trigger = ReceiptSystem.maybeTriggerReceipt(this.game);
     alert(trigger ? 'Receipt trigger found.' : 'No receipt trigger this round.');
+  },
+
+  /* ---------- BLOCK MAP ---------- */
+  showBlockMap() {
+    this.renderBlockMap();
+    this.show('blockMap');
+  },
+  renderBlockMap() {
+    const list = document.getElementById('locationList');
+    const rep = document.getElementById('mapRep');
+    const weather = document.getElementById('mapWeather');
+    if (!list) return;
+    const locations = [
+      { name: 'Harlem Stoop', city: 'Harlem' },
+      { name: 'Detroit Lot', city: 'Detroit' },
+      { name: 'Chicago Greystone', city: 'Chicago' },
+      { name: 'Miami Cut', city: 'Miami' },
+      { name: 'Baltimore Steps', city: 'Baltimore' },
+      { name: 'Atlanta Porch', city: 'Atlanta' },
+      { name: 'Oakland Corner', city: 'Oakland' },
+      { name: 'NOLA Balcony', city: 'NOLA' }
+    ];
+    const player = this.game.players[this.humanIndex];
+    const reputation = player?.stats?.reputation || 0;
+    if (rep) rep.textContent = reputation;
+    if (weather) weather.textContent = this.game.weatherMode || 'CLEAR';
+    list.innerHTML = '';
+    locations.forEach(loc => {
+      const btn = document.createElement('button');
+      btn.className = 'secondary';
+      btn.textContent = loc.name + ' (' + loc.city + ')';
+      btn.onclick = () => {
+        this.setWeather('CLEAR');
+        alert('Traveled to ' + loc.name + '. Weather reset to Clear.');
+        this.show('game');
+        this.showPassDevice();
+        this.renderGame();
+      };
+      list.appendChild(btn);
+    });
   }
 };
 
