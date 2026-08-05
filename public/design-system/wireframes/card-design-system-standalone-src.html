@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<template id="__bundler_thumbnail" data-bg-color="#1a1a1a">
+  <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <rect width="120" height="120" fill="#1a1a1a"/>
+    <rect x="14" y="20" width="40" height="60" rx="8" fill="#3a2a1a" stroke="#ff6b35" stroke-width="2"/>
+    <rect x="66" y="20" width="40" height="60" rx="8" fill="#fff7e6"/>
+    <circle cx="34" cy="46" r="6" fill="#f7c948"/>
+    <circle cx="86" cy="46" r="6" fill="#4caf50"/>
+    <rect x="24" y="90" width="20" height="6" rx="3" fill="#f3e7cf" opacity=".7"/>
+    <rect x="76" y="90" width="20" height="6" rx="3" fill="#1a1a1a" opacity=".5"/>
+  </svg>
+</template>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@400;500;600;700&amp;family=Unbounded:wght@400;700;900&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:linear-gradient(180deg,#1a1a1a 0%,#2b1d0e 100%);background-attachment:fixed;color:#f3e7cf;font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#ff6b35}a:hover{color:#e04b00}
+[tabindex]:focus-visible,button:focus-visible{outline:3px solid #ff6b35;outline-offset:2px}
+@keyframes ckDeal{from{transform:translateY(-200px) rotate(-10deg) scale(.8);opacity:0}to{transform:translateY(0) rotate(0) scale(1);opacity:1}}
+@keyframes ckSubmit{0%{transform:translateY(0) rotate(0) scale(1);opacity:1}30%{transform:translateY(-20px) scale(1.05)}60%{transform:translateY(-20px) rotate(180deg) scale(1.05);opacity:1}100%{transform:translateY(0) rotate(180deg) scale(.5);opacity:0}}
+@keyframes ckSpin{from{transform:rotate(0)}to{transform:rotate(1080deg)}}
+@keyframes ckReceipt{from{transform:translateY(-300px) rotate(-5deg);opacity:0}60%{transform:translateY(10px) rotate(1deg);opacity:1}to{transform:translateY(0) rotate(-1deg);opacity:1}}
+@keyframes ckSeal{from{transform:translateY(-60px) scale(1.6);opacity:0}70%{transform:translateY(2px) scale(.95);opacity:1}to{transform:translateY(0) scale(1);opacity:1}}
+@keyframes ckVictory{from{transform:translateY(-100px) scale(.8);opacity:0}60%{transform:translateY(10px) scale(1.05);opacity:1}to{transform:translateY(0) scale(1);opacity:1}}
+@keyframes ckPulse{0%,100%{box-shadow:0 4px 0 rgba(0,0,0,.2),0 0 0 6px rgba(255,107,53,.3)}50%{box-shadow:0 4px 0 rgba(0,0,0,.2),0 0 0 12px rgba(255,107,53,.12)}}
+@keyframes ckFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes ckBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes ckBadgePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+@media print{body{background:#fff7e6}[data-card],[data-panel]{break-inside:avoid}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}[data-noprint]{display:none!important}}
+</style>
+</helmet>
+<div style="max-width:1100px;margin:0 auto;padding:0 24px 80px">
+
+<header style="padding:56px 0 40px;text-align:center">
+  <div style="font:500 12px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#f7c948;margin-bottom:14px">Living Design System · v1.0</div>
+  <h1 style="font:900 48px 'Unbounded';letter-spacing:-1px;margin:0 0 10px;color:#f3e7cf">CONCRETE KINGS</h1>
+  <div style="font:700 18px 'Plus Jakarta Sans';letter-spacing:.5px;color:#ff6b35;margin-bottom:18px">The Block Chronicles — Card Design System</div>
+  <p style="font:400 15px/1.6 'Plus Jakarta Sans';max-width:640px;margin:0 auto;color:rgba(243,231,207,.75)">Griot Modernism: traditional Black visual culture meets premium digital craft. Warm, dimensional, ceremonial — barbershop gold, cookout orange, block-party energy. Never sterile, never flat.</p>
+</header>
+
+<section data-panel="colors" style="background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:28px;margin-bottom:28px">
+  <div style="font:500 12px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:6px">01 · Palette</div>
+  <h2 style="font:700 24px 'Plus Jakarta Sans';margin:0 0 18px">Color</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px">
+    <div><div style="height:56px;border-radius:8px;background:#1a1a1a;border:1px solid rgba(255,255,255,.15)"></div><div style="font:600 12px 'Space Grotesk';letter-spacing:1px;margin-top:8px">--c-black</div><div style="font:400 10px 'JetBrains Mono';opacity:.65">#1a1a1a · warm deep black</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#2b1d0e;border:1px solid rgba(255,255,255,.15)"></div><div style="font:600 12px 'Space Grotesk';letter-spacing:1px;margin-top:8px">--c-black-soft</div><div style="font:400 10px 'JetBrains Mono';opacity:.65">#2b1d0e · gradient partner</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#ff6b35"></div><div style="font:600 12px 'Space Grotesk';letter-spacing:1px;margin-top:8px">--c-orange</div><div style="font:400 10px 'JetBrains Mono';opacity:.65">#ff6b35 · brand primary</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#e04b00"></div><div style="font:600 12px 'Space Grotesk';letter-spacing:1px;margin-top:8px">--c-orange-deep</div><div style="font:400 10px 'JetBrains Mono';opacity:.65">#e04b00 · hover / active</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#f3e7cf"></div><div style="font:600 12px 'Space Grotesk';letter-spacing:1px;margin-top:8px">--c-cream</div><div style="font:400 10px 'JetBrains Mono';opacity:.65">#f3e7cf · text on dark</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#fff7e6"></div><div style="font:600 12px 'Space Grotesk';letter-spacing:1px;margin-top:8px">--c-cream-light</div><div style="font:400 10px 'JetBrains Mono';opacity:.65">#fff7e6 · white card base</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#ffe3b3"></div><div style="font:600 12px 'Space Grotesk';letter-spacing:1px;margin-top:8px">--c-cream-mid</div><div style="font:400 10px 'JetBrains Mono';opacity:.65">#ffe3b3 · card gradient end</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#f7c948"></div><div style="font:600 12px 'Space Grotesk';letter-spacing:1px;margin-top:8px">--c-gold</div><div style="font:400 10px 'JetBrains Mono';opacity:.65">#f7c948 · receipts, seals</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#4caf50"></div><div style="font:600 12px 'Space Grotesk';letter-spacing:1px;margin-top:8px">--c-green</div><div style="font:400 10px 'JetBrains Mono';opacity:.65">#4caf50 · origins, success</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#e8f5e9"></div><div style="font:600 12px 'Space Grotesk';letter-spacing:1px;margin-top:8px">--c-green-light</div><div style="font:400 10px 'JetBrains Mono';opacity:.65">#e8f5e9 · origin card bg</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#ff4444"></div><div style="font:600 12px 'Space Grotesk';letter-spacing:1px;margin-top:8px">--c-red</div><div style="font:400 10px 'JetBrains Mono';opacity:.65">#ff4444 · beef, danger</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#ffebee"></div><div style="font:600 12px 'Space Grotesk';letter-spacing:1px;margin-top:8px">--c-red-light</div><div style="font:400 10px 'JetBrains Mono';opacity:.65">#ffebee · danger card bg</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#2196f3"></div><div style="font:600 12px 'Space Grotesk';letter-spacing:1px;margin-top:8px">--c-blue</div><div style="font:400 10px 'JetBrains Mono';opacity:.65">#2196f3 · hustle, info</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#e3f2fd"></div><div style="font:600 12px 'Space Grotesk';letter-spacing:1px;margin-top:8px">--c-blue-light</div><div style="font:400 10px 'JetBrains Mono';opacity:.65">#e3f2fd · hustle card bg</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#9c27b0"></div><div style="font:600 12px 'Space Grotesk';letter-spacing:1px;margin-top:8px">--c-purple</div><div style="font:400 10px 'JetBrains Mono';opacity:.65">#9c27b0 · ciphers, mystery</div></div>
+    <div><div style="height:56px;border-radius:8px;background:#f3e5f5"></div><div style="font:600 12px 'Space Grotesk';letter-spacing:1px;margin-top:8px">--c-purple-light</div><div style="font:400 10px 'JetBrains Mono';opacity:.65">#f3e5f5 · cipher card bg</div></div>
+  </div>
+  <sc-if value="{{ notes }}" hint-placeholder-val="{{ true }}"><p style="font:400 12px/1.6 'Space Grotesk';color:rgba(243,231,207,.55);margin:18px 0 0;border-top:1px dashed rgba(255,255,255,.12);padding-top:12px">Design note: never pure #000 or #fff. Warm blacks carry brown undertones; whites are cream. Cream on black hits 12.5:1 contrast, orange on cream 4.8:1 — both pass WCAG AA.</p></sc-if>
+</section>
+
+<section data-panel="type" style="background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:28px;margin-bottom:28px">
+  <div style="font:500 12px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:6px">02 · Specimen</div>
+  <h2 style="font:700 24px 'Plus Jakarta Sans';margin:0 0 18px">Typography</h2>
+  <div style="display:flex;flex-direction:column;gap:0">
+    <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:16px;justify-content:space-between;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.08)"><div style="font:900 48px 'Unbounded';letter-spacing:-1px">Long Live the Block</div><div style="font:400 10px 'JetBrains Mono';opacity:.6;text-transform:uppercase;letter-spacing:2px">Hero · Unbounded 900 · 48px · -1px</div></div>
+    <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:16px;justify-content:space-between;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.08)"><div style="font:800 32px 'Plus Jakarta Sans';letter-spacing:-.5px">Round Three: The Cookout</div><div style="font:400 10px 'JetBrains Mono';opacity:.6;text-transform:uppercase;letter-spacing:2px">H1 · Plus Jakarta 800 · 32px · -0.5px</div></div>
+    <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:16px;justify-content:space-between;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.08)"><div style="font:700 24px 'Plus Jakarta Sans'">Pull up a chair, tell it right</div><div style="font:400 10px 'JetBrains Mono';opacity:.6;text-transform:uppercase;letter-spacing:2px">H2 · Plus Jakarta 700 · 24px · 0</div></div>
+    <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:16px;justify-content:space-between;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.08)"><div style="font:600 18px 'Plus Jakarta Sans';letter-spacing:.5px">Every card is a testimony</div><div style="font:400 10px 'JetBrains Mono';opacity:.6;text-transform:uppercase;letter-spacing:2px">H3 · Plus Jakarta 600 · 18px · 0.5px</div></div>
+    <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:16px;justify-content:space-between;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.08)"><div style="font:400 15px/1.6 'Plus Jakarta Sans';max-width:520px">The griot keeps the story moving. Body copy stays generous — 1.6 line height, room to breathe, warm cream on deep black.</div><div style="font:400 10px 'JetBrains Mono';opacity:.6;text-transform:uppercase;letter-spacing:2px">Body · Plus Jakarta 400 · 15px · 1.6lh</div></div>
+    <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:16px;justify-content:space-between;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.08)"><div style="font:500 12px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px">Round 3 · Scenario · 6 players</div><div style="font:400 10px 'JetBrains Mono';opacity:.6;text-transform:uppercase;letter-spacing:2px">Caption · Space Grotesk 500 · 12px · 1.5px</div></div>
+    <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:16px;justify-content:space-between;padding:16px 0"><div style="font:400 10px 'JetBrains Mono';text-transform:uppercase;letter-spacing:2px">+2 REP · CK-0034 · UNRESOLVED</div><div style="font:400 10px 'JetBrains Mono';opacity:.6;text-transform:uppercase;letter-spacing:2px">Micro · JetBrains Mono 400 · 10px · 2px</div></div>
+  </div>
+</section>
+
+<section data-panel="icons" style="background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:28px;margin-bottom:28px">
+  <div style="font:500 12px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:6px">03 · Iconography</div>
+  <h2 style="font:700 24px 'Plus Jakarta Sans';margin:0 0 18px">Cultural Icon Set</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:12px">
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px 8px;text-align:center"><div style="font-size:32px;margin-bottom:8px">👑</div><div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.75">Crown</div></div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px 8px;text-align:center"><div style="font-size:32px;margin-bottom:8px">🎲</div><div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.75">Dice Roll</div></div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px 8px;text-align:center"><div style="font-size:32px;margin-bottom:8px">📜</div><div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.75">Receipt</div></div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px 8px;text-align:center"><div style="font-size:32px;margin-bottom:8px">✂️</div><div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.75">The Shop</div></div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px 8px;text-align:center"><div style="font-size:32px;margin-bottom:8px">🔥</div><div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.75">Truth</div></div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px 8px;text-align:center"><div style="font-size:32px;margin-bottom:8px">☮️</div><div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.75">Peace</div></div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px 8px;text-align:center"><div style="font-size:32px;margin-bottom:8px">💰</div><div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.75">Block Watch</div></div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px 8px;text-align:center"><div style="font-size:32px;margin-bottom:8px">📻</div><div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.75">Side Door</div></div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px 8px;text-align:center"><div style="font-size:32px;margin-bottom:8px">🎤</div><div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.75">Mic Drop</div></div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px 8px;text-align:center"><div style="font-size:32px;margin-bottom:8px">🏘️</div><div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.75">The Block</div></div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px 8px;text-align:center"><div style="font-size:32px;margin-bottom:8px">🍽️</div><div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.75">Cookout</div></div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px 8px;text-align:center"><div style="font-size:32px;margin-bottom:8px">🎧</div><div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.75">The Deejay</div></div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px 8px;text-align:center"><div style="font-size:32px;margin-bottom:8px">📖</div><div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.75">Chronicles</div></div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px 8px;text-align:center"><div style="font-size:32px;margin-bottom:8px">✊🏾</div><div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.75">Unity</div></div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px 8px;text-align:center"><div style="font-size:32px;margin-bottom:8px">🌇</div><div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.75">Golden Hour</div></div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px 8px;text-align:center"><div style="font-size:32px;margin-bottom:8px">🃏</div><div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.75">Wildcard</div></div>
+  </div>
+  <sc-if value="{{ notes }}" hint-placeholder-val="{{ true }}"><p style="font:400 12px/1.6 'Space Grotesk';color:rgba(243,231,207,.55);margin:18px 0 0;border-top:1px dashed rgba(255,255,255,.12);padding-top:12px">Design note: icons come from lived spaces — the shop, the cookout, the stoop — never stereotype shorthand. Emoji today; commissioned illustration set replaces them 1:1 later.</p></sc-if>
+</section>
+
+<section data-panel="variants" style="background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:28px;margin-bottom:28px">
+  <div style="font:500 12px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:6px">04 · Components</div>
+  <h2 style="font:700 24px 'Plus Jakarta Sans';margin:0 0 18px">The Six Card Variants</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:22px;align-items:start">
+
+    <div data-card="black">
+      <div role="button" tabindex="0" aria-label="Black card, scenario: The cookout went dead silent when blank grabbed the aux cord." style="position:relative;display:flex;flex-direction:column;min-height:340px;padding:24px;border-radius:14px;background:radial-gradient(circle at 50% -20%,rgba(255,107,53,.16),transparent 55%),linear-gradient(165deg,#3a2a1a 0%,#241f18 45%,#1a1a1a 100%);border:2px solid #4a3826;box-shadow:0 6px 0 rgba(0,0,0,.25),0 14px 28px rgba(224,75,0,.18);color:#f3e7cf;overflow:hidden">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#ff6b35,#f7c948);opacity:.55"></div>
+        <div style="font-size:40px;text-align:center;margin-bottom:12px;opacity:.9">🎤</div>
+        <div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:3px;color:#ff6b35;margin-bottom:12px;text-align:center">Scenario</div>
+        <div style="font:700 20px/1.35 'Plus Jakarta Sans';flex-grow:1">The cookout went dead silent when <span style="display:inline-block;min-width:90px;border-bottom:3px solid #ff6b35">&nbsp;</span> grabbed the aux cord.</div>
+        <div style="display:flex;justify-content:space-between;font:400 11px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.6;margin-top:20px"><span>Concrete Kings</span><span>Round 3</span></div><div aria-hidden="true" style="position:absolute;bottom:-22px;right:-14px;font-size:110px;line-height:1;opacity:.07;pointer-events:none;filter:grayscale(30%)">👑</div>
+      </div>
+      <div style="font:500 11px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;color:#f7c948;margin-top:10px">1 · Black Card — Scenario</div>
+      <sc-if value="{{ notes }}" hint-placeholder-val="{{ true }}"><div style="font:400 11px/1.5 'Space Grotesk';color:rgba(243,231,207,.55);margin-top:4px">Warm gradient + cream text + orange blank. Deliberately NOT flat CAH black.</div></sc-if>
+    </div>
+
+    <div data-card="white">
+      <div role="button" tabindex="0" aria-label="White card, response: A fresh line-up from Deacon's chair, first Saturday of the month." style="position:relative;display:flex;flex-direction:column;min-height:340px;padding:24px;border-radius:14px;background:linear-gradient(170deg,#fff7e6 0%,#ffedc7 55%,#ffe3b3 100%);border:2px solid #e0d4b0;box-shadow:0 4px 0 rgba(0,0,0,.15),0 10px 22px rgba(43,29,14,.4);color:#1a1a1a;overflow:hidden;transition:transform .2s ease-out,box-shadow .2s ease-out" style-hover="transform:translateY(-4px);box-shadow:0 8px 0 rgba(0,0,0,.2)">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#ff6b35,#f7c948);opacity:.55"></div>
+        <div style="font-size:32px;margin-bottom:10px">✂️</div>
+        <div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#8b7355;margin-bottom:10px">Response</div>
+        <div style="font:600 14px/1.45 'Plus Jakarta Sans';flex-grow:1">A fresh line-up from Deacon's chair, first Saturday of the month.</div>
+        <div style="font:400 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.5;margin-top:16px">White Card</div><div aria-hidden="true" style="position:absolute;bottom:-18px;right:-12px;font-size:96px;line-height:1;opacity:.08;pointer-events:none;filter:grayscale(30%)">✂️</div>
+      </div>
+      <div style="font:500 11px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;color:#f7c948;margin-top:10px">2 · White Card — Response</div>
+      <sc-if value="{{ notes }}" hint-placeholder-val="{{ true }}"><div style="font:400 11px/1.5 'Space Grotesk';color:rgba(243,231,207,.55);margin-top:4px">Cream-to-honey gradient. Hover lifts 4px; hard offset shadows keep the tabletop feel.</div></sc-if>
+    </div>
+
+    <div data-card="receipt">
+      <div role="button" tabindex="0" aria-label="Receipt card, story thread: The Aux Cord Incident, unresolved." style="position:relative;display:flex;flex-direction:column;min-height:340px;padding:24px;border-radius:14px;background:linear-gradient(135deg,#fff8e1,#ffecb3);border:3px solid #f7c948;box-shadow:0 4px 0 rgba(0,0,0,.2),0 12px 24px rgba(247,201,72,.2);color:#1a1a1a;transform:rotate(-1deg)">
+        <div style="position:absolute;top:-14px;right:-10px;width:52px;height:52px;border-radius:50%;background:#f7c948;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 3px 0 rgba(0,0,0,.25)">📜</div>
+        <div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:3px;color:#b8860b;margin-bottom:12px;padding-right:48px">Receipt · Story Thread</div>
+        <div style="font:italic 800 18px 'Plus Jakarta Sans';margin-bottom:12px">The Aux Cord Incident</div>
+        <div style="font:500 14px/1.6 'Plus Jakarta Sans';flex-grow:1">Round 3. Marcus swears it was self-defense. The whole table saw the playlist. This thread stays open until somebody speaks on it.</div>
+        <div style="font:400 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;color:#b8860b;border-top:2px dashed #f7c948;padding-top:12px;margin-top:16px">Pinned Round 3 · Unresolved</div>
+      </div>
+      <div style="font:500 11px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;color:#f7c948;margin-top:10px">3 · Receipt — Story Thread</div>
+      <sc-if value="{{ notes }}" hint-placeholder-val="{{ true }}"><div style="font:400 11px/1.5 'Space Grotesk';color:rgba(243,231,207,.55);margin-top:4px">-1° rotation reads pinned-to-corkboard. Gold seal + dashed rule = document, not game piece.</div></sc-if>
+    </div>
+
+    <div data-card="cipher">
+      <div role="button" tabindex="0" aria-label="Cipher card, dice effect: Barbershop Truth. Every player must speak on it; table votes on the realest answer." style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;aspect-ratio:1/1;padding:24px;border-radius:14px;background:radial-gradient(circle at 50% 32%,rgba(255,255,255,.55),transparent 55%),linear-gradient(135deg,#f3e5f5,#e1bee7);border:3px solid #9c27b0;box-shadow:0 4px 0 rgba(0,0,0,.2),0 12px 24px rgba(156,39,176,.25);color:#1a1a1a">
+        <div style="font-size:72px;margin-bottom:16px;animation:ckFloat 3s ease-in-out infinite">🔥</div>
+        <div style="font:800 20px 'Plus Jakarta Sans';text-transform:uppercase;letter-spacing:2px;margin-bottom:12px">Barbershop Truth</div>
+        <div style="font:500 14px/1.5 'Plus Jakarta Sans';opacity:.8">Every player must speak on it. The table votes on the realest answer.</div>
+      </div>
+      <div style="font:500 11px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;color:#f7c948;margin-top:10px">4 · Cipher — Dice Effect</div>
+      <sc-if value="{{ notes }}" hint-placeholder-val="{{ true }}"><div style="font:400 11px/1.5 'Space Grotesk';color:rgba(243,231,207,.55);margin-top:4px">Square 1:1, centered, symbol floats. Six ciphers: ☮ 🔥 💰 📻 🎤 👑. Ceremony, not utility.</div></sc-if>
+    </div>
+
+    <div data-card="origin">
+      <div role="button" tabindex="0" aria-label="Origin card: Raised on the Block. Plus 2 street wisdom, plus 1 loyalty." style="position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;min-height:320px;padding:24px;border-radius:14px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border:2px solid #4caf50;box-shadow:0 4px 0 rgba(0,0,0,.15),0 12px 24px rgba(76,175,80,.2);color:#1a1a1a">
+        <div style="font-size:56px;margin-bottom:16px;animation:ckBounce 2.5s ease-in-out infinite">🏘️</div>
+        <div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#2e7d32;margin-bottom:12px">Origin</div>
+        <div style="font:800 20px 'Plus Jakarta Sans';margin-bottom:12px">Raised on the Block</div>
+        <div style="font:400 14px/1.6 'Plus Jakarta Sans';margin-bottom:16px;flex-grow:1">You know every shortcut, every porch, every name. The block raised you and the block remembers.</div>
+        <div style="font:600 11px 'JetBrains Mono';background:#e8f5e9;border-radius:8px;padding:10px;width:100%;box-sizing:border-box">+2 STREET WISDOM · +1 LOYALTY</div>
+      </div>
+      <div style="font:500 11px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;color:#f7c948;margin-top:10px">5 · Origin — Character Creation</div>
+      <sc-if value="{{ notes }}" hint-placeholder-val="{{ true }}"><div style="font:400 11px/1.5 'Space Grotesk';color:rgba(243,231,207,.55);margin-top:4px">Green = roots and growth. Mono bonus chip separates game math from story voice.</div></sc-if>
+    </div>
+
+    <div data-card="hustle">
+      <div role="button" tabindex="0" aria-label="Hustle card: The Deejay. Power: Side Door — once per round, swap a card with the discard pile." style="position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;min-height:320px;padding:24px;border-radius:14px;background:linear-gradient(135deg,#e3f2fd,#bbdefb);border:3px solid #2196f3;box-shadow:0 4px 0 rgba(0,0,0,.2),0 12px 24px rgba(33,150,243,.22);color:#1a1a1a">
+        <div style="font-size:48px;margin-bottom:16px">🎧</div>
+        <div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:3px;color:#1565c0;margin-bottom:12px">Hustle</div>
+        <div style="font:800 22px 'Plus Jakarta Sans';margin-bottom:12px">The Deejay</div>
+        <div style="font:500 14px/1.5 'Plus Jakarta Sans';margin-bottom:16px">You control the vibe. When the room shifts, it's because you moved it.</div>
+        <div style="font:700 12px 'Space Grotesk';background:#fff7e6;border:2px solid #2196f3;border-radius:8px;padding:12px;margin-top:auto;width:100%;box-sizing:border-box">POWER: SIDE DOOR — once per round, swap a card with the discard pile.</div>
+      </div>
+      <div style="font:500 11px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;color:#f7c948;margin-top:10px">6 · Hustle — Character Class</div>
+      <sc-if value="{{ notes }}" hint-placeholder-val="{{ true }}"><div style="font:400 11px/1.5 'Space Grotesk';color:rgba(243,231,207,.55);margin-top:4px">Blue = craft and information. Power box anchors to bottom via margin-top:auto.</div></sc-if>
+    </div>
+  </div>
+</section>
+
+<section data-panel="states" style="background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:28px;margin-bottom:28px">
+  <div style="font:500 12px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:6px">05 · Interaction</div>
+  <h2 style="font:700 24px 'Plus Jakarta Sans';margin:0 0 6px">Card States</h2>
+  <p style="font:400 13px/1.6 'Plus Jakarta Sans';color:rgba(243,231,207,.7);margin:0 0 22px">Hover the second card. Click (or Tab + Enter) the third to select; Escape or click again deselects.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:18px;align-items:start;padding-top:10px">
+    <div>
+      <div style="display:flex;flex-direction:column;min-height:230px;padding:18px;border-radius:14px;background:linear-gradient(170deg,#fff7e6 0%,#ffedc7 55%,#ffe3b3 100%);border:2px solid #e0d4b0;box-shadow:0 4px 0 rgba(0,0,0,.15),0 10px 22px rgba(43,29,14,.4);color:#1a1a1a"><div style="font-size:26px;margin-bottom:8px">🍽️</div><div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#8b7355;margin-bottom:8px">Response</div><div style="font:600 13px/1.45 'Plus Jakarta Sans';flex-grow:1">The last plate, wrapped in foil, saved just for you.</div></div>
+      <div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.6;margin-top:10px;text-align:center">Default</div>
+    </div>
+    <div>
+      <div style="display:flex;flex-direction:column;min-height:230px;padding:18px;border-radius:14px;background:linear-gradient(170deg,#fff7e6 0%,#ffedc7 55%,#ffe3b3 100%);border:2px solid #e0d4b0;box-shadow:0 4px 0 rgba(0,0,0,.15),0 10px 22px rgba(43,29,14,.4);color:#1a1a1a;cursor:pointer;transition:transform .2s ease-out,box-shadow .2s ease-out" style-hover="transform:translateY(-4px);box-shadow:0 8px 0 rgba(0,0,0,.2)" onMouseMove="{{ magMove }}" onMouseLeave="{{ magLeave }}"><div style="font-size:26px;margin-bottom:8px">📻</div><div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#8b7355;margin-bottom:8px">Response</div><div style="font:600 13px/1.45 'Plus Jakarta Sans';flex-grow:1">Whatever's playing out the third-floor window.</div></div>
+      <div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.6;margin-top:10px;text-align:center">Hover · magnetic</div>
+    </div>
+    <div>
+      <div role="button" tabindex="0" aria-pressed="false" aria-label="Select this response card: Grandma's cast-iron skillet, seasoned since 1974." onClick="{{ toggleSel }}" onKeyDown="{{ toggleSel }}" style="display:flex;flex-direction:column;min-height:230px;padding:18px;border-radius:14px;background:linear-gradient(170deg,#fff7e6 0%,#ffedc7 55%,#ffe3b3 100%);border:2px solid #e0d4b0;box-shadow:0 4px 0 rgba(0,0,0,.15),0 10px 22px rgba(43,29,14,.4);color:#1a1a1a;cursor:pointer;transition:transform .2s ease-out,box-shadow .2s ease-out,outline-color .2s ease-out"><div style="font-size:26px;margin-bottom:8px">🍳</div><div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#8b7355;margin-bottom:8px">Response</div><div style="font:600 13px/1.45 'Plus Jakarta Sans';flex-grow:1">Grandma's cast-iron skillet, seasoned since 1974.</div></div>
+      <div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.6;margin-top:10px;text-align:center">Selected · click me</div>
+    </div>
+    <div>
+      <div aria-disabled="true" style="display:flex;flex-direction:column;min-height:230px;padding:18px;border-radius:14px;background:linear-gradient(170deg,#fff7e6 0%,#ffedc7 55%,#ffe3b3 100%);border:2px solid #e0d4b0;box-shadow:0 4px 0 rgba(0,0,0,.15),0 10px 22px rgba(43,29,14,.4);color:#1a1a1a;opacity:.4;filter:grayscale(40%)"><div style="font-size:26px;margin-bottom:8px">📖</div><div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#8b7355;margin-bottom:8px">Response</div><div style="font:600 13px/1.45 'Plus Jakarta Sans';flex-grow:1">A story your uncle has told four different ways.</div></div>
+      <div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.6;margin-top:10px;text-align:center">Disabled</div>
+    </div>
+    <div>
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:230px;padding:18px;border-radius:14px;background:linear-gradient(135deg,#f3e5f5,#e1bee7);border:3px solid #ff6b35;color:#1a1a1a;animation:ckPulse 2s ease-in-out infinite"><div style="font-size:44px;margin-bottom:10px">👑</div><div style="font:800 15px 'Plus Jakarta Sans';text-transform:uppercase;letter-spacing:2px">Crown</div><div style="font:500 12px/1.5 'Plus Jakarta Sans';opacity:.8;margin-top:8px">Cipher in play</div></div>
+      <div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.6;margin-top:10px;text-align:center">Active · pulsing</div>
+    </div>
+  </div>
+</section>
+
+<section data-panel="anim" style="background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:28px;margin-bottom:28px">
+  <div style="font:500 12px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:6px">06 · Motion</div>
+  <h2 style="font:700 24px 'Plus Jakarta Sans';margin:0 0 6px">Animation System</h2>
+  <p style="font:400 13px/1.6 'Plus Jakarta Sans';color:rgba(243,231,207,.7);margin:0 0 18px">Spring physics, never linear. Hover 200ms out / 150ms in · deal 400ms spring + 50ms stagger · submit 600ms · cipher spin 1200ms · receipt 1500ms sequence · victory 2000ms cascade. Honors prefers-reduced-motion.</p>
+  <div data-noprint="" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px">
+    <button onClick="{{ playDeal }}" aria-label="Play card deal animation" style="font:700 13px 'Plus Jakarta Sans';background:#ff6b35;color:#fff7e6;border:none;border-radius:8px;padding:10px 18px;cursor:pointer;box-shadow:0 3px 0 #e04b00" style-hover="background:#e04b00" style-active="transform:translateY(2px);box-shadow:0 1px 0 #e04b00">▶ Deal</button>
+    <button onClick="{{ playSubmit }}" aria-label="Play card submit animation" style="font:700 13px 'Plus Jakarta Sans';background:#ff6b35;color:#fff7e6;border:none;border-radius:8px;padding:10px 18px;cursor:pointer;box-shadow:0 3px 0 #e04b00" style-hover="background:#e04b00" style-active="transform:translateY(2px);box-shadow:0 1px 0 #e04b00">▶ Submit</button>
+    <button onClick="{{ playSpin }}" aria-label="Play cipher spin animation" style="font:700 13px 'Plus Jakarta Sans';background:#9c27b0;color:#fff7e6;border:none;border-radius:8px;padding:10px 18px;cursor:pointer;box-shadow:0 3px 0 #6a1b7a" style-hover="background:#7b1fa2" style-active="transform:translateY(2px);box-shadow:0 1px 0 #6a1b7a">▶ Cipher Spin</button>
+    <button onClick="{{ playReceipt }}" aria-label="Play receipt award animation" style="font:700 13px 'Plus Jakarta Sans';background:#f7c948;color:#1a1a1a;border:none;border-radius:8px;padding:10px 18px;cursor:pointer;box-shadow:0 3px 0 #b8860b" style-hover="background:#ffd968" style-active="transform:translateY(2px);box-shadow:0 1px 0 #b8860b">▶ Receipt Award</button>
+    <button onClick="{{ playVictory }}" aria-label="Play victory cascade animation" style="font:700 13px 'Plus Jakarta Sans';background:#4caf50;color:#fff7e6;border:none;border-radius:8px;padding:10px 18px;cursor:pointer;box-shadow:0 3px 0 #2e7d32" style-hover="background:#43a047" style-active="transform:translateY(2px);box-shadow:0 1px 0 #2e7d32">▶ Victory</button>
+  </div>
+  <div aria-live="polite" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;align-items:start">
+    <div>
+      <div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.6;margin-bottom:10px">Deal · 400ms spring · 50ms stagger</div>
+      <div ref="{{ refDeal }}" style="display:flex;gap:8px;min-height:120px">
+        <div style="width:76px;height:104px;border-radius:10px;background:linear-gradient(180deg,#fff7e6,#ffe3b3);border:2px solid #e0d4b0;box-shadow:0 3px 0 rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:24px">✂️</div>
+        <div style="width:76px;height:104px;border-radius:10px;background:linear-gradient(180deg,#fff7e6,#ffe3b3);border:2px solid #e0d4b0;box-shadow:0 3px 0 rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:24px">📻</div>
+        <div style="width:76px;height:104px;border-radius:10px;background:linear-gradient(180deg,#fff7e6,#ffe3b3);border:2px solid #e0d4b0;box-shadow:0 3px 0 rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:24px">🍽️</div>
+        <div style="width:76px;height:104px;border-radius:10px;background:linear-gradient(180deg,#fff7e6,#ffe3b3);border:2px solid #e0d4b0;box-shadow:0 3px 0 rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:24px">📖</div>
+      </div>
+    </div>
+    <div>
+      <div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.6;margin-bottom:10px">Submit · 600ms flip-away</div>
+      <div style="min-height:120px;display:flex;align-items:flex-start"><div ref="{{ refSubmit }}" style="width:76px;height:104px;border-radius:10px;background:linear-gradient(180deg,#fff7e6,#ffe3b3);border:2px solid #e0d4b0;box-shadow:0 3px 0 rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:24px">🎤</div></div>
+    </div>
+    <div>
+      <div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.6;margin-bottom:10px">Cipher spin · 1200ms · 3 rotations</div>
+      <div style="min-height:120px;display:flex;align-items:flex-start"><div ref="{{ refSpin }}" style="width:104px;height:104px;border-radius:12px;background:linear-gradient(135deg,#f3e5f5,#e1bee7);border:3px solid #9c27b0;box-shadow:0 3px 0 rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-size:40px">🎲</div></div>
+    </div>
+    <div>
+      <div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.6;margin-bottom:10px">Receipt · drop + seal at 400ms</div>
+      <div style="min-height:120px;display:flex;align-items:flex-start"><div ref="{{ refReceipt }}" style="position:relative;width:150px;height:100px;border-radius:10px;background:linear-gradient(135deg,#fff8e1,#ffecb3);border:3px solid #f7c948;box-shadow:0 3px 0 rgba(0,0,0,.2);transform:rotate(-1deg);padding:12px;box-sizing:border-box;color:#1a1a1a"><div ref="{{ refSeal }}" style="position:absolute;top:-12px;right:-10px;width:36px;height:36px;border-radius:50%;background:#f7c948;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 0 rgba(0,0,0,.25)">✓</div><div style="font:500 8px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#b8860b;padding-right:28px">Receipt</div><div style="font:italic 800 12px 'Plus Jakarta Sans';margin-top:4px">Thread Resolved</div><div style="font:600 9px 'JetBrains Mono';color:#2e7d32;margin-top:6px">+2 REPUTATION</div></div></div>
+    </div>
+    <div>
+      <div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.6;margin-bottom:10px">Victory · staggered cascade</div>
+      <div ref="{{ refVictory }}" style="display:flex;gap:8px;min-height:120px;align-items:flex-start">
+        <div style="width:64px;height:88px;border-radius:10px;background:linear-gradient(135deg,#f7c948,#ffd968);border:2px solid #b8860b;box-shadow:0 3px 0 rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-size:26px">👑</div>
+        <div style="width:64px;height:88px;border-radius:10px;background:linear-gradient(135deg,#f7c948,#ffd968);border:2px solid #b8860b;box-shadow:0 3px 0 rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-size:26px">✊🏾</div>
+        <div style="width:64px;height:88px;border-radius:10px;background:linear-gradient(135deg,#f7c948,#ffd968);border:2px solid #b8860b;box-shadow:0 3px 0 rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-size:26px">🌇</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-panel="anatomy" style="background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:28px;margin-bottom:28px">
+  <div style="font:500 12px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:6px">07 · Anatomy</div>
+  <h2 style="font:700 24px 'Plus Jakarta Sans';margin:0 0 18px">Component Breakdown</h2>
+  <div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">
+    <div style="position:relative;flex:none;width:280px">
+      <div style="position:relative;display:flex;flex-direction:column;min-height:340px;padding:24px;border-radius:14px;background:radial-gradient(circle at 50% -20%,rgba(255,107,53,.16),transparent 55%),linear-gradient(165deg,#3a2a1a 0%,#241f18 45%,#1a1a1a 100%);border:2px solid #4a3826;box-shadow:0 6px 0 rgba(0,0,0,.25),0 14px 28px rgba(224,75,0,.18);color:#f3e7cf;overflow:hidden">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#ff6b35,#f7c948);opacity:.55"></div>
+        <div style="font-size:40px;text-align:center;margin-bottom:12px;opacity:.9">🎲</div>
+        <div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:3px;color:#ff6b35;margin-bottom:12px;text-align:center">Scenario · Dice</div>
+        <div style="font:700 20px/1.35 'Plus Jakarta Sans';flex-grow:1">Somebody's cousin claims they can fix <span style="display:inline-block;min-width:90px;border-bottom:3px solid #ff6b35">&nbsp;</span> for half price.</div>
+        <div style="display:flex;justify-content:space-between;font:400 11px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.6;margin-top:20px"><span>Concrete Kings</span><span>CK-0034</span></div>
+        <div style="position:absolute;top:12px;right:12px;width:44px;height:44px;border-radius:50%;background:#ff6b35;display:flex;align-items:center;justify-content:center;font-size:20px;animation:ckBadgePulse 2s ease-in-out infinite">🎲</div>
+      </div>
+      <div style="position:absolute;top:-10px;left:24px;width:22px;height:22px;border-radius:50%;background:#f7c948;color:#1a1a1a;font:600 11px 'JetBrains Mono';display:flex;align-items:center;justify-content:center">1</div>
+      <div style="position:absolute;top:34px;left:-11px;width:22px;height:22px;border-radius:50%;background:#f7c948;color:#1a1a1a;font:600 11px 'JetBrains Mono';display:flex;align-items:center;justify-content:center">2</div>
+      <div style="position:absolute;top:96px;left:-11px;width:22px;height:22px;border-radius:50%;background:#f7c948;color:#1a1a1a;font:600 11px 'JetBrains Mono';display:flex;align-items:center;justify-content:center">3</div>
+      <div style="position:absolute;top:160px;left:-11px;width:22px;height:22px;border-radius:50%;background:#f7c948;color:#1a1a1a;font:600 11px 'JetBrains Mono';display:flex;align-items:center;justify-content:center">4</div>
+      <div style="position:absolute;bottom:26px;left:-11px;width:22px;height:22px;border-radius:50%;background:#f7c948;color:#1a1a1a;font:600 11px 'JetBrains Mono';display:flex;align-items:center;justify-content:center">5</div>
+      <div style="position:absolute;top:34px;right:-11px;width:22px;height:22px;border-radius:50%;background:#f7c948;color:#1a1a1a;font:600 11px 'JetBrains Mono';display:flex;align-items:center;justify-content:center">6</div>
+    </div>
+    <ol style="flex:1;min-width:260px;margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:14px">
+      <li style="display:flex;gap:12px;align-items:baseline"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:#f7c948;color:#1a1a1a;font:600 11px 'JetBrains Mono';display:inline-flex;align-items:center;justify-content:center">1</span><span style="font:400 14px/1.5 'Plus Jakarta Sans'"><strong>Accent bar</strong> — 4px orange at 40% opacity. Brand signature on every card top edge.</span></li>
+      <li style="display:flex;gap:12px;align-items:baseline"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:#f7c948;color:#1a1a1a;font:600 11px 'JetBrains Mono';display:inline-flex;align-items:center;justify-content:center">2</span><span style="font:400 14px/1.5 'Plus Jakarta Sans'"><strong>Icon</strong> — 40px emoji, centered, 90% opacity. Sets scene before a word is read.</span></li>
+      <li style="display:flex;gap:12px;align-items:baseline"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:#f7c948;color:#1a1a1a;font:600 11px 'JetBrains Mono';display:inline-flex;align-items:center;justify-content:center">3</span><span style="font:400 14px/1.5 'Plus Jakarta Sans'"><strong>Type label</strong> — 10px Space Grotesk, uppercase, 3px tracking, orange. Instant card-type recognition.</span></li>
+      <li style="display:flex;gap:12px;align-items:baseline"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:#f7c948;color:#1a1a1a;font:600 11px 'JetBrains Mono';display:inline-flex;align-items:center;justify-content:center">4</span><span style="font:400 14px/1.5 'Plus Jakarta Sans'"><strong>Prompt + blank</strong> — 20px Jakarta 700, flex-grow. The blank is a 3px orange underline, min 90px.</span></li>
+      <li style="display:flex;gap:12px;align-items:baseline"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:#f7c948;color:#1a1a1a;font:600 11px 'JetBrains Mono';display:inline-flex;align-items:center;justify-content:center">5</span><span style="font:400 14px/1.5 'Plus Jakarta Sans'"><strong>Footer</strong> — 11px Space Grotesk, 60% opacity, space-between. Brand left, card ID right.</span></li>
+      <li style="display:flex;gap:12px;align-items:baseline"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:#f7c948;color:#1a1a1a;font:600 11px 'JetBrains Mono';display:inline-flex;align-items:center;justify-content:center">6</span><span style="font:400 14px/1.5 'Plus Jakarta Sans'"><strong>Dice badge</strong> — 44px orange circle, pulsing. Only on dice-variant scenarios.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section data-panel="responsive" style="background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:28px;margin-bottom:28px">
+  <div style="font:500 12px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:6px">08 · Layout &amp; Access</div>
+  <h2 style="font:700 24px 'Plus Jakarta Sans';margin:0 0 18px">Responsive + Accessibility Notes</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:18px">
+      <div style="font:600 14px 'Plus Jakarta Sans';margin-bottom:10px;color:#f7c948">Screen structure</div>
+      <ul style="margin:0;padding-left:18px;font:400 13px/1.7 'Plus Jakarta Sans';color:rgba(243,231,207,.8)"><li>Max width 1100px desktop, fluid mobile</li><li>Panels: rgba(0,0,0,.35), 1px white/8% border, 14px radius</li><li>Hand grid: minmax(170px,1fr) desktop, minmax(140px,1fr) mobile, 10px gap; horizontal scroll under 360px</li><li>Status messages: #fff3e0 bg, 2px orange border, Jakarta 600 14px</li></ul>
+    </div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:18px">
+      <div style="font:600 14px 'Plus Jakarta Sans';margin-bottom:10px;color:#f7c948">Accessibility (mandatory)</div>
+      <ul style="margin:0;padding-left:18px;font:400 13px/1.7 'Plus Jakarta Sans';color:rgba(243,231,207,.8)"><li>Cards: role=button, tabindex=0, full-text aria-label</li><li>Keyboard: Tab + Enter/Space select, Escape deselect</li><li>3px orange focus outline on everything interactive</li><li>aria-live regions for round + status announcements</li><li>prefers-reduced-motion swaps springs for fades</li><li>Contrast ≥ 4.5:1 everywhere</li></ul>
+    </div>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:18px">
+      <div style="font:600 14px 'Plus Jakarta Sans';margin-bottom:10px;color:#f7c948">Print production</div>
+      <ul style="margin:0;padding-left:18px;font:400 13px/1.7 'Plus Jakarta Sans';color:rgba(243,231,207,.8)"><li>Cards never break across pages (break-inside: avoid)</li><li>print-color-adjust: exact preserves gradients + gold</li><li>Animation controls hidden in print</li><li>Cream page background replaces the dark desk</li></ul>
+    </div>
+  </div>
+  <div style="margin-top:20px;background:#fff3e0;border:2px solid #ff6b35;border-radius:8px;padding:12px 16px;font:600 14px 'Plus Jakarta Sans';color:#1a1a1a">Status message pattern — "Marcus is the Griot this round. Everybody else, play your card."</div>
+</section>
+
+<footer style="text-align:center;padding:12px 0 0">
+  <div style="font:400 10px 'JetBrains Mono';text-transform:uppercase;letter-spacing:2px;opacity:.5">Concrete Kings: The Block Chronicles · Design System v1.0 · Griot Modernism</div>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showNotes&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Documentation&quot;}}">
+class Component extends DCLogic {
+  refDeal = (el) => { this.dealEl = el; };
+  refSubmit = (el) => { this.submitEl = el; };
+  refSpin = (el) => { this.spinEl = el; };
+  refReceipt = (el) => { this.receiptEl = el; };
+  refSeal = (el) => { this.sealEl = el; };
+  refVictory = (el) => { this.victoryEl = el; };
+  play(el, anim) {
+    if (!el) return;
+    el.style.animation = 'none';
+    void el.offsetWidth;
+    el.style.animation = anim;
+  }
+  playDeal = () => {
+    if (!this.dealEl) return;
+    Array.from(this.dealEl.children).forEach((c, i) =>
+      this.play(c, `ckDeal 400ms cubic-bezier(0.34,1.56,0.64,1) ${i * 50}ms both`));
+  };
+  playSubmit = () => {
+    this.play(this.submitEl, 'ckSubmit 600ms ease-in-out both');
+    clearTimeout(this._st);
+    this._st = setTimeout(() => { if (this.submitEl) this.submitEl.style.animation = 'none'; }, 1400);
+  };
+  playSpin = () => this.play(this.spinEl, 'ckSpin 1200ms cubic-bezier(0.25,0.46,0.45,0.94) both');
+  playReceipt = () => {
+    this.play(this.receiptEl, 'ckReceipt 800ms cubic-bezier(0.34,1.56,0.64,1) both');
+    this.play(this.sealEl, 'ckSeal 400ms cubic-bezier(0.34,1.56,0.64,1) 400ms both');
+  };
+  playVictory = () => {
+    if (!this.victoryEl) return;
+    Array.from(this.victoryEl.children).forEach((c, i) =>
+      this.play(c, `ckVictory 800ms cubic-bezier(0.34,1.56,0.64,1) ${i * 200}ms both`));
+  };
+  magMove = (e) => {
+    const el = e.currentTarget, r = el.getBoundingClientRect();
+    const dx = Math.max(-8, Math.min(8, (e.clientX - (r.left + r.width / 2)) * 0.05));
+    const dy = Math.max(-8, Math.min(8, (e.clientY - (r.top + r.height / 2)) * 0.05));
+    el.style.transform = `translateY(-4px) translate(${dx}px,${dy}px)`;
+  };
+  magLeave = (e) => { e.currentTarget.style.transform = ''; };
+  toggleSel = (e) => {
+    const el = e.currentTarget;
+    if (e.type === 'keydown') {
+      if (e.key === 'Escape') { this.setSel(el, false); return; }
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+    }
+    this.setSel(el, el.getAttribute('aria-pressed') !== 'true');
+  };
+  setSel(el, on) {
+    el.setAttribute('aria-pressed', String(on));
+    el.style.transform = on ? 'translateY(-8px)' : '';
+    el.style.outline = on ? '4px solid #ff6b35' : '';
+    el.style.outlineOffset = on ? '0px' : '';
+    el.style.boxShadow = on ? '0 8px 0 rgba(0,0,0,.2), 0 0 0 8px rgba(255,107,53,.25)' : '0 4px 0 rgba(0,0,0,.15)';
+  }
+  renderVals() {
+    return {
+      notes: this.props.showNotes ?? true,
+      refDeal: this.refDeal, refSubmit: this.refSubmit, refSpin: this.refSpin,
+      refReceipt: this.refReceipt, refSeal: this.refSeal, refVictory: this.refVictory,
+      playDeal: this.playDeal, playSubmit: this.playSubmit, playSpin: this.playSpin,
+      playReceipt: this.playReceipt, playVictory: this.playVictory,
+      magMove: this.magMove, magLeave: this.magLeave, toggleSel: this.toggleSel,
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<template id="__bundler_thumbnail" data-bg-color="#141210">
+  <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <rect width="120" height="120" fill="#141210"/>
+    <rect x="30" y="24" width="60" height="72" rx="10" fill="#3a2a1a" stroke="#ff6b35" stroke-width="3"/>
+    <circle cx="72" cy="42" r="8" fill="#ff6b35" opacity=".6"/>
+    <rect x="40" y="66" width="40" height="6" rx="3" fill="#f7c948" opacity=".8"/>
+    <rect x="40" y="78" width="26" height="6" rx="3" fill="#f3e7cf" opacity=".5"/>
+  </svg>
+</template>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@400;500;600;700&amp;family=Unbounded:wght@400;700;900&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#141210;color:#f3e7cf;font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#ff6b35}a:hover{color:#e04b00}
+[tabindex]:focus-visible,button:focus-visible{outline:3px solid #ff6b35;outline-offset:2px}
+.ck-card{transform:translateZ(0);will-change:transform,opacity}
+@keyframes poleSpin{from{background-position:0 0}to{background-position:0 40px}}
+@keyframes lightPulse{0%,100%{opacity:.2;transform:scale(1)}50%{opacity:.4;transform:scale(1.05)}}
+@keyframes flameFlicker{0%,100%{transform:scaleY(1) scaleX(1);opacity:.85}25%{transform:scaleY(1.15) scaleX(.9);opacity:1}50%{transform:scaleY(.85) scaleX(1.1);opacity:.7}75%{transform:scaleY(1.05) scaleX(.95);opacity:.9}}
+@keyframes streetlightPulse{0%,100%{opacity:.3}50%{opacity:.55}}
+@keyframes sealPulse{0%,100%{box-shadow:0 0 0 6px rgba(247,201,72,.4)}50%{box-shadow:0 0 0 12px rgba(247,201,72,.08)}}
+@keyframes urgentPulse{0%,100%{box-shadow:0 0 0 4px rgba(255,68,68,.5)}50%{box-shadow:0 0 0 9px rgba(255,68,68,.1)}}
+@keyframes sealBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes cipherEnergy{0%,100%{box-shadow:0 0 0 4px rgba(156,39,176,.45)}50%{box-shadow:0 0 0 9px rgba(156,39,176,.1)}}
+@keyframes cipherActiveEnergy{0%,100%{box-shadow:0 0 0 8px rgba(255,107,53,.5)}50%{box-shadow:0 0 0 16px rgba(255,107,53,.12)}}
+@keyframes iconFloat{0%,100%{transform:translateY(-2px)}50%{transform:translateY(2px)}}
+@keyframes iconSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes orbit{from{transform:rotate(0) translateX(30px) rotate(0)}to{transform:rotate(360deg) translateX(30px) rotate(-360deg)}}
+@keyframes drift{0%{transform:translate(0,0);opacity:0}15%{opacity:.7}100%{transform:translate(6px,-46px);opacity:0}}
+@keyframes rise{0%{transform:translate(0,0) scale(.6);opacity:.6}100%{transform:translate(4px,-40px) scale(1.6);opacity:0}}
+@keyframes sway{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg)}}
+@keyframes chairSway{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(1deg)}}
+@keyframes shineSweep{from{transform:translateX(-140%) rotate(20deg)}to{transform:translateX(140%) rotate(20deg)}}
+@keyframes carSweep{0%{transform:translateX(-40px);opacity:0}10%{opacity:.6}90%{opacity:.6}100%{transform:translateX(220px);opacity:0}}
+@keyframes neonFlicker{0%,89%,91%,100%{opacity:.95}90%{opacity:.3}}
+@keyframes hueShift{0%,100%{filter:hue-rotate(0)}50%{filter:hue-rotate(18deg)}}
+@keyframes eqBar{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+@keyframes micVibe{0%,100%{transform:translateX(0)}50%{transform:translateX(.6px)}}
+@keyframes grain{0%,100%{opacity:.9}50%{opacity:1}}
+@keyframes rainMove{from{background-position:0 0}to{background-position:40px 90px}}
+@keyframes snowMove{from{background-position:0 0}to{background-position:0 120px}}
+@keyframes heatPulse{0%,100%{opacity:.05}50%{opacity:.12}}
+@keyframes fogPulse{0%,100%{opacity:.18}50%{opacity:.3}}
+@keyframes lightning{0%,96%,100%{opacity:0}97%{opacity:.35}}
+@keyframes sirenAlt{0%,49%{background:rgba(255,68,68,.16)}50%,99%{background:rgba(33,150,243,.16)}100%{background:rgba(255,68,68,.16)}}
+@keyframes fireflyDrift{0%{transform:translate(0,0);opacity:.2}25%{opacity:.9}50%{transform:translate(14px,-10px);opacity:.3}75%{opacity:.85}100%{transform:translate(-6px,-18px);opacity:.2}}
+@keyframes notifPop{0%,100%{transform:scale(0);opacity:0}10%,90%{transform:scale(1);opacity:1}}
+@keyframes heartFloat{0%{transform:translateY(0) scale(.8);opacity:0}20%{opacity:1}100%{transform:translateY(-40px) scale(1.1);opacity:0}}
+@keyframes bubbleFade{0%,100%{opacity:0}20%,70%{opacity:1}}
+@keyframes flagWave{0%,100%{transform:skewY(0) scaleY(1)}50%{transform:skewY(4deg) scaleY(.96)}}
+@keyframes netSway{0%,100%{transform:rotate(0)}50%{transform:rotate(4deg)}}
+@keyframes scoreFlicker{0%,80%,100%{opacity:1}82%{opacity:.4}}
+@keyframes crowdSway{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
+@keyframes haloPulse{0%,100%{opacity:.35;transform:scale(1)}50%{opacity:.6;transform:scale(1.08)}}
+@keyframes moneyRain{0%{transform:translateY(-10px);opacity:0}20%{opacity:.9}100%{transform:translateY(60px);opacity:0}}
+@keyframes networkPulse{0%,100%{stroke-dashoffset:24}50%{stroke-dashoffset:0}}
+@keyframes colorBurst{0%,100%{filter:hue-rotate(0)}50%{filter:hue-rotate(60deg)}}
+@keyframes graphGrow{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1)}}
+@keyframes coinPulse{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes bulbGlow{0%,100%{opacity:.4;filter:drop-shadow(0 0 2px #ffeb3b)}50%{opacity:1;filter:drop-shadow(0 0 10px #ffeb3b)}}
+@keyframes rayPulse{0%,100%{opacity:.15}50%{opacity:.4}}
+@keyframes fistPump{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-4px) scale(1.08)}}
+@keyframes beamSweep{0%,100%{transform:rotate(-18deg)}50%{transform:rotate(18deg)}}
+@keyframes ckSlideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</helmet>
+<div style="max-width:1280px;margin:0 auto;padding:0 24px 80px">
+
+<header style="padding:32px 0 20px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;position:sticky;top:0;background:#141210;z-index:20;border-bottom:1px solid rgba(255,255,255,.08)">
+  <div>
+    <div style="font:500 11px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#f7c948;margin-bottom:6px">Card Animation System</div>
+    <h1 style="font:800 26px 'Plus Jakarta Sans';margin:0">Griot Modernism in Motion</h1>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <select onChange="{{ weatherChange }}" value="{{ weather }}" aria-label="Weather overlay" style="font:600 10px 'Space Grotesk';background:rgba(255,255,255,.06);color:#f3e7cf;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:6px 8px">
+      <sc-for list="{{ weatherOpts }}" as="w" hint-placeholder-count="6"><option value="{{ w.key }}">{{ w.label }}</option></sc-for>
+    </select>
+    <select onChange="{{ eventChange }}" value="{{ eventSel }}" aria-label="Event overlay" style="font:600 10px 'Space Grotesk';background:rgba(255,255,255,.06);color:#f3e7cf;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:6px 8px">
+      <sc-for list="{{ eventOpts }}" as="ev" hint-placeholder-count="6"><option value="{{ ev.key }}">{{ ev.label }}</option></sc-for>
+    </select>
+    <button onClick="{{ triggerEventBtn }}" style="font:600 10px 'Space Grotesk';letter-spacing:.5px;text-transform:uppercase;background:#9c27b0;color:#fff7e6;border:none;border-radius:6px;padding:7px 10px;cursor:pointer">Trigger</button>
+  </div>
+</header>
+
+<sc-if value="{{ eventActive }}" hint-placeholder-val="{{ false }}">
+  <div style="margin:16px 0;background:rgba(26,26,26,.9);border:2px solid #ff6b35;border-radius:10px;padding:10px 16px;display:flex;gap:10px;align-items:center;animation:ckSlideUp .3s ease-out">
+    <span style="font-size:18px">{{ eventIcon }}</span><div style="font:600 13px 'Plus Jakarta Sans'">{{ eventLabel }} overlay active on every card below.</div>
+  </div>
+</sc-if>
+
+<p style="font:400 13px/1.6 'Plus Jakarta Sans';color:rgba(243,231,207,.65);max-width:760px;margin:20px 0 8px">The complete set: all 12 Black-card scenarios, all 9 White-card category tints, Receipt states, Cipher states, all 8 Origin identity animations, and all 8 Hustle power animations — CSS-driven, GPU-accelerated, reduced-motion aware. Weather/event above apply as a shared translucent overlay across the grid rather than bespoke per-card behavior.</p>
+
+<section style="position:relative">
+  <div aria-hidden="true" style="position:absolute;inset:-8px;border-radius:16px;pointer-events:none;z-index:5;{{ weatherOverlayStyle }}"></div>
+
+  <h2 style="font:700 20px 'Plus Jakarta Sans';margin:28px 0 14px;color:#ff6b35">Black Cards · Scenario Scenes</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:20px">
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Barbershop scenario card background: rotating pole, amber glow, drifting dust" style="position:relative;overflow:hidden;min-height:300px;border-radius:14px;background:linear-gradient(165deg,#3a2a1a,#1a1610);border:2px solid #4a3826;padding:20px;box-sizing:border-box;color:#f3e7cf;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.5)">
+      <div aria-hidden="true" style="position:absolute;top:16px;right:20px;width:14px;height:56px;border-radius:6px;background:repeating-linear-gradient(#ff4444 0 8px,#fff7e6 8px 16px,#2196f3 16px 24px);animation:poleSpin 1.4s linear infinite;box-shadow:0 0 16px rgba(255,107,53,.4)"></div>
+      <div aria-hidden="true" style="position:absolute;top:30px;right:14px;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,53,.5),transparent 70%);animation:lightPulse 4s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:18px;top:60px;width:60px;height:70px;border-radius:6px;background:rgba(243,231,207,.06)"></div>
+      <div aria-hidden="true" style="position:absolute;left:18px;top:130px;width:60px;height:14px;border-radius:4px;background:rgba(90,60,40,.7);animation:chairSway 6s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:26px;bottom:60px;width:4px;height:4px;border-radius:50%;background:#f7c948;animation:drift 9s ease-in .5s infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:48px;bottom:44px;width:3px;height:3px;border-radius:50%;background:#ff6b35;animation:drift 11s ease-in 2s infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:18px;top:60px;width:60px;height:70px;border-radius:6px;overflow:hidden"><div aria-hidden="true" style="position:absolute;top:0;left:-40%;width:40%;height:140%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.25),transparent);animation:shineSweep 7s ease-in-out 1s infinite"></div></div>
+      <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 105%,rgba(0,0,0,.4),transparent 62%);pointer-events:none"></div>
+      <div style="position:relative;z-index:2;font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#ff6b35">Scenario · Barbershop</div>
+      <div style="position:relative;z-index:2;font:700 18px/1.35 'Plus Jakarta Sans';margin-top:120px">Where the real news get passed.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Church scenario card background: stained glass shift, light beam, flickering candles" style="position:relative;overflow:hidden;min-height:300px;border-radius:14px;background:linear-gradient(165deg,#2e2820,#1a1610);border:2px solid #4a3826;padding:20px;box-sizing:border-box;color:#f3e7cf;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.5)">
+      <div aria-hidden="true" style="position:absolute;top:-10px;right:20px;width:70px;height:100px;border-radius:35px 35px 0 0;background:linear-gradient(180deg,#9c27b0,#2196f3 34%,#f7c948 67%,#4caf50);opacity:.5;animation:hueShift 10s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;top:0;right:36px;width:38px;height:220px;background:linear-gradient(180deg,rgba(255,235,150,.35),transparent);animation:lightPulse 8s ease-in-out infinite;transform-origin:top center"></div>
+      <div aria-hidden="true" style="position:absolute;left:24px;bottom:36px;width:5px;height:16px;border-radius:2px;background:#f7c948;animation:flameFlicker 2.2s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:44px;bottom:36px;width:5px;height:16px;border-radius:2px;background:#ff6b35;animation:flameFlicker 2.8s ease-in-out .3s infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:64px;bottom:36px;width:5px;height:16px;border-radius:2px;background:#f7c948;animation:flameFlicker 2.4s ease-in-out .6s infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:70px;top:70px;width:3px;height:3px;border-radius:50%;background:#ffeb3b;animation:rise 12s linear infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:0;right:0;bottom:0;height:70px;background:linear-gradient(0deg,rgba(60,40,20,.5),transparent)"></div>
+      <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 105%,rgba(0,0,0,.4),transparent 62%);pointer-events:none"></div>
+      <div style="position:relative;z-index:2;font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#ff6b35">Scenario · Church</div>
+      <div style="position:relative;z-index:2;font:700 18px/1.35 'Plus Jakarta Sans';margin-top:130px">The tea is served with prayer.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Cookout scenario card background: grill flame flicker, rising smoke, swaying trees" style="position:relative;overflow:hidden;min-height:300px;border-radius:14px;background:linear-gradient(165deg,#3a2a1a,#1a1610);border:2px solid #4a3826;padding:20px;box-sizing:border-box;color:#f3e7cf;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.5)">
+      <div aria-hidden="true" style="position:absolute;right:26px;top:18px;width:20px;height:26px;border-radius:10px 10px 4px 4px;background:#1b5e20;animation:sway 5s ease-in-out infinite;transform-origin:bottom center"></div>
+      <div aria-hidden="true" style="position:absolute;right:52px;top:26px;width:16px;height:20px;border-radius:8px 8px 4px 4px;background:#2e7d32;animation:sway 4.4s ease-in-out .5s infinite;transform-origin:bottom center"></div>
+      <div aria-hidden="true" style="position:absolute;left:22px;bottom:44px;width:52px;height:14px;border-radius:4px;background:#2a2014"></div>
+      <div aria-hidden="true" style="position:absolute;left:32px;bottom:56px;width:8px;height:12px;border-radius:4px;background:#ff6b35;animation:flameFlicker 1.6s ease-in-out infinite;transform-origin:bottom center"></div>
+      <div aria-hidden="true" style="position:absolute;left:44px;bottom:56px;width:6px;height:10px;border-radius:4px;background:#ff4444;animation:flameFlicker 1.9s ease-in-out .2s infinite;transform-origin:bottom center"></div>
+      <div aria-hidden="true" style="position:absolute;left:34px;bottom:68px;width:5px;height:5px;border-radius:50%;background:rgba(160,160,160,.5);animation:rise 5s linear infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:44px;bottom:68px;width:5px;height:5px;border-radius:50%;background:rgba(160,160,160,.4);animation:rise 6s linear .8s infinite"></div>
+      <div aria-hidden="true" style="position:absolute;right:20px;bottom:44px;width:44px;height:8px;border-radius:2px;background:#5a4632"></div>
+      <div aria-hidden="true" style="position:absolute;right:30px;bottom:52px;width:10px;height:8px;border-radius:1px;background:#2c4a72"></div>
+      <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 105%,rgba(0,0,0,.4),transparent 62%);pointer-events:none"></div>
+      <div style="position:relative;z-index:2;font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#ff6b35">Scenario · Cookout</div>
+      <div style="position:relative;z-index:2;font:700 18px/1.35 'Plus Jakarta Sans';margin-top:130px">The grill talks. The block listens.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Block corner scenario card background: pulsing streetlight, passing car headlights, flickering neon" style="position:relative;overflow:hidden;min-height:300px;border-radius:14px;background:linear-gradient(165deg,#241f24,#141014);border:2px solid #3a2e3a;padding:20px;box-sizing:border-box;color:#f3e7cf;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.5)">
+      <div aria-hidden="true" style="position:absolute;top:20px;right:30px;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,53,.45),transparent 70%);animation:streetlightPulse 4s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;top:36px;right:60px;width:2px;height:60px;background:#8a8a8a"></div>
+      <div aria-hidden="true" style="position:absolute;left:0;bottom:70px;width:16px;height:6px;border-radius:2px;background:#ffeb3b;box-shadow:0 0 8px rgba(255,235,59,.7);animation:carSweep 9s linear infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:20px;bottom:40px;font:700 11px 'Unbounded';color:#ff6b35;letter-spacing:1px;animation:neonFlicker 6s steps(1) infinite">OPEN</div>
+      <div aria-hidden="true" style="position:absolute;left:0;top:10px;width:90px;height:120px;background:linear-gradient(180deg,#1c1620,#100c14);opacity:.7"></div>
+      <div aria-hidden="true" style="position:absolute;left:14px;top:30px;width:8px;height:8px;background:#f7c948;opacity:.4"></div>
+      <div aria-hidden="true" style="position:absolute;left:34px;top:50px;width:8px;height:8px;background:#f7c948;opacity:.3"></div>
+      <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 105%,rgba(0,0,0,.4),transparent 62%);pointer-events:none"></div>
+      <div style="position:relative;z-index:2;font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#ff6b35">Scenario · The Corner</div>
+      <div style="position:relative;z-index:2;font:700 18px/1.35 'Plus Jakarta Sans';margin-top:130px">Where the block watches, where the business happens.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Beauty shop scenario card background: mirror shine sweep, gentle chair sway, rising steam" style="position:relative;overflow:hidden;min-height:300px;border-radius:14px;background:linear-gradient(165deg,#3a2028,#1a1214);border:2px solid #4a2e38;padding:20px;box-sizing:border-box;color:#f3e7cf;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.5)">
+      <div aria-hidden="true" style="position:absolute;top:16px;right:20px;width:56px;height:72px;border-radius:8px;background:rgba(243,231,207,.08);overflow:hidden"><div aria-hidden="true" style="position:absolute;top:0;left:0;width:20px;height:140%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);animation:shineSweep 5s ease-in-out infinite"></div></div>
+      <div aria-hidden="true" style="position:absolute;left:20px;top:70px;width:40px;height:16px;border-radius:6px;background:#5a2e3a;animation:chairSway 7s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:30px;top:44px;width:4px;height:4px;border-radius:50%;background:#fff;opacity:.6;animation:rise 8s linear infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:40px;top:50px;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.5;animation:rise 9s linear 1.2s infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:20px;top:44px;width:8px;height:8px;border-radius:50%;background:#e91e63;opacity:.6"></div>
+      <div aria-hidden="true" style="position:absolute;left:32px;top:44px;width:8px;height:8px;border-radius:50%;background:#9c27b0;opacity:.5"></div>
+      <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 105%,rgba(0,0,0,.4),transparent 62%);pointer-events:none"></div>
+      <div style="position:relative;z-index:2;font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#ff6b35">Scenario · Beauty Shop</div>
+      <div style="position:relative;z-index:2;font:700 18px/1.35 'Plus Jakarta Sans';margin-top:130px">Where the tea gets spilled.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Music and culture scenario card background: color-washed stage lights, vibrating mic, animated equalizer bars" style="position:relative;overflow:hidden;min-height:300px;border-radius:14px;background:linear-gradient(165deg,#241a2e,#14101a);border:2px solid #3a2e4a;padding:20px;box-sizing:border-box;color:#f3e7cf;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.5)">
+      <div aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,107,53,.18),rgba(156,39,176,.18) 50%,rgba(33,150,243,.18));animation:hueShift 6s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:26px;top:40px;width:4px;height:40px;border-radius:2px;background:#f3e7cf;animation:micVibe 3s ease-in-out infinite"></div>
+      <div style="position:relative;z-index:2;display:flex;gap:4px;align-items:flex-end;height:34px;position:absolute;left:70px;bottom:60px">
+        <div aria-hidden="true" style="width:5px;height:100%;background:#ff6b35;border-radius:2px;animation:eqBar .9s ease-in-out infinite;transform-origin:bottom"></div>
+        <div aria-hidden="true" style="width:5px;height:100%;background:#f7c948;border-radius:2px;animation:eqBar 1.1s ease-in-out .1s infinite;transform-origin:bottom"></div>
+        <div aria-hidden="true" style="width:5px;height:100%;background:#9c27b0;border-radius:2px;animation:eqBar .7s ease-in-out .2s infinite;transform-origin:bottom"></div>
+        <div aria-hidden="true" style="width:5px;height:100%;background:#ff6b35;border-radius:2px;animation:eqBar 1s ease-in-out .3s infinite;transform-origin:bottom"></div>
+      </div>
+      <div aria-hidden="true" style="position:absolute;left:6px;top:6px;bottom:6px;width:14px;background:linear-gradient(90deg,#3a1a2e,transparent);border-radius:4px 0 0 4px"></div>
+      <div aria-hidden="true" style="position:absolute;right:6px;top:6px;bottom:6px;width:14px;background:linear-gradient(270deg,#3a1a2e,transparent);border-radius:0 4px 4px 0"></div>
+      <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 105%,rgba(0,0,0,.4),transparent 62%);pointer-events:none"></div>
+      <div style="position:relative;z-index:2;font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#ff6b35">Scenario · Music &amp; Culture</div>
+      <div style="position:relative;z-index:2;font:700 18px/1.35 'Plus Jakarta Sans';margin-top:130px">The mic don't lie.</div>
+    </div>
+  </div>
+
+  <h2 style="font:700 20px 'Plus Jakarta Sans';margin:36px 0 14px;color:#ff6b35">White Cards · Category Tints</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px">
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Cookout category white card, warm steam rising" style="position:relative;overflow:hidden;min-height:220px;border-radius:14px;background:linear-gradient(170deg,#fff7e6,#ffedc7 55%,#ffe3b3);border:2px solid #e0d4b0;padding:16px;box-sizing:border-box;color:#1a1a1a;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.25)">
+      <div aria-hidden="true" style="position:absolute;left:16px;bottom:10px;width:4px;height:4px;border-radius:50%;background:rgba(224,75,0,.35);animation:rise 6s linear infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:26px;bottom:10px;width:3px;height:3px;border-radius:50%;background:rgba(224,75,0,.3);animation:rise 7s linear 1s infinite"></div>
+      <div style="font-size:24px;position:relative;z-index:2">🍗</div>
+      <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#8b7355;margin:8px 0">Response · Cookout</div>
+      <div style="font:600 13px/1.4 'Plus Jakarta Sans';position:relative;z-index:2">Grandma's cast-iron skillet, seasoned since 1974.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Church category white card, gold beam pulse" style="position:relative;overflow:hidden;min-height:220px;border-radius:14px;background:linear-gradient(170deg,#fff7e6,#ffedc7 55%,#ffe3b3);border:2px solid #e0d4b0;padding:16px;box-sizing:border-box;color:#1a1a1a;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.25)">
+      <div aria-hidden="true" style="position:absolute;top:-20px;right:10px;width:50px;height:100px;background:linear-gradient(180deg,rgba(247,201,72,.4),transparent);animation:lightPulse 6s ease-in-out infinite"></div>
+      <div style="font-size:24px;position:relative;z-index:2">🙏🏾</div>
+      <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#8b7355;margin:8px 0">Response · Church</div>
+      <div style="font:600 13px/1.4 'Plus Jakarta Sans';position:relative;z-index:2">A prayer that runs long because the spirit ain't done.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Block category white card, amber streetlight glow" style="position:relative;overflow:hidden;min-height:220px;border-radius:14px;background:linear-gradient(170deg,#fff7e6,#ffedc7 55%,#ffe3b3);border:2px solid #e0d4b0;padding:16px;box-sizing:border-box;color:#1a1a1a;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.25)">
+      <div aria-hidden="true" style="position:absolute;right:10px;top:10px;width:40px;height:40px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,53,.3),transparent 70%);animation:streetlightPulse 4s ease-in-out infinite"></div>
+      <div style="font-size:24px;position:relative;z-index:2">🌇</div>
+      <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#8b7355;margin:8px 0">Response · Block</div>
+      <div style="font:600 13px/1.4 'Plus Jakarta Sans';position:relative;z-index:2">Whatever's playing out the third-floor window.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Money and hustle category white card, green gradient shift" style="position:relative;overflow:hidden;min-height:220px;border-radius:14px;background:linear-gradient(170deg,#f1f8f4,#dcefe0 55%,#c8e6c9);border:2px solid #a5d6a7;padding:16px;box-sizing:border-box;color:#1a1a1a;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.25)">
+      <div aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(120deg,transparent,rgba(76,175,80,.15),transparent);animation:hueShift 8s ease-in-out infinite"></div>
+      <div style="font-size:24px;position:relative;z-index:2">💰</div>
+      <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#2e7d32;margin:8px 0">Response · Hustle</div>
+      <div style="font:600 13px/1.4 'Plus Jakarta Sans';position:relative;z-index:2">A side hustle that outgrew the day job.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Barbershop and beauty category white card, silver mirror shine" style="position:relative;overflow:hidden;min-height:220px;border-radius:14px;background:linear-gradient(170deg,#fff7e6,#ffedc7 55%,#ffe3b3);border:2px solid #e0d4b0;padding:16px;box-sizing:border-box;color:#1a1a1a;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.25)">
+      <div aria-hidden="true" style="position:absolute;top:0;left:-30px;width:30px;height:140%;background:linear-gradient(100deg,transparent,rgba(224,224,224,.5),transparent);animation:shineSweep 5s ease-in-out infinite"></div>
+      <div style="font-size:24px;position:relative;z-index:2">✂️</div>
+      <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#8b7355;margin:8px 0">Response · Barbershop/Beauty</div>
+      <div style="font:600 13px/1.4 'Plus Jakarta Sans';position:relative;z-index:2">A fresh line-up from Deacon's chair, first Saturday of the month.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Music and culture category white card, small animated equalizer" style="position:relative;overflow:hidden;min-height:220px;border-radius:14px;background:linear-gradient(170deg,#fff7e6,#ffedc7 55%,#ffe3b3);border:2px solid #e0d4b0;padding:16px;box-sizing:border-box;color:#1a1a1a;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.25)">
+      <div style="position:absolute;right:14px;bottom:14px;display:flex;gap:3px;align-items:flex-end;height:18px">
+        <div aria-hidden="true" style="width:4px;height:100%;background:#ff6b35;border-radius:2px;animation:eqBar .8s ease-in-out infinite;transform-origin:bottom"></div>
+        <div aria-hidden="true" style="width:4px;height:100%;background:#9c27b0;border-radius:2px;animation:eqBar 1s ease-in-out .1s infinite;transform-origin:bottom"></div>
+        <div aria-hidden="true" style="width:4px;height:100%;background:#f7c948;border-radius:2px;animation:eqBar .6s ease-in-out .2s infinite;transform-origin:bottom"></div>
+      </div>
+      <div style="font-size:24px;position:relative;z-index:2">🎤</div>
+      <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#8b7355;margin:8px 0">Response · Music/Culture</div>
+      <div style="font:600 13px/1.4 'Plus Jakarta Sans';position:relative;z-index:2">An acoustic open mic by candlelight on the stoop.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Struggle and resistance category white card, drifting gray smoke" style="position:relative;overflow:hidden;min-height:220px;border-radius:14px;background:linear-gradient(170deg,#f2f0ee,#e2ddd6 55%,#d4ccc0);border:2px solid #b8b0a4;padding:16px;box-sizing:border-box;color:#1a1a1a;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.25)">
+      <div aria-hidden="true" style="position:absolute;left:16px;bottom:10px;width:6px;height:6px;border-radius:50%;background:rgba(117,117,117,.4);animation:rise 7s linear infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:30px;bottom:14px;width:5px;height:5px;border-radius:50%;background:rgba(117,117,117,.35);animation:rise 8s linear 1.4s infinite"></div>
+      <div style="font-size:24px;position:relative;z-index:2">✊🏾</div>
+      <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#6b6255;margin:8px 0">Response · Struggle/Resistance</div>
+      <div style="font:600 13px/1.4 'Plus Jakarta Sans';position:relative;z-index:2">The tenant association's emergency generator fund, activated.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Romance category white card, pulsing heart" style="position:relative;overflow:hidden;min-height:220px;border-radius:14px;background:linear-gradient(170deg,#fff0f3,#ffe0e8 55%,#ffd0dc);border:2px solid #f0b8c8;padding:16px;box-sizing:border-box;color:#1a1a1a;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.25)">
+      <div aria-hidden="true" style="position:absolute;right:16px;bottom:16px;font-size:16px;color:#e91e63;opacity:.5;animation:iconFloat 3s ease-in-out infinite">♥</div>
+      <div style="font-size:24px;position:relative;z-index:2">🌇</div>
+      <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#a05070;margin:8px 0">Response · Romance</div>
+      <div style="font:600 13px/1.4 'Plus Jakarta Sans';position:relative;z-index:2">Watching the whole skyline go dark from the roof, together.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Tech and social media category white card, blue screen glow" style="position:relative;overflow:hidden;min-height:220px;border-radius:14px;background:linear-gradient(170deg,#eef6fc,#dcedf8 55%,#c9e2f4);border:2px solid #a8cfe8;padding:16px;box-sizing:border-box;color:#1a1a1a;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.25)">
+      <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(33,150,243,.25),transparent 60%);animation:lightPulse 4s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;right:16px;bottom:40px;font-size:12px;animation:heartFloat 2.5s ease-out infinite">❤️</div>
+      <div style="font-size:24px;position:relative;z-index:2">🃏</div>
+      <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#4488bb;margin:8px 0">Response · Tech</div>
+      <div style="font:600 13px/1.4 'Plus Jakarta Sans';position:relative;z-index:2">Somebody's cousin who "knows a guy at the power company."</div>
+    </div>
+  </div>
+
+  <h2 style="font:700 20px 'Plus Jakarta Sans';margin:36px 0 14px;color:#ff6b35">Black Cards · Remaining Scenarios</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:20px">
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Money and hustle scenario card background: blinking register light, flickering open sign" style="position:relative;overflow:hidden;min-height:300px;border-radius:14px;background:linear-gradient(165deg,#2a3020,#161a12);border:2px solid #3a4228;padding:20px;box-sizing:border-box;color:#f3e7cf;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.5)">
+      <div aria-hidden="true" style="position:absolute;top:20px;right:24px;width:10px;height:10px;border-radius:50%;background:#4caf50;box-shadow:0 0 10px #4caf50;animation:streetlightPulse 3s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;top:16px;left:20px;font:700 11px 'Unbounded';color:#f7c948;letter-spacing:1px;animation:neonFlicker 5s steps(1) infinite">OPEN</div>
+      <div aria-hidden="true" style="position:absolute;left:20px;top:60px;width:60px;height:40px;border-radius:4px;background:rgba(243,231,207,.05)"></div>
+      <div aria-hidden="true" style="position:absolute;left:30px;bottom:56px;width:3px;height:3px;border-radius:50%;background:#f7c948;animation:drift 8s ease-in .3s infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:26px;top:66px;width:8px;height:10px;border-radius:1px;background:#c23a2e"></div>
+      <div aria-hidden="true" style="position:absolute;left:38px;top:70px;width:8px;height:6px;border-radius:1px;background:#2e7d32"></div>
+      <div aria-hidden="true" style="position:absolute;left:50px;top:64px;width:8px;height:12px;border-radius:1px;background:#f7c948"></div>
+      <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 105%,rgba(0,0,0,.4),transparent 62%);pointer-events:none"></div>
+      <div style="position:relative;z-index:2;font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#ff6b35">Scenario · Money/Hustle</div>
+      <div style="position:relative;z-index:2;font:700 18px/1.35 'Plus Jakarta Sans';margin-top:130px">Somebody's cousin swears this doubles by Friday.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Struggle and resistance scenario card background: swaying signs, pulsing raised fist, smooth alternating emergency lights" style="position:relative;overflow:hidden;min-height:300px;border-radius:14px;background:linear-gradient(165deg,#2a1c1c,#161010);border:2px solid #4a2e2e;padding:20px;box-sizing:border-box;color:#f3e7cf;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.5)">
+      <div aria-hidden="true" style="position:absolute;inset:0;animation:sirenAlt 10s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;right:30px;top:40px;width:24px;height:16px;border-radius:2px;background:#4caf50;animation:sway 4s ease-in-out infinite;transform-origin:bottom center"></div>
+      <div aria-hidden="true" style="position:absolute;right:60px;top:50px;width:20px;height:14px;border-radius:2px;background:#f7c948;animation:sway 3.6s ease-in-out .3s infinite;transform-origin:bottom center"></div>
+      <div aria-hidden="true" style="position:absolute;left:24px;bottom:50px;font-size:26px;animation:fistPump 2s ease-in-out infinite">✊🏾</div>
+      <div aria-hidden="true" style="position:absolute;left:0;top:20px;width:70px;height:100px;background:linear-gradient(180deg,#241c1c,#161010);opacity:.6"></div>
+      <div aria-hidden="true" style="position:absolute;left:20px;top:30px;width:5px;height:5px;border-radius:50%;background:rgba(150,150,150,.4);animation:rise 9s linear .5s infinite"></div>
+      <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 105%,rgba(0,0,0,.4),transparent 62%);pointer-events:none"></div>
+      <div style="position:relative;z-index:2;font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#ff6b35">Scenario · Struggle/Resistance</div>
+      <div style="position:relative;z-index:2;font:700 18px/1.35 'Plus Jakarta Sans';margin-top:130px">The whole block showed up when the notice went up.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Romance and dating scenario card background: drifting fireflies, warm porch light glow, swaying trees" style="position:relative;overflow:hidden;min-height:300px;border-radius:14px;background:linear-gradient(165deg,#241c30,#12101c);border:2px solid #34284a;padding:20px;box-sizing:border-box;color:#f3e7cf;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.5)">
+      <div aria-hidden="true" style="position:absolute;right:26px;top:30px;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,rgba(255,235,59,.35),transparent 70%);animation:lightPulse 6s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:40px;top:60px;width:4px;height:4px;border-radius:50%;background:#f7c948;box-shadow:0 0 6px #f7c948;animation:fireflyDrift 7s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:70px;top:90px;width:3px;height:3px;border-radius:50%;background:#ff6b35;box-shadow:0 0 5px #ff6b35;animation:fireflyDrift 9s ease-in-out 1.5s infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:50px;top:120px;width:3px;height:3px;border-radius:50%;background:#f7c948;box-shadow:0 0 5px #f7c948;animation:fireflyDrift 8s ease-in-out 3s infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:18px;bottom:44px;width:18px;height:22px;border-radius:9px 9px 4px 4px;background:#2e7d32;animation:sway 5s ease-in-out infinite;transform-origin:bottom center"></div>
+      <div aria-hidden="true" style="position:absolute;left:40px;bottom:44px;width:44px;height:6px;border-radius:2px;background:#4a3a2a"></div>
+      <div aria-hidden="true" style="position:absolute;left:42px;bottom:50px;width:2px;height:10px;background:#4a3a2a"></div>
+      <div aria-hidden="true" style="position:absolute;left:78px;bottom:50px;width:2px;height:10px;background:#4a3a2a"></div>
+      <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 105%,rgba(0,0,0,.4),transparent 62%);pointer-events:none"></div>
+      <div style="position:relative;z-index:2;font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#ff6b35">Scenario · Romance/Dating</div>
+      <div style="position:relative;z-index:2;font:700 18px/1.35 'Plus Jakarta Sans';margin-top:130px">Porch light on, radio low, nowhere else to be.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Tech and social media scenario card background: pulsing screen glow, popping notification, floating heart" style="position:relative;overflow:hidden;min-height:300px;border-radius:14px;background:linear-gradient(165deg,#1a2430,#0e141c);border:2px solid #2a3a4a;padding:20px;box-sizing:border-box;color:#f3e7cf;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.5)">
+      <div aria-hidden="true" style="position:absolute;left:20px;top:50px;width:70px;height:110px;border-radius:10px;background:rgba(33,150,243,.12);animation:lightPulse 4s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:76px;top:56px;width:22px;height:22px;border-radius:50%;background:#ff6b35;display:flex;align-items:center;justify-content:center;font-size:11px;animation:notifPop 4s ease-in-out infinite">💬</div>
+      <div aria-hidden="true" style="position:absolute;left:55px;top:130px;font-size:12px;animation:heartFloat 2.4s ease-out infinite">❤️</div>
+      <div aria-hidden="true" style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(33,150,243,.05) 0 1px,transparent 1px 18px);pointer-events:none"></div>
+      <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 105%,rgba(0,0,0,.4),transparent 62%);pointer-events:none"></div>
+      <div style="position:relative;z-index:2;font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#ff6b35">Scenario · Tech/Social Media</div>
+      <div style="position:relative;z-index:2;font:700 18px/1.35 'Plus Jakarta Sans';margin-top:130px">The whole group chat popped off at once.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Education and HBCU scenario card background: waving maroon and gold flag, swaying trees, twinkling windows" style="position:relative;overflow:hidden;min-height:300px;border-radius:14px;background:linear-gradient(165deg,#241e18,#12100c);border:2px solid #3a3226;padding:20px;box-sizing:border-box;color:#f3e7cf;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.5)">
+      <div aria-hidden="true" style="position:absolute;top:20px;right:34px;width:2px;height:50px;background:#8a8a8a"></div>
+      <div aria-hidden="true" style="position:absolute;top:20px;right:20px;width:24px;height:16px;background:linear-gradient(90deg,#7a1f2b,#f7c948);animation:flagWave 3s ease-in-out infinite;transform-origin:left center"></div>
+      <div aria-hidden="true" style="position:absolute;left:24px;top:60px;width:18px;height:24px;border-radius:9px 9px 4px 4px;background:#2e7d32;animation:sway 5s ease-in-out infinite;transform-origin:bottom center"></div>
+      <div aria-hidden="true" style="position:absolute;left:60px;bottom:70px;width:60px;height:36px;border-radius:4px;background:rgba(243,231,207,.05)"></div>
+      <div aria-hidden="true" style="position:absolute;left:76px;bottom:82px;width:5px;height:5px;background:#f7c948;opacity:.6;animation:rayPulse 5s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;left:92px;bottom:82px;width:5px;height:5px;background:#f7c948;opacity:.5;animation:rayPulse 6s ease-in-out 1s infinite"></div>
+      <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 105%,rgba(0,0,0,.4),transparent 62%);pointer-events:none"></div>
+      <div style="position:relative;z-index:2;font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#ff6b35">Scenario · Education/HBCU</div>
+      <div style="position:relative;z-index:2;font:700 18px/1.35 'Plus Jakarta Sans';margin-top:130px">Homecoming weekend and the whole yard is out.</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Sports and gaming scenario card background: swaying net, flickering scoreboard, swaying crowd shadow" style="position:relative;overflow:hidden;min-height:300px;border-radius:14px;background:linear-gradient(165deg,#241a14,#120e0a);border:2px solid #3a2e24;padding:20px;box-sizing:border-box;color:#f3e7cf;transition:transform .15s ease-out,box-shadow .15s ease-out" style-hover="transform:translateY(-8px);box-shadow:0 16px 28px rgba(0,0,0,.5)">
+      <div aria-hidden="true" style="position:absolute;top:24px;right:30px;width:26px;height:16px;border:2px solid #f3e7cf;border-top:none;border-radius:0 0 4px 4px;animation:netSway 1.4s ease-in-out infinite;transform-origin:top center"></div>
+      <div aria-hidden="true" style="position:absolute;left:20px;top:20px;font:700 14px 'JetBrains Mono';color:#ff6b35;animation:scoreFlicker 6s steps(1) infinite">42–38</div>
+      <div aria-hidden="true" style="position:absolute;left:20px;bottom:60px;width:80px;height:8px;border-radius:4px;background:rgba(243,231,207,.06);animation:crowdSway 6s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;top:20px;right:24px;width:34px;height:22px;border:2px solid rgba(243,231,207,.35);border-radius:2px"></div>
+      <div aria-hidden="true" style="position:absolute;top:60px;right:40px;width:8px;height:8px;border-radius:50%;background:#ff6b35;animation:sealBounce 1.2s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 105%,rgba(0,0,0,.4),transparent 62%);pointer-events:none"></div>
+      <div style="position:relative;z-index:2;font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#ff6b35">Scenario · Sports/Gaming</div>
+      <div style="position:relative;z-index:2;font:700 18px/1.35 'Plus Jakarta Sans';margin-top:130px">Winner stays. Loser's buying the sodas.</div>
+    </div>
+  </div>
+
+  <h2 style="font:700 20px 'Plus Jakarta Sans';margin:36px 0 14px;color:#ff6b35">Receipt Cards · States</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:18px">
+    <div class="ck-card" tabindex="0" role="img" aria-label="Receipt card, default state, gold seal pulsing" style="position:relative;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,#f7c948,#ff6b35);border:3px solid #f7c948;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#1a1a1a;padding:20px;box-sizing:border-box;animation:sealPulse 3s ease-in-out infinite">
+      <div style="font-size:36px">📜</div>
+      <div style="font:600 11px 'Plus Jakarta Sans';margin-top:8px">Pinned · Default</div>
+    </div>
+    <div class="ck-card" tabindex="0" role="img" aria-label="Receipt card, active unresolved state, red urgency pulse" style="position:relative;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,#fff8e1,#ffecb3);border:3px solid #ff4444;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#1a1a1a;padding:20px;box-sizing:border-box;animation:urgentPulse 1.5s ease-in-out infinite">
+      <div aria-hidden="true" style="position:absolute;top:16px;right:24px;width:8px;height:8px;border-radius:50%;background:#ff4444;animation:urgentPulse 1s ease-in-out infinite"></div>
+      <div style="font-size:36px;animation:sealBounce 2s ease-in-out infinite">📜</div>
+      <div style="font:600 11px 'Plus Jakarta Sans';margin-top:8px;color:#c62828">Unresolved</div>
+    </div>
+    <div class="ck-card" tabindex="0" role="img" aria-label="Receipt card, resolved state, static green checkmark" style="position:relative;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,#f1f8f4,#c8e6c9);border:3px solid #4caf50;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#1a1a1a;padding:20px;box-sizing:border-box">
+      <div style="font-size:36px">✓</div>
+      <div style="font:600 11px 'Plus Jakarta Sans';margin-top:8px;color:#2e7d32">Resolved</div>
+    </div>
+  </div>
+
+  <h2 style="font:700 20px 'Plus Jakarta Sans';margin:36px 0 14px;color:#ff6b35">Cipher Cards · States</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:18px">
+    <div class="ck-card" tabindex="0" role="img" aria-label="Cipher card, default state, purple pulse and floating icon" style="position:relative;width:140px;height:140px;border-radius:16px;background:linear-gradient(135deg,#f3e5f5,#e1bee7);border:3px solid #9c27b0;display:flex;align-items:center;justify-content:center;color:#1a1a1a;animation:cipherEnergy 2s ease-in-out infinite">
+      <div style="font-size:40px;animation:iconFloat 3s ease-in-out infinite">🔥</div>
+    </div>
+    <div class="ck-card" tabindex="0" role="img" aria-label="Cipher card, active state, intense pulse, spinning icon, orbiting particles" style="position:relative;width:140px;height:140px;border-radius:16px;background:linear-gradient(135deg,#f3e5f5,#e1bee7);border:3px solid #ff6b35;display:flex;align-items:center;justify-content:center;color:#1a1a1a;animation:cipherActiveEnergy 1.4s ease-in-out infinite">
+      <div aria-hidden="true" style="position:absolute;width:6px;height:6px;border-radius:50%;background:#9c27b0;animation:orbit 2s linear infinite"></div>
+      <div aria-hidden="true" style="position:absolute;width:5px;height:5px;border-radius:50%;background:#ff6b35;animation:orbit 2s linear -1s infinite"></div>
+      <div style="font-size:40px;animation:iconSpin 1s linear infinite">🎲</div>
+    </div>
+    <div class="ck-card" tabindex="0" role="img" aria-label="Cipher card, expired state, grayed out, no animation" style="position:relative;width:140px;height:140px;border-radius:16px;background:#3a3a3a;border:3px solid #555;display:flex;align-items:center;justify-content:center;color:#888;opacity:.55">
+      <div style="font-size:40px;filter:grayscale(1)">👑</div>
+    </div>
+  </div>
+
+  <h2 style="font:700 20px 'Plus Jakarta Sans';margin:36px 0 14px;color:#ff6b35">Origin Cards · Identity Animations</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:18px">
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Church Child origin card, pulsing halo and glowing cross" style="position:relative;overflow:hidden;min-height:230px;border-radius:14px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border:2px solid #4caf50;padding:16px;box-sizing:border-box;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .15s ease-out" style-hover="transform:translateY(-8px)">
+      <div aria-hidden="true" style="position:absolute;top:14px;width:38px;height:38px;border-radius:50%;border:3px solid #f7c948;animation:haloPulse 3s ease-in-out infinite"></div>
+      <div style="font-size:40px;margin-top:34px">🙏🏾</div>
+      <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;color:#2e7d32;margin-top:10px">Origin</div>
+      <div style="font:800 14px 'Plus Jakarta Sans';margin-top:4px">Church Child</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Block Product origin card, bouncing basketball shadow, flickering neon" style="position:relative;overflow:hidden;min-height:230px;border-radius:14px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border:2px solid #4caf50;padding:16px;box-sizing:border-box;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .15s ease-out" style-hover="transform:translateY(-8px)">
+      <div aria-hidden="true" style="position:absolute;top:70px;width:20px;height:5px;border-radius:50%;background:rgba(0,0,0,.25);animation:sealBounce 1.5s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;top:14px;right:16px;font:700 9px 'Unbounded';color:#e04b00;animation:neonFlicker 5s steps(1) infinite">OPEN</div>
+      <div style="font-size:40px;margin-top:34px">🏘️</div>
+      <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;color:#2e7d32;margin-top:10px">Origin</div>
+      <div style="font:800 14px 'Plus Jakarta Sans';margin-top:4px">Block Product</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Beauty Shop Insider origin card, shimmering mirror shine sweep" style="position:relative;overflow:hidden;min-height:230px;border-radius:14px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border:2px solid #4caf50;padding:16px;box-sizing:border-box;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .15s ease-out" style-hover="transform:translateY(-8px)">
+      <div aria-hidden="true" style="position:absolute;inset:0;overflow:hidden"><div aria-hidden="true" style="position:absolute;top:0;left:-30%;width:30%;height:140%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);animation:shineSweep 5s ease-in-out infinite"></div></div>
+      <div style="font-size:40px;margin-top:34px;position:relative">💅🏾</div>
+      <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;color:#2e7d32;margin-top:10px;position:relative">Origin</div>
+      <div style="font:800 14px 'Plus Jakarta Sans';margin-top:4px;position:relative">Beauty Shop Insider</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Cookout Regular origin card, rising smoke, bobbing plate" style="position:relative;overflow:hidden;min-height:230px;border-radius:14px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border:2px solid #4caf50;padding:16px;box-sizing:border-box;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .15s ease-out" style-hover="transform:translateY(-8px)">
+      <div aria-hidden="true" style="position:absolute;top:40px;left:60px;width:4px;height:4px;border-radius:50%;background:rgba(100,100,100,.4);animation:rise 6s linear infinite"></div>
+      <div aria-hidden="true" style="position:absolute;top:70px;width:26px;height:6px;border-radius:50%;background:rgba(0,0,0,.15);animation:chairSway 5s ease-in-out infinite"></div>
+      <div style="font-size:40px;margin-top:34px">🍽️</div>
+      <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;color:#2e7d32;margin-top:10px">Origin</div>
+      <div style="font:800 14px 'Plus Jakarta Sans';margin-top:4px">Cookout Regular</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="HBCU Student origin card, waving flag, swaying tree" style="position:relative;overflow:hidden;min-height:230px;border-radius:14px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border:2px solid #4caf50;padding:16px;box-sizing:border-box;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .15s ease-out" style-hover="transform:translateY(-8px)">
+      <div aria-hidden="true" style="position:absolute;top:20px;right:24px;width:20px;height:14px;background:linear-gradient(90deg,#7a1f2b,#f7c948);animation:flagWave 3s ease-in-out infinite;transform-origin:left center"></div>
+      <div aria-hidden="true" style="position:absolute;top:30px;left:20px;width:14px;height:20px;border-radius:7px 7px 3px 3px;background:#2e7d32;animation:sway 5s ease-in-out infinite;transform-origin:bottom center"></div>
+      <div style="font-size:40px;margin-top:34px">🎓</div>
+      <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;color:#2e7d32;margin-top:10px">Origin</div>
+      <div style="font:800 14px 'Plus Jakarta Sans';margin-top:4px">HBCU Student</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="The Creative origin card, rotating color swirl" style="position:relative;overflow:hidden;min-height:230px;border-radius:14px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border:2px solid #4caf50;padding:16px;box-sizing:border-box;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .15s ease-out" style-hover="transform:translateY(-8px)">
+      <div aria-hidden="true" style="position:absolute;inset:0;background:conic-gradient(from 0deg,#ff6b35,#9c27b0,#2196f3,#f7c948,#ff6b35);opacity:.18;animation:colorBurst 6s linear infinite"></div>
+      <div style="font-size:40px;margin-top:34px;position:relative">🎨</div>
+      <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;color:#2e7d32;margin-top:10px;position:relative">Origin</div>
+      <div style="font:800 14px 'Plus Jakarta Sans';margin-top:4px;position:relative">The Creative</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="The Hustler origin card, glowing phone screen" style="position:relative;overflow:hidden;min-height:230px;border-radius:14px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border:2px solid #4caf50;padding:16px;box-sizing:border-box;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .15s ease-out" style-hover="transform:translateY(-8px)">
+      <div aria-hidden="true" style="position:absolute;top:30px;right:28px;width:16px;height:26px;border-radius:3px;background:#2196f3;animation:lightPulse 4s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;top:60px;left:24px;font-size:14px;color:#2e7d32;animation:coinPulse 2s ease-in-out infinite">💵</div>
+      <div style="font-size:40px;margin-top:34px">💼</div>
+      <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;color:#2e7d32;margin-top:10px">Origin</div>
+      <div style="font:800 14px 'Plus Jakarta Sans';margin-top:4px">The Hustler</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="The Protector origin card, sweeping flashlight beam, shining badge" style="position:relative;overflow:hidden;min-height:230px;border-radius:14px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border:2px solid #4caf50;padding:16px;box-sizing:border-box;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .15s ease-out" style-hover="transform:translateY(-8px)">
+      <div aria-hidden="true" style="position:absolute;top:30px;right:20px;width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-top:36px solid rgba(255,235,59,.25);animation:beamSweep 4s ease-in-out infinite;transform-origin:top center"></div>
+      <div aria-hidden="true" style="position:absolute;top:70px;left:30px;font-size:12px;animation:lightPulse 3s ease-in-out infinite">🛡️</div>
+      <div style="font-size:40px;margin-top:34px">✊🏾</div>
+      <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;color:#2e7d32;margin-top:10px">Origin</div>
+      <div style="font:800 14px 'Plus Jakarta Sans';margin-top:4px">The Protector</div>
+    </div>
+  </div>
+
+  <h2 style="font:700 20px 'Plus Jakarta Sans';margin:36px 0 14px;color:#ff6b35">Hustle Cards · Power Animations</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:18px">
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Street Hustler power card, falling money" style="position:relative;overflow:hidden;min-height:200px;border-radius:14px;background:linear-gradient(135deg,#e3f2fd,#bbdefb);border:2px solid #2196f3;padding:16px;box-sizing:border-box;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .15s ease-out" style-hover="transform:translateY(-8px)">
+      <div aria-hidden="true" style="position:absolute;top:10px;left:30%;font-size:12px;color:#2e7d32;animation:moneyRain 3s linear infinite">💵</div>
+      <div aria-hidden="true" style="position:absolute;top:10px;left:60%;font-size:10px;color:#2e7d32;animation:moneyRain 3.6s linear .8s infinite">💵</div>
+      <div style="font-size:34px;margin-top:26px">🎧</div>
+      <div style="font:800 13px 'Plus Jakarta Sans';margin-top:8px">Street Hustler</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Community Organizer power card, pulsing network lines" style="position:relative;overflow:hidden;min-height:200px;border-radius:14px;background:linear-gradient(135deg,#e3f2fd,#bbdefb);border:2px solid #2196f3;padding:16px;box-sizing:border-box;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .15s ease-out" style-hover="transform:translateY(-8px)">
+      <svg aria-hidden="true" style="position:absolute;top:14px;width:60px;height:30px" viewBox="0 0 60 30"><line x1="6" y1="6" x2="30" y2="24" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="4 3" style="animation:networkPulse 2s linear infinite"></line><line x1="54" y1="6" x2="30" y2="24" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="4 3" style="animation:networkPulse 2s linear .5s infinite"></line></svg>
+      <div style="font-size:34px;margin-top:40px">✊🏾</div>
+      <div style="font:800 13px 'Plus Jakarta Sans';margin-top:8px">Community Organizer</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Creative power card, rotating color burst" style="position:relative;overflow:hidden;min-height:200px;border-radius:14px;background:linear-gradient(135deg,#e3f2fd,#bbdefb);border:2px solid #2196f3;padding:16px;box-sizing:border-box;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .15s ease-out" style-hover="transform:translateY(-8px)">
+      <div aria-hidden="true" style="position:absolute;inset:0;background:conic-gradient(from 0deg,#ff6b35,#9c27b0,#2196f3,#f7c948);opacity:.2;animation:colorBurst 5s linear infinite"></div>
+      <div style="font-size:34px;margin-top:26px;position:relative">🎤</div>
+      <div style="font:800 13px 'Plus Jakarta Sans';margin-top:8px;position:relative">The Poet</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Entrepreneur power card, growing bar graph" style="position:relative;overflow:hidden;min-height:200px;border-radius:14px;background:linear-gradient(135deg,#e3f2fd,#bbdefb);border:2px solid #2196f3;padding:16px;box-sizing:border-box;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .15s ease-out" style-hover="transform:translateY(-8px)">
+      <div style="position:absolute;top:16px;display:flex;gap:4px;align-items:flex-end;height:24px">
+        <div aria-hidden="true" style="width:6px;height:100%;background:#1565c0;border-radius:2px;animation:graphGrow 1.6s ease-in-out infinite;transform-origin:bottom"></div>
+        <div aria-hidden="true" style="width:6px;height:100%;background:#1565c0;border-radius:2px;animation:graphGrow 1.6s ease-in-out .2s infinite;transform-origin:bottom"></div>
+        <div aria-hidden="true" style="width:6px;height:100%;background:#1565c0;border-radius:2px;animation:graphGrow 1.6s ease-in-out .4s infinite;transform-origin:bottom"></div>
+      </div>
+      <div style="font-size:34px;margin-top:40px">🍽️</div>
+      <div style="font:800 13px 'Plus Jakarta Sans';margin-top:8px">The Cook</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Student power card, glowing lightbulb" style="position:relative;overflow:hidden;min-height:200px;border-radius:14px;background:linear-gradient(135deg,#e3f2fd,#bbdefb);border:2px solid #2196f3;padding:16px;box-sizing:border-box;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .15s ease-out" style-hover="transform:translateY(-8px)">
+      <div aria-hidden="true" style="position:absolute;top:14px;font-size:16px;animation:bulbGlow 3s ease-in-out infinite">💡</div>
+      <div style="font-size:34px;margin-top:40px">📖</div>
+      <div style="font:800 13px 'Plus Jakarta Sans';margin-top:8px">The Chronicler</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Elder power card, pulsing candle and light rays" style="position:relative;overflow:hidden;min-height:200px;border-radius:14px;background:linear-gradient(135deg,#e3f2fd,#bbdefb);border:2px solid #2196f3;padding:16px;box-sizing:border-box;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .15s ease-out" style-hover="transform:translateY(-8px)">
+      <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(circle at 50% 20%,rgba(247,201,72,.4),transparent 60%);animation:rayPulse 5s ease-in-out infinite"></div>
+      <div aria-hidden="true" style="position:absolute;top:14px;width:4px;height:14px;border-radius:2px;background:#f7c948;animation:flameFlicker 2.2s ease-in-out infinite"></div>
+      <div style="font-size:34px;margin-top:40px;position:relative">🧓🏾</div>
+      <div style="font:800 13px 'Plus Jakarta Sans';margin-top:8px;position:relative">The Elder</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Diplomat power card, rotating handshake" style="position:relative;overflow:hidden;min-height:200px;border-radius:14px;background:linear-gradient(135deg,#e3f2fd,#bbdefb);border:2px solid #2196f3;padding:16px;box-sizing:border-box;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .15s ease-out" style-hover="transform:translateY(-8px)">
+      <div aria-hidden="true" style="position:absolute;top:20px;font-size:16px;animation:iconFloat 3s ease-in-out infinite">🤝</div>
+      <div style="font-size:34px;margin-top:40px">🕊️</div>
+      <div style="font:800 13px 'Plus Jakarta Sans';margin-top:8px">The Diplomat</div>
+    </div>
+
+    <div class="ck-card" tabindex="0" role="img" aria-label="Rebel power card, flickering fire and pumping fist" style="position:relative;overflow:hidden;min-height:200px;border-radius:14px;background:linear-gradient(135deg,#e3f2fd,#bbdefb);border:2px solid #2196f3;padding:16px;box-sizing:border-box;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .15s ease-out" style-hover="transform:translateY(-8px)">
+      <div aria-hidden="true" style="position:absolute;top:14px;width:8px;height:16px;border-radius:4px;background:#ff6b35;animation:flameFlicker 1.6s ease-in-out infinite;transform-origin:bottom"></div>
+      <div style="font-size:34px;margin-top:40px;animation:fistPump 2s ease-in-out infinite">✊🏾</div>
+      <div style="font:800 13px 'Plus Jakarta Sans';margin-top:8px">The Rebel</div>
+    </div>
+  </div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = { weather: 'clear', eventSel: 'blockparty', eventType: null };
+  weatherList = [['clear', 'Clear Night'], ['rain', 'Rain'], ['snow', 'Snow'], ['fog', 'Fog'], ['heat', 'Heat Wave'], ['thunder', 'Thunderstorm']];
+  eventList = [
+    ['blockparty', '🎉 Block Party', '🎉'], ['raid', '🚨 Police Raid', '🚨'], ['fire', '🔥 Fire', '🔥'],
+    ['church', '⛪ Church Service', '⛪'], ['cookout', '🍗 Cookout', '🍗'], ['funeral', '🕊️ Funeral', '🕊️'],
+  ];
+  weatherStyle(w) {
+    const map = {
+      clear: '',
+      rain: 'background:repeating-linear-gradient(115deg,rgba(176,190,197,.4) 0 2px,transparent 2px 14px);animation:rainMove .4s linear infinite',
+      snow: 'background:radial-gradient(circle,rgba(255,255,255,.7) 1.5px,transparent 2px) 0 0/18px 18px;animation:snowMove 3s linear infinite',
+      fog: 'background:linear-gradient(0deg,rgba(158,158,158,.35),transparent 70%);animation:fogPulse 5s ease-in-out infinite',
+      heat: 'background:rgba(255,107,53,.1);animation:heatPulse 4s ease-in-out infinite',
+      thunder: 'background:repeating-linear-gradient(115deg,rgba(176,190,197,.5) 0 2px,transparent 2px 12px);animation:rainMove .35s linear infinite,lightning 5s linear infinite',
+    };
+    return map[w] || '';
+  }
+  componentWillUnmount() { clearTimeout(this._evtTm); }
+  renderVals() {
+    const st = this.state;
+    const ev = st.eventType ? this.eventList.find(e => e[0] === st.eventType) : null;
+    return {
+      weatherOpts: this.weatherList.map(([key, label]) => ({ key, label })), weather: st.weather,
+      weatherChange: (e) => this.setState({ weather: e.target.value }),
+      weatherOverlayStyle: this.weatherStyle(st.weather),
+      eventOpts: this.eventList.map(([key, label]) => ({ key, label })), eventSel: st.eventSel,
+      eventChange: (e) => this.setState({ eventSel: e.target.value }),
+      triggerEventBtn: () => {
+        const key = st.eventSel; clearTimeout(this._evtTm);
+        this.setState({ eventType: key });
+        this._evtTm = setTimeout(() => this.setState({ eventType: null }), 6000);
+      },
+      eventActive: !!st.eventType,
+      eventIcon: ev ? ev[2] : '', eventLabel: ev ? ev[1].replace(/^\S+\s/, '') : '',
+    };
+  }
+}
+</script>
+</body>
+</html>

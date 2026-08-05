@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<template id="__bundler_thumbnail" data-bg-color="#141210">
+  <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <rect width="120" height="120" fill="#141210"/>
+    <rect x="0" y="70" width="120" height="50" fill="#232128"/>
+    <rect x="14" y="30" width="24" height="40" fill="#3a2a1a" stroke="#f7c948" stroke-width="1.5"/>
+    <rect x="46" y="20" width="28" height="50" fill="#4a2c22" stroke="#ff6b35" stroke-width="1.5"/>
+    <rect x="82" y="36" width="22" height="34" fill="#3a2430" stroke="#e91e63" stroke-width="1.5"/>
+    <circle cx="60" cy="86" r="16" fill="#ff6b35" opacity=".35"/>
+    <circle cx="26" cy="50" r="2" fill="#f7c948"/>
+    <circle cx="58" cy="40" r="2" fill="#f7c948"/>
+    <circle cx="90" cy="52" r="2" fill="#f7c948"/>
+  </svg>
+</template>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@400;500;600;700&amp;family=Unbounded:wght@400;700;900&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#141210;color:#f3e7cf;font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+a{color:#ff6b35}a:hover{color:#e04b00}
+[tabindex]:focus-visible,button:focus-visible{outline:3px solid #ff6b35;outline-offset:2px}
+@keyframes ckPulse{0%,100%{box-shadow:0 0 0 6px rgba(255,107,53,.3)}50%{box-shadow:0 0 0 12px rgba(255,107,53,.1)}}
+@keyframes ckSlideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+[data-ck-handle]{display:none}
+@media (max-width:768px){
+[data-ck-aside]{position:fixed!important;left:0;right:0;bottom:0;top:auto;width:100%!important;max-height:64vh;border-left:none!important;border-top:2px solid #ff6b35;border-radius:16px 16px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.6);z-index:40;transform:translateY(calc(100% - 46px));transition:transform .35s cubic-bezier(.34,1.2,.64,1)}
+[data-ck-aside][data-open="true"]{transform:none}
+[data-ck-handle]{display:flex!important}
+[data-ck-foot]{flex-wrap:wrap;min-height:0!important;padding-bottom:56px!important}
+[data-ck-mini]{display:none!important}
+}
+</style>
+</helmet>
+<section data-screen-label="Block Map" style="display:flex;flex-direction:column;height:100vh;overflow:hidden;background:#141210">
+  <div aria-live="polite" style="position:fixed;left:-9999px;top:0">{{ announce }}</div>
+  <header style="flex:none;display:flex;align-items:center;gap:14px;flex-wrap:wrap;min-height:60px;padding:8px 18px;background:rgba(26,26,26,.95);border-bottom:2px solid #ff6b35;box-sizing:border-box;z-index:10">
+    <div style="font:700 18px 'Unbounded';letter-spacing:-.5px">THE BLOCK</div>
+    <div style="font:600 12px 'Space Grotesk';color:#ff6b35;border:1px solid #ff6b35;border-radius:999px;padding:4px 12px">ROUND 3 / 7</div>
+    <div title="Cipher landed: ☮ Peace — no beef actions this round" style="font:500 10px 'Space Grotesk';letter-spacing:1px;text-transform:uppercase;background:#9c27b0;color:#fff7e6;border-radius:999px;padding:5px 12px;animation:ckPulse 2s ease-in-out infinite;cursor:help">☮ Cipher: Peace</div>
+    <div style="display:flex;gap:5px;margin-left:auto;flex-wrap:wrap;align-items:center">
+      <span style="font:500 9px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;opacity:.5;margin-right:2px">City</span>
+      <sc-for list="{{ themes }}" as="t" hint-placeholder-count="8"><button onClick="{{ t.go }}" aria-pressed="{{ t.cur }}" style="font:600 10px 'Space Grotesk';letter-spacing:.5px;text-transform:uppercase;border:none;border-radius:5px;padding:6px 9px;cursor:pointer;transition:background .15s ease;background:{{ t.bg }};color:{{ t.fg }}">{{ t.label }}</button></sc-for>
+    </div>
+    <div style="display:flex;gap:10px;font:600 11px 'JetBrains Mono'"><span title="Street Cred" style="color:#ff6b35">💼 5</span><span title="Community" style="color:#4caf50">🤝 6</span><span title="Wisdom" style="color:#2196f3">📖 4</span><span title="Reputation" style="color:#f7c948">👑 7</span></div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <select onChange="{{ weatherChange }}" value="{{ weatherVal }}" aria-label="Weather" style="font:600 10px 'Space Grotesk';background:rgba(255,255,255,.06);color:#f3e7cf;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:6px 8px;cursor:pointer">
+        <sc-for list="{{ weatherOpts }}" as="w" hint-placeholder-count="10"><option value="{{ w.key }}">{{ w.label }}</option></sc-for>
+      </select>
+      <select onChange="{{ eventSelChange }}" value="{{ eventSelVal }}" aria-label="Event type to trigger" style="font:600 10px 'Space Grotesk';background:rgba(255,255,255,.06);color:#f3e7cf;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:6px 8px;cursor:pointer">
+        <sc-for list="{{ eventOpts }}" as="ev" hint-placeholder-count="10"><option value="{{ ev.key }}">{{ ev.label }}</option></sc-for>
+      </select>
+      <button onClick="{{ triggerEventBtn }}" style="font:600 10px 'Space Grotesk';letter-spacing:.5px;text-transform:uppercase;background:#9c27b0;color:#fff7e6;border:none;border-radius:6px;padding:7px 10px;cursor:pointer">Trigger</button>
+      <button onClick="{{ toggleMute }}" aria-label="Toggle sound" style="width:30px;height:30px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#f3e7cf;cursor:pointer;font-size:13px">{{ muteIcon }}</button>
+      <button onClick="{{ toggleSettings }}" aria-label="Open settings" style="width:30px;height:30px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#f3e7cf;cursor:pointer;font-size:13px">⚙️</button>
+    </div>
+  </header>
+  <div style="flex:1;display:flex;min-height:0">
+    <div ref="{{ refWrap }}" style="position:relative;flex:1;min-width:0;overflow:hidden">
+      <canvas ref="{{ refCanvas }}" tabindex="0" aria-label="Top-down map of The Block. Use left and right arrow keys to browse locations, Enter to select or move." style="display:block;width:100%;height:100%;cursor:grab;touch-action:none"></canvas>
+      <div ref="{{ refTip }}" aria-hidden="true" style="position:absolute;left:0;top:0;display:none;max-width:260px;background:rgba(26,26,26,.95);border:2px solid #ff6b35;border-radius:8px;padding:10px 13px;font:600 12px/1.45 'Plus Jakarta Sans';color:#f3e7cf;pointer-events:none;z-index:5;box-shadow:0 8px 24px rgba(0,0,0,.5)"></div>
+      <div style="position:absolute;left:12px;top:12px;display:flex;flex-direction:column;gap:6px;z-index:4">
+        <button onClick="{{ zoomIn }}" aria-label="Zoom in" style="width:36px;height:36px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(26,26,26,.9);color:#f3e7cf;font:700 17px 'Space Grotesk';cursor:pointer" style-hover="background:#ff6b35">+</button>
+        <button onClick="{{ zoomOut }}" aria-label="Zoom out" style="width:36px;height:36px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(26,26,26,.9);color:#f3e7cf;font:700 17px 'Space Grotesk';cursor:pointer" style-hover="background:#ff6b35">−</button>
+        <button onClick="{{ zoomFit }}" aria-label="Reset view" style="width:36px;height:36px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(26,26,26,.9);color:#f3e7cf;font:600 10px 'Space Grotesk';cursor:pointer" style-hover="background:#ff6b35">FIT</button>
+      </div>
+      <div style="position:absolute;right:12px;top:12px;background:rgba(26,26,26,.85);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;z-index:4;display:flex;flex-direction:column;gap:4px;font:500 9px 'Space Grotesk';letter-spacing:1px;text-transform:uppercase;color:rgba(243,231,207,.75)">
+        <span><span style="display:inline-block;width:14px;height:3px;background:#4caf50;vertical-align:middle;margin-right:6px"></span>Alliance</span>
+        <span><span style="display:inline-block;width:14px;height:3px;background:#ff4444;vertical-align:middle;margin-right:6px"></span>Beef</span>
+        <span><span style="display:inline-block;width:14px;height:3px;background:#e91e63;vertical-align:middle;margin-right:6px"></span>Romantic</span>
+        <span><span style="display:inline-block;width:14px;height:2px;background:rgba(243,231,207,.4);vertical-align:middle;margin-right:6px"></span>Neutral</span>
+      </div>
+      <sc-if value="{{ eventActive }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:6;background:rgba(26,26,26,.95);border:2px solid #ff6b35;border-radius:10px;padding:10px 18px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:ckSlideUp .3s ease-out;white-space:nowrap">
+          <span style="font-size:20px">{{ eventIcon }}</span>
+          <div><div style="font:700 13px 'Plus Jakarta Sans'">{{ eventLabel }}</div><div style="font:500 10px 'Space Grotesk';opacity:.75">{{ eventGameplay }}</div></div>
+        </div>
+      </sc-if>
+      <div aria-live="polite" style="position:absolute;right:12px;bottom:12px;z-index:6;display:flex;flex-direction:column;gap:8px;max-width:280px">
+        <sc-for list="{{ toasts }}" as="ts" hint-placeholder-count="0">
+          <div style="background:#fff3e0;border-left:4px solid {{ ts.color }};border-radius:8px;padding:10px 14px;font:600 12px/1.4 'Plus Jakarta Sans';color:#1a1a1a;box-shadow:0 6px 16px rgba(0,0,0,.3);animation:ckSlideUp .3s ease-out">{{ ts.text }}</div>
+        </sc-for>
+      </div>
+    </div>
+    <aside data-ck-aside="" data-open="{{ sheetOpen }}" style="flex:none;width:320px;background:rgba(26,26,26,.95);border-left:2px solid rgba(255,255,255,.08);padding:16px;box-sizing:border-box;overflow-y:auto;display:flex;flex-direction:column;gap:16px;zoom:{{ textZoomPct }}">
+      <button data-ck-handle="" onClick="{{ toggleSheet }}" aria-expanded="{{ sheetOpen }}" aria-label="Toggle block info sheet" style="align-items:center;justify-content:center;gap:8px;background:none;border:none;color:#f3e7cf;font:600 12px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;padding:2px 0 10px;margin:-4px 0 0"><span style="display:inline-block;width:38px;height:4px;border-radius:2px;background:rgba(243,231,207,.4)"></span>{{ sheetLabel }}<span style="display:inline-block;width:38px;height:4px;border-radius:2px;background:rgba(243,231,207,.4)"></span></button>
+      <div>
+        <div style="font:500 11px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:8px">{{ locName }}</div>
+        <p style="font:400 13px/1.6 'Plus Jakarta Sans';opacity:.8;margin:0 0 10px">{{ locFlavor }}</p>
+        <div style="font:500 10px 'Space Grotesk';letter-spacing:1px;text-transform:uppercase;opacity:.55;margin-bottom:10px">Here now: {{ occupants }}</div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <sc-for list="{{ locActions }}" as="a" hint-placeholder-count="2"><button onClick="{{ a.go }}" style="font:600 13px 'Plus Jakarta Sans';background:#ff6b35;color:#fff7e6;border:none;border-radius:8px;padding:10px 14px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.2);text-align:left;transition:all .15s ease" style-hover="background:#e04b00;transform:translateY(-2px)">{{ a.label }}</button></sc-for>
+        </div>
+        <div aria-live="polite" style="font:600 12px 'Plus Jakarta Sans';color:#f7c948;margin-top:10px;min-height:18px">{{ mapMsg }}</div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:14px">
+        <div style="font:500 11px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#f7c948;margin-bottom:10px">Active Receipts</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:10px;align-items:center;background:linear-gradient(135deg,#fff8e1,#ffecb3);border:2px solid #f7c948;border-radius:10px;padding:10px;color:#1a1a1a;transform:rotate(-1deg);cursor:pointer;transition:transform .2s ease-out,box-shadow .2s ease-out" style-hover="transform:rotate(0) translateY(-2px);box-shadow:0 8px 16px rgba(247,201,72,.3)"><div style="flex:none;width:34px;height:34px;border-radius:50%;background:#f7c948;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 0 rgba(0,0,0,.2)">📜</div><div><div style="font:italic 800 12px 'Plus Jakarta Sans'">The Aux Cord Incident</div><div style="font:400 9px 'JetBrains Mono';color:#b8860b;margin-top:2px">RND 1 · UNRESOLVED</div></div></div>
+          <div style="display:flex;gap:10px;align-items:center;background:linear-gradient(135deg,#f1f8f4,#c8e6c9);border:2px solid #4caf50;border-radius:10px;padding:10px;color:#1a1a1a;transform:rotate(1deg);cursor:pointer;transition:transform .2s ease-out,box-shadow .2s ease-out" style-hover="transform:rotate(0) translateY(-2px);box-shadow:0 8px 16px rgba(76,175,80,.3)"><div style="flex:none;width:34px;height:34px;border-radius:50%;background:#4caf50;color:#fff7e6;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 0 rgba(0,0,0,.2)">✓</div><div><div style="font:italic 800 12px 'Plus Jakarta Sans'">The Blackout Save</div><div style="font:400 9px 'JetBrains Mono';color:#2e7d32;margin-top:2px">RND 3 · +2 REP</div></div></div>
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:14px">
+        <div style="font:500 11px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#f7c948;margin-bottom:10px">The Table</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <sc-for list="{{ pstats }}" as="p" hint-placeholder-count="5">
+            <div style="display:flex;gap:10px;align-items:center">
+              <div style="flex:none;width:36px;height:36px;border-radius:50%;color:#fff7e6;font:700 13px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.2);background:{{ p.color }}">{{ p.initial }}</div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 12px 'Plus Jakarta Sans'">{{ p.name }}</span><span style="font:500 8px 'Space Grotesk';letter-spacing:1px;text-transform:uppercase;opacity:.55">{{ p.hustle }}</span></div>
+                <div style="display:flex;gap:3px;margin-top:5px">
+                  <sc-for list="{{ p.bars }}" as="b" hint-placeholder-count="4"><div title="{{ b.title }}" style="flex:1;height:7px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden"><div style="height:100%;transition:width .6s ease-out;background:{{ b.color }};width:{{ b.pct }}"></div></div></sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </aside>
+  </div>
+  <footer data-ck-foot="" style="flex:none;display:flex;align-items:center;gap:14px;min-height:80px;padding:10px 18px;background:rgba(26,26,26,.95);border-top:2px solid rgba(255,255,255,.08);box-sizing:border-box;z-index:10;zoom:{{ textZoomPct }}">
+    <div style="display:flex;gap:10px;align-items:center">
+      <div style="width:44px;height:44px;border-radius:50%;background:#f7c948;color:#1a1a1a;font:700 16px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.3)">Y</div>
+      <div><div style="font:700 14px 'Plus Jakarta Sans'">You</div><div style="font:500 9px 'Space Grotesk';letter-spacing:1px;text-transform:uppercase;opacity:.6">📖 The Chronicler</div></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 auto">
+      <button onClick="{{ doMove }}" style="font:600 13px 'Plus Jakarta Sans';border:none;border-radius:8px;padding:11px 20px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.2);transition:all .15s ease;background:{{ moveBg }};color:#fff7e6" style-hover="transform:translateY(-2px)">🚶🏾 Move</button>
+      <button onClick="{{ doAction }}" style="font:600 13px 'Plus Jakarta Sans';background:#4caf50;color:#fff7e6;border:none;border-radius:8px;padding:11px 20px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.2);transition:all .15s ease" style-hover="transform:translateY(-2px)">✋🏾 Action</button>
+      <button onClick="{{ doPower }}" style="font:600 13px 'Plus Jakarta Sans';background:#9c27b0;color:#fff7e6;border:none;border-radius:8px;padding:11px 20px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.2);transition:all .15s ease" style-hover="transform:translateY(-2px)">📖 Hustle Power</button>
+      <button onClick="{{ endTurn }}" style="font:600 13px 'Plus Jakarta Sans';background:transparent;border:2px solid #f3e7cf;color:#f3e7cf;border-radius:8px;padding:9px 20px;cursor:pointer;transition:all .15s ease" style-hover="background:#f3e7cf;color:#1a1a1a">End Turn ⏭</button>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center">
+      <div style="font:600 12px 'JetBrains Mono';opacity:.7">⏱ 01:20</div>
+      <canvas data-ck-mini="" ref="{{ refMini }}" role="button" tabindex="0" aria-label="Minimap. Click to recenter the view." style="width:150px;height:100px;border-radius:8px;border:1px solid rgba(255,255,255,.15);cursor:pointer;background:#181512"></canvas>
+    </div>
+  </footer>
+  <sc-if value="{{ settingsOpen }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" aria-label="Settings" onClick="{{ closeSettingsBg }}" style="position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:60">
+      <div onClick="{{ stop }}" style="width:420px;max-height:80vh;overflow-y:auto;background:#1e1c1a;border:2px solid #ff6b35;border-radius:14px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.6);box-sizing:border-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font:800 20px 'Plus Jakarta Sans';margin:0">Settings</h2><button onClick="{{ toggleSettings }}" aria-label="Close settings" style="background:none;border:none;color:#f3e7cf;font-size:18px;cursor:pointer">✕</button></div>
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div>
+            <div style="font:500 10px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:10px">Sound</div>
+            <label style="display:flex;align-items:center;justify-content:space-between;gap:10px;font:500 12px 'Plus Jakarta Sans';margin-bottom:8px">Master<input type="range" min="0" max="100" value="{{ soundMaster }}" onChange="{{ soundMasterChange }}" style="flex:1;margin-left:12px"></label>
+            <label style="display:flex;align-items:center;justify-content:space-between;gap:10px;font:500 12px 'Plus Jakarta Sans'">Music<input type="range" min="0" max="100" value="{{ soundMusic }}" onChange="{{ soundMusicChange }}" style="flex:1;margin-left:12px"></label>
+          </div>
+          <div>
+            <div style="font:500 10px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:10px">Display</div>
+            <label style="display:flex;align-items:center;justify-content:space-between;font:500 12px 'Plus Jakarta Sans';margin-bottom:8px">Quality<select onChange="{{ qualityChange }}" value="{{ quality }}" style="background:rgba(255,255,255,.06);color:#f3e7cf;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:5px 8px"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="ultra">Ultra</option></select></label>
+            <label style="display:flex;align-items:center;justify-content:space-between;font:500 12px 'Plus Jakarta Sans'">FPS Counter<input type="checkbox" checked="{{ showFps }}" onChange="{{ toggleFps }}"></label>
+          </div>
+          <div>
+            <div style="font:500 10px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:10px">Accessibility</div>
+            <label style="display:flex;align-items:center;justify-content:space-between;font:500 12px 'Plus Jakarta Sans';margin-bottom:8px">Reduced motion<input type="checkbox" checked="{{ reduceMotionUI }}" onChange="{{ toggleReduceMotionUI }}"></label>
+            <label style="display:flex;align-items:center;justify-content:space-between;font:500 12px 'Plus Jakarta Sans';margin-bottom:8px">High contrast<input type="checkbox" checked="{{ highContrast }}" onChange="{{ toggleContrast }}"></label>
+            <label style="display:flex;align-items:center;justify-content:space-between;font:500 12px 'Plus Jakarta Sans'">Text size<select onChange="{{ textSizeChange }}" value="{{ textSize }}" style="background:rgba(255,255,255,.06);color:#f3e7cf;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:5px 8px"><option value="sm">Small</option><option value="md">Medium</option><option value="lg">Large</option></select></label>
+            <div style="font:400 11px/1.5 'Space Grotesk';opacity:.55;margin-top:8px">Relationship lines already use distinct dash patterns (solid/dashed/dotted), not color alone.</div>
+          </div>
+          <div>
+            <div style="font:500 10px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:10px">Gameplay Language</div>
+            <div style="display:flex;gap:8px">
+              <button onClick="{{ setLangAave }}" style="flex:1;font:600 12px 'Plus Jakarta Sans';border:none;border-radius:8px;padding:9px;cursor:pointer;background:{{ langAaveBg }};color:#fff7e6">AAVE</button>
+              <button onClick="{{ setLangStd }}" style="flex:1;font:600 12px 'Plus Jakarta Sans';border:none;border-radius:8px;padding:9px;cursor:pointer;background:{{ langStdBg }};color:#fff7e6">Standard</button>
+            </div>
+          </div>
+          <div>
+            <div style="font:500 10px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:10px">Weather</div>
+            <label style="display:flex;align-items:center;justify-content:space-between;font:500 12px 'Plus Jakarta Sans'">Weather effects<input type="checkbox" checked="{{ weatherFXOn }}" onChange="{{ toggleWeatherFX }}"></label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = { theme: 'harlem', selLoc: 5, selTok: null, mapMsg: '', announce: 'Block map loaded. Harlem theme.', moveMode: false, sheetOpen: false,
+    weather: 'clear', eventSel: 'blockparty', eventType: null, toasts: [], settingsOpen: false, quality: 'high', showFps: false,
+    reduceMotionUI: false, highContrast: false, textSize: 'md', lang: 'aave', weatherFXOn: true, muted: false, soundMaster: 80, soundMusic: 60 };
+  themeList = [['harlem', 'Harlem'], ['detroit', 'Detroit'], ['chicago', 'Chicago'], ['miami', 'Miami'], ['baltimore', 'Baltimore'], ['atlanta', 'Atlanta'], ['oakland', 'Oakland'], ['nola', 'N.O.']];
+  weatherList = [['clear', '🌙 Clear Night'], ['overcast', '☁️ Overcast'], ['rain-light', '🌦️ Light Rain'], ['rain-heavy', '🌧️ Heavy Rain'], ['thunder', '⛈️ Thunderstorm'], ['snow-light', '🌨️ Light Snow'], ['snow-heavy', '❄️ Heavy Snow'], ['fog', '🌫️ Fog'], ['heat', '🥵 Heat Wave'], ['windy', '💨 Windy']];
+  eventList = [
+    ['blockparty', '🎉 Block Party', '🎉', '+1 Community for everybody nearby.', 7000, ['#ff6b35', '#f7c948', '#4caf50']],
+    ['raid', '🚨 Police Raid', '🚨', 'Move or hide — caught costs \u22121 Street Cred.', 6000, null],
+    ['fire', '🔥 Fire', '🔥', 'Location blocked 2 rounds. +2 Community for helping.', 6000, null],
+    ['parade', '🎊 Parade', '🎊', '+1 Reputation for marching along.', 6000, ['#ff6b35', '#4caf50', '#9c27b0', '#f7c948']],
+    ['protest', '✊🏾 Protest', '✊🏾', '+2 Community if you join, \u22121 Reputation if you ignore.', 7000, null],
+    ['church', '⛪ Church Service', '⛪', '+1 Community, +1 Reputation for attending.', 7000, null],
+    ['cookout', '🍗 Cookout', '🍗', '+1 Community, +1 Reputation for attending.', 7000, ['#ff6b35', '#f7c948']],
+    ['gentrification', '📢 Gentrification Protest', '📢', '+2 Community if you join, \u22121 Street Cred if you cross the line.', 7000, null],
+    ['funeral', '🕊️ Funeral', '🕊️', '+1 Community for attending, \u22121 Reputation for disrespect.', 6000, null],
+    ['celebration', '🎈 Celebration', '🎈', '+1 Reputation for attending.', 6000, ['#ff6b35', '#9c27b0', '#2196f3', '#f7c948']],
+  ];
+  standardFlavor = { 0: 'A barbershop where community news circulates.', 5: 'A central corner where residents gather and information moves.', 3: 'A public park for recreation and socializing.', 6: 'A church hosting worship services and community events.' };
+  W = 1200; H = 800;
+  locs = [
+    { id: 0, n: 'Barbershop', x: 70, y: 260, w: 80, h: 60, f: 'Where the real news get passed.', acts: [['💈 Get a cut · +1 Wisdom'], ['👂🏾 Gather intel · +1 Street Cred']] },
+    { id: 1, n: 'Beauty Shop', x: 170, y: 260, w: 70, h: 60, f: 'Where the tea gets spilled.', acts: [['💅🏾 Fresh set · +1 Reputation'], ['👂🏾 Catch up · +1 Community']] },
+    { id: 2, n: 'Bodega', x: 310, y: 300, w: 72, h: 58, f: 'Everything from a snack to a blessing.', acts: [['🛒 Buy supplies · +1 Item'], ['🤝 Front a homie · +1 Community']] },
+    { id: 3, n: 'The Park', x: 40, y: 420, w: 230, h: 195, f: 'Elders play dominoes, kids play ball.', acts: [['🏀 Shoot hoops · +1 Street Cred'], ['🎤 Hold a cypher · +1 Reputation']] },
+    { id: 4, n: 'The House', x: 390, y: 192, w: 130, h: 83, f: 'Be yourself. The kitchen is always open.', acts: [['🍽️ Sunday dinner · +1 Community'], ['🛋️ Lay low · +1 Wisdom']] },
+    { id: 5, n: 'The Corner', x: 232, y: 408, w: 62, h: 46, f: 'Where the block watches. Where the business happens.', acts: [['🧍🏾 Post up · +1 Street Cred'], ['📻 Play the speaker · +1 Reputation']] },
+    { id: 6, n: 'Church', x: 720, y: 200, w: 95, h: 80, f: 'The tea is served with prayer.', acts: [['⛪ Attend service · +1 Community'], ['🙏🏾 Pray · +1 Wisdom']] },
+    { id: 7, n: 'School', x: 690, y: 430, w: 130, h: 95, f: 'Where the future gets made.', acts: [['📚 Study · +1 Wisdom'], ['✊🏾 Organize · +1 Community']] },
+    { id: 8, n: 'Cookout Spot', x: 1020, y: 560, w: 110, h: 75, f: 'Where the family gathers. Where the drama unfolds.', acts: [['🍗 Man the grill · +1 Community'], ['🗣️ Grown folks talk · +1 Wisdom']] },
+    { id: 9, n: 'Vacant Lot', x: 1000, y: 430, w: 90, h: 80, f: 'Where anything can happen. Where the block dreams.', acts: [['🌱 Tend the garden · +1 Community'], ['🔥 Light the fire pit · +1 Street Cred']] },
+    { id: 10, n: 'Courthouse', x: 1000, y: 180, w: 125, h: 90, f: 'Where the system meets the streets.', acts: [['⚖️ Show up · +1 Reputation'], ['📋 Pull records · +1 Wisdom']] },
+    { id: 11, n: 'Studio', x: 860, y: 560, w: 80, h: 55, f: 'Where the culture gets documented.', acts: [['🎙️ Lay a verse · +1 Reputation'], ['🎧 Sit in · +1 Wisdom']] },
+    { id: 12, n: 'Community Ctr', x: 480, y: 430, w: 110, h: 70, f: 'Where the block organizes.', acts: [['✊🏾 Run a meeting · +1 Community'], ['📋 Sign folks up · +1 Reputation']] },
+    { id: 13, n: 'Library', x: 850, y: 235, w: 90, h: 70, f: 'Where the quiet revolution starts.', acts: [['📖 Read up · +1 Wisdom'], ['🗂️ Dig the archives · +1 Reputation']] },
+    { id: 14, n: 'Playground', x: 80, y: 545, w: 85, h: 52, f: 'Where the block protects its own.', acts: [['🛝 Watch the kids · +1 Community'], ['🧒🏾 Coach a game · +1 Reputation']] },
+    { id: 15, n: 'Ball Court', x: 330, y: 470, w: 100, h: 65, f: 'Where the trash talk flows. Where skills get tested.', acts: [['🏀 Run a five · +1 Street Cred'], ['🗣️ Talk your talk · +1 Reputation']] },
+    { id: 16, n: 'The Street', x: 480, y: 362, w: 130, h: 76, f: 'Where the life happens. Where the music plays.', acts: [['🚗 Cruise the ave · +1 Street Cred'], ['📻 Turn it up · +1 Reputation']] },
+    { id: 17, n: 'The Porch', x: 405, y: 277, w: 70, h: 16, f: 'Where the elders sit. Where the tea gets passed.', acts: [['🪑 Sit with the elders · +1 Wisdom'], ['🫖 Pass the tea · +1 Community']] },
+    { id: 18, n: 'The Kitchen', x: 396, y: 197, w: 55, h: 36, f: 'Where the recipes get passed down.', acts: [['🍳 Learn the recipe · +1 Wisdom'], ['🍽️ Fix a plate · +1 Community']] },
+    { id: 19, n: 'Living Room', x: 460, y: 197, w: 56, h: 36, f: 'Where the arguments get settled.', acts: [['🎮 Run it back · +1 Community'], ['📺 Watch the game · +1 Street Cred']] },
+    { id: 20, n: 'The Backyard', x: 400, y: 158, w: 110, h: 30, f: 'Where grown folks business gets talked.', acts: [['🔥 Fire up the grill · +1 Community'], ['🗣️ Listen in · +1 Wisdom']] },
+    { id: 21, n: 'Front Steps', x: 440, y: 295, w: 36, h: 13, f: 'Where the block watch happens.', acts: [['👋🏾 Greet the neighbors · +1 Community'], ['👀 Keep watch · +1 Street Cred']] },
+    { id: 22, n: 'Laundromat', x: 70, y: 170, w: 80, h: 55, f: 'Where the gossip flows. Where the block catches up.', acts: [['🧺 Wash & fold · +1 Wisdom'], ['🗣️ Catch the gossip · +1 Street Cred']] },
+    { id: 23, n: 'Pool Hall', x: 170, y: 170, w: 70, h: 55, f: 'Where the respect gets earned.', acts: [['🎱 Run the table · +1 Street Cred'], ['🤝 Make a bet · +1 Reputation']] },
+  ];
+  toks = [
+    { i: 'M', name: 'Marcus', hustle: 'Entrepreneur', c: '#2196f3', x: 345, y: 285, loc: 2 },
+    { i: 'A', name: 'Aisha', hustle: 'Organizer', c: '#4caf50', x: 110, y: 245, loc: 0 },
+    { i: 'D', name: 'Deja', hustle: 'Creative', c: '#9c27b0', x: 150, y: 500, loc: 3 },
+    { i: 'R', name: 'Rell', hustle: 'Street Hustler', c: '#ff6b35', x: 1075, y: 545, loc: 8, crown: true },
+    { i: 'Y', name: 'You', hustle: 'The Chronicler', c: '#f7c948', x: 263, y: 432, loc: 5 },
+  ];
+  rels = [[0, 1, 'alliance'], [2, 3, 'beef'], [0, 2, 'neutral'], [1, 3, 'romantic']];
+  cam = { x: 0, y: 0, z: 1 };
+  hover = null; kbIdx = -1;
+  rnd(seed) { let a = seed; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  refWrap = (el) => { this.wrap = el; this.tryInit(); };
+  refCanvas = (el) => { this.cv = el; this.tryInit(); };
+  refTip = (el) => { this.tip = el; };
+  refMini = (el) => { this.mini = el; };
+  tryInit() {
+    if (!this.wrap || !this.cv || this.inited) return;
+    this.inited = true;
+    this.rmDetected = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.rm = this.rmDetected;
+    this.smoke = []; this.rainP = []; this.snowP = []; this.debrisP = []; this.evtP = []; this.timers = [];
+    const cv = this.cv;
+    this.onGlobalKey = (e) => {
+      const tag = (e.target.tagName || '').toLowerCase(); if (tag === 'select' || tag === 'input' || tag === 'textarea') return;
+      if (e.key === 'Escape') { if (this.state.settingsOpen) this.setState({ settingsOpen: false }); else if (this.state.selTok != null) this.setState({ selTok: null }); }
+      else if (e.key === 's' || e.key === 'S') this.setState(s => ({ settingsOpen: !s.settingsOpen }));
+      else if (e.key === '+' || e.key === '=') this.zoomAt(1.25);
+      else if (e.key === '-' || e.key === '_') this.zoomAt(.8);
+    };
+    window.addEventListener('keydown', this.onGlobalKey);
+    this.ro = new ResizeObserver(() => { this.resize(); }); this.ro.observe(this.wrap);
+    this.resize(); this.fit();
+    cv.addEventListener('wheel', (e) => { e.preventDefault(); this.zoomAt(e.deltaY < 0 ? 1.12 : .89, e); }, { passive: false });
+    this.ptrs = new Map();
+    const pinchInfo = () => { const p = [...this.ptrs.values()]; return { d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y), mx: (p[0].x + p[1].x) / 2, my: (p[0].y + p[1].y) / 2 }; };
+    cv.addEventListener('pointerdown', (e) => {
+      this.initAudio();
+      this.ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      cv.setPointerCapture(e.pointerId);
+      if (this.ptrs.size === 2) { const pi = pinchInfo(); this.pinch = { d0: pi.d, z0: this.cam.z }; this.pd = null; return; }
+      this.pd = { x: e.clientX, y: e.clientY, cx: this.cam.x, cy: this.cam.y, moved: false }; cv.style.cursor = 'grabbing';
+    });
+    cv.addEventListener('pointermove', (e) => {
+      if (this.ptrs.has(e.pointerId)) this.ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (this.pinch && this.ptrs.size === 2) {
+        const pi = pinchInfo(); const nz = Math.max(.5, Math.min(2.5, this.pinch.z0 * pi.d / this.pinch.d0));
+        const r = cv.getBoundingClientRect(), px = pi.mx - r.left, py = pi.my - r.top;
+        const wx = this.cam.x + px / this.cam.z, wy = this.cam.y + py / this.cam.z;
+        this.cam.z = nz; this.cam.x = wx - px / nz; this.cam.y = wy - py / nz;
+        return;
+      }
+      if (this.pd) { const dx = e.clientX - this.pd.x, dy = e.clientY - this.pd.y; if (Math.abs(dx) + Math.abs(dy) > 5) this.pd.moved = true; if (this.pd.moved) { this.cam.x = this.pd.cx - dx / this.cam.z; this.cam.y = this.pd.cy - dy / this.cam.z; } return; }
+      this.updateHover(e);
+    });
+    const endPtr = (e) => {
+      this.ptrs.delete(e.pointerId);
+      if (this.ptrs.size < 2) this.pinch = null;
+      const wasClick = this.pd && !this.pd.moved; this.pd = null; cv.style.cursor = 'grab';
+      if (wasClick && e.type === 'pointerup') this.clickAt(e);
+    };
+    cv.addEventListener('pointerup', endPtr);
+    cv.addEventListener('pointercancel', endPtr);
+    cv.addEventListener('pointerleave', () => { this.hover = null; if (this.tip) this.tip.style.display = 'none'; });
+    cv.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); this.kbIdx = (this.kbIdx + (e.key === 'ArrowRight' ? 1 : this.locs.length - 1) + this.locs.length) % this.locs.length; const l = this.locs[this.kbIdx]; this.hover = { kind: 'loc', l }; this.setState({ announce: l.n + '. ' + l.f }); }
+      if (e.key === 'Enter' && this.kbIdx >= 0) this.selectLoc(this.locs[this.kbIdx]);
+    });
+    if (this.mini) this.mini.addEventListener('pointerdown', (e) => { const r = this.mini.getBoundingClientRect(); this.cam.x = (e.clientX - r.left) / r.width * this.W - this.cv.clientWidth / this.cam.z / 2; this.cam.y = (e.clientY - r.top) / r.height * this.H - this.cv.clientHeight / this.cam.z / 2; });
+    const loop = (now) => { this.raf = requestAnimationFrame(loop); this.draw(this.rm ? 0 : now / 1000); };
+    this.raf = requestAnimationFrame(loop);
+  }
+  resize() { const d = devicePixelRatio || 1; this.cv.width = this.wrap.clientWidth * d; this.cv.height = this.wrap.clientHeight * d; this.dpr = d; if (this.mini) { this.mini.width = 150 * d; this.mini.height = 100 * d; } }
+  fit() { const cw = this.wrap.clientWidth, ch = this.wrap.clientHeight; this.cam.z = Math.min(cw / this.W, ch / this.H) * .98; this.cam.x = (this.W - cw / this.cam.z) / 2; this.cam.y = (this.H - ch / this.cam.z) / 2; }
+  zoomAt(f, e) { const r = this.cv.getBoundingClientRect(); const px = e ? e.clientX - r.left : r.width / 2, py = e ? e.clientY - r.top : r.height / 2; const wx = this.cam.x + px / this.cam.z, wy = this.cam.y + py / this.cam.z; this.cam.z = Math.max(.5, Math.min(2.5, this.cam.z * f)); this.cam.x = wx - px / this.cam.z; this.cam.y = wy - py / this.cam.z; }
+  toWorld(e) { const r = this.cv.getBoundingClientRect(); return { x: this.cam.x + (e.clientX - r.left) / this.cam.z, y: this.cam.y + (e.clientY - r.top) / this.cam.z }; }
+  hitTest(p) {
+    for (const t of this.toks) if (Math.hypot(p.x - t.x, p.y - t.y) < 16) return { kind: 'tok', t };
+    const hits = this.locs.filter(l => p.x >= l.x && p.x <= l.x + l.w && p.y >= l.y && p.y <= l.y + l.h);
+    hits.sort((a, b) => a.w * a.h - b.w * b.h);
+    return hits[0] ? { kind: 'loc', l: hits[0] } : null;
+  }
+  updateHover(e) {
+    const h = this.hitTest(this.toWorld(e)); this.hover = h;
+    this.cv.style.cursor = this.pd ? 'grabbing' : (h ? 'pointer' : 'grab');
+    if (!this.tip) return;
+    if (!h) { this.tip.style.display = 'none'; return; }
+    const r = this.wrap.getBoundingClientRect();
+    this.tip.style.display = 'block';
+    this.tip.style.left = Math.min(e.clientX - r.left + 16, r.width - 270) + 'px';
+    this.tip.style.top = (e.clientY - r.top + 14) + 'px';
+    this.tip.innerHTML = h.kind === 'tok'
+      ? `<strong>${h.t.name}</strong> · ${h.t.hustle}${h.t.crown ? ' · O.G. 👑' : ''}<br><span style="opacity:.7;font-weight:400">At ${this.locs[h.t.loc].n}${h.t.i === 'A' ? ' · 1 active receipt 📜' : ''}</span>`
+      : `<strong>${h.l.n}.</strong> <span style="font-weight:400">${h.l.f}</span>`;
+  }
+  clickAt(e) {
+    const h = this.hitTest(this.toWorld(e));
+    if (!h) return;
+    if (h.kind === 'tok') { const i = this.toks.indexOf(h.t); this.setState({ selTok: this.state.selTok === i ? null : i, announce: h.t.name + (this.state.selTok === i ? ' deselected' : ' selected. Click a location to move.') }); return; }
+    this.selectLoc(h.l);
+  }
+  selectLoc(l) {
+    const st = this.state;
+    if (st.selTok != null) {
+      const t = this.toks[st.selTok];
+      t.anim = { fx: t.x, fy: t.y, tx: l.x + l.w / 2, ty: l.y - 14, start: performance.now() };
+      t.loc = l.id;
+      this.setState({ selLoc: l.id, selTok: null, moveMode: false, announce: `${t.name} moves to ${l.n}.`, mapMsg: `${t.name} pulled up to ${l.n}.` });
+    } else this.setState({ selLoc: l.id, announce: l.n + ' selected. ' + l.f, mapMsg: '' });
+  }
+  componentWillUnmount() {
+    cancelAnimationFrame(this.raf); if (this.ro) this.ro.disconnect();
+    if (this.onGlobalKey) window.removeEventListener('keydown', this.onGlobalKey);
+    clearTimeout(this._evtTm); (this.timers || []).forEach(clearTimeout);
+  }
+  qMul() { return { low: .15, medium: .5, high: 1, ultra: 1.4 }[this.state.quality] || 1; }
+  worldToScreen(wx, wy) { return { x: (wx - this.cam.x) * this.cam.z, y: (wy - this.cam.y) * this.cam.z }; }
+  projectLoc(id) { const l = this.locs.find(l => l.id === id); return this.worldToScreen(l.x + l.w / 2, l.y + l.h / 2); }
+  initAudio() {
+    if (this.audioCtx) return;
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext; this.audioCtx = new Ctx();
+      this.masterGain = this.audioCtx.createGain(); this.masterGain.connect(this.audioCtx.destination);
+      this.musicGain = this.audioCtx.createGain(); this.musicGain.connect(this.masterGain);
+      this.masterGain.gain.value = this.state.muted ? 0 : this.state.soundMaster / 100;
+      this.musicGain.gain.value = this.state.soundMusic / 100;
+      const osc = this.audioCtx.createOscillator(); osc.type = 'sine'; osc.frequency.value = 55;
+      const og = this.audioCtx.createGain(); og.gain.value = .05; osc.connect(og); og.connect(this.musicGain); osc.start();
+      const bufSize = this.audioCtx.sampleRate * 2, buf = this.audioCtx.createBuffer(1, bufSize, this.audioCtx.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < bufSize; i++) d[i] = Math.random() * 2 - 1;
+      const noise = this.audioCtx.createBufferSource(); noise.buffer = buf; noise.loop = true;
+      const nf = this.audioCtx.createBiquadFilter(); nf.type = 'lowpass'; nf.frequency.value = 800;
+      const ng = this.audioCtx.createGain(); ng.gain.value = 0;
+      noise.connect(nf); nf.connect(ng); ng.connect(this.musicGain); noise.start();
+      this.noiseGain = ng; this.noiseFilter = nf;
+      this.updateWeatherAudioFor(this.state.weather);
+    } catch (e) { this.audioCtx = null; }
+  }
+  updateWeatherAudioFor(w) {
+    if (!this.noiseGain) return;
+    let target = 0, freq = 800;
+    if (w === 'rain-light') { target = .05; freq = 1200; }
+    else if (w === 'rain-heavy' || w === 'thunder') { target = .11; freq = 1500; }
+    else if (w === 'windy') { target = .06; freq = 400; }
+    this.noiseGain.gain.setTargetAtTime(target, this.audioCtx.currentTime, .4);
+    this.noiseFilter.frequency.setTargetAtTime(freq, this.audioCtx.currentTime, .4);
+  }
+  playSting(type) {
+    if (!this.audioCtx) return;
+    const ctx = this.audioCtx, now = ctx.currentTime;
+    const tone = (freq, start, dur, wave, vol) => {
+      const o = ctx.createOscillator(); o.type = wave; o.frequency.value = freq;
+      const g = ctx.createGain(); g.gain.setValueAtTime(0, now + start); g.gain.linearRampToValueAtTime(vol, now + start + .02); g.gain.exponentialRampToValueAtTime(.001, now + start + dur);
+      o.connect(g); g.connect(this.masterGain); o.start(now + start); o.stop(now + start + dur + .05);
+    };
+    if (type === 'blockparty' || type === 'celebration' || type === 'parade') [523, 659, 784, 988].forEach((f, i) => tone(f, i * .09, .25, 'triangle', .12));
+    else if (type === 'raid') for (let i = 0; i < 6; i++) tone(i % 2 ? 880 : 660, i * .18, .16, 'square', .1);
+    else if (type === 'fire') { tone(180, 0, .5, 'sawtooth', .08); tone(90, .1, .6, 'sawtooth', .06); }
+    else if (type === 'church') [261, 329, 392].forEach((f, i) => tone(f, i * .12, 1.1, 'sine', .09));
+    else if (type === 'cookout') { tone(300, 0, .12, 'square', .05); tone(250, .15, .12, 'square', .05); }
+    else if (type === 'funeral') tone(130, 0, 1.4, 'sine', .08);
+    else if (type === 'protest' || type === 'gentrification') { tone(200, 0, .3, 'sawtooth', .07); tone(160, .3, .3, 'sawtooth', .07); }
+  }
+  addToast(text, color) {
+    const id = Math.random();
+    this.setState(s => ({ toasts: [...s.toasts, { id, text, color: color || '#ff6b35' }] }));
+    const tm = setTimeout(() => this.setState(s => ({ toasts: s.toasts.filter(x => x.id !== id) })), 5000);
+    this.timers.push(tm);
+  }
+  triggerEvent(key) {
+    const def = this.eventList.find(e => e[0] === key); if (!def) return;
+    const [k, , icon, gp, dur] = def;
+    clearTimeout(this._evtTm);
+    this.setState({ eventType: k, announce: def[1] + ' started. ' + gp });
+    this.initAudio(); this.playSting(k);
+    this.addToast(`${icon} ${def[1].replace(/^\S+\s/, '')} kicking off. ${gp}`, '#ff6b35');
+    this._evtTm = setTimeout(() => { this.setState(s => s.eventType === k ? { eventType: null } : {}); this.addToast(`${def[1].replace(/^\S+\s/, '')} wrapped up.`, '#4caf50'); }, dur);
+  }
+  applyFilters() {
+    if (!this.wrap) return;
+    let f = '';
+    if (this.state.highContrast) f += 'contrast(1.3) saturate(1.15) ';
+    if (this.state.weather === 'heat') f += 'saturate(1.08) ';
+    if (this.state.eventType === 'funeral') f += 'grayscale(.35) ';
+    this.wrap.style.filter = f.trim();
+  }
+  drawFps(x) {
+    this._fc = (this._fc || 0) + 1; const now = performance.now(); if (!this._fpsT) this._fpsT = now;
+    if (now - this._fpsT > 500) { this._fps = Math.round(this._fc / ((now - this._fpsT) / 1000)); this._fc = 0; this._fpsT = now; }
+    x.fillStyle = 'rgba(0,0,0,.6)'; x.fillRect(8, 8, 66, 20); x.fillStyle = '#4caf50'; x.font = "700 11px 'JetBrains Mono'"; x.textAlign = 'left'; x.fillText((this._fps || 0) + ' FPS', 14, 22);
+  }
+  drawWeatherFX(x, t, dt) {
+    if (!this.state.weatherFXOn) return;
+    const W = this.cv.clientWidth, H = this.cv.clientHeight, wthr = this.state.weather, q = this.qMul();
+    if (wthr === 'overcast') { x.fillStyle = 'rgba(55,71,79,.18)'; x.fillRect(0, 0, W, H); }
+    const raining = wthr === 'rain-light' || wthr === 'rain-heavy' || wthr === 'thunder';
+    if (raining) {
+      const heavy = wthr !== 'rain-light', target = Math.floor((heavy ? 220 : 110) * q);
+      while (this.rainP.length < target) this.rainP.push({ x: Math.random() * W, y: Math.random() * H, spd: 500 + Math.random() * 300 });
+      this.rainP.length = Math.min(this.rainP.length, target);
+      x.strokeStyle = `rgba(176,190,197,${heavy ? .55 : .4})`; x.lineWidth = heavy ? 2 : 1;
+      this.rainP.forEach(p => { p.y += p.spd * dt; p.x += p.spd * dt * .3; if (p.y > H) { p.y = -10; p.x = Math.random() * W; } x.beginPath(); x.moveTo(p.x, p.y); x.lineTo(p.x + 6, p.y + 16); x.stroke(); });
+      x.fillStyle = 'rgba(120,140,150,.06)'; x.fillRect(0, H * .72, W, H * .28);
+    } else this.rainP.length = 0;
+    if (wthr === 'thunder') {
+      if (!this.rm && Math.random() < .01) this._flashUntil = performance.now() + 90;
+      if (this._flashUntil && performance.now() < this._flashUntil) { x.fillStyle = 'rgba(255,255,255,.35)'; x.fillRect(0, 0, W, H); }
+    }
+    const snowing = wthr === 'snow-light' || wthr === 'snow-heavy';
+    if (snowing) {
+      const heavy = wthr === 'snow-heavy', target = Math.floor((heavy ? 180 : 90) * q);
+      while (this.snowP.length < target) this.snowP.push({ x: Math.random() * W, y: Math.random() * H, spd: 40 + Math.random() * 60, seed: Math.random() * 10, r: heavy ? 3.5 : 2.5 });
+      this.snowP.length = Math.min(this.snowP.length, target);
+      x.fillStyle = 'rgba(255,255,255,.85)';
+      this.snowP.forEach(p => { p.y += p.spd * dt; p.x += Math.sin(t + p.seed) * .4; if (p.y > H) { p.y = -6; p.x = Math.random() * W; } x.beginPath(); x.arc(p.x, p.y, p.r, 0, 7); x.fill(); });
+      this.snowAccum = Math.min(heavy ? .22 : .1, (this.snowAccum || 0) + dt * .015);
+    } else this.snowAccum = Math.max(0, (this.snowAccum || 0) - dt * .03);
+    if (this.snowAccum > 0) { const g = x.createLinearGradient(0, H * .75, 0, H); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(1, `rgba(255,255,255,${this.snowAccum})`); x.fillStyle = g; x.fillRect(0, H * .75, W, H * .25); }
+    const fogTarget = wthr === 'fog' ? .32 : 0;
+    this.fogA = (this.fogA || 0) + (fogTarget - (this.fogA || 0)) * Math.min(1, dt * 1.5);
+    if (this.fogA > .01) { const g = x.createLinearGradient(0, H * .3, 0, H); g.addColorStop(0, 'rgba(158,158,158,0)'); g.addColorStop(1, `rgba(158,158,158,${this.fogA})`); x.fillStyle = g; x.fillRect(0, 0, W, H); }
+    if (wthr === 'heat') { x.fillStyle = 'rgba(255,107,53,.06)'; x.fillRect(0, 0, W, H); }
+    if (wthr === 'windy') {
+      const target = Math.floor(40 * q);
+      while (this.debrisP.length < target) this.debrisP.push({ x: Math.random() * W, y: H * .6 + Math.random() * H * .4, spd: 80 + Math.random() * 140, rot: Math.random() * 6 });
+      this.debrisP.length = Math.min(this.debrisP.length, target);
+      x.fillStyle = 'rgba(120,95,60,.55)';
+      this.debrisP.forEach(p => { p.x += p.spd * dt; p.rot += dt * 4; if (p.x > W + 10) { p.x = -10; p.y = H * .6 + Math.random() * H * .4; } x.save(); x.translate(p.x, p.y); x.rotate(p.rot); x.fillRect(-3, -1.5, 6, 3); x.restore(); });
+    } else this.debrisP.length = 0;
+  }
+  drawEventFX(x, t, dt) {
+    const ev = this.state.eventType; if (!ev) { this.evtP.length = 0; return; }
+    const W = this.cv.clientWidth, H = this.cv.clientHeight, q = this.qMul();
+    const def = this.eventList.find(e => e[0] === ev); if (!def) return; const palette = def[5];
+    if (ev === 'raid') {
+      const anchor = this.projectLoc(5), on = Math.floor(t * 2) % 2 === 0;
+      const g = x.createRadialGradient(anchor.x, anchor.y, 10, anchor.x, anchor.y, 260);
+      g.addColorStop(0, on ? 'rgba(255,68,68,.32)' : 'rgba(33,150,243,.32)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+      x.fillStyle = g; x.fillRect(0, 0, W, H);
+      x.fillStyle = on ? 'rgba(255,68,68,.08)' : 'rgba(33,150,243,.08)'; x.fillRect(0, 0, W, H);
+    } else if (ev === 'fire') {
+      const a = this.projectLoc(9);
+      const rg = x.createRadialGradient(a.x, a.y, 10, a.x, a.y, 240); rg.addColorStop(0, 'rgba(255,68,68,.12)'); rg.addColorStop(1, 'rgba(255,68,68,0)'); x.fillStyle = rg; x.fillRect(0, 0, W, H);
+      const target = Math.floor(30 * q);
+      while (this.evtP.length < target) this.evtP.push({ x: a.x - 20 + Math.random() * 40, y: a.y + Math.random() * 14, vy: -(60 + Math.random() * 60), c: Math.random() < .5 ? '#ff6b35' : '#ff4444', r: 3 + Math.random() * 4, life: 1 });
+      this.evtP = this.evtP.filter(p => p.life > 0);
+      this.evtP.forEach(p => { p.y += p.vy * dt; p.life -= dt * .6; x.fillStyle = p.c; x.globalAlpha = Math.max(0, p.life); x.beginPath(); x.arc(p.x, p.y, p.r, 0, 7); x.fill(); x.globalAlpha = 1; });
+    } else if (ev === 'church') { const a = this.projectLoc(6); const g = x.createRadialGradient(a.x, a.y - 30, 10, a.x, a.y - 30, 200); g.addColorStop(0, 'rgba(255,224,130,.22)'); g.addColorStop(1, 'rgba(255,224,130,0)'); x.fillStyle = g; x.fillRect(0, 0, W, H); }
+    else if (ev === 'protest' || ev === 'gentrification') { const a = this.projectLoc(10); const g = x.createRadialGradient(a.x, a.y, 10, a.x, a.y, 260); g.addColorStop(0, ev === 'gentrification' ? 'rgba(156,39,176,.2)' : 'rgba(255,107,53,.2)'); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, W, H); }
+    else if (ev === 'funeral') { const a = this.projectLoc(6); const g = x.createRadialGradient(a.x, a.y, 10, a.x, a.y, 260); g.addColorStop(0, 'rgba(60,72,88,.28)'); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, W, H); }
+    else if (palette) {
+      const anchorId = ev === 'celebration' ? 3 : 8, a = this.projectLoc(anchorId);
+      const shape = ev === 'celebration' ? 'circle' : 'rect', target = Math.floor(60 * q);
+      const spanX = ev === 'parade' ? W : 140;
+      while (this.evtP.length < target) this.evtP.push({ x: ev === 'parade' ? Math.random() * W : a.x - spanX / 2 + Math.random() * spanX, y: a.y + 20 + Math.random() * 10, vy: -(40 + Math.random() * 50), vx: (Math.random() - .5) * 30, rot: Math.random() * 6, c: palette[Math.floor(Math.random() * palette.length)], r: shape === 'circle' ? (5 + Math.random() * 4) : null, w: 6 + Math.random() * 4, h: 8 + Math.random() * 4, life: 1 + Math.random() });
+      this.evtP = this.evtP.filter(p => p.y > -20 && p.life > 0);
+      this.evtP.forEach(p => { p.y += p.vy * dt; p.x += p.vx * dt; p.rot += dt * 2; p.life -= dt * .15; x.save(); x.translate(p.x, p.y); x.rotate(p.rot); x.fillStyle = p.c; x.globalAlpha = Math.max(0, Math.min(1, p.life)); if (shape === 'circle') { x.beginPath(); x.arc(0, 0, p.r, 0, 7); x.fill(); } else x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); x.restore(); x.globalAlpha = 1; });
+    }
+  }
+  // ---------- drawing ----------
+  themeDef(k) {
+    return {
+      harlem: { base: '#201b16', road: '#2a2a2a', sw: '#333', fill: '#4a2c22', fill2: '#3d241c', win: '#f7c948' },
+      detroit: { base: '#1d1c1a', road: '#292929', sw: '#323232', fill: '#3a352e', fill2: '#2e2a24', win: '#ffb74d' },
+      chicago: { base: '#1c1d1f', road: '#2a2b2e', sw: '#35363a', fill: '#41332a', fill2: '#332a24', win: '#ffe082' },
+      miami: { base: '#1c1e1d', road: '#2b2c2e', sw: '#37383a', fill: '#f8bbd0', fill2: '#b2dfdb', win: '#fff9c4' },
+      baltimore: { base: '#1e1c1a', road: '#2a2a2a', sw: '#343434', fill: '#4a3226', fill2: '#41372c', win: '#ffd54f' },
+      atlanta: { base: '#1b1e1a', road: '#2a2b29', sw: '#343633', fill: '#453528', fill2: '#38302a', win: '#ffe082' },
+      oakland: { base: '#1d1c1e', road: '#2a2a2c', sw: '#343436', fill: '#4e3b4a', fill2: '#3c3040', win: '#ffcc80' },
+      nola: { base: '#1e1c18', road: '#2b2a28', sw: '#353432', fill: '#43552e', fill2: '#4a3a55', win: '#ffe082' },
+    }[k];
+  }
+  draw(t) {
+    this.rm = this.rmDetected || this.state.reduceMotionUI;
+    const dt = this.lastT != null ? Math.min(.05, t - this.lastT) : .016; this.lastT = t;
+    this.windMult = this.state.weather === 'windy' ? 3 : 1;
+    const cv = this.cv, x = cv.getContext('2d'), th = this.themeDef(this.state.theme), z = this.cam.z * this.dpr;
+    x.setTransform(1, 0, 0, 1, 0, 0); x.fillStyle = '#141210'; x.fillRect(0, 0, cv.width, cv.height);
+    x.setTransform(z, 0, 0, z, -this.cam.x * z, -this.cam.y * z);
+    x.fillStyle = th.base; x.fillRect(0, 0, this.W, this.H);
+    const R = this.rnd(7);
+    x.globalAlpha = .05; x.fillStyle = '#fff7e6';
+    for (let i = 0; i < 260; i++) x.fillRect(R() * this.W, R() * this.H, 2, 2);
+    x.globalAlpha = 1;
+    this.drawThemeUnder(x, t, th);
+    // sidewalks + roads
+    const roadsH = [[380, 44], [140, 26], [640, 26]], roadsV = [[280, 44], [640, 26], [960, 26]];
+    x.fillStyle = th.sw;
+    roadsH.forEach(([y, w]) => x.fillRect(0, y - w / 2 - 9, this.W, w + 18));
+    roadsV.forEach(([vx, w]) => x.fillRect(vx - w / 2 - 9, 0, w + 18, this.H));
+    x.fillStyle = th.road;
+    roadsH.forEach(([y, w]) => x.fillRect(0, y - w / 2, this.W, w));
+    roadsV.forEach(([vx, w]) => x.fillRect(vx - w / 2, 0, w, this.H));
+    x.strokeStyle = 'rgba(243,231,207,.28)'; x.lineWidth = 2; x.setLineDash([14, 18]);
+    x.beginPath(); x.moveTo(0, 380); x.lineTo(this.W, 380); x.moveTo(280, 0); x.lineTo(280, this.H); x.stroke(); x.setLineDash([]);
+    x.fillStyle = 'rgba(243,231,207,.4)';
+    for (let i = 0; i < 5; i++) { x.fillRect(240 + i * 5, 352, 3, 12); x.fillRect(240 + i * 5, 396, 3, 12); x.fillRect(252, 340 - i * 5 - 3, 12, 3); x.fillRect(252, 420 + i * 5, 12, 3); }
+    this.drawFiller(x, t, th);
+    this.locs.forEach(l => this.drawLoc(x, l, t, th));
+    // streetlights
+    const lamps = [[200, 358], [420, 402], [640, 358], [880, 402], [1100, 358], [258, 200], [302, 520], [258, 720], [700, 620], [960, 120]];
+    lamps.forEach(([lx, ly], i) => {
+      const p = this.rm ? .4 : .3 + .15 * Math.sin(t * 1.5 + i);
+      const g = x.createRadialGradient(lx, ly, 2, lx, ly, 34); g.addColorStop(0, `rgba(255,107,53,${p})`); g.addColorStop(1, 'rgba(255,107,53,0)');
+      x.fillStyle = g; x.beginPath(); x.arc(lx, ly, 34, 0, 7); x.fill();
+      x.fillStyle = '#8a8a8a'; x.fillRect(lx - 1, ly - 12, 2, 12); x.fillStyle = '#ffd54f'; x.fillRect(lx - 2, ly - 14, 4, 3);
+    });
+    // parked + moving cars
+    const carC = ['#d7d2c8', '#2c2c34', '#a33327', '#2c4a72', '#8f8f96'];
+    [[60, 404], [150, 404], [500, 356], [590, 404], [760, 356], [850, 404], [1050, 356], [305, 480], [305, 560], [256, 240]].forEach((c, i) => { x.fillStyle = carC[i % 5]; const vert = c[0] === 305 || c[0] === 256; x.fillRect(c[0], c[1], vert ? 8 : 17, vert ? 17 : 8); });
+    if (!this.rm) [[380, 372, 90], [380, 390, -70], [280, 0, 0]].forEach((r, i) => {
+      let cx, cy;
+      if (i < 2) { cx = ((t * r[2] * 1.4) % (this.W + 120)); if (r[2] < 0) cx = this.W - cx; cy = r[1]; } else { cy = (t * 60) % (this.H + 120) - 60; cx = 271; }
+      x.fillStyle = '#e8e2d2'; x.fillRect(cx, cy, i === 2 ? 8 : 16, i === 2 ? 16 : 8);
+      const hg = x.createRadialGradient(cx + (i === 0 ? 18 : i === 1 ? -2 : 4), cy + (i === 2 ? 18 : 4), 1, cx + (i === 0 ? 18 : i === 1 ? -2 : 4), cy + (i === 2 ? 18 : 4), 22);
+      hg.addColorStop(0, 'rgba(255,245,200,.5)'); hg.addColorStop(1, 'rgba(255,245,200,0)');
+      x.fillStyle = hg; x.beginPath(); x.arc(cx + (i === 0 ? 18 : i === 1 ? -2 : 4), cy + (i === 2 ? 18 : 4), 22, 0, 7); x.fill();
+    });
+    // hydrants + mailboxes
+    x.fillStyle = '#c23a2e'; [[160, 362], [610, 398], [990, 362]].forEach(h => { x.beginPath(); x.arc(h[0], h[1], 4, 0, 7); x.fill(); });
+    x.fillStyle = '#2c4a72'; [[300, 362], [946, 400]].forEach(m => x.fillRect(m[0], m[1], 7, 9));
+    this.drawSmoke(x, t);
+    this.drawRels(x, t);
+    this.toks.forEach((tk, i) => this.drawTok(x, tk, i, t));
+    // hover / selection outlines
+    const sel = this.locs[this.state.selLoc];
+    if (sel) { x.strokeStyle = '#ff6b35'; x.lineWidth = 2.5; x.setLineDash([6, 4]); x.lineDashOffset = this.rm ? 0 : -t * 12; x.strokeRect(sel.x - 4, sel.y - 4, sel.w + 8, sel.h + 8); x.setLineDash([]); }
+    if (this.hover && this.hover.kind === 'loc') { const l = this.hover.l; x.strokeStyle = 'rgba(255,107,53,.9)'; x.lineWidth = 2; x.strokeRect(l.x - 2, l.y - 2, l.w + 4, l.h + 4); }
+    // cipher effect zone (Peace: park + corner glow purple)
+    [this.locs[3], this.locs[5]].forEach(l => { const p = this.rm ? .18 : .12 + .08 * Math.sin(t * 2); x.strokeStyle = `rgba(156,39,176,${p + .3})`; x.lineWidth = 2; x.strokeRect(l.x - 7, l.y - 7, l.w + 14, l.h + 14); });
+    x.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    this.drawWeatherFX(x, t, dt);
+    this.drawEventFX(x, t, dt);
+    if (this.state.showFps) this.drawFps(x);
+    this.applyFilters();
+    this.drawMini();
+  }
+  label(x, txt, cx, cy, big) { x.font = `${big ? 600 : 500} ${big ? 10 : 9}px 'Space Grotesk',sans-serif`; x.textAlign = 'center'; x.fillStyle = 'rgba(0,0,0,.75)'; x.fillText(txt.toUpperCase(), cx + 1, cy + 1); x.fillStyle = 'rgba(243,231,207,.9)'; x.fillText(txt.toUpperCase(), cx, cy); }
+  wins(x, l, cols, rows, t, color, seed) {
+    const R = this.rnd(seed); const gw = l.w / cols, gh = (l.h - 8) / rows;
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const lit = R() < .6, fl = R() < .25, ph = R() * 6;
+      x.fillStyle = lit ? color : '#333';
+      x.globalAlpha = lit ? (fl && !this.rm ? .5 + .4 * Math.abs(Math.sin(t * .8 + ph)) : .85) : 1;
+      x.fillRect(l.x + c * gw + gw / 2 - 2.5, l.y + 6 + r * gh + gh / 2 - 2.5, 5, 5);
+    }
+    x.globalAlpha = 1;
+  }
+  drawLoc(x, l, t, th) {
+    const cx = l.x + l.w / 2;
+    const F = (c) => { x.fillStyle = c; x.fillRect(l.x, l.y, l.w, l.h); };
+    switch (l.id) {
+      case 0: F('#3a2620'); this.wins(x, l, 2, 1, t, '#ffd54f', 11); x.fillStyle = '#c23a2e'; for (let i = 0; i < 8; i++) x.fillStyle = i % 2 ? '#fff7e6' : '#c23a2e', x.fillRect(l.x + i * 10, l.y - 5, 10, 5);
+        { const po = this.rm ? 0 : (t * 14) % 8; x.save(); x.beginPath(); x.rect(l.x + l.w + 2, l.y + 8, 6, 26); x.clip(); for (let i = -1; i < 6; i++) { x.fillStyle = ['#c23a2e', '#fff7e6', '#2c4a72'][((i + 9) % 3)]; x.fillRect(l.x + l.w + 2, l.y + 8 + i * 8 + po, 6, 8); } x.restore(); } break;
+      case 1: F('#3a2430'); this.wins(x, l, 2, 1, t, '#ffe4f1', 12); x.fillStyle = this.rm ? '#e91e63' : `rgba(233,30,99,${.7 + .3 * Math.sin(t * 3)})`; x.fillRect(l.x + 8, l.y - 6, l.w - 16, 5); break;
+      case 2: F('#33402c'); this.wins(x, l, 2, 1, t, '#fff3c4', 13); for (let i = 0; i < 7; i++) { x.fillStyle = i % 2 ? '#c23a2e' : '#2e7d32'; x.fillRect(l.x + i * 10.3, l.y - 5, 10.3, 5); } x.fillStyle = '#5a3d22'; x.fillRect(l.x - 8, l.y + l.h - 12, 6, 6); x.fillRect(l.x - 8, l.y + l.h - 22, 6, 6); break;
+      case 3: { x.fillStyle = '#22452a'; x.beginPath(); x.roundRect(l.x, l.y, l.w, l.h, 18); x.fill();
+        x.strokeStyle = '#3e6b44'; x.lineWidth = 4; x.beginPath(); x.moveTo(l.x + 10, l.y + l.h - 20); x.quadraticCurveTo(cx, l.y + 60, l.x + l.w - 10, l.y + 30); x.stroke();
+        const R3 = this.rnd(33); for (let i = 0; i < 8; i++) { const tx = l.x + 14 + R3() * (l.w - 28), ty = l.y + 12 + R3() * (l.h - 30), sw = this.rm ? 0 : Math.sin(t * .9 + i) * 1.2 * this.windMult; x.fillStyle = i % 2 ? '#1b5e20' : '#2e7d32'; x.beginPath(); x.arc(tx + sw, ty, 6 + (i % 3) * 2, 0, 7); x.fill(); }
+        x.fillStyle = '#5a4632'; x.fillRect(l.x + 88, l.y + 96, 15, 8); x.fillRect(l.x + 130, l.y + 120, 15, 8);
+        x.fillStyle = '#5a4632'; x.fillRect(l.x + 180, l.y + 40, 12, 7); } break;
+      case 4: F('#4a3226'); this.wins(x, l, 3, 1, t, '#ffd54f', 14); x.fillStyle = '#241812'; x.fillRect(cx - 6, l.y + l.h - 20, 12, 20); x.fillStyle = '#2a1a14'; x.fillRect(l.x - 3, l.y - 4, l.w + 6, 5); break;
+      case 5: x.fillStyle = th.sw; x.fillRect(l.x, l.y, l.w, l.h); x.fillStyle = '#8a8a8a'; x.fillRect(l.x + 46, l.y + 4, 2, 22); x.strokeStyle = '#ff6b35'; x.lineWidth = 2; x.beginPath(); x.arc(l.x + 47, l.y + 28, 5, 0, 7); x.stroke();
+        x.fillStyle = '#2c2c34'; x.fillRect(l.x + 8, l.y + l.h - 14, 10, 8); if (!this.rm) { x.font = '10px sans-serif'; x.fillStyle = `rgba(247,201,72,${.5 + .5 * Math.sin(t * 2)})`; x.fillText('♪', l.x + 22, l.y + l.h - 10 - (t * 8 % 14)); } break;
+      case 6: F('#4e4232'); this.wins(x, l, 3, 2, t, '#ffb74d', 15); x.fillStyle = '#f3e7cf'; x.beginPath(); x.moveTo(cx - 12, l.y); x.lineTo(cx, l.y - 22); x.lineTo(cx + 12, l.y); x.fill(); x.fillRect(cx - 1, l.y - 30, 2, 8); x.fillRect(cx - 4, l.y - 27, 8, 2);
+        x.fillStyle = th.sw; x.fillRect(l.x + l.w + 6, l.y + 10, 46, 60); x.strokeStyle = 'rgba(243,231,207,.25)'; x.lineWidth = 1; for (let i = 0; i < 4; i++) { x.beginPath(); x.moveTo(l.x + l.w + 6, l.y + 10 + i * 15); x.lineTo(l.x + l.w + 52, l.y + 10 + i * 15); x.stroke(); } break;
+      case 7: F('#4a3a30'); this.wins(x, l, 5, 3, t, '#ffe082', 16); x.fillStyle = '#8a8a8a'; x.fillRect(l.x - 10, l.y + 20, 2, 30); x.fillStyle = '#c23a2e'; x.fillRect(l.x - 8, l.y + 20, 10, 6);
+        x.fillStyle = '#2e5a34'; x.fillRect(l.x + 20, l.y + l.h + 8, 50, 20); break;
+      case 8: { x.fillStyle = '#2a2014'; x.beginPath(); x.roundRect(l.x, l.y, l.w, l.h, 10); x.fill(); x.strokeStyle = 'rgba(255,107,53,.4)'; x.lineWidth = 2; x.stroke();
+        x.fillStyle = '#1a1410'; x.fillRect(l.x + 14, l.y + 26, 18, 10); x.fillStyle = '#ff6b35'; x.fillRect(l.x + 17, l.y + 23, 12, 3);
+        x.fillStyle = '#5a4632'; x.fillRect(l.x + 50, l.y + 22, 26, 9); x.fillRect(l.x + 50, l.y + 44, 26, 9); x.fillStyle = '#2c4a72'; x.fillRect(l.x + 86, l.y + 50, 12, 9);
+        x.fillStyle = '#1b5e20'; x.beginPath(); x.arc(l.x + 92, l.y + 16, 10, 0, 7); x.fill();
+        for (let i = 0; i < 5; i++) { x.fillStyle = i % 2 ? '#f7c948' : '#ff6b35'; x.globalAlpha = this.rm ? .8 : .5 + .5 * Math.sin(t * 2 + i); x.beginPath(); x.arc(l.x + 12 + i * 22, l.y - 6, 2.5, 0, 7); x.fill(); } x.globalAlpha = 1; } break;
+      case 9: { x.fillStyle = '#2e2416'; x.beginPath(); x.roundRect(l.x, l.y, l.w, l.h, 8); x.fill(); x.strokeStyle = 'rgba(243,231,207,.2)'; x.setLineDash([4, 4]); x.strokeRect(l.x, l.y, l.w, l.h); x.setLineDash([]);
+        const R9 = this.rnd(99); x.fillStyle = '#3e6b34'; for (let i = 0; i < 14; i++) x.fillRect(l.x + 6 + R9() * (l.w - 12), l.y + 6 + R9() * (l.h - 12), 3, 5);
+        x.strokeStyle = '#5a4632'; x.lineWidth = 2; x.beginPath(); x.arc(l.x + 24, l.y + 58, 7, 0, 7); x.stroke();
+        x.fillStyle = '#3e6b34'; x.fillRect(l.x + 46, l.y + 14, 34, 4); x.fillRect(l.x + 46, l.y + 24, 34, 4); x.fillStyle = '#c23a2e'; x.fillRect(l.x + 52, l.y + 32, 3, 3); x.fillRect(l.x + 68, l.y + 34, 3, 3); } break;
+      case 10: F('#4a463c'); x.fillStyle = '#5a564a'; x.fillRect(l.x - 4, l.y - 6, l.w + 8, 8); x.fillStyle = '#d8d2c0';
+        for (let i = 0; i < 4; i++) x.fillRect(l.x + 14 + i * 28, l.y + 8, 6, l.h - 26); x.fillStyle = '#3a362e'; x.fillRect(l.x + 8, l.y + l.h - 12, l.w - 16, 12);
+        x.fillStyle = '#8a8a8a'; x.fillRect(l.x + l.w - 8, l.y - 26, 2, 22); x.fillStyle = '#c23a2e'; x.fillRect(l.x + l.w - 6, l.y - 26, 8, 5); break;
+      case 11: F('#2c2733'); this.wins(x, l, 3, 1, t, '#443a55', 17); x.fillStyle = this.rm ? '#9c27b0' : `rgba(156,39,176,${.5 + .4 * Math.sin(t * 2.4)})`; x.fillRect(l.x + 10, l.y + 12, 12, 8);
+        { const g = x.createLinearGradient(l.x, l.y, l.x + l.w, l.y); g.addColorStop(0, '#ff6b35'); g.addColorStop(.5, '#9c27b0'); g.addColorStop(1, '#4caf50'); x.fillStyle = g; x.fillRect(l.x, l.y + l.h, l.w, 4); } break;
+      case 12: F('#35443a'); this.wins(x, l, 4, 2, t, '#ffe082', 18); x.fillStyle = '#2e7d32'; x.fillRect(l.x + 10, l.y - 5, l.w - 20, 5);
+        { const g = x.createLinearGradient(l.x + l.w, l.y, l.x + l.w, l.y + l.h); g.addColorStop(0, '#2196f3'); g.addColorStop(.5, '#f7c948'); g.addColorStop(1, '#ff6b35'); x.fillStyle = g; x.fillRect(l.x + l.w, l.y + 8, 4, l.h - 16); } break;
+      case 13: F('#463c30'); this.wins(x, l, 3, 2, t, '#ffd54f', 19); x.fillStyle = '#d8d2c0'; for (let i = 0; i < 3; i++) x.fillRect(l.x + 14 + i * 28, l.y + 6, 5, l.h - 18); x.fillStyle = '#3a332a'; x.fillRect(l.x + 6, l.y + l.h - 9, l.w - 12, 9); break;
+      case 14: { x.fillStyle = '#3a2a44'; x.beginPath(); x.roundRect(l.x, l.y, l.w, l.h, 8); x.fill();
+        x.fillStyle = '#4caf50'; x.fillRect(l.x + 8, l.y + 10, 26, 18); x.fillStyle = '#9c27b0'; x.fillRect(l.x + 42, l.y + 24, 30, 18);
+        x.fillStyle = '#8a8a8a'; x.fillRect(l.x + 12, l.y + 34, 2, 12); x.fillRect(l.x + 26, l.y + 34, 2, 12); x.strokeStyle = '#8a8a8a'; x.beginPath(); x.moveTo(l.x + 13, l.y + 34); x.lineTo(l.x + 27, l.y + 34); x.stroke();
+        x.fillStyle = '#f7c948'; x.beginPath(); x.moveTo(l.x + 60, l.y + 8); x.lineTo(l.x + 74, l.y + 22); x.lineTo(l.x + 60, l.y + 22); x.fill(); } break;
+      case 15: { x.fillStyle = '#8a4a22'; x.fillRect(l.x, l.y, l.w, l.h); x.strokeStyle = 'rgba(255,247,230,.7)'; x.lineWidth = 1.5; x.strokeRect(l.x + 4, l.y + 4, l.w - 8, l.h - 8); x.beginPath(); x.arc(cx, l.y + l.h / 2, 10, 0, 7); x.stroke(); x.beginPath(); x.moveTo(cx, l.y + 4); x.lineTo(cx, l.y + l.h - 4); x.stroke();
+        x.strokeStyle = '#ff6b35'; [[l.x + 8, l.y + l.h / 2], [l.x + l.w - 8, l.y + l.h / 2]].forEach(h => { x.beginPath(); x.arc(h[0], h[1], 4, 0, 7); x.stroke(); }); } break;
+      case 16: break;
+      case 17: x.fillStyle = '#4a4440'; x.fillRect(l.x, l.y, l.w, l.h); x.strokeStyle = 'rgba(243,231,207,.4)'; x.lineWidth = 1; x.beginPath(); x.moveTo(l.x, l.y); x.lineTo(l.x + l.w, l.y); x.stroke(); x.fillStyle = '#5a4632'; x.fillRect(l.x + 4, l.y + 4, 8, 8); break;
+      case 18: x.fillStyle = '#5c4430'; x.fillRect(l.x, l.y, l.w, l.h); x.fillStyle = '#d8d2c0'; x.fillRect(l.x + 6, l.y + 6, 10, 8); x.fillStyle = '#8a8a8a'; x.fillRect(l.x + 24, l.y + 8, 14, 10); x.fillStyle = '#5a4632'; x.fillRect(l.x + 42, l.y + 20, 10, 8);
+        if (!this.rm) { x.fillStyle = `rgba(243,231,207,${.3 + .2 * Math.sin(t * 2)})`; x.beginPath(); x.arc(l.x + 11, l.y + 2 - (t * 4 % 8), 2, 0, 7); x.fill(); } break;
+      case 19: x.fillStyle = '#4a3a30'; x.fillRect(l.x, l.y, l.w, l.h); x.fillStyle = this.rm ? '#7ec8ff' : `rgba(126,200,255,${.4 + .4 * Math.abs(Math.sin(t * 5.3))})`; x.fillRect(l.x + 8, l.y + 8, 14, 9); x.fillStyle = '#5a4632'; x.fillRect(l.x + 30, l.y + 20, 20, 8); break;
+      case 20: { x.fillStyle = '#2e4a2c'; x.beginPath(); x.roundRect(l.x, l.y, l.w, l.h, 6); x.fill(); x.fillStyle = '#1a1410'; x.fillRect(l.x + 14, l.y + 10, 14, 8); x.fillStyle = '#5a4632'; x.fillRect(l.x + 40, l.y + 12, 22, 8); x.fillStyle = '#1b5e20'; x.beginPath(); x.arc(l.x + 90, l.y + 14, 8, 0, 7); x.fill(); } break;
+      case 21: x.fillStyle = '#8a8478'; for (let i = 0; i < 3; i++) x.fillRect(l.x, l.y + i * 4.5, l.w, 3); break;
+      case 22: F('#2c3a40'); this.wins(x, l, 2, 1, t, '#d4f1ff', 22); x.fillStyle = '#fff7e6'; for (let i = 0; i < 3; i++) { x.beginPath(); x.arc(l.x + 16 + i * 20, l.y + 34, 6, 0, 7); x.stroke(); x.strokeStyle = '#7ec8ff'; if (!this.rm) { x.beginPath(); x.arc(l.x + 16 + i * 20, l.y + 34, 3, t * 3 + i, t * 3 + i + 4); x.stroke(); } }
+        x.fillStyle = '#2196f3'; x.fillRect(l.x + 8, l.y - 5, l.w - 16, 5); break;
+      case 23: F('#26202c'); this.wins(x, l, 2, 1, t, '#3e5a3a', 23); x.fillStyle = '#fff7e6'; x.beginPath(); x.arc(l.x + l.w / 2, l.y - 8, 6, 0, 7); x.fill(); x.fillStyle = '#1a1a1a'; x.beginPath(); x.arc(l.x + l.w / 2, l.y - 8, 3.4, 0, 7); x.fill(); x.fillStyle = '#fff7e6'; x.font = '5px sans-serif'; x.textAlign = 'center'; x.fillText('8', l.x + l.w / 2, l.y - 6.4); break;
+    }
+    if (![17, 18, 19, 20, 21].includes(l.id)) this.label(x, l.n, cx, l.y + l.h + 14, l.w > 100);
+  }
+  drawFiller(x, t, th) {
+    const k = this.state.theme, R = this.rnd(41);
+    const strip = (sy, n, wMin, wMax, hMin, hMax) => {
+      let sx = 20;
+      for (let i = 0; i < n && sx < this.W - 60; i++) {
+        const bw = wMin + R() * (wMax - wMin), bh = hMin + R() * (hMax - hMin);
+        if ((sx > 240 && sx < 330) || (sx > 620 && sx < 680) || (sx > 930 && sx < 1000)) { sx += 70; continue; }
+        if (k === 'detroit' && R() < .3) { x.fillStyle = '#2a281f'; x.fillRect(sx, sy, bw, bh); x.fillStyle = '#3e4a2c'; for (let j = 0; j < 6; j++) x.fillRect(sx + R() * bw, sy + R() * bh, 2, 4); }
+        else {
+          x.fillStyle = k === 'miami' ? ['#f8bbd0', '#b2dfdb', '#fff9c4'][i % 3] : (i % 2 ? th.fill : th.fill2);
+          x.fillRect(sx, sy, bw, bh);
+          const wc = Math.max(1, Math.floor(bw / 16));
+          for (let c = 0; c < wc; c++) { const lit = R() < .5; x.fillStyle = lit ? th.win : (k === 'miami' ? 'rgba(0,0,0,.25)' : '#2a2622'); x.globalAlpha = lit ? .85 : 1; x.fillRect(sx + 5 + c * 14, sy + bh / 2 - 3, 5, 6); x.globalAlpha = 1; }
+          if (k === 'harlem' || k === 'baltimore') { x.fillStyle = '#b8b2a4'; x.fillRect(sx + bw / 2 - 5, sy + bh, 10, 5); }
+          if (k === 'oakland') { x.fillStyle = th.fill2; x.fillRect(sx + bw / 2 - 6, sy - 4, 12, 4); }
+          if (k === 'nola') { x.strokeStyle = 'rgba(243,231,207,.5)'; x.lineWidth = 1; x.beginPath(); x.moveTo(sx, sy + 5); x.lineTo(sx + bw, sy + 5); x.stroke(); }
+        }
+        sx += bw + (k === 'detroit' ? 14 : 6);
+      }
+    };
+    strip(692, 24, k === 'nola' ? 22 : 34, k === 'nola' ? 30 : 52, 42, 62);
+    strip(50, 16, 40, 64, 40, 56);
+    if (k === 'chicago') { x.fillStyle = '#4a4a52'; x.fillRect(0, 96, this.W, 8); x.fillStyle = '#3a3a40'; for (let i = 0; i < 60; i++) x.fillRect(i * 20, 104, 3, 5); }
+    if (k === 'oakland') { x.fillStyle = '#4a5258'; x.fillRect(0, 88, this.W, 6); }
+    if (k === 'miami') { const g = x.createLinearGradient(1130, 0, this.W, 0); g.addColorStop(0, 'rgba(13,71,161,0)'); g.addColorStop(1, '#0d47a1'); x.fillStyle = g; x.fillRect(1130, 0, 70, this.H); x.strokeStyle = 'rgba(255,255,255,.3)'; for (let i = 0; i < 8; i++) { x.beginPath(); const wy = 60 + i * 95 + (this.rm ? 0 : Math.sin(t + i) * 6); x.moveTo(1160, wy); x.quadraticCurveTo(1172, wy - 5, 1184, wy); x.stroke(); }
+      x.fillStyle = '#5a4632'; [[350, 320], [900, 330], [560, 610]].forEach(p => { x.fillRect(p[0], p[1], 3, 10); x.fillStyle = '#2e7d32'; x.beginPath(); x.arc(p[0] + 1, p[1] - 4, 7, 0, 7); x.fill(); x.fillStyle = '#5a4632'; }); }
+    if (k === 'baltimore') { const g = x.createLinearGradient(0, 770, 0, this.H); g.addColorStop(0, 'rgba(13,71,161,0)'); g.addColorStop(1, '#0d47a1'); x.fillStyle = g; x.fillRect(0, 760, this.W, 40); }
+    if (k === 'atlanta') { const RA = this.rnd(55); x.globalAlpha = .5; for (let i = 0; i < 22; i++) { x.fillStyle = i % 2 ? '#1b5e20' : '#2e7d32'; x.beginPath(); x.arc(RA() * this.W, RA() * this.H, 8 + RA() * 8, 0, 7); x.fill(); } x.globalAlpha = 1; x.fillStyle = '#2e5a34'; x.fillRect(560, 560, 110, 56); this.label(x, 'The Quad', 615, 630, false); }
+    if (k === 'harlem') { x.fillStyle = '#2e7d32'; x.fillRect(300, 340, 40, 6); x.fillStyle = '#8a8a8a'; x.fillRect(312, 346, 16, 10); this.label(x, 'Subway', 320, 370, false); }
+    if (k === 'nola') { const cols = ['#9c27b0', '#4caf50', '#f7c948']; for (let i = 0; i < 6; i++) { x.fillStyle = cols[i % 3]; x.fillRect(250 + i * 12, 420, 8, 5); } }
+    if (k === 'detroit') { x.fillStyle = '#33302a'; x.fillRect(430, 44, 90, 50); x.fillRect(540, 50, 70, 44); x.fillStyle = th.win; x.globalAlpha = .5; x.fillRect(444, 60, 8, 6); x.fillRect(560, 66, 8, 6); x.globalAlpha = 1; }
+  }
+  drawThemeUnder() {}
+  drawSmoke(x, t) {
+    if (this.rm) return;
+    if (Math.random() < .3) this.smoke.push({ x: 1043 + Math.random() * 8, y: 585, a: .35, r: 3 });
+    if (Math.random() < .15) this.smoke.push({ x: 425 + Math.random() * 8, y: 170, a: .3, r: 2.5 });
+    this.smoke = this.smoke.filter(s => s.a > .02);
+    this.smoke.forEach(s => { s.y -= .5; s.r += .12; s.a *= .975; x.fillStyle = `rgba(180,180,180,${s.a})`; x.beginPath(); x.arc(s.x, s.y, s.r, 0, 7); x.fill(); });
+  }
+  drawRels(x, t) {
+    this.rels.forEach(([a, b, kind]) => {
+      const A = this.toks[a], B = this.toks[b];
+      x.beginPath(); x.moveTo(A.x, A.y); x.lineTo(B.x, B.y);
+      if (kind === 'alliance') { x.strokeStyle = 'rgba(76,175,80,.85)'; x.lineWidth = 3; x.setLineDash([8, 5]); x.lineDashOffset = this.rm ? 0 : -t * 16; x.shadowColor = '#4caf50'; x.shadowBlur = 6; }
+      else if (kind === 'beef') { x.strokeStyle = `rgba(255,68,68,${this.rm ? .8 : .5 + .4 * Math.sin(t * 4.2)})`; x.lineWidth = 3; x.setLineDash([]); x.shadowColor = '#ff4444'; x.shadowBlur = 6; }
+      else if (kind === 'romantic') { x.strokeStyle = 'rgba(233,30,99,.7)'; x.lineWidth = 2; x.setLineDash([3, 6]); x.shadowBlur = 0; }
+      else { x.strokeStyle = 'rgba(160,160,160,.35)'; x.lineWidth = 1; x.setLineDash([]); x.shadowBlur = 0; }
+      x.stroke(); x.setLineDash([]); x.shadowBlur = 0;
+      if (kind === 'romantic') { const p = this.rm ? .5 : (t * .25) % 1; const hx = A.x + (B.x - A.x) * p, hy = A.y + (B.y - A.y) * p; x.font = '11px sans-serif'; x.textAlign = 'center'; x.fillStyle = '#e91e63'; x.fillText('♥', hx, hy); }
+    });
+  }
+  drawTok(x, tk, i, t) {
+    if (tk.anim) { const p = Math.min(1, (performance.now() - tk.anim.start) / 600); const e = 1 + 2.7 * Math.pow(p - 1, 3) + 1.7 * Math.pow(p - 1, 2); tk.x = tk.anim.fx + (tk.anim.tx - tk.anim.fx) * e; tk.y = tk.anim.fy + (tk.anim.ty - tk.anim.fy) * e; if (p >= 1) tk.anim = null; }
+    const sel = this.state.selTok === i;
+    if (sel) { x.strokeStyle = `rgba(255,107,53,${this.rm ? .8 : .5 + .4 * Math.sin(t * 5)})`; x.lineWidth = 4; x.beginPath(); x.arc(tk.x, tk.y, 18, 0, 7); x.stroke(); }
+    x.fillStyle = tk.c; x.strokeStyle = 'rgba(255,247,230,.85)'; x.lineWidth = 2.5;
+    x.beginPath(); x.arc(tk.x, tk.y, 13, 0, 7); x.fill(); x.stroke();
+    x.fillStyle = '#fff7e6'; x.font = "700 11px 'Plus Jakarta Sans',sans-serif"; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(tk.i, tk.x, tk.y + .5); x.textBaseline = 'alphabetic';
+    if (tk.crown) { x.font = '11px sans-serif'; x.fillText('👑', tk.x, tk.y - 18); }
+    if (tk.i === 'A') { x.font = '8px sans-serif'; x.fillText('📜', tk.x + 12, tk.y - 10); }
+  }
+  drawMini() {
+    if (!this.mini) return;
+    const m = this.mini.getContext('2d'), d = this.dpr, sc = 150 / this.W;
+    m.setTransform(d * sc, 0, 0, d * sc, 0, 0);
+    m.fillStyle = '#181512'; m.fillRect(0, 0, this.W, this.W * 100 / 150);
+    m.fillStyle = '#2a2a2a';
+    m.fillRect(0, 358, this.W, 44); m.fillRect(258, 0, 44, this.H); m.fillRect(0, 127, this.W, 26); m.fillRect(0, 627, this.W, 26); m.fillRect(627, 0, 26, this.H); m.fillRect(947, 0, 26, this.H);
+    m.fillStyle = '#22452a'; m.fillRect(40, 420, 230, 195);
+    this.locs.forEach(l => { if (l.id < 17) { m.fillStyle = 'rgba(243,231,207,.35)'; m.fillRect(l.x, l.y, l.w, l.h); } });
+    this.toks.forEach(tk => { m.fillStyle = tk.c; m.beginPath(); m.arc(tk.x, tk.y, 12, 0, 7); m.fill(); });
+    m.strokeStyle = '#ff6b35'; m.lineWidth = 8;
+    m.strokeRect(this.cam.x, this.cam.y, this.cv.clientWidth / this.cam.z, this.cv.clientHeight / this.cam.z);
+  }
+  renderVals() {
+    const st = this.state;
+    const themes = this.themeList.map(([k, label]) => ({ label, cur: String(st.theme === k), go: () => this.setState({ theme: k, announce: label + ' theme applied' }), bg: st.theme === k ? '#ff6b35' : 'rgba(255,255,255,.06)', fg: st.theme === k ? '#fff7e6' : '#f3e7cf' }));
+    const loc = this.locs[st.selLoc] || this.locs[5];
+    const occ = this.toks.filter(tk => tk.loc === loc.id).map(tk => tk.name);
+    const barC = ['#ff6b35', '#4caf50', '#2196f3', '#f7c948'], barN = ['Street Cred', 'Community', 'Wisdom', 'Reputation'];
+    const pdata = [['Marcus', 'M', '#2196f3', 'Entrepreneur', [6, 4, 5, 7]], ['Aisha', 'A', '#4caf50', 'Organizer', [4, 8, 6, 7]], ['Deja', 'D', '#9c27b0', 'Creative', [5, 5, 7, 6]], ['Rell', 'R', '#ff6b35', 'Street Hustler', [8, 4, 4, 6]], ['You', 'Y', '#f7c948', 'Chronicler', [5, 6, 4, 7]]];
+    return {
+      themes, announce: st.announce,
+      locName: loc.n, locFlavor: (st.lang === 'standard' && this.standardFlavor[loc.id]) ? this.standardFlavor[loc.id] : loc.f, occupants: occ.length ? occ.join(', ') : 'Nobody right now',
+      locActions: loc.acts.map(([label]) => ({ label, go: () => this.setState({ mapMsg: label.replace('·', '—') + ' ✓', announce: label }) })),
+      mapMsg: st.mapMsg,
+      pstats: pdata.map(([name, initial, color, hustle, vals]) => ({ name, initial, color, hustle, bars: vals.map((v, i) => ({ color: barC[i], pct: v * 10 + '%', title: barN[i] + ' ' + v + '/10' })) })),
+      zoomIn: () => this.zoomAt(1.25), zoomOut: () => this.zoomAt(.8), zoomFit: () => this.fit(),
+      refWrap: this.refWrap, refCanvas: this.refCanvas, refTip: this.refTip, refMini: this.refMini,
+      moveBg: st.moveMode ? '#e04b00' : '#ff6b35',
+      doMove: () => this.setState({ moveMode: true, selTok: 4, announce: 'Move mode. Click a location to move your token.', mapMsg: 'Click anywhere on the map to move.' }),
+      doAction: () => this.setState({ mapMsg: `Pick an action at ${loc.n} from the panel above.`, announce: 'Choose an action' }),
+      doPower: () => this.setState({ mapMsg: '📖 The Receipts: peek at one unresolved thread.', announce: 'Hustle power used' }),
+      endTurn: () => this.setState({ mapMsg: 'Turn ended. Marcus is up.', announce: 'Turn ended. Marcus is up.' }),
+      sheetOpen: String(st.sheetOpen), sheetLabel: st.sheetOpen ? 'Close' : 'Block Info',
+      toggleSheet: () => this.setState({ sheetOpen: !st.sheetOpen, announce: st.sheetOpen ? 'Info sheet closed' : 'Info sheet opened' }),
+      weatherOpts: this.weatherList.map(([key, label]) => ({ key, label })), weatherVal: st.weather,
+      weatherChange: (e) => { const val = e.target.value, w = this.weatherList.find(w => w[0] === val); this.initAudio(); this.setState({ weather: val, announce: (w ? w[1] : '') + ' weather set' }); this.updateWeatherAudioFor(val); },
+      eventOpts: this.eventList.map(([key, label]) => ({ key, label })), eventSelVal: st.eventSel,
+      eventSelChange: (e) => this.setState({ eventSel: e.target.value }),
+      triggerEventBtn: () => this.triggerEvent(st.eventSel),
+      muteIcon: st.muted ? '🔇' : '🔊',
+      toggleMute: () => { const nm = !st.muted; this.initAudio(); this.setState({ muted: nm }); if (this.masterGain) this.masterGain.gain.setTargetAtTime(nm ? 0 : st.soundMaster / 100, this.audioCtx.currentTime, .05); },
+      toggleSettings: () => this.setState(s => ({ settingsOpen: !s.settingsOpen })), settingsOpen: st.settingsOpen,
+      closeSettingsBg: () => this.setState({ settingsOpen: false }), stop: (e) => e.stopPropagation(),
+      eventActive: !!st.eventType,
+      eventIcon: st.eventType ? this.eventList.find(e => e[0] === st.eventType)[2] : '',
+      eventLabel: st.eventType ? this.eventList.find(e => e[0] === st.eventType)[1].replace(/^\S+\s/, '') : '',
+      eventGameplay: st.eventType ? this.eventList.find(e => e[0] === st.eventType)[3] : '',
+      toasts: st.toasts,
+      soundMaster: st.soundMaster,
+      soundMasterChange: (e) => { const v = +e.target.value; this.initAudio(); this.setState({ soundMaster: v }); if (this.masterGain) this.masterGain.gain.setTargetAtTime(st.muted ? 0 : v / 100, this.audioCtx.currentTime, .05); },
+      soundMusic: st.soundMusic,
+      soundMusicChange: (e) => { const v = +e.target.value; this.initAudio(); this.setState({ soundMusic: v }); if (this.musicGain) this.musicGain.gain.setTargetAtTime(v / 100, this.audioCtx.currentTime, .05); },
+      quality: st.quality, qualityChange: (e) => this.setState({ quality: e.target.value }),
+      showFps: st.showFps, toggleFps: () => this.setState({ showFps: !st.showFps }),
+      reduceMotionUI: st.reduceMotionUI, toggleReduceMotionUI: () => this.setState({ reduceMotionUI: !st.reduceMotionUI }),
+      highContrast: st.highContrast, toggleContrast: () => this.setState({ highContrast: !st.highContrast }),
+      textSize: st.textSize, textSizeChange: (e) => this.setState({ textSize: e.target.value }),
+      textZoomPct: ({ sm: '90%', md: '100%', lg: '118%' })[st.textSize] || '100%',
+      langAaveBg: st.lang === 'aave' ? '#ff6b35' : 'rgba(255,255,255,.08)', langStdBg: st.lang === 'standard' ? '#ff6b35' : 'rgba(255,255,255,.08)',
+      setLangAave: () => this.setState({ lang: 'aave' }), setLangStd: () => this.setState({ lang: 'standard' }),
+      weatherFXOn: st.weatherFXOn, toggleWeatherFX: () => this.setState({ weatherFXOn: !st.weatherFXOn }),
+    };
+  }
+}
+</script>
+</body>
+</html>

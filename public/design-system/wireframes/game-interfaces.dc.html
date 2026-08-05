@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@400;500;600;700&amp;family=Unbounded:wght@400;700;900&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#1a1a1a;color:#f3e7cf;font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:#ff6b35}a:hover{color:#e04b00}
+[tabindex]:focus-visible,button:focus-visible{outline:3px solid #ff6b35;outline-offset:2px}
+@keyframes ckDeal{from{transform:translateY(-200px) rotate(-10deg) scale(.8);opacity:0}to{transform:translateY(0) rotate(0) scale(1);opacity:1}}
+@keyframes ckReceipt{from{transform:translateY(-300px) rotate(-5deg);opacity:0}60%{transform:translateY(10px) rotate(1deg);opacity:1}to{transform:translateY(0) rotate(-1deg);opacity:1}}
+@keyframes ckSeal{from{transform:translateY(-100px) scale(0) rotate(-10deg);opacity:0}60%{transform:translateY(5px) scale(1.2);opacity:1}to{transform:translateY(0) scale(1) rotate(0);opacity:1}}
+@keyframes ckVictory{from{transform:translateY(-100px) scale(.8);opacity:0}60%{transform:translateY(10px) scale(1.05);opacity:1}to{transform:translateY(0) scale(1);opacity:1}}
+@keyframes ckConfetti{from{transform:translateY(-12vh) rotate(0)}to{transform:translateY(112vh) rotate(720deg);opacity:0}}
+@keyframes ckPulse{0%,100%{box-shadow:0 0 0 6px rgba(255,107,53,.3)}50%{box-shadow:0 0 0 12px rgba(255,107,53,.1)}}
+@keyframes ckGlow{0%,100%{box-shadow:0 0 0 12px rgba(255,107,53,.4)}50%{box-shadow:0 0 0 20px rgba(255,107,53,.15)}}
+@keyframes ckFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes ckCrown{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes ckTwinkle{0%,100%{opacity:.12}50%{opacity:.85}}
+@keyframes ckDriftUp{from{transform:translateY(45vh)}to{transform:translateY(-65vh)}}
+@keyframes ckFall{from{transform:translateY(-10vh);opacity:0}15%{opacity:.6}to{transform:translateY(70vh);opacity:0}}
+@keyframes ckFlame{from{transform:translateY(0) scale(1);opacity:.9}to{transform:translateY(-150px) scale(.25);opacity:0}}
+@keyframes ckSmoke{from{transform:translateY(0) scale(1);opacity:.22}to{transform:translateY(-200px) scale(2.2);opacity:0}}
+@keyframes ckSweep{0%{transform:translateX(-30vw);opacity:0}8%{opacity:.5}45%{transform:translateX(105vw);opacity:.5}50%,100%{transform:translateX(105vw);opacity:0}}
+@keyframes ckShake{0%,100%{transform:translateX(0)}10%,30%,50%,70%,90%{transform:translateX(-5px)}20%,40%,60%,80%{transform:translateX(5px)}}
+@keyframes ckSlideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes ckDash{to{stroke-dashoffset:-24}}
+@keyframes ckSpotlight{0%,100%{opacity:.12}50%{opacity:.22}}
+@keyframes ckSpinSlow{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes ckSpinSlowR{from{transform:rotate(0)}to{transform:rotate(-360deg)}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</helmet>
+<a href="#ck-main" style="position:absolute;left:-9999px;z-index:100;background:#ff6b35;color:#fff7e6;padding:10px 16px;border-radius:8px;font:600 13px 'Plus Jakarta Sans';text-decoration:none" style-focus="left:12px;top:64px">Skip to main content</a>
+<nav aria-label="Screens" style="position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:14px;flex-wrap:wrap;height:auto;min-height:56px;padding:8px 20px;background:#1a1a1a;border-bottom:2px solid #ff6b35;box-sizing:border-box">
+  <div style="font:700 16px 'Unbounded';letter-spacing:-.5px;color:#f3e7cf">CONCRETE&nbsp;KINGS</div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="7"><button onClick="{{ t.go }}" aria-current="{{ t.cur }}" style="font:600 11px 'Space Grotesk';letter-spacing:1px;text-transform:uppercase;border:none;border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s ease;background:{{ t.bg }};color:{{ t.fg }}">{{ t.label }}</button></sc-for>
+  </div>
+  <div style="display:flex;gap:6px;align-items:center;margin-left:auto;flex-wrap:wrap">
+    <select onChange="{{ weatherChange }}" value="{{ weatherVal }}" aria-label="Weather" style="font:600 10px 'Space Grotesk';background:rgba(255,255,255,.06);color:#f3e7cf;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:6px 8px;cursor:pointer">
+      <sc-for list="{{ weatherOpts }}" as="w" hint-placeholder-count="10"><option value="{{ w.key }}">{{ w.label }}</option></sc-for>
+    </select>
+    <select onChange="{{ eventSelChange }}" value="{{ eventSelVal }}" aria-label="Event type to trigger" style="font:600 10px 'Space Grotesk';background:rgba(255,255,255,.06);color:#f3e7cf;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:6px 8px;cursor:pointer">
+      <sc-for list="{{ eventOpts }}" as="ev" hint-placeholder-count="10"><option value="{{ ev.key }}">{{ ev.label }}</option></sc-for>
+    </select>
+    <button onClick="{{ triggerEventBtn }}" style="font:600 10px 'Space Grotesk';letter-spacing:.5px;text-transform:uppercase;background:#9c27b0;color:#fff7e6;border:none;border-radius:6px;padding:7px 10px;cursor:pointer">Trigger</button>
+    <button onClick="{{ toggleMute }}" aria-label="Toggle sound" style="width:30px;height:30px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#f3e7cf;cursor:pointer;font-size:13px">{{ muteIcon }}</button>
+    <button onClick="{{ toggleSettings }}" aria-label="Open settings" style="width:30px;height:30px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#f3e7cf;cursor:pointer;font-size:13px">⚙️</button>
+  </div>
+</nav>
+<canvas ref="{{ refCity }}" aria-hidden="true" style="position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none"></canvas>
+<div aria-live="polite" style="position:fixed;left:-9999px;top:0">{{ announce }}</div>
+<sc-if value="{{ eventActive }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;top:66px;left:50%;transform:translateX(-50%);z-index:40;background:rgba(26,26,26,.95);border:2px solid #ff6b35;border-radius:10px;padding:10px 18px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:ckSlideUp .3s ease-out;white-space:nowrap">
+    <span style="font-size:20px">{{ eventIcon }}</span>
+    <div><div style="font:700 13px 'Plus Jakarta Sans'">{{ eventLabel }}</div><div style="font:500 10px 'Space Grotesk';opacity:.75">{{ eventGameplay }}</div></div>
+  </div>
+</sc-if>
+<div aria-live="polite" style="position:fixed;right:12px;bottom:12px;z-index:40;display:flex;flex-direction:column;gap:8px;max-width:280px">
+  <sc-for list="{{ toasts }}" as="ts" hint-placeholder-count="0">
+    <div style="background:#fff3e0;border-left:4px solid {{ ts.color }};border-radius:8px;padding:10px 14px;font:600 12px/1.4 'Plus Jakarta Sans';color:#1a1a1a;box-shadow:0 6px 16px rgba(0,0,0,.3);animation:ckSlideUp .3s ease-out">{{ ts.text }}</div>
+  </sc-for>
+</div>
+<main id="ck-main" style="position:relative;z-index:1">
+
+<sc-if value="{{ isS1 }}" hint-placeholder-val="{{ true }}">
+<section data-screen-label="Character Creation" style="position:relative;min-height:calc(100vh - 58px);overflow:hidden;background:radial-gradient(ellipse at 50% -10%,rgba(247,201,72,.18),transparent 55%),linear-gradient(180deg,rgba(43,29,14,.68),rgba(26,26,26,.68))">
+  <div ref="{{ refBg }}" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none"></div>
+  <div style="position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:28px 24px 40px;animation:ckSlideUp .5s ease-out">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+      <div><div style="font:500 12px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#f7c948;margin-bottom:6px">Screen 01 · Character Creation</div><h1 style="font:800 32px 'Plus Jakarta Sans';letter-spacing:-.5px;margin:0">Who You Gonna Be?</h1></div>
+      <button onClick="{{ randomPick }}" style="font:600 13px 'Plus Jakarta Sans';background:transparent;border:2px solid #f3e7cf;color:#f3e7cf;border-radius:8px;padding:10px 20px;cursor:pointer;transition:all .15s ease" style-hover="background:#f3e7cf;color:#1a1a1a">SKIP · Random</button>
+    </div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:stretch">
+      <div style="flex:1;min-width:300px;background:rgba(26,26,26,.9);border:2px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+        <h2 style="font:700 18px 'Plus Jakarta Sans';margin:0 0 4px;color:#4caf50">Choose Your Origin</h2>
+        <div style="font:500 11px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;opacity:.55;margin-bottom:14px">Where you come from shapes the story</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+          <sc-for list="{{ origins }}" as="o" hint-placeholder-count="4">
+            <div role="button" tabindex="0" aria-pressed="{{ o.pressed }}" aria-label="{{ o.aria }}" onClick="{{ o.pick }}" onKeyDown="{{ o.pick }}" style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:16px 12px;border-radius:14px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border:2px solid #4caf50;color:#1a1a1a;cursor:pointer;transition:transform .2s ease-out,box-shadow .2s ease-out;transform:{{ o.tf }};outline:{{ o.ol }};box-shadow:{{ o.sh }}" style-hover="transform:translateY(-4px)">
+              <div style="font-size:36px;margin-bottom:8px">{{ o.icon }}</div>
+              <div style="font:800 14px 'Plus Jakarta Sans';margin-bottom:6px">{{ o.name }}</div>
+              <div style="font:600 9px 'JetBrains Mono';background:#e8f5e9;border-radius:6px;padding:6px 8px">{{ o.bonus }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="flex:1.4;min-width:340px;background:rgba(26,26,26,.9);border:2px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+        <h2 style="font:700 18px 'Plus Jakarta Sans';margin:0 0 4px;color:#2196f3">Choose Your Hustle</h2>
+        <div style="font:500 11px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;opacity:.55;margin-bottom:14px">How you move through The Block</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+          <sc-for list="{{ hustles }}" as="h" hint-placeholder-count="6">
+            <div role="button" tabindex="0" aria-pressed="{{ h.pressed }}" aria-label="{{ h.aria }}" onClick="{{ h.pick }}" onKeyDown="{{ h.pick }}" style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:16px 10px;border-radius:14px;background:linear-gradient(135deg,#e3f2fd,#bbdefb);border:2px solid #2196f3;color:#1a1a1a;cursor:pointer;transition:transform .2s ease-out,box-shadow .2s ease-out;transform:{{ h.tf }};outline:{{ h.ol }};box-shadow:{{ h.sh }}" style-hover="transform:translateY(-4px)">
+              <div style="font-size:32px;margin-bottom:8px">{{ h.icon }}</div>
+              <div style="font:800 13px 'Plus Jakarta Sans';margin-bottom:6px">{{ h.name }}</div>
+              <div style="font:700 9px 'Space Grotesk';background:#fff7e6;border:1px solid #2196f3;border-radius:6px;padding:5px 7px">{{ h.power }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:20px;background:rgba(26,26,26,.9);border:2px solid #ff6b35;border-radius:14px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.4);display:flex;gap:24px;flex-wrap:wrap;align-items:center">
+      <div style="flex:none;min-width:220px">
+        <div style="font:500 11px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:8px">Your Character</div>
+        <div style="font:800 22px 'Plus Jakarta Sans'">{{ previewName }}</div>
+        <div style="font:400 13px/1.5 'Plus Jakarta Sans';opacity:.7;margin-top:4px">{{ previewSub }}</div>
+      </div>
+      <div style="flex:1;min-width:280px;display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="flex:none;width:96px;font:500 10px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;opacity:.7">{{ s.label }}</div>
+            <div style="flex:1;height:10px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden"><div style="height:100%;border-radius:5px;transition:width .6s ease-out;background:{{ s.color }};width:{{ s.pct }}"></div></div>
+            <div style="flex:none;width:36px;text-align:right;font:600 12px 'JetBrains Mono'">{{ s.txt }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="font:400 11px/1.5 'Space Grotesk';color:rgba(243,231,207,.5);margin-top:14px">Note: dusty-window particles drift 20–40s · cards stagger in 100ms · stat bars fill 600ms ease-out · selection uses the system 4px orange outline + glow.</div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isS2 }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Main Game Board" style="position:relative;min-height:calc(100vh - 58px);overflow:hidden;background:linear-gradient(180deg,rgba(10,10,26,.6) 0%,rgba(26,26,46,.6) 55%,rgba(26,26,26,.6) 100%)">
+  <div ref="{{ refBg }}" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none"></div>
+  <div aria-hidden="true" style="position:absolute;left:0;right:0;bottom:0;height:180px;pointer-events:none;background:linear-gradient(0deg,#12100d 30%,transparent 100%)"></div>
+  <div aria-hidden="true" style="position:absolute;left:0;right:0;bottom:120px;height:120px;pointer-events:none;opacity:.9;background:linear-gradient(90deg,transparent 0,#141220 4%,#141220 9%,transparent 9.5%,transparent 13%,#100e1a 13%,#100e1a 21%,transparent 21.5%,transparent 26%,#161326 26%,#161326 33%,transparent 33.5%,transparent 40%,#100e1a 40%,#100e1a 51%,transparent 51.5%,transparent 57%,#141220 57%,#141220 66%,transparent 66.5%,transparent 72%,#0e0c16 72%,#0e0c16 83%,transparent 83.5%,transparent 90%,#141220 90%,#141220 98%,transparent 98.5%)"></div>
+  <div aria-hidden="true" style="position:absolute;bottom:130px;left:0;width:220px;height:26px;border-radius:50%;background:radial-gradient(ellipse,rgba(255,235,59,.35),transparent 70%);animation:ckSweep 10s linear infinite;pointer-events:none"></div>
+  <div style="position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:16px 24px 32px;animation:ckSlideUp .5s ease-out">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#1a1a1a;border:2px solid rgba(255,255,255,.08);border-bottom:2px solid #ff6b35;border-radius:10px;padding:10px 16px;margin-bottom:16px">
+      <div style="font:700 16px 'Unbounded';letter-spacing:-.5px">THE BLOCK</div>
+      <div style="font:600 12px 'Space Grotesk';color:#ff6b35;border:1px solid #ff6b35;border-radius:999px;padding:4px 12px">ROUND 3 / 7</div>
+      <div title="Cipher active: Barbershop Truth — everybody speaks on it" style="font:500 11px 'Space Grotesk';letter-spacing:1px;text-transform:uppercase;background:#9c27b0;color:#fff7e6;border-radius:999px;padding:5px 12px;animation:ckPulse 2s ease-in-out infinite;cursor:help">🔥 Cipher: Barbershop Truth</div>
+      <div style="font:500 11px 'Space Grotesk';letter-spacing:1px;text-transform:uppercase;background:rgba(247,201,72,.15);color:#f7c948;border:1px solid #f7c948;border-radius:999px;padding:5px 12px">👑 O.G.: Rell</div>
+      <div style="margin-left:auto;font:600 13px 'JetBrains Mono';color:#f3e7cf;opacity:.8">⏱ 00:42</div>
+    </div>
+    <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+      <div style="flex:1;min-width:520px">
+        <div style="display:flex;gap:20px;align-items:flex-start;justify-content:center;flex-wrap:wrap">
+          <div style="position:relative;flex:none;width:300px;display:flex;flex-direction:column;min-height:420px;padding:24px;border-radius:14px;background:radial-gradient(circle at 50% -20%,rgba(255,107,53,.16),transparent 55%),linear-gradient(165deg,#3a2a1a 0%,#241f18 45%,#1a1a1a 100%);border:2px solid #4a3826;box-shadow:0 6px 0 rgba(0,0,0,.25),0 14px 28px rgba(224,75,0,.18);color:#f3e7cf;overflow:hidden;box-sizing:border-box">
+            <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#ff6b35,#f7c948);opacity:.55"></div>
+            <div style="font-size:40px;text-align:center;margin-bottom:12px;opacity:.9">🌇</div>
+            <div style="font:500 10px 'Space Grotesk';text-transform:uppercase;letter-spacing:3px;color:#ff6b35;margin-bottom:12px;text-align:center">Scenario · Active</div>
+            <div style="font:700 20px/1.35 'Plus Jakarta Sans';flex-grow:1">The whole block lost power right when <span style="display:inline-block;min-width:90px;border-bottom:3px solid #ff6b35">&nbsp;</span> was about to happen.</div>
+            <div style="display:flex;justify-content:space-between;font:400 11px 'Space Grotesk';text-transform:uppercase;letter-spacing:1.5px;opacity:.6;margin-top:20px"><span>Concrete Kings</span><span>CK-0072</span></div>
+          </div>
+          <div style="flex:1;min-width:240px">
+            <div style="font:500 11px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;opacity:.6;margin-bottom:10px">On the table · hover for names</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <div style="position:relative;width:150px;min-height:200px;padding:14px;border-radius:12px;background:linear-gradient(170deg,#fff7e6 0%,#ffedc7 55%,#ffe3b3 100%);border:2px solid #e0d4b0;box-shadow:0 4px 0 rgba(0,0,0,.15);color:#1a1a1a;box-sizing:border-box;cursor:pointer;transition:transform .2s ease-out" style-hover="transform:translateY(-4px)" title="Played by Aisha"><div style="font-size:22px;margin-bottom:6px">✊🏾</div><div style="font:600 12px/1.45 'Plus Jakarta Sans'">The tenant association's emergency generator fund, activated.</div></div>
+              <div style="position:relative;width:150px;min-height:200px;padding:14px;border-radius:12px;background:linear-gradient(170deg,#fff7e6 0%,#ffedc7 55%,#ffe3b3 100%);border:2px solid #e0d4b0;box-shadow:0 4px 0 rgba(0,0,0,.15);color:#1a1a1a;box-sizing:border-box;cursor:pointer;transition:transform .2s ease-out" style-hover="transform:translateY(-4px)" title="Played by Deja"><div style="font-size:22px;margin-bottom:6px">🎤</div><div style="font:600 12px/1.45 'Plus Jakarta Sans'">An acoustic open mic by candlelight on the stoop.</div></div>
+              <div style="display:flex;align-items:center;justify-content:center;width:150px;min-height:200px;border:2px dashed #f7c948;border-radius:12px;font:500 11px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#f7c948;text-align:center;padding:14px;box-sizing:border-box">Judge's Pick<br>drops here</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:20px;background:rgba(26,26,26,.9);border:2px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+            <div style="font:500 11px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;opacity:.6">Your hand · pick one</div>
+            <sc-if value="{{ canPlay }}" hint-placeholder-val="{{ false }}"><button onClick="{{ playCard }}" style="font:600 14px 'Plus Jakarta Sans';background:#ff6b35;color:#fff7e6;border:none;border-radius:8px;padding:12px 24px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.2);transition:all .15s ease;animation:ckVictory .4s cubic-bezier(.34,1.56,.64,1)" style-hover="background:#e04b00;transform:translateY(-2px);box-shadow:0 5px 0 rgba(0,0,0,.2)" style-active="transform:translateY(0);box-shadow:0 2px 0 rgba(0,0,0,.2)">Play Card ▶</button></sc-if>
+          </div>
+          <sc-if value="{{ played }}" hint-placeholder-val="{{ false }}"><div style="background:#fff3e0;border:2px solid #ff6b35;border-radius:8px;padding:12px 16px;font:600 14px 'Plus Jakarta Sans';color:#1a1a1a;margin-bottom:12px">Card played. Waiting on the rest of the table…</div></sc-if>
+          <div ref="{{ refHand }}" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;max-height:280px;overflow-y:auto">
+            <sc-for list="{{ hand }}" as="c" hint-placeholder-count="8">
+              <div role="button" tabindex="0" aria-pressed="{{ c.pressed }}" aria-label="{{ c.aria }}" onClick="{{ c.pick }}" onKeyDown="{{ c.pick }}" onMouseMove="{{ magMove }}" onMouseLeave="{{ magLeave }}" style="position:relative;display:flex;flex-direction:column;min-height:210px;padding:14px;border-radius:12px;background:linear-gradient(170deg,#fff7e6 0%,#ffedc7 55%,#ffe3b3 100%);border:2px solid #e0d4b0;color:#1a1a1a;cursor:pointer;box-sizing:border-box;transition:transform .2s ease-out,box-shadow .2s ease-out;overflow:hidden;transform:{{ c.tf }};outline:{{ c.ol }};box-shadow:{{ c.sh }};opacity:{{ c.op }};filter:{{ c.filt }}">
+                <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#ff6b35,#f7c948);opacity:.55"></div>
+                <div style="font-size:24px;margin:6px 0">{{ c.icon }}</div>
+                <div style="font:500 9px 'Space Grotesk';text-transform:uppercase;letter-spacing:2px;color:#8b7355;margin-bottom:6px">Response</div>
+                <div style="font:600 13px/1.45 'Plus Jakarta Sans';flex-grow:1">{{ c.text }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <aside style="flex:none;width:260px;display:flex;flex-direction:column;gap:14px">
+        <div style="background:rgba(26,26,26,.9);border:2px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+          <div style="font:500 11px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#f7c948;margin-bottom:12px">Active Receipts</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="background:linear-gradient(135deg,#fff8e1,#ffecb3);border:2px solid #f7c948;border-radius:10px;padding:12px;color:#1a1a1a;transform:rotate(-1deg);cursor:pointer;transition:transform .2s ease-out,box-shadow .2s ease-out" style-hover="transform:rotate(0) translateY(-3px);box-shadow:0 8px 16px rgba(247,201,72,.3)"><div style="font:500 8px 'Space Grotesk';letter-spacing:2px;text-transform:uppercase;color:#b8860b">Receipt · Rnd 1</div><div style="font:italic 800 13px 'Plus Jakarta Sans';margin-top:4px">The Aux Cord Incident</div><div style="font:400 9px 'JetBrains Mono';color:#b8860b;margin-top:6px">UNRESOLVED</div></div>
+            <div style="background:linear-gradient(135deg,#f1f8f4,#c8e6c9);border:2px solid #4caf50;border-radius:10px;padding:12px;color:#1a1a1a;transform:rotate(1deg);cursor:pointer;transition:transform .2s ease-out,box-shadow .2s ease-out" style-hover="transform:rotate(0) translateY(-3px);box-shadow:0 8px 16px rgba(76,175,80,.3)"><div style="font:500 8px 'Space Grotesk';letter-spacing:2px;text-transform:uppercase;color:#2e7d32">Receipt · Rnd 2</div><div style="font:italic 800 13px 'Plus Jakarta Sans';margin-top:4px">Deacon's Half-Price Fix</div><div style="font:400 9px 'JetBrains Mono';color:#2e7d32;margin-top:6px">RESOLVED · +2 REP</div></div>
+          </div>
+        </div>
+        <div style="background:rgba(26,26,26,.9);border:2px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+          <div style="font:500 11px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#f7c948;margin-bottom:12px">Your Stats</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:8px"><div style="flex:none;width:80px;font:500 9px 'Space Grotesk';letter-spacing:1px;text-transform:uppercase;opacity:.7">{{ s.label }}</div><div style="flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden"><div style="height:100%;transition:width .6s ease-out;background:{{ s.color }};width:{{ s.pct }}"></div></div><div style="flex:none;font:600 11px 'JetBrains Mono'">{{ s.txt }}</div></div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:rgba(26,26,26,.9);border:2px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+          <div style="font:500 11px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#f7c948;margin-bottom:12px">The Table</div>
+          <div style="display:flex;gap:8px">
+            <div title="Marcus · The Deejay" style="width:40px;height:40px;border-radius:50%;background:#2196f3;color:#fff7e6;font:700 14px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.2)">M</div>
+            <div title="Aisha · The Organizer" style="width:40px;height:40px;border-radius:50%;background:#4caf50;color:#fff7e6;font:700 14px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.2)">A</div>
+            <div title="Deja · The Poet" style="width:40px;height:40px;border-radius:50%;background:#9c27b0;color:#fff7e6;font:700 14px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.2)">D</div>
+            <div title="Rell · The Barber · O.G." style="width:40px;height:40px;border-radius:50%;background:#ff6b35;color:#fff7e6;font:700 14px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;border:2px solid #f7c948">R</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+    <div style="font:400 11px/1.5 'Space Grotesk';color:rgba(243,231,207,.5);margin-top:14px">Note: night cityscape with twinkling stars + 10s headlight sweep · hand deals in with 50ms stagger · magnetic hover on hand cards · sidebar collapses under 768px.</div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isS3 }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Judge Phase" style="position:relative;min-height:calc(100vh - 58px);overflow:hidden;background:rgba(20,16,12,.55)">
+  <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% -10%,rgba(255,107,53,.35),transparent 60%);animation:ckSpotlight 4s ease-in-out infinite;pointer-events:none"></div>
+  <div aria-hidden="true" style="position:absolute;inset:0;box-shadow:inset 0 0 180px 60px rgba(0,0,0,.75);pointer-events:none"></div>
+  <div ref="{{ refBg }}" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none"></div>
+  <div style="position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:36px 24px 40px;text-align:center;animation:ckSlideUp .5s ease-out">
+    <div style="font:500 12px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#f7c948;margin-bottom:6px">Screen 03 · Judge Phase</div>
+    <h1 style="font:900 40px 'Unbounded';letter-spacing:-1px;margin:0 0 6px">O.G. JUDGMENT</h1>
+    <div style="display:inline-block;font:500 11px 'Space Grotesk';letter-spacing:1px;text-transform:uppercase;background:#9c27b0;color:#fff7e6;border-radius:999px;padding:5px 14px;margin-bottom:28px">🔥 Cipher active · answers stay anonymous</div>
+    <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:28px">
+      <sc-for list="{{ judge }}" as="j" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
+          <div role="button" tabindex="0" aria-label="{{ j.aria }}" onClick="{{ j.pick }}" onKeyDown="{{ j.pick }}" style="width:190px;height:270px;perspective:1000px;cursor:pointer;border-radius:14px;outline:{{ j.ol }};outline-offset:2px;box-shadow:{{ j.glow }};transition:box-shadow .3s ease">
+            <div style="position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .6s ease-in-out;transform:{{ j.flip }}">
+              <div style="position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;background:radial-gradient(circle at 50% 40%,rgba(255,107,53,.2),transparent 60%),linear-gradient(165deg,#3a2a1a,#1a1a1a);border:2px solid #4a3826;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#f3e7cf"><div style="font-size:44px;opacity:.85">👑</div><div style="font:700 12px 'Unbounded';letter-spacing:1px;opacity:.6">CONCRETE<br>KINGS</div></div>
+              <div style="position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:rotateY(180deg);border-radius:14px;background:linear-gradient(170deg,#fff7e6 0%,#ffedc7 55%,#ffe3b3 100%);border:2px solid #e0d4b0;color:#1a1a1a;padding:16px;box-sizing:border-box;display:flex;flex-direction:column;text-align:left;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#ff6b35,#f7c948);opacity:.55"></div><div style="font-size:24px;margin:6px 0">{{ j.icon }}</div><div style="font:500 9px 'Space Grotesk';letter-spacing:2px;text-transform:uppercase;color:#8b7355;margin-bottom:6px">Response</div><div style="font:600 13px/1.45 'Plus Jakarta Sans';flex-grow:1">{{ j.text }}</div></div>
+            </div>
+          </div>
+          <div style="font:500 11px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#f7c948;min-height:16px">{{ j.name }}</div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button onClick="{{ revealAll }}" style="font:600 14px 'Plus Jakarta Sans';background:#ff6b35;color:#fff7e6;border:none;border-radius:8px;padding:12px 24px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.2);transition:all .15s ease" style-hover="background:#e04b00;transform:translateY(-2px);box-shadow:0 5px 0 rgba(0,0,0,.2)" style-active="transform:translateY(0);box-shadow:0 2px 0 rgba(0,0,0,.2)">Reveal All</button>
+      <button onClick="{{ confirmWinner }}" disabled="{{ noWinner }}" style="font:600 14px 'Plus Jakarta Sans';background:transparent;border:2px solid #f3e7cf;color:#f3e7cf;border-radius:8px;padding:12px 24px;transition:all .15s ease;cursor:{{ winCursor }};opacity:{{ winOp }}" style-hover="background:#f3e7cf;color:#1a1a1a">Crown the Winner 👑</button>
+      <button onClick="{{ veto }}" aria-label="Veto this round" style="font:600 14px 'Plus Jakarta Sans';background:transparent;border:2px solid #ff4444;color:#ff4444;border-radius:8px;padding:12px 24px;cursor:pointer;transition:all .15s ease" style-hover="background:#ff4444;color:#fff7e6">Veto ✋🏾</button>
+    </div>
+    <div style="font:600 14px 'Plus Jakarta Sans';color:#f7c948;margin-top:18px;min-height:20px">{{ judgeMsg }}</div>
+    <div style="font:400 11px/1.5 'Space Grotesk';color:rgba(243,231,207,.5);margin-top:10px">Note: stage spotlight pulses 4s · gold dust falls through the beam · cards flip rotateY 600ms with 300ms stagger · veto shakes 500ms.</div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isS4 }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Round Result" onClick="{{ burst }}" style="position:relative;min-height:calc(100vh - 58px);overflow:hidden;background:radial-gradient(ellipse at 50% 30%,rgba(255,107,53,.14),transparent 55%),linear-gradient(180deg,rgba(43,29,14,.66),rgba(26,26,26,.66))">
+  <div ref="{{ refBg }}" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none"></div>
+  <div style="position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:32px 24px 40px;text-align:center;animation:ckSlideUp .5s ease-out">
+    <div aria-hidden="true" style="font-size:52px;animation:ckCrown 1s ease-in-out infinite">👑</div>
+    <div style="display:inline-block;position:relative;margin:10px 0 18px">
+      <div style="width:250px;min-height:340px;padding:20px;border-radius:14px;background:linear-gradient(170deg,#fff7e6 0%,#ffedc7 55%,#ffe3b3 100%);border:2px solid #e0d4b0;color:#1a1a1a;box-sizing:border-box;display:flex;flex-direction:column;text-align:left;transform:scale(1.1);animation:ckGlow 2s ease-in-out infinite;border-radius:14px"><div style="font-size:30px;margin-bottom:8px">✊🏾</div><div style="font:500 10px 'Space Grotesk';letter-spacing:2px;text-transform:uppercase;color:#8b7355;margin-bottom:8px">Winning Response</div><div style="font:600 15px/1.5 'Plus Jakarta Sans';flex-grow:1">The tenant association's emergency generator fund, activated.</div><div style="font:400 10px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;opacity:.5;margin-top:12px">Round 3</div></div>
+    </div>
+    <h1 style="font:900 36px 'Unbounded';letter-spacing:-1px;margin:0;color:#ff6b35">AISHA WINS THE ROUND!</h1>
+    <p style="font:400 15px/1.6 'Plus Jakarta Sans';opacity:.75;margin:8px 0 24px">The block stayed lit. Rell had no choice.</p>
+    <div style="display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-bottom:24px">
+      <div style="width:230px;background:linear-gradient(135deg,#fff8e1,#ffecb3);border:3px solid #f7c948;border-radius:12px;padding:16px;color:#1a1a1a;text-align:left;position:relative;transform:rotate(-1deg);animation:ckReceipt .8s cubic-bezier(.34,1.56,.64,1) both;box-shadow:0 4px 0 rgba(0,0,0,.2),0 12px 24px rgba(247,201,72,.2)"><div style="position:absolute;top:-12px;right:-8px;width:40px;height:40px;border-radius:50%;background:#f7c948;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 0 rgba(0,0,0,.25);animation:ckSeal .4s cubic-bezier(.34,1.56,.64,1) .4s both">📜</div><div style="font:500 9px 'Space Grotesk';letter-spacing:2px;text-transform:uppercase;color:#b8860b;padding-right:36px">New Receipt</div><div style="font:italic 800 15px 'Plus Jakarta Sans';margin-top:6px">The Blackout Save</div><div style="font:400 12px/1.5 'Plus Jakarta Sans';margin-top:6px">Aisha kept the lights on. The block remembers.</div></div>
+      <div style="width:230px;background:linear-gradient(135deg,#f1f8f4,#c8e6c9);border:3px solid #4caf50;border-radius:12px;padding:16px;color:#1a1a1a;text-align:left;position:relative;transform:rotate(1deg);animation:ckReceipt .8s cubic-bezier(.34,1.56,.64,1) .2s both;box-shadow:0 4px 0 rgba(0,0,0,.2),0 12px 24px rgba(76,175,80,.2)"><div style="position:absolute;top:-12px;right:-8px;width:40px;height:40px;border-radius:50%;background:#4caf50;color:#fff7e6;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 0 rgba(0,0,0,.25);animation:ckSeal .4s cubic-bezier(.34,1.56,.64,1) .6s both">✓</div><div style="font:500 9px 'Space Grotesk';letter-spacing:2px;text-transform:uppercase;color:#2e7d32;padding-right:36px">Thread Resolved</div><div style="font:italic 800 15px 'Plus Jakarta Sans';margin-top:6px">The Aux Cord Incident</div><div style="font:600 11px 'JetBrains Mono';color:#2e7d32;margin-top:8px">+2 REPUTATION</div></div>
+    </div>
+    <div style="display:inline-flex;gap:22px;flex-wrap:wrap;justify-content:center;background:rgba(26,26,26,.9);border:2px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 22px;margin-bottom:22px">
+      <div style="font:600 13px 'JetBrains Mono';color:#4caf50">REPUTATION +2 ▲</div>
+      <div style="font:600 13px 'JetBrains Mono';color:#4caf50">COMMUNITY +1 ▲</div>
+      <div style="font:600 13px 'JetBrains Mono';color:#ff4444">STREET CRED −1 ▼</div>
+    </div>
+    <div><button onClick="{{ goNextRound }}" style="font:600 15px 'Plus Jakarta Sans';background:#ff6b35;color:#fff7e6;border:none;border-radius:8px;padding:14px 32px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.2);transition:all .15s ease" style-hover="background:#e04b00;transform:translateY(-2px);box-shadow:0 5px 0 rgba(0,0,0,.2)" style-active="transform:translateY(0);box-shadow:0 2px 0 rgba(0,0,0,.2)">Next Round ▶</button></div>
+    <div style="font:400 11px/1.5 'Space Grotesk';color:rgba(243,231,207,.5);margin-top:16px">Note: confetti falls with rotation + wind sway · click anywhere for a burst at the cursor · receipts drop with 200ms stagger, seals land 400ms later.</div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isS5 }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Block Map" style="position:relative;min-height:calc(100vh - 58px);overflow:hidden;background:linear-gradient(180deg,rgba(10,10,26,.6),rgba(26,26,58,.6))">
+  <div ref="{{ refBg }}" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none"></div>
+  <div aria-hidden="true" style="position:absolute;bottom:40px;left:0;width:200px;height:22px;border-radius:50%;background:radial-gradient(ellipse,rgba(255,235,59,.3),transparent 70%);animation:ckSweep 12s linear infinite;pointer-events:none"></div>
+  <div style="position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:24px;animation:ckSlideUp .5s ease-out">
+    <div style="font:500 12px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#f7c948;margin-bottom:6px">Screen 05 · Block Map</div>
+    <h1 style="font:800 32px 'Plus Jakarta Sans';letter-spacing:-.5px;margin:0 0 18px">The Block</h1>
+    <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap">
+      <div style="flex:1;min-width:560px;position:relative;height:520px;background:rgba(10,10,26,.5);border:2px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden">
+        <div aria-hidden="true" style="position:absolute;left:0;right:0;top:6%;height:34%;background:radial-gradient(ellipse at 50% 100%,rgba(255,107,53,.08),transparent 70%);pointer-events:none"></div>
+        <div aria-hidden="true" style="position:absolute;left:0;right:0;top:46%;height:46px;background:linear-gradient(180deg,#2a2830,#232128);border-top:4px solid #35323c;border-bottom:4px solid #35323c;box-sizing:border-box"></div>
+        <div aria-hidden="true" style="position:absolute;left:0;right:0;top:calc(46% + 21px);height:3px;background:repeating-linear-gradient(90deg,#f7c948 0 16px,transparent 16px 42px);opacity:.35"></div>
+        <div aria-hidden="true" style="position:absolute;top:0;bottom:0;left:47%;width:38px;background:linear-gradient(90deg,#2a2830,#232128);border-left:4px solid #35323c;border-right:4px solid #35323c;box-sizing:border-box"></div>
+        <div aria-hidden="true" style="position:absolute;left:calc(47% - 28px);top:46%;width:24px;height:46px;background:repeating-linear-gradient(180deg,rgba(243,231,207,.45) 0 5px,transparent 5px 11px)"></div>
+        <div aria-hidden="true" style="position:absolute;left:calc(47% + 42px);top:46%;width:24px;height:46px;background:repeating-linear-gradient(180deg,rgba(243,231,207,.45) 0 5px,transparent 5px 11px)"></div>
+        <div aria-hidden="true" style="position:absolute;left:20%;top:43%;width:150px;height:64px;border-radius:50%;background:radial-gradient(ellipse,rgba(247,201,72,.16),transparent 70%);animation:ckSpotlight 4s ease-in-out infinite;pointer-events:none"></div>
+        <div aria-hidden="true" style="position:absolute;left:66%;top:43%;width:150px;height:64px;border-radius:50%;background:radial-gradient(ellipse,rgba(247,201,72,.16),transparent 70%);animation:ckSpotlight 4s ease-in-out 2s infinite;pointer-events:none"></div>
+        <svg aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <line x1="11" y1="27" x2="65" y2="29" stroke="rgba(76,175,80,.8)" stroke-width="0.5" stroke-dasharray="3 1.5" style="animation:ckDash 2s linear infinite"></line>
+          <line x1="19" y1="66" x2="90" y2="61" stroke="rgba(255,68,68,.8)" stroke-width="0.5" stroke-dasharray="3 1.5" style="animation:ckDash 1.4s linear infinite"></line>
+          <line x1="11" y1="27" x2="19" y2="66" stroke="rgba(243,231,207,.25)" stroke-width="0.25" stroke-dasharray="2 2"></line>
+        </svg>
+        <div role="button" tabindex="0" aria-label="Barbershop — where the truth gets told" onClick="{{ m0.pick }}" onKeyDown="{{ m0.pick }}" style="position:absolute;left:4%;bottom:54.5%;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform .2s ease-out;transform:{{ m0.tf }};z-index:2" style-hover="transform:scale(1.06)">
+          <div style="font:700 7px 'Space Grotesk';letter-spacing:1px;background:#f7c948;color:#1a1a1a;padding:2px 6px;border-radius:2px 2px 0 0">DEACON'S</div>
+          <div style="position:relative;width:92px;border-radius:0 0 2px 2px;box-shadow:{{ m0.glow }};transition:box-shadow .3s ease">
+            <div style="height:9px;background:repeating-linear-gradient(90deg,#ff4444 0 9px,#fff7e6 9px 18px);border-radius:3px 3px 0 0;box-shadow:0 2px 4px rgba(0,0,0,.4)"></div>
+            <div style="height:34px;background:linear-gradient(180deg,#4a2a22,#38201a);display:flex;align-items:flex-end;justify-content:center;gap:7px;padding:0 6px 4px;box-sizing:border-box">
+              <span aria-hidden="true" style="width:7px;height:22px;border-radius:3px;background:repeating-linear-gradient(-45deg,#ff4444 0 3px,#fff7e6 3px 6px,#2196f3 6px 9px)"></span>
+              <span aria-hidden="true" style="width:34px;height:20px;border-radius:2px;background:rgba(255,220,120,.85);box-shadow:0 0 10px rgba(255,220,120,.5);animation:ckTwinkle 8s ease-in-out infinite alternate"></span>
+              <span aria-hidden="true" style="width:14px;height:24px;border-radius:2px 2px 0 0;background:#241812;border:1px solid rgba(255,255,255,.08)"></span>
+            </div>
+          </div>
+          <div style="font:600 9px 'Space Grotesk';letter-spacing:1.2px;text-transform:uppercase;margin-top:5px;text-shadow:0 1px 4px rgba(0,0,0,.9);color:{{ m0.lc }}">Barbershop</div>
+        </div>
+        <div role="button" tabindex="0" aria-label="The House — Big Mama's place" onClick="{{ m3.pick }}" onKeyDown="{{ m3.pick }}" style="position:absolute;left:20%;bottom:54.5%;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform .2s ease-out;transform:{{ m3.tf }};z-index:2" style-hover="transform:scale(1.06)">
+          <div style="position:relative;width:74px;box-shadow:{{ m3.glow }};transition:box-shadow .3s ease">
+            <div style="height:6px;background:#2a1a14;border-radius:3px 3px 0 0;margin:0 -4px"></div>
+            <div style="height:46px;background:linear-gradient(180deg,#4a3226,#3a2620);display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;padding:6px 8px;box-sizing:border-box;align-items:start">
+              <span aria-hidden="true" style="width:100%;height:13px;border-radius:1px;background:rgba(255,220,120,.75);animation:ckTwinkle 9s ease-in-out 1s infinite alternate"></span>
+              <span aria-hidden="true" style="width:100%;height:13px;border-radius:1px;background:rgba(120,90,60,.6)"></span>
+              <span aria-hidden="true" style="width:100%;height:13px;border-radius:1px;background:rgba(255,220,120,.75);animation:ckTwinkle 7s ease-in-out infinite alternate"></span>
+              <span aria-hidden="true" style="grid-column:2;width:14px;height:17px;justify-self:center;border-radius:2px 2px 0 0;background:#241812;border:1px solid rgba(255,255,255,.1)"></span>
+            </div>
+            <div style="height:7px;background:linear-gradient(180deg,#55483a,#3d332a);margin:0 14px;border-radius:0 0 2px 2px"></div>
+          </div>
+          <div style="font:600 9px 'Space Grotesk';letter-spacing:1.2px;text-transform:uppercase;margin-top:5px;text-shadow:0 1px 4px rgba(0,0,0,.9);color:{{ m3.lc }}">The House</div>
+        </div>
+        <div role="button" tabindex="0" aria-label="Bodega — open late, knows your order" onClick="{{ m1.pick }}" onKeyDown="{{ m1.pick }}" style="position:absolute;left:58%;bottom:54.5%;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform .2s ease-out;transform:{{ m1.tf }};z-index:2" style-hover="transform:scale(1.06)">
+          <div style="font:700 7px 'JetBrains Mono';letter-spacing:1px;background:#ff6b35;color:#fff7e6;padding:2px 6px;border-radius:2px 2px 0 0">24 HRS</div>
+          <div style="position:relative;width:86px;box-shadow:{{ m1.glow }};transition:box-shadow .3s ease">
+            <div style="height:9px;background:repeating-linear-gradient(90deg,#f7c948 0 9px,#4caf50 9px 18px);border-radius:3px 3px 0 0;box-shadow:0 2px 4px rgba(0,0,0,.4)"></div>
+            <div style="height:32px;background:linear-gradient(180deg,#3c3424,#2e281c);display:flex;align-items:flex-end;justify-content:center;gap:6px;padding:0 6px 4px;box-sizing:border-box">
+              <span aria-hidden="true" style="width:38px;height:19px;border-radius:2px;background:rgba(255,220,120,.85);box-shadow:0 0 12px rgba(255,220,120,.5);animation:ckTwinkle 10s ease-in-out infinite alternate"></span>
+              <span aria-hidden="true" style="width:11px;height:9px;background:#5a3d22;border-radius:1px"></span>
+              <span aria-hidden="true" style="width:11px;height:13px;background:#4a3018;border-radius:1px"></span>
+            </div>
+          </div>
+          <div style="font:600 9px 'Space Grotesk';letter-spacing:1.2px;text-transform:uppercase;margin-top:5px;text-shadow:0 1px 4px rgba(0,0,0,.9);color:{{ m1.lc }}">Bodega</div>
+        </div>
+        <div role="button" tabindex="0" aria-label="Church — the pastor hears everything" onClick="{{ m6.pick }}" onKeyDown="{{ m6.pick }}" style="position:absolute;left:79%;bottom:54.5%;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform .2s ease-out;transform:{{ m6.tf }};z-index:2" style-hover="transform:scale(1.06)">
+          <div aria-hidden="true" style="width:3px;height:8px;background:#f3e7cf;position:relative"><span style="position:absolute;top:2px;left:-3px;width:9px;height:3px;background:#f3e7cf"></span></div>
+          <div aria-hidden="true" style="width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:16px solid #55483a"></div>
+          <div style="position:relative;width:66px;box-shadow:{{ m6.glow }};transition:box-shadow .3s ease">
+            <div style="height:44px;background:linear-gradient(180deg,#4e4232,#3c3226);display:flex;align-items:flex-end;justify-content:center;gap:8px;padding:0 6px 4px;box-sizing:border-box;border-radius:0 0 2px 2px">
+              <span aria-hidden="true" style="width:13px;height:26px;border-radius:7px 7px 0 0;background:rgba(255,190,90,.85);box-shadow:0 0 10px rgba(255,190,90,.45);animation:ckTwinkle 12s ease-in-out infinite alternate"></span>
+              <span aria-hidden="true" style="width:16px;height:20px;border-radius:8px 8px 0 0;background:#241812;border:1px solid rgba(255,255,255,.1)"></span>
+              <span aria-hidden="true" style="width:13px;height:26px;border-radius:7px 7px 0 0;background:rgba(255,190,90,.85);box-shadow:0 0 10px rgba(255,190,90,.45);animation:ckTwinkle 9s ease-in-out 2s infinite alternate"></span>
+            </div>
+          </div>
+          <div style="font:600 9px 'Space Grotesk';letter-spacing:1.2px;text-transform:uppercase;margin-top:5px;text-shadow:0 1px 4px rgba(0,0,0,.9);color:{{ m6.lc }}">Church</div>
+        </div>
+        <div role="button" tabindex="0" aria-label="The Corner — information moves through here" onClick="{{ m4.pick }}" onKeyDown="{{ m4.pick }}" style="position:absolute;left:38%;bottom:55%;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform .2s ease-out;transform:{{ m4.tf }};z-index:2" style-hover="transform:scale(1.06)">
+          <div style="position:relative;display:flex;flex-direction:column;align-items:center;padding:4px 6px;border-radius:6px;box-shadow:{{ m4.glow }};transition:box-shadow .3s ease">
+            <div style="font:700 7px 'Space Grotesk';letter-spacing:1px;background:#2e7d32;color:#fff7e6;padding:2px 6px;border-radius:2px;border:1px solid rgba(255,255,255,.25)">MLK BLVD</div>
+            <div aria-hidden="true" style="width:3px;height:26px;background:#8a8a8a"></div>
+            <div aria-hidden="true" style="position:absolute;top:22px;left:50%;transform:translateX(-50%);width:56px;height:26px;border-radius:50%;background:radial-gradient(ellipse,rgba(247,201,72,.35),transparent 70%);animation:ckSpotlight 4s ease-in-out 1s infinite"></div>
+            <div aria-hidden="true" style="width:10px;height:12px;background:#c23a2e;border-radius:3px 3px 1px 1px;margin-top:2px"></div>
+          </div>
+          <div style="font:600 9px 'Space Grotesk';letter-spacing:1.2px;text-transform:uppercase;margin-top:4px;text-shadow:0 1px 4px rgba(0,0,0,.9);color:{{ m4.lc }}">The Corner</div>
+        </div>
+        <div role="button" tabindex="0" aria-label="The Park — chess tables and the best shade" onClick="{{ m2.pick }}" onKeyDown="{{ m2.pick }}" style="position:absolute;left:4%;top:calc(46% + 58px);display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform .2s ease-out;transform:{{ m2.tf }};z-index:2" style-hover="transform:scale(1.06)">
+          <div style="position:relative;width:148px;height:62px;border-radius:14px;background:radial-gradient(ellipse at 40% 30%,#22452a,#132717);border:2px solid rgba(76,175,80,.35);box-shadow:{{ m2.glow }};transition:box-shadow .3s ease">
+            <span aria-hidden="true" style="position:absolute;left:12px;top:6px;font-size:22px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.5))">🌳</span>
+            <span aria-hidden="true" style="position:absolute;right:14px;top:16px;font-size:17px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.5))">🌳</span>
+            <span aria-hidden="true" style="position:absolute;left:58px;bottom:10px;width:16px;height:9px;background:#5a4632;border-radius:2px;box-shadow:0 3px 0 -1px #3a2d20"></span>
+            <span aria-hidden="true" style="position:absolute;left:8px;bottom:4px;right:8px;height:5px;border-radius:3px;background:repeating-linear-gradient(90deg,rgba(243,231,207,.18) 0 8px,transparent 8px 16px)"></span>
+          </div>
+          <div style="font:600 9px 'Space Grotesk';letter-spacing:1.2px;text-transform:uppercase;margin-top:5px;text-shadow:0 1px 4px rgba(0,0,0,.9);color:{{ m2.lc }}">The Park</div>
+        </div>
+        <div role="button" tabindex="0" aria-label="School — the gym is still the polling place" onClick="{{ m7.pick }}" onKeyDown="{{ m7.pick }}" style="position:absolute;left:28%;top:calc(46% + 58px);display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform .2s ease-out;transform:{{ m7.tf }};z-index:2" style-hover="transform:scale(1.06)">
+          <div style="position:relative;width:108px;box-shadow:{{ m7.glow }};transition:box-shadow .3s ease">
+            <div aria-hidden="true" style="position:absolute;left:8px;top:-16px;width:2px;height:16px;background:#8a8a8a"><span style="position:absolute;top:0;left:2px;width:10px;height:6px;background:#c23a2e"></span></div>
+            <div style="height:8px;background:#2e2a3c;border-radius:3px 3px 0 0"></div>
+            <div style="height:38px;background:linear-gradient(180deg,#3a3348,#2c2738);display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:5px 8px;box-sizing:border-box;align-items:start;border-radius:0 0 2px 2px">
+              <span aria-hidden="true" style="width:100%;height:10px;border-radius:1px;background:rgba(255,220,120,.65);animation:ckTwinkle 11s ease-in-out infinite alternate"></span>
+              <span aria-hidden="true" style="width:100%;height:10px;border-radius:1px;background:rgba(110,100,140,.5)"></span>
+              <span aria-hidden="true" style="width:100%;height:10px;border-radius:1px;background:rgba(110,100,140,.5)"></span>
+              <span aria-hidden="true" style="width:100%;height:10px;border-radius:1px;background:rgba(255,220,120,.65);animation:ckTwinkle 8s ease-in-out 3s infinite alternate"></span>
+              <span aria-hidden="true" style="grid-column:2/4;width:18px;height:14px;justify-self:center;border-radius:2px 2px 0 0;background:#1c1826;border:1px solid rgba(255,255,255,.1)"></span>
+            </div>
+          </div>
+          <div style="font:600 9px 'Space Grotesk';letter-spacing:1.2px;text-transform:uppercase;margin-top:5px;text-shadow:0 1px 4px rgba(0,0,0,.9);color:{{ m7.lc }}">School</div>
+        </div>
+        <div role="button" tabindex="0" aria-label="Vacant Lot — somebody keeps planting tomatoes" onClick="{{ m8.pick }}" onKeyDown="{{ m8.pick }}" style="position:absolute;left:56%;top:calc(46% + 58px);display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform .2s ease-out;transform:{{ m8.tf }};z-index:2" style-hover="transform:scale(1.06)">
+          <div style="position:relative;width:96px;height:56px;border-radius:8px;background:linear-gradient(180deg,#2e2014,#221808);border:2px dashed rgba(243,231,207,.25);box-shadow:{{ m8.glow }};transition:box-shadow .3s ease">
+            <span aria-hidden="true" style="position:absolute;left:10px;right:10px;top:12px;height:4px;border-radius:2px;background:repeating-linear-gradient(90deg,#3e6b34 0 10px,transparent 10px 16px)"></span>
+            <span aria-hidden="true" style="position:absolute;left:10px;right:10px;top:24px;height:4px;border-radius:2px;background:repeating-linear-gradient(90deg,#3e6b34 0 10px,transparent 10px 16px)"></span>
+            <span aria-hidden="true" style="position:absolute;left:22px;top:34px;width:5px;height:5px;border-radius:50%;background:#ff4444"></span>
+            <span aria-hidden="true" style="position:absolute;left:52px;top:36px;width:5px;height:5px;border-radius:50%;background:#ff4444"></span>
+            <span aria-hidden="true" style="position:absolute;left:6px;right:6px;top:-5px;height:2px;background:linear-gradient(90deg,transparent,rgba(243,231,207,.3),transparent)"></span>
+            <span aria-hidden="true" style="position:absolute;left:18px;top:-7px;width:4px;height:4px;border-radius:50%;background:#f7c948;box-shadow:24px 1px 0 #ff6b35,48px -1px 0 #f7c948;animation:ckTwinkle 6s ease-in-out infinite alternate"></span>
+          </div>
+          <div style="font:600 9px 'Space Grotesk';letter-spacing:1.2px;text-transform:uppercase;margin-top:5px;text-shadow:0 1px 4px rgba(0,0,0,.9);color:{{ m8.lc }}">Vacant Lot</div>
+        </div>
+        <div role="button" tabindex="0" aria-label="Cookout Spot — the block's living room" onClick="{{ m5.pick }}" onKeyDown="{{ m5.pick }}" style="position:absolute;left:78%;top:calc(46% + 58px);display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform .2s ease-out;transform:{{ m5.tf }};z-index:2" style-hover="transform:scale(1.06)">
+          <div style="position:relative;width:100px;height:58px;border-radius:8px;background:linear-gradient(180deg,#2a2014,#1e160c);border:2px solid rgba(255,107,53,.3);box-shadow:{{ m5.glow }};transition:box-shadow .3s ease">
+            <span aria-hidden="true" style="position:absolute;left:14px;top:14px;font-size:18px;filter:drop-shadow(0 0 10px rgba(255,107,53,.8));animation:ckFloat 2.5s ease-in-out infinite">🔥</span>
+            <span aria-hidden="true" style="position:absolute;left:12px;top:34px;width:22px;height:8px;background:#241812;border-radius:2px;box-shadow:0 4px 0 -2px #14100a"></span>
+            <span aria-hidden="true" style="position:absolute;right:12px;top:26px;width:34px;height:8px;background:#5a4632;border-radius:2px;box-shadow:0 5px 0 -2px #3a2d20,0 10px 0 -3px #3a2d20"></span>
+            <span aria-hidden="true" style="position:absolute;left:6px;right:6px;top:-5px;height:2px;background:linear-gradient(90deg,transparent,rgba(243,231,207,.3),transparent)"></span>
+            <span aria-hidden="true" style="position:absolute;left:16px;top:-7px;width:4px;height:4px;border-radius:50%;background:#ff6b35;box-shadow:26px 1px 0 #f7c948,52px -1px 0 #ff6b35;animation:ckTwinkle 5s ease-in-out 1s infinite alternate"></span>
+          </div>
+          <div style="font:600 9px 'Space Grotesk';letter-spacing:1.2px;text-transform:uppercase;margin-top:5px;text-shadow:0 1px 4px rgba(0,0,0,.9);color:{{ m5.lc }}">Cookout Spot</div>
+        </div>
+        <div title="Marcus · The Deejay · at the Bodega" style="position:absolute;left:63%;top:26%;z-index:4;width:40px;height:40px;border-radius:50%;background:#2196f3;color:#fff7e6;font:700 14px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.35);cursor:pointer;transition:transform .2s ease-out;box-shadow:0 4px 10px rgba(0,0,0,.5)" style-hover="transform:translateY(-8px)">M</div>
+        <div title="Aisha · The Organizer · at the Barbershop" style="position:absolute;left:9%;top:24%;z-index:4;width:40px;height:40px;border-radius:50%;background:#4caf50;color:#fff7e6;font:700 14px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.35);cursor:pointer;transition:transform .2s ease-out;box-shadow:0 4px 10px rgba(0,0,0,.5)" style-hover="transform:translateY(-8px)">A</div>
+        <div title="Deja · The Poet · at the Park" style="position:absolute;left:17%;top:63%;z-index:4;width:40px;height:40px;border-radius:50%;background:#9c27b0;color:#fff7e6;font:700 14px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.35);cursor:pointer;transition:transform .2s ease-out;box-shadow:0 4px 10px rgba(0,0,0,.5)" style-hover="transform:translateY(-8px)">D</div>
+        <div title="Rell · The Barber · at the Cookout Spot" style="position:absolute;left:88%;top:58%;z-index:4;width:40px;height:40px;border-radius:50%;background:#ff6b35;color:#fff7e6;font:700 14px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;border:2px solid #f7c948;cursor:pointer;transition:transform .2s ease-out;box-shadow:0 4px 10px rgba(0,0,0,.5)" style-hover="transform:translateY(-8px)">R</div>
+        <div style="position:absolute;left:12px;bottom:10px;display:flex;gap:14px;font:500 9px 'Space Grotesk';letter-spacing:1px;text-transform:uppercase;color:rgba(243,231,207,.6)"><span><span style="display:inline-block;width:14px;height:3px;background:#4caf50;vertical-align:middle;margin-right:5px"></span>Alliance</span><span><span style="display:inline-block;width:14px;height:3px;background:#ff4444;vertical-align:middle;margin-right:5px"></span>Beef</span><span><span style="display:inline-block;width:14px;height:2px;background:rgba(243,231,207,.4);vertical-align:middle;margin-right:5px"></span>Neutral</span></div>
+      </div>
+      <div style="flex:none;width:280px;background:rgba(26,26,26,.9);border:2px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+        <div style="font-size:34px;margin-bottom:8px">{{ locIcon }}</div>
+        <h2 style="font:700 20px 'Plus Jakarta Sans';margin:0 0 6px">{{ locName }}</h2>
+        <p style="font:400 13px/1.6 'Plus Jakarta Sans';opacity:.75;margin:0 0 16px">{{ locDesc }}</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button onClick="{{ actHustle }}" style="font:600 13px 'Plus Jakarta Sans';background:#ff6b35;color:#fff7e6;border:none;border-radius:8px;padding:11px 16px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.2);text-align:left;transition:all .15s ease" style-hover="background:#e04b00;transform:translateY(-2px)">💼 Hustle · +1 Street Cred</button>
+          <button onClick="{{ actChill }}" style="font:600 13px 'Plus Jakarta Sans';background:#4caf50;color:#fff7e6;border:none;border-radius:8px;padding:11px 16px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.2);text-align:left;transition:all .15s ease" style-hover="transform:translateY(-2px)">🪑 Chill · +1 Community</button>
+          <button onClick="{{ actInvestigate }}" style="font:600 13px 'Plus Jakarta Sans';background:#2196f3;color:#fff7e6;border:none;border-radius:8px;padding:11px 16px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.2);text-align:left;transition:all .15s ease" style-hover="transform:translateY(-2px)">🔎 Investigate · +1 Wisdom</button>
+          <button onClick="{{ actScheme }}" style="font:600 13px 'Plus Jakarta Sans';background:#9c27b0;color:#fff7e6;border:none;border-radius:8px;padding:11px 16px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.2);text-align:left;transition:all .15s ease" style-hover="transform:translateY(-2px)">🎭 Scheme · +1 Reputation</button>
+        </div>
+        <div aria-live="polite" style="font:600 13px 'Plus Jakarta Sans';color:#f7c948;margin-top:14px;min-height:20px">{{ mapMsg }}</div>
+      </div>
+    </div>
+    <div style="font:400 11px/1.5 'Space Grotesk';color:rgba(243,231,207,.5);margin-top:14px">Note: every spot is hand-built — Deacon's striped awning + pole, Big Mama's brownstone stoop, the bodega's 24-hr sign, the steeple, string lights over the lot and the grill · relationship lines animate dash-offset (green alliance / red beef) · window lights flicker · click a location to load its actions.</div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isS6 }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Cookout Alliance" style="position:relative;min-height:calc(100vh - 58px);overflow:hidden;background:radial-gradient(ellipse at 50% 110%,rgba(255,107,53,.25),transparent 55%),linear-gradient(180deg,rgba(26,26,26,.65),rgba(43,29,14,.65))">
+  <div ref="{{ refBg }}" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none"></div>
+  <div style="position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:28px 24px 40px;text-align:center;animation:ckSlideUp .5s ease-out">
+    <div style="font:500 12px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#f7c948;margin-bottom:6px">Screen 06 · Alliance</div>
+    <h1 style="font:900 36px 'Unbounded';letter-spacing:-1px;margin:0 0 4px">FORM THE COOKOUT</h1>
+    <div style="font:600 13px 'Space Grotesk';color:#ff6b35;margin-bottom:10px">{{ memberCount }} at the grill · min 2, max 4</div>
+    <div style="position:relative;width:400px;height:400px;margin:0 auto">
+      <div aria-hidden="true" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:56px;filter:drop-shadow(0 0 18px rgba(255,107,53,.6))">🔥</div>
+      <div style="position:absolute;inset:0;animation:ckSpinSlow 24s linear infinite">
+        <sc-for list="{{ cookMembers }}" as="m" hint-placeholder-count="4">
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate({{ m.rot }}) translateY(-150px) rotate({{ m.rotNeg }})">
+            <div style="animation:ckSpinSlowR 24s linear infinite">
+              <div role="button" tabindex="0" aria-pressed="{{ m.pressed }}" aria-label="{{ m.aria }}" onClick="{{ m.toggle }}" onKeyDown="{{ m.toggle }}" style="width:110px;padding:12px 8px;border-radius:12px;background:linear-gradient(170deg,#fff7e6,#ffe3b3);color:#1a1a1a;cursor:pointer;text-align:center;transition:box-shadow .3s ease,border-color .3s ease;border:{{ m.border }};box-shadow:{{ m.glow }}">
+                <div style="width:36px;height:36px;border-radius:50%;margin:0 auto 6px;color:#fff7e6;font:700 13px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;background:{{ m.color }}">{{ m.initial }}</div>
+                <div style="font:800 12px 'Plus Jakarta Sans'">{{ m.name }}</div>
+                <div style="font:500 8px 'Space Grotesk';letter-spacing:1px;text-transform:uppercase;opacity:.6;margin-top:2px">{{ m.hustle }}</div>
+                <div style="font:600 9px 'Space Grotesk';margin-top:6px;color:{{ m.stateColor }}">{{ m.stateTxt }}</div>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="max-width:560px;margin:8px auto 0;background:rgba(26,26,26,.9);border:2px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+      <div style="font:500 10px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#f7c948;margin-bottom:8px">Combined Story</div>
+      <div style="font:600 15px/1.6 'Plus Jakarta Sans';min-height:48px">{{ story }}<span aria-hidden="true" style="color:#ff6b35">▊</span></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+        <div style="flex:1;height:12px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden"><div style="height:100%;border-radius:6px;background:linear-gradient(90deg,#4caf50,#8bc34a);transition:width .6s ease-out;width:{{ meterPct }}"></div></div>
+        <div style="font:600 11px 'JetBrains Mono';color:#4caf50">{{ meterTxt }}</div>
+      </div>
+      <sc-if value="{{ blockParty }}" hint-placeholder-val="{{ false }}"><div style="font:600 12px 'Space Grotesk';letter-spacing:1px;text-transform:uppercase;color:#f7c948;margin-top:10px">🎉 Block Party bonus unlocked</div></sc-if>
+    </div>
+    <div style="margin-top:18px"><button onClick="{{ ghost }}" style="font:600 14px 'Plus Jakarta Sans';background:transparent;border:2px solid #ff4444;color:#ff4444;border-radius:8px;padding:12px 24px;cursor:pointer;transition:all .15s ease" style-hover="background:#ff4444;color:#fff7e6;animation:ckShake .5s ease">Ghost the Cookout · Go Solo</button></div>
+    <div aria-live="polite" style="font:600 13px 'Plus Jakarta Sans';color:#f7c948;margin-top:12px;min-height:18px">{{ cookMsg }}</div>
+    <div style="font:400 11px/1.5 'Space Grotesk';color:rgba(243,231,207,.5);margin-top:10px">Note: flame particles rise 1–3s with gray smoke behind · member ring orbits 24s (cards counter-rotate to stay upright) · story types in 30ms/char · solo play trades +2 Rep for −1 Community risk.</div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isS7 }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Game Over" style="position:relative;min-height:calc(100vh - 58px);overflow:hidden;background:radial-gradient(ellipse at 50% 20%,rgba(247,201,72,.16),transparent 55%),linear-gradient(180deg,rgba(43,29,14,.66),rgba(26,26,26,.66))">
+  <div ref="{{ refBg }}" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none"></div>
+  <div style="position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:32px 24px 48px;text-align:center;animation:ckSlideUp .5s ease-out">
+    <div aria-hidden="true" style="font-size:56px;animation:ckCrown 1.2s ease-in-out infinite">👑</div>
+    <div style="font:500 12px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#f7c948;margin:8px 0 6px">Final Chronicle</div>
+    <h1 style="font:900 44px 'Unbounded';letter-spacing:-1px;margin:0 0 26px;color:#f7c948">THE BLOCK BELONGS TO AISHA</h1>
+    <div style="display:flex;align-items:flex-end;justify-content:center;gap:14px;margin-bottom:32px;flex-wrap:wrap">
+      <div style="width:180px;background:rgba(26,26,26,.9);border:2px solid #c0c0c0;border-radius:14px 14px 0 0;padding:16px 12px 0;animation:ckVictory .8s cubic-bezier(.34,1.56,.64,1) .2s both" style-hover="box-shadow:0 0 24px rgba(192,192,192,.3)"><div style="width:48px;height:48px;border-radius:50%;background:#2196f3;color:#fff7e6;font:700 18px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;margin:0 auto 8px;border:2px solid #c0c0c0">M</div><div style="font:800 16px 'Plus Jakarta Sans'">Marcus</div><div style="font:500 10px 'Space Grotesk';letter-spacing:1px;text-transform:uppercase;opacity:.6">The Deejay</div><div style="font:600 20px 'JetBrains Mono';color:#c0c0c0;margin:8px 0 4px">31</div><div style="font:italic 500 10px 'Plus Jakarta Sans';opacity:.6;padding-bottom:10px">"The Candlelight Set"</div><div style="height:64px;background:linear-gradient(180deg,rgba(192,192,192,.18),transparent);border-radius:6px 6px 0 0;display:flex;align-items:center;justify-content:center;font:700 22px 'Unbounded';color:#c0c0c0">2</div></div>
+      <div style="width:200px;background:rgba(26,26,26,.95);border:2px solid #f7c948;border-radius:14px 14px 0 0;padding:18px 12px 0;animation:ckVictory .8s cubic-bezier(.34,1.56,.64,1) both;box-shadow:0 0 32px rgba(247,201,72,.25)"><div style="width:56px;height:56px;border-radius:50%;background:#4caf50;color:#fff7e6;font:700 20px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;margin:0 auto 8px;border:2px solid #f7c948">A</div><div style="font:800 18px 'Plus Jakarta Sans';color:#f7c948">Aisha</div><div style="font:500 10px 'Space Grotesk';letter-spacing:1px;text-transform:uppercase;opacity:.6">The Organizer</div><div style="font:600 24px 'JetBrains Mono';color:#f7c948;margin:8px 0 4px">38</div><div style="font:italic 500 10px 'Plus Jakarta Sans';opacity:.6;padding-bottom:10px">"The Blackout Save"</div><div style="height:96px;background:linear-gradient(180deg,rgba(247,201,72,.22),transparent);border-radius:6px 6px 0 0;display:flex;align-items:center;justify-content:center;font:700 28px 'Unbounded';color:#f7c948">1</div></div>
+      <div style="width:180px;background:rgba(26,26,26,.9);border:2px solid #cd7f32;border-radius:14px 14px 0 0;padding:16px 12px 0;animation:ckVictory .8s cubic-bezier(.34,1.56,.64,1) .4s both"><div style="width:48px;height:48px;border-radius:50%;background:#9c27b0;color:#fff7e6;font:700 18px 'Plus Jakarta Sans';display:flex;align-items:center;justify-content:center;margin:0 auto 8px;border:2px solid #cd7f32">D</div><div style="font:800 16px 'Plus Jakarta Sans'">Deja</div><div style="font:500 10px 'Space Grotesk';letter-spacing:1px;text-transform:uppercase;opacity:.6">The Poet</div><div style="font:600 20px 'JetBrains Mono';color:#cd7f32;margin:8px 0 4px">27</div><div style="font:italic 500 10px 'Plus Jakarta Sans';opacity:.6;padding-bottom:10px">"Stoop Sermon"</div><div style="height:44px;background:linear-gradient(180deg,rgba(205,127,50,.18),transparent);border-radius:6px 6px 0 0;display:flex;align-items:center;justify-content:center;font:700 18px 'Unbounded';color:#cd7f32">3</div></div>
+    </div>
+    <div style="display:flex;gap:20px;align-items:flex-start;justify-content:center;flex-wrap:wrap">
+      <div style="flex:1;min-width:320px;max-width:560px;text-align:left;background:rgba(26,26,26,.9);border:2px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+        <div style="font:500 11px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#f7c948;margin-bottom:14px">Story Recap · The Receipts</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:12px;align-items:baseline;background:linear-gradient(135deg,#fff8e1,#ffecb3);border:2px solid #f7c948;border-radius:10px;padding:10px 14px;color:#1a1a1a;animation:ckSlideUp .5s ease-out both;cursor:pointer;transition:transform .2s ease-out" style-hover="transform:translateX(4px)"><span style="font:600 10px 'JetBrains Mono';color:#b8860b;flex:none">RND 1</span><span style="font:italic 700 13px 'Plus Jakarta Sans';flex:1">The Aux Cord Incident</span><span style="font:600 9px 'JetBrains Mono';color:#2e7d32">RESOLVED</span></div>
+          <div style="display:flex;gap:12px;align-items:baseline;background:linear-gradient(135deg,#fff8e1,#ffecb3);border:2px solid #f7c948;border-radius:10px;padding:10px 14px;color:#1a1a1a;animation:ckSlideUp .5s ease-out .1s both;cursor:pointer;transition:transform .2s ease-out" style-hover="transform:translateX(4px)"><span style="font:600 10px 'JetBrains Mono';color:#b8860b;flex:none">RND 2</span><span style="font:italic 700 13px 'Plus Jakarta Sans';flex:1">Deacon's Half-Price Fix</span><span style="font:600 9px 'JetBrains Mono';color:#2e7d32">RESOLVED</span></div>
+          <div style="display:flex;gap:12px;align-items:baseline;background:linear-gradient(135deg,#fff8e1,#ffecb3);border:2px solid #f7c948;border-radius:10px;padding:10px 14px;color:#1a1a1a;animation:ckSlideUp .5s ease-out .2s both;cursor:pointer;transition:transform .2s ease-out" style-hover="transform:translateX(4px)"><span style="font:600 10px 'JetBrains Mono';color:#b8860b;flex:none">RND 3</span><span style="font:italic 700 13px 'Plus Jakarta Sans';flex:1">The Blackout Save</span><span style="font:600 9px 'JetBrains Mono';color:#b8860b">LEGENDARY</span></div>
+          <div style="display:flex;gap:12px;align-items:baseline;background:linear-gradient(135deg,#fff8e1,#ffecb3);border:2px solid #f7c948;border-radius:10px;padding:10px 14px;color:#1a1a1a;animation:ckSlideUp .5s ease-out .3s both;cursor:pointer;transition:transform .2s ease-out" style-hover="transform:translateX(4px)"><span style="font:600 10px 'JetBrains Mono';color:#b8860b;flex:none">RND 5</span><span style="font:italic 700 13px 'Plus Jakarta Sans';flex:1">The Land Trust Play</span><span style="font:600 9px 'JetBrains Mono';color:#2e7d32">RESOLVED</span></div>
+        </div>
+      </div>
+      <div style="flex:none;display:flex;flex-direction:column;gap:10px">
+        <button onClick="{{ playAgain }}" style="font:600 15px 'Plus Jakarta Sans';background:#ff6b35;color:#fff7e6;border:none;border-radius:8px;padding:14px 32px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.2);transition:all .15s ease" style-hover="background:#e04b00;transform:translateY(-2px);box-shadow:0 5px 0 rgba(0,0,0,.2)" style-active="transform:translateY(0);box-shadow:0 2px 0 rgba(0,0,0,.2)">Run It Back ▶</button>
+        <button onClick="{{ share }}" style="font:600 15px 'Plus Jakarta Sans';background:transparent;border:2px solid #f3e7cf;color:#f3e7cf;border-radius:8px;padding:14px 32px;cursor:pointer;transition:all .15s ease" style-hover="background:#f3e7cf;color:#1a1a1a">{{ shareLabel }}</button>
+      </div>
+    </div>
+    <div style="font:400 11px/1.5 'Space Grotesk';color:rgba(243,231,207,.5);margin-top:20px">Note: golden confetti sways down slowly · podium steps bounce in staggered (1st, 2nd, 3rd) · recap rows stagger 100ms · share copies a text summary.</div>
+  </div>
+</section>
+</sc-if>
+</main>
+<sc-if value="{{ settingsOpen }}" hint-placeholder-val="{{ false }}">
+  <div role="dialog" aria-modal="true" aria-label="Settings" onClick="{{ closeSettingsBg }}" style="position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:70">
+    <div onClick="{{ stop }}" style="width:420px;max-height:80vh;overflow-y:auto;background:#1e1c1a;border:2px solid #ff6b35;border-radius:14px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.6);box-sizing:border-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font:800 20px 'Plus Jakarta Sans';margin:0">Settings</h2><button onClick="{{ toggleSettings }}" aria-label="Close settings" style="background:none;border:none;color:#f3e7cf;font-size:18px;cursor:pointer">✕</button></div>
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div>
+          <div style="font:500 10px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:10px">City Theme</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
+            <sc-for list="{{ themeOpts }}" as="th" hint-placeholder-count="8"><button onClick="{{ th.go }}" style="font:600 10px 'Space Grotesk';letter-spacing:.5px;text-transform:uppercase;border:none;border-radius:5px;padding:6px 9px;cursor:pointer;background:{{ th.bg }};color:{{ th.fg }}">{{ th.label }}</button></sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font:500 10px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:10px">Sound</div>
+          <label style="display:flex;align-items:center;justify-content:space-between;gap:10px;font:500 12px 'Plus Jakarta Sans';margin-bottom:8px">Master<input type="range" min="0" max="100" value="{{ soundMaster }}" onChange="{{ soundMasterChange }}" style="flex:1;margin-left:12px"></label>
+          <label style="display:flex;align-items:center;justify-content:space-between;gap:10px;font:500 12px 'Plus Jakarta Sans'">Music<input type="range" min="0" max="100" value="{{ soundMusic }}" onChange="{{ soundMusicChange }}" style="flex:1;margin-left:12px"></label>
+        </div>
+        <div>
+          <div style="font:500 10px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:10px">Display</div>
+          <label style="display:flex;align-items:center;justify-content:space-between;font:500 12px 'Plus Jakarta Sans';margin-bottom:8px">Quality<select onChange="{{ qualityChange }}" value="{{ quality }}" style="background:rgba(255,255,255,.06);color:#f3e7cf;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:5px 8px"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="ultra">Ultra</option></select></label>
+          <label style="display:flex;align-items:center;justify-content:space-between;font:500 12px 'Plus Jakarta Sans'">FPS Counter<input type="checkbox" checked="{{ showFps }}" onChange="{{ toggleFps }}"></label>
+        </div>
+        <div>
+          <div style="font:500 10px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:10px">Accessibility</div>
+          <label style="display:flex;align-items:center;justify-content:space-between;font:500 12px 'Plus Jakarta Sans';margin-bottom:8px">Reduced motion<input type="checkbox" checked="{{ reduceMotionUI }}" onChange="{{ toggleReduceMotionUI }}"></label>
+          <label style="display:flex;align-items:center;justify-content:space-between;font:500 12px 'Plus Jakarta Sans';margin-bottom:8px">High contrast<input type="checkbox" checked="{{ highContrast }}" onChange="{{ toggleContrast }}"></label>
+          <label style="display:flex;align-items:center;justify-content:space-between;font:500 12px 'Plus Jakarta Sans'">Text size<select onChange="{{ textSizeChange }}" value="{{ textSize }}" style="background:rgba(255,255,255,.06);color:#f3e7cf;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:5px 8px"><option value="sm">Small</option><option value="md">Medium</option><option value="lg">Large</option></select></label>
+        </div>
+        <div>
+          <div style="font:500 10px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:10px">Gameplay Language</div>
+          <div style="display:flex;gap:8px">
+            <button onClick="{{ setLangAave }}" style="flex:1;font:600 12px 'Plus Jakarta Sans';border:none;border-radius:8px;padding:9px;cursor:pointer;background:{{ langAaveBg }};color:#fff7e6">AAVE</button>
+            <button onClick="{{ setLangStd }}" style="flex:1;font:600 12px 'Plus Jakarta Sans';border:none;border-radius:8px;padding:9px;cursor:pointer;background:{{ langStdBg }};color:#fff7e6">Standard</button>
+          </div>
+        </div>
+        <div>
+          <div style="font:500 10px 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:#ff6b35;margin-bottom:10px">Weather</div>
+          <label style="display:flex;align-items:center;justify-content:space-between;font:500 12px 'Plus Jakarta Sans'">Weather effects<input type="checkbox" checked="{{ weatherFXOn }}" onChange="{{ toggleWeatherFX }}"></label>
+        </div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = { screen: 's1', origin: null, hustle: null, sel: null, played: false, revealed: 0, winner: null, judgeMsg: '', loc: 0, mapMsg: '', members: [true, true, false, false], story: '', cookMsg: '', copied: false, announce: 'Character creation screen',
+    theme: 'harlem', weather: 'clear', eventSel: 'blockparty', eventType: null, toasts: [], settingsOpen: false, quality: 'high', showFps: false,
+    reduceMotionUI: false, highContrast: false, textSize: 'md', lang: 'aave', weatherFXOn: true, muted: false, soundMaster: 80, soundMusic: 60 };
+  originsData = [
+    { icon: '🏘️', name: 'Raised on the Block', bonus: '+2 STREET CRED · +1 COMMUNITY', b: { sc: 2, com: 1, wis: 0, rep: 0 } },
+    { icon: '🙏🏾', name: 'Church Kid', bonus: '+2 COMMUNITY · +1 WISDOM', b: { sc: 0, com: 2, wis: 1, rep: 0 } },
+    { icon: '🧳', name: 'The Transplant', bonus: '+2 WISDOM · +1 REPUTATION', b: { sc: 0, com: 0, wis: 2, rep: 1 } },
+    { icon: '🏪', name: 'Corner Store Legacy', bonus: '+2 REPUTATION · +1 STREET CRED', b: { sc: 1, com: 0, wis: 0, rep: 2 } },
+  ];
+  hustlesData = [
+    { icon: '🎧', name: 'The Deejay', power: 'SIDE DOOR', b: { sc: 1, com: 0, wis: 0, rep: 1 } },
+    { icon: '✂️', name: 'The Barber', power: 'BARBERSHOP TRUTH', b: { sc: 0, com: 1, wis: 1, rep: 0 } },
+    { icon: '🍽️', name: 'The Cook', power: 'COOKOUT SUMMIT', b: { sc: 0, com: 2, wis: 0, rep: 0 } },
+    { icon: '✊🏾', name: 'The Organizer', power: 'BLOCK WATCH', b: { sc: 0, com: 1, wis: 0, rep: 1 } },
+    { icon: '🎤', name: 'The Poet', power: 'MIC DROP', b: { sc: 1, com: 0, wis: 1, rep: 0 } },
+    { icon: '📖', name: 'The Chronicler', power: 'THE RECEIPTS', b: { sc: 0, com: 0, wis: 2, rep: 0 } },
+  ];
+  handData = [
+    { icon: '✊🏾', text: "The tenant association's emergency generator fund, activated." },
+    { icon: '🎤', text: 'An acoustic open mic by candlelight on the stoop.' },
+    { icon: '🍽️', text: "Miss Pearl's deep freezer — everything must be grilled tonight." },
+    { icon: '📻', text: 'A battery-powered radio and the oldies station, loud.' },
+    { icon: '✂️', text: 'Deacon cutting hair on the sidewalk by flashlight.' },
+    { icon: '📖', text: 'The story of the \u201977 blackout, told for the hundredth time.' },
+    { icon: '🃏', text: 'Somebody\u2019s cousin who "knows a guy at the power company."' },
+    { icon: '🌇', text: 'Watching the whole skyline go dark from the roof.' },
+  ];
+  judgeData = [
+    { icon: '✊🏾', text: "The tenant association's emergency generator fund, activated.", name: 'Aisha' },
+    { icon: '🎤', text: 'An acoustic open mic by candlelight on the stoop.', name: 'Deja' },
+    { icon: '📻', text: 'A battery-powered radio and the oldies station, loud.', name: 'Marcus' },
+    { icon: '🃏', text: 'Somebody\u2019s cousin who "knows a guy at the power company."', name: 'You' },
+  ];
+  locsData = [
+    { icon: '💈', name: 'Barbershop', x: '8%', y: '10%', desc: 'Where the truth gets told and the line-ups stay crisp. Deacon holds court every Saturday.' },
+    { icon: '🏪', name: 'Bodega', x: '62%', y: '8%', desc: 'Open late, knows your order, extends credit when it counts.' },
+    { icon: '🌳', name: 'The Park', x: '16%', y: '58%', desc: 'Chess tables, hoop dreams, and the best shade on the block.' },
+    { icon: '🏠', name: 'The House', x: '33%', y: '12%', desc: 'Big Mama\u2019s. Everybody\u2019s welcome, nobody leaves hungry.' },
+    { icon: '🚏', name: 'The Corner', x: '48%', y: '32%', desc: 'Information moves through here faster than the bus ever did.' },
+    { icon: '🔥', name: 'Cookout Spot', x: '74%', y: '52%', desc: 'The vacant lot they turned into the block\u2019s living room.' },
+    { icon: '⛪', name: 'Church', x: '85%', y: '14%', desc: 'Sunday service, Tuesday choir, and the pastor hears everything.' },
+    { icon: '🏫', name: 'School', x: '38%', y: '66%', desc: 'Half the block learned to read here. The gym is still the polling place.' },
+    { icon: '🌱', name: 'Vacant Lot', x: '58%', y: '74%', desc: 'Somebody keeps planting tomatoes. Nobody stops them.' },
+  ];
+  players = [
+    { name: 'Marcus', initial: 'M', hustle: 'The Deejay', color: '#2196f3' },
+    { name: 'Aisha', initial: 'A', hustle: 'The Organizer', color: '#4caf50' },
+    { name: 'Deja', initial: 'D', hustle: 'The Poet', color: '#9c27b0' },
+    { name: 'Rell', initial: 'R', hustle: 'The Barber', color: '#ff6b35' },
+  ];
+  key(e) { if (e.type !== 'keydown') return true; if (e.key !== 'Enter' && e.key !== ' ') return false; e.preventDefault(); return true; }
+  refBg = (el) => { if (el) { this.bgEl = el; this.spawn(el); } };
+  refHand = (el) => {
+    if (el && !this.dealt) {
+      this.dealt = true;
+      Array.from(el.children).forEach((c, i) => { c.style.animation = `ckDeal 400ms cubic-bezier(0.34,1.56,0.64,1) ${i * 50}ms both`; });
+    }
+  };
+  spawn(el) {
+    el.innerHTML = '';
+    const s = this.state.screen, r = Math.random;
+    const mk = (st) => { const d = document.createElement('div'); d.style.position = 'absolute'; Object.assign(d.style, st); el.appendChild(d); };
+    const px = (n) => n + 'px';
+    if (s === 's1') for (let i = 0; i < 30; i++) { const z = 2 + r() * 4; mk({ left: r() * 100 + '%', top: r() * 100 + '%', width: px(z), height: px(z), borderRadius: '50%', background: ['#ff6b35', '#f7c948', '#ffeb3b'][i % 3], opacity: String(.1 + r() * .2), animation: `ckDriftUp ${20 + r() * 20}s linear ${-r() * 30}s infinite` }); }
+    if (s === 's2' || s === 's5') for (let i = 0; i < (s === 's5' ? 70 : 50); i++) mk({ left: r() * 100 + '%', top: r() * 50 + '%', width: '2px', height: '2px', borderRadius: '50%', background: '#f3e7cf', animation: `ckTwinkle ${2 + r() * 3}s ease-in-out ${r() * 4}s infinite` });
+    if (s === 's3') for (let i = 0; i < 15; i++) { const z = 3 + r() * 3; mk({ left: 32 + r() * 36 + '%', top: '-5%', width: px(z), height: px(z), borderRadius: '50%', background: '#f7c948', animation: `ckFall ${6 + r() * 4}s linear ${-r() * 8}s infinite` }); }
+    if (s === 's4' || s === 's7') { const cols = s === 's4' ? ['#ff6b35', '#f7c948', '#4caf50'] : ['#f7c948', '#ff6b35', '#fff7e6']; const n = s === 's4' ? 50 : 60; for (let i = 0; i < n; i++) mk({ left: r() * 100 + '%', top: '-12%', width: px(5 + r() * 5), height: px(8 + r() * 6), borderRadius: '2px', background: cols[i % 3], opacity: '.85', animation: `ckConfetti ${(s === 's7' ? 4 : 2.5) + r() * 2.5}s linear ${-r() * 6}s infinite` }); }
+    if (s === 's6') { for (let i = 0; i < 40; i++) { const z = 3 + r() * 5; mk({ left: 34 + r() * 32 + '%', bottom: '-10px', width: px(z), height: px(z * 1.4), borderRadius: '50%', background: ['#ff6b35', '#ff4444', '#ffeb3b'][i % 3], animation: `ckFlame ${1 + r() * 2}s ease-out ${-r() * 3}s infinite` }); } for (let i = 0; i < 8; i++) mk({ left: 38 + r() * 24 + '%', bottom: '60px', width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(160,160,160,.2)', animation: `ckSmoke ${5 + r() * 3}s linear ${-r() * 8}s infinite` }); }
+  }
+  go(s, label) { this.dealt = false; this.setState({ screen: s, announce: label + ' screen' }); }
+  randomPick = () => this.setState({ origin: Math.floor(Math.random() * 4), hustle: Math.floor(Math.random() * 6), announce: 'Random character assigned' });
+  playCard = () => this.setState({ played: true, announce: 'Card played. Waiting on the table.' });
+  revealAll = () => {
+    if (this.state.revealed > 0) return;
+    let i = 0; this._rv = setInterval(() => { i++; this.setState({ revealed: i }); if (i >= 4) clearInterval(this._rv); }, 300);
+  };
+  confirmWinner = () => { if (this.state.winner != null) this.setState({ judgeMsg: `👑 ${this.judgeData[this.state.winner].name} takes the round.`, announce: 'Winner crowned' }); };
+  veto = (e) => { const el = e.currentTarget; el.style.animation = 'none'; void el.offsetWidth; el.style.animation = 'ckShake .5s ease'; this.setState({ judgeMsg: '✋🏾 Vetoed. Everybody redraws.', announce: 'Round vetoed' }); };
+  burst = (e) => {
+    if (!this.bgEl || e.target.closest('button')) return;
+    const rect = this.bgEl.getBoundingClientRect();
+    for (let i = 0; i < 12; i++) { const d = document.createElement('div'); const a = Math.random() * 6.28, v = 40 + Math.random() * 80; Object.assign(d.style, { position: 'absolute', left: (e.clientX - rect.left) + 'px', top: (e.clientY - rect.top) + 'px', width: '7px', height: '10px', borderRadius: '2px', background: ['#ff6b35', '#f7c948', '#4caf50'][i % 3], transition: 'transform 1s ease-out, opacity 1s ease-out' }); this.bgEl.appendChild(d); requestAnimationFrame(() => { d.style.transform = `translate(${Math.cos(a) * v}px,${Math.sin(a) * v + 60}px) rotate(${Math.random() * 360}deg)`; d.style.opacity = '0'; }); setTimeout(() => d.remove(), 1100); }
+  };
+  typeStory(members) {
+    const names = this.players.filter((_, i) => members[i]).map(p => p.name);
+    const full = names.length < 2 ? 'Invite at least one more player to combine your story…'
+      : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}'s story: a community land trust proposal, a block-wide generator fund, and the best cookout the block has ever seen.`;
+    clearInterval(this._ty); let i = 0;
+    this._ty = setInterval(() => { i++; this.setState({ story: full.slice(0, i) }); if (i >= full.length) clearInterval(this._ty); }, 30);
+  }
+  ghost = () => this.setState({ cookMsg: 'Gone solo. +2 Reputation if you win… −1 Community if you lose.', announce: 'Left the cookout' });
+  share = () => { this.setState({ copied: true }); try { navigator.clipboard.writeText('Concrete Kings — The Block belongs to Aisha (38). Marcus 31, Deja 27. Legendary receipt: The Blackout Save.'); } catch (err) {} setTimeout(() => this.setState({ copied: false }), 2000); };
+  doAction(msg) { this.setState({ mapMsg: msg }); }
+  refCity = (el) => {
+    if (!el || this.cityEngine) return;
+    import('./city-engine.js').then((mod) => {
+      this.cityMod = mod;
+      this.cityEngine = new mod.CityEngine(el, { theme: this.state.theme, weather: this.state.weather, quality: this.state.quality, reducedMotion: this.state.reduceMotionUI });
+      this.audioEngine = new mod.AudioEngine();
+      this.timers = [];
+      this.forceUpdate();
+    }).catch(() => {});
+  };
+  addToast(text, color) {
+    const id = Math.random();
+    this.setState(s => ({ toasts: [...s.toasts, { id, text, color: color || '#ff6b35' }] }));
+    const tm = setTimeout(() => this.setState(s => ({ toasts: s.toasts.filter(x => x.id !== id) })), 5000);
+    (this.timers = this.timers || []).push(tm);
+  }
+  triggerEventFor(key) {
+    if (!this.cityMod) return;
+    const def = this.cityMod.EVENT_LIST.find(e => e[0] === key); if (!def) return;
+    const [k, label, icon, gp, dur] = def;
+    clearTimeout(this._evtTm);
+    if (this.cityEngine) this.cityEngine.triggerEvent(k, dur);
+    if (this.audioEngine) { this.audioEngine.init(this.state); this.audioEngine.sting(k); }
+    this.setState({ eventType: k, announce: label + ' started. ' + gp });
+    this.addToast(`${icon} ${label.replace(/^\S+\s/, '')} kicking off. ${gp}`, '#ff6b35');
+    this._evtTm = setTimeout(() => { this.setState(s => s.eventType === k ? { eventType: null } : {}); this.addToast(`${label.replace(/^\S+\s/, '')} wrapped up.`, '#4caf50'); }, dur);
+  }
+  componentDidMount() { this.typeStory(this.state.members); }
+  componentWillUnmount() {
+    clearInterval(this._rv); clearInterval(this._ty); clearTimeout(this._evtTm);
+    (this.timers || []).forEach(clearTimeout);
+    if (this.cityEngine) this.cityEngine.destroy();
+  }
+  renderVals() {
+    const st = this.state;
+    const selStyle = (on) => ({ tf: on ? 'translateY(-8px)' : 'none', ol: on ? '4px solid #ff6b35' : 'none', sh: on ? '0 8px 0 rgba(0,0,0,.2), 0 0 0 8px rgba(255,107,53,.25)' : '0 4px 0 rgba(0,0,0,.15)' });
+    const screens = [['s1', 'Create'], ['s2', 'Game Board'], ['s3', 'Judge'], ['s4', 'Result'], ['s5', 'Block Map'], ['s6', 'Cookout'], ['s7', 'Game Over']];
+    const tabs = screens.map(([id, label]) => ({ label, cur: st.screen === id ? 'page' : 'false', go: () => this.go(id, label), bg: st.screen === id ? '#ff6b35' : 'rgba(255,255,255,.06)', fg: st.screen === id ? '#fff7e6' : '#f3e7cf' }));
+    const oB = st.origin != null ? this.originsData[st.origin].b : { sc: 0, com: 0, wis: 0, rep: 0 };
+    const hB = st.hustle != null ? this.hustlesData[st.hustle].b : { sc: 0, com: 0, wis: 0, rep: 0 };
+    const sv = { sc: 2 + oB.sc + hB.sc, com: 2 + oB.com + hB.com, wis: 2 + oB.wis + hB.wis, rep: 2 + oB.rep + hB.rep };
+    const stats = [['Street Cred', sv.sc, '#ff6b35'], ['Community', sv.com, '#4caf50'], ['Wisdom', sv.wis, '#2196f3'], ['Reputation', sv.rep, '#f7c948']].map(([label, v, color]) => ({ label, color, pct: (v * 10) + '%', txt: v + '/10' }));
+    const origins = this.originsData.map((o, i) => ({ ...o, pressed: String(st.origin === i), aria: `Origin: ${o.name}. ${o.bonus}`, pick: (e) => { if (this.key(e)) this.setState({ origin: st.origin === i ? null : i }); }, ...selStyle(st.origin === i) }));
+    const hustles = this.hustlesData.map((h, i) => ({ ...h, pressed: String(st.hustle === i), aria: `Hustle: ${h.name}. Power: ${h.power}`, pick: (e) => { if (this.key(e)) this.setState({ hustle: st.hustle === i ? null : i }); }, ...selStyle(st.hustle === i) }));
+    const hand = this.handData.map((c, i) => { const on = st.sel === i; return { ...c, pressed: String(on), aria: `Response card: ${c.text}`, op: st.played ? '.4' : '1', filt: st.played ? 'grayscale(40%)' : 'none', pick: (e) => { if (this.key(e) && !st.played) this.setState({ sel: on ? null : i }); }, ...selStyle(on) }; });
+    const judge = this.judgeData.map((j, i) => { const rev = st.revealed > i, win = st.winner === i; return { ...j, name: rev ? j.name : '· · ·', flip: rev ? 'rotateY(180deg)' : 'none', aria: rev ? `Submission by ${j.name}: ${j.text}. Click to crown.` : 'Face-down submission', ol: win ? '4px solid #ff6b35' : 'none', glow: win ? '0 0 0 8px rgba(255,107,53,.25)' : 'none', pick: (e) => { if (this.key(e) && rev) this.setState({ winner: win ? null : i, judgeMsg: '' }); } }; });
+    const loc = this.locsData[st.loc];
+    const M = {};
+    for (let i = 0; i < 9; i++) M['m' + i] = { pick: ((k) => (e) => { if (this.key(e)) this.setState({ loc: k, mapMsg: '' }); })(i), tf: st.loc === i ? 'scale(1.06)' : 'none', glow: st.loc === i ? '0 0 0 3px #ff6b35, 0 0 26px rgba(255,107,53,.55)' : '0 6px 16px rgba(0,0,0,.45)', lc: st.loc === i ? '#ff6b35' : 'rgba(243,231,207,.85)' };
+    const mCount = st.members.filter(Boolean).length;
+    const cookMembers = this.players.map((p, i) => { const on = st.members[i]; return { ...p, rot: (i * 90) + 'deg', rotNeg: (-i * 90) + 'deg', pressed: String(on), aria: `${p.name}, ${p.hustle}. ${on ? 'In the cookout, click to remove' : 'Click to invite'}`, border: on ? '3px solid #4caf50' : '2px solid #e0d4b0', glow: on ? '0 0 0 6px rgba(76,175,80,.25), 0 8px 20px rgba(0,0,0,.4)' : '0 4px 0 rgba(0,0,0,.15)', stateTxt: on ? '✓ AT THE GRILL' : '+ INVITE', stateColor: on ? '#2e7d32' : '#8b7355', toggle: (e) => { if (!this.key(e)) return; const m = [...st.members]; m[i] = !m[i]; if (m.filter(Boolean).length > 4) return; this.setState({ members: m, cookMsg: '' }); this.typeStory(m); } }; });
+    return {
+      tabs, announce: st.announce, stats, origins, hustles, hand, judge, ...M, cookMembers,
+      isS1: st.screen === 's1', isS2: st.screen === 's2', isS3: st.screen === 's3', isS4: st.screen === 's4', isS5: st.screen === 's5', isS6: st.screen === 's6', isS7: st.screen === 's7',
+      refBg: this.refBg, refHand: this.refHand, magMove: this.magMove, magLeave: this.magLeave,
+      randomPick: this.randomPick, playCard: this.playCard, revealAll: this.revealAll, confirmWinner: this.confirmWinner, veto: this.veto, burst: this.burst, ghost: this.ghost, share: this.share,
+      goNextRound: () => this.go('s2', 'Game board'), playAgain: () => this.go('s1', 'Character creation'),
+      previewName: st.origin != null || st.hustle != null ? `${st.origin != null ? this.originsData[st.origin].name : '…'} · ${st.hustle != null ? this.hustlesData[st.hustle].name : '…'}` : 'Pick an Origin and a Hustle',
+      previewSub: st.origin != null && st.hustle != null ? 'Locked and ready. The Block is waiting.' : 'Your story starts with where you\u2019re from and how you move.',
+      canPlay: st.sel != null && !st.played, played: st.played,
+      noWinner: st.winner == null, winCursor: st.winner == null ? 'not-allowed' : 'pointer', winOp: st.winner == null ? '.4' : '1', judgeMsg: st.judgeMsg,
+      locIcon: loc.icon, locName: loc.name, locDesc: loc.desc, mapMsg: st.mapMsg,
+      actHustle: () => this.doAction(`💼 Hustled at ${loc.name}. +1 Street Cred.`), actChill: () => this.doAction(`🪑 Chilled at ${loc.name}. +1 Community.`), actInvestigate: () => this.doAction(`🔎 Asked around ${loc.name}. +1 Wisdom.`), actScheme: () => this.doAction(`🎭 Schemed at ${loc.name}. +1 Reputation.`),
+      memberCount: mCount, story: st.story, meterPct: Math.min(100, mCount * 25) + '%', meterTxt: mCount * 25 + ' STR', blockParty: mCount >= 3, cookMsg: st.cookMsg,
+      shareLabel: st.copied ? '✓ Copied!' : 'Share the Chronicle',
+      refCity: this.refCity,
+      weatherOpts: (this.cityMod ? this.cityMod.WEATHER_LIST : []).map(([key, label]) => ({ key, label })), weatherVal: st.weather,
+      weatherChange: (e) => { const val = e.target.value; this.setState({ weather: val }); if (this.cityEngine) this.cityEngine.setWeather(val); if (this.audioEngine) this.audioEngine.setWeather(val); },
+      eventOpts: (this.cityMod ? this.cityMod.EVENT_LIST : []).map(([key, label]) => ({ key, label })), eventSelVal: st.eventSel,
+      eventSelChange: (e) => this.setState({ eventSel: e.target.value }),
+      triggerEventBtn: () => this.triggerEventFor(st.eventSel),
+      eventActive: !!st.eventType,
+      eventIcon: st.eventType && this.cityMod ? this.cityMod.EVENT_LIST.find(e => e[0] === st.eventType)[2] : '',
+      eventLabel: st.eventType && this.cityMod ? this.cityMod.EVENT_LIST.find(e => e[0] === st.eventType)[1].replace(/^\S+\s/, '') : '',
+      eventGameplay: st.eventType && this.cityMod ? this.cityMod.EVENT_LIST.find(e => e[0] === st.eventType)[3] : '',
+      toasts: st.toasts,
+      muteIcon: st.muted ? '🔇' : '🔊',
+      toggleMute: () => { const nm = !st.muted; if (this.audioEngine) { this.audioEngine.init(this.state); this.audioEngine.setGains({ ...this.state, muted: nm }); } this.setState({ muted: nm }); },
+      toggleSettings: () => this.setState(s => ({ settingsOpen: !s.settingsOpen })), settingsOpen: st.settingsOpen,
+      closeSettingsBg: () => this.setState({ settingsOpen: false }), stop: (e) => e.stopPropagation(),
+      themeOpts: (this.cityMod ? this.cityMod.THEME_LIST : []).map(([key, label]) => ({ label, bg: st.theme === key ? '#ff6b35' : 'rgba(255,255,255,.08)', fg: '#fff7e6', go: () => { this.setState({ theme: key }); if (this.cityEngine) this.cityEngine.setTheme(key); } })),
+      soundMaster: st.soundMaster,
+      soundMasterChange: (e) => { const v = +e.target.value; this.setState({ soundMaster: v }); if (this.audioEngine) { this.audioEngine.init(this.state); this.audioEngine.setGains({ ...this.state, soundMaster: v }); } },
+      soundMusic: st.soundMusic,
+      soundMusicChange: (e) => { const v = +e.target.value; this.setState({ soundMusic: v }); if (this.audioEngine) { this.audioEngine.init(this.state); this.audioEngine.setGains({ ...this.state, soundMusic: v }); } },
+      quality: st.quality, qualityChange: (e) => { const v = e.target.value; this.setState({ quality: v }); if (this.cityEngine) this.cityEngine.setQuality(v); },
+      showFps: st.showFps, toggleFps: () => this.setState({ showFps: !st.showFps }),
+      reduceMotionUI: st.reduceMotionUI, toggleReduceMotionUI: () => { const v = !st.reduceMotionUI; this.setState({ reduceMotionUI: v }); if (this.cityEngine) this.cityEngine.setReducedMotion(v); },
+      highContrast: st.highContrast, toggleContrast: () => this.setState({ highContrast: !st.highContrast }),
+      textSize: st.textSize, textSizeChange: (e) => this.setState({ textSize: e.target.value }),
+      langAaveBg: st.lang === 'aave' ? '#ff6b35' : 'rgba(255,255,255,.08)', langStdBg: st.lang === 'standard' ? '#ff6b35' : 'rgba(255,255,255,.08)',
+      setLangAave: () => this.setState({ lang: 'aave' }), setLangStd: () => this.setState({ lang: 'standard' }),
+      weatherFXOn: st.weatherFXOn, toggleWeatherFX: () => this.setState({ weatherFXOn: !st.weatherFXOn }),
+    };
+  }
+  magMove = (e) => {
+    const el = e.currentTarget; if (el.getAttribute('aria-pressed') === 'true') return;
+    const r = el.getBoundingClientRect();
+    const dx = Math.max(-8, Math.min(8, (e.clientX - (r.left + r.width / 2)) * .05)), dy = Math.max(-8, Math.min(8, (e.clientY - (r.top + r.height / 2)) * .05));
+    el.style.transform = `translateY(-4px) translate(${dx}px,${dy}px)`;
+  };
+  magLeave = (e) => { if (e.currentTarget.getAttribute('aria-pressed') !== 'true') e.currentTarget.style.transform = 'none'; };
+}
+</script>
+</body>
+</html>

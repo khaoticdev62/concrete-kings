@@ -19,6 +19,9 @@ const server = http.createServer((req, res) => {
   let url = req.url.split('?')[0];
   if (url === '/') url = '/index.html';
   let filePath = path.join(ROOT, url);
+  if (url.startsWith('/design-system/')) {
+    filePath = path.join(ROOT, 'public', url);
+  }
   if (!filePath.startsWith(ROOT)) {
     res.writeHead(403); res.end('Forbidden'); return;
   }
