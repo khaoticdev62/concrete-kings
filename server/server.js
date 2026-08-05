@@ -29,7 +29,9 @@ const server = http.createServer((req, res) => {
     if (err) { res.writeHead(404); res.end('Not found'); return; }
     const ext = path.extname(filePath);
     const types = { '.html':'text/html', '.js':'application/javascript', '.css':'text/css' };
-    res.writeHead(200, { 'Content-Type': types[ext] || 'text/plain' });
+    const headers = { 'Content-Type': types[ext] || 'text/plain' };
+    if (ext === '.html') headers['Cache-Control'] = 'no-store, no-cache';
+    res.writeHead(200, headers);
     res.end(data);
   });
 });
