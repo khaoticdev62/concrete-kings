@@ -113,3 +113,13 @@ test('Story Engine: origin bonus does not apply when winning tag does not match 
   assert.equal(engine.trust, 0, 'no bonus: trust should equal the base +0');
   assert.equal(result.ended, false);
 });
+
+test('Story Engine: markAbilityUsed succeeds once then reports already used', () => {
+  const engine = new NarrativeStoryEngine();
+  engine.reset();
+  assert.equal(engine.specialAbilityUsed, false);
+  assert.equal(engine.markAbilityUsed(), true);
+  assert.equal(engine.specialAbilityUsed, true);
+  assert.equal(engine.markAbilityUsed(), false, 'second call must fail, ability already used');
+  assert.equal(engine.specialAbilityUsed, true, 'state must stay used after the failed second call');
+});

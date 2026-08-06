@@ -135,6 +135,7 @@ class NarrativeStoryEngine {
     this.active = false;
     this.history = [];
     this.origin = null;
+    this.specialAbilityUsed = false;
   }
 
   reset(originKey = null) {
@@ -144,6 +145,13 @@ class NarrativeStoryEngine {
     this.active = true;
     this.history = [];
     this.origin = originKey;
+    this.specialAbilityUsed = false;
+  }
+
+  markAbilityUsed() {
+    if (this.specialAbilityUsed) return false;
+    this.specialAbilityUsed = true;
+    return true;
   }
 
   getCurrentBeat() {
