@@ -35,3 +35,32 @@ test('Weather System: Mode switching updates activeMode cleanly', () => {
   weather.setMode(WEATHER_MODES.POLICE_SIRENS);
   assert.equal(weather.activeMode, 'POLICE_SIRENS');
 });
+
+test('Weather System: renderNeonFlicker cycles a 4-stage alpha curve baked into fillStyle, never touching globalAlpha', () => {
+  const system = new WeatherEffectsSystem(320, 180);
+  system.setMode(WEATHER_MODES.NEON_FLICKER);
+
+  const fillStyles = [];
+  const ctx = new Proxy({}, {
+    set(target, prop, value) {
+      if (prop === 'globalAlpha') {
+        throw new Error('renderNeonFlicker must not use ctx.globalAlpha during gameplay');
+      }
+      if (prop === 'fillStyle') fillStyles.push(value);
+      target[prop] = value;
+      return true;
+    },
+    get(target, prop) {
+      if (prop === 'fillRect') return () => {};
+      return target[prop];
+    }
+  });
+
+  for (let i = 0; i < 4; i++) {
+    system.render(ctx);
+    system.advanceFrame();
+  }
+
+  const alphas = fillStyles.map(s => Number(s.match(/,\s*([\d.]+)\)$/)[1]));
+  assert.deepEqual(alphas, [1, 0.7, 1, 0.9]);
+});

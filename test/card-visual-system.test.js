@@ -43,3 +43,24 @@ test('Card Visual System: CardVisualRenderer adheres to strict 4-frame shimmer a
   assert.equal(renderer.advanceShimmerFrame(), 3);
   assert.equal(renderer.advanceShimmerFrame(), 0, 'Frame 4 cycles back to 0');
 });
+
+test('Card Visual System: renderCardText memoizes word-wrap so repeated renders of the same text skip measureText', () => {
+  const renderer = new CardVisualRenderer();
+  let measureCalls = 0;
+  const mockCtx = {
+    fillStyle: '', font: '', textAlign: '', lineWidth: 0, strokeStyle: '',
+    fillRect() {}, fillText() {}, strokeRect() {},
+    save() {}, restore() {}, beginPath() {}, rect() {}, clip() {},
+    moveTo() {}, lineTo() {}, closePath() {}, fill() {}, stroke() {},
+    measureText(str) { measureCalls++; return { width: str.length * 6 }; }
+  };
+  const category = CARD_CATEGORIES.BLOCK_LOYALTY;
+  const text = 'A recurring caption that should only be measured once';
+
+  renderer.renderCard(mockCtx, text, category, false);
+  const firstPassCalls = measureCalls;
+  assert.ok(firstPassCalls > 0, 'first render must measure text at least once');
+
+  renderer.renderCard(mockCtx, text, category, false);
+  assert.equal(measureCalls, firstPassCalls, 'second render of identical text must not call measureText again');
+});
