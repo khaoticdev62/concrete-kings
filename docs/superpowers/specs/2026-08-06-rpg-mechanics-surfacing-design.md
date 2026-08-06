@@ -212,7 +212,7 @@ placeBetFromUI(pick) {
   const me = this.game.players[this.humanIndex];
   if (!me) return;
   const cost = this.game.weatherMode === 'NEON_FLICKER' ? 2 : 1;
-  if (!CornerHustleBetting.placeBet(this.game, me.name, pick)) {
+  if (!this.game.placeBet(me.name, pick)) {
     alert(`Not enough Street Cred (need ${cost}).`);
     return;
   }
@@ -257,12 +257,16 @@ free-text input to reading the select's value:
 proposeAllianceFromUI() {
   const me = this.game.players[this.humanIndex];
   const targetName = document.getElementById('allianceTargetSelect')?.value;
-  const target = this.game.players.find(p => p.name === targetName);
-  if (!me || !target) return;
-  AllianceSystem.proposeAlliance(this.game, me, target);
+  if (!me || !targetName) return;
+  AllianceSystem.proposeAlliance(this.game, me.name, targetName);
   this.renderGame();
 },
 ```
+(`AllianceSystem.proposeAlliance(game, proposer, target)` stores `proposer`/
+`target` exactly as passed and `resolveRound` later compares them against
+`winner.name` — confirmed at `index.html:1338-1349` that these must be name
+strings, not player objects, matching the current dev-console call's
+argument types.)
 The old `allianceInput` text field and dev-console button
 (`index.html:911-912`) are removed.
 
@@ -275,16 +279,20 @@ the top, before the existing Receipt-trigger check, using the same
 ```js
 nextBlack() {
   if (Math.random() < 0.2) {
-    const modes = WEATHER_MODES.filter(m => m !== this.weatherMode);
+    const modes = Object.values(WEATHER_MODES).filter(m => m !== this.weatherMode);
     this.weatherMode = modes[Math.floor(Math.random() * modes.length)];
   }
   const trigger = ReceiptSystem.maybeTriggerReceipt(this);
   // ... unchanged from here
 ```
-`WEATHER_MODES` (defined in `src/pixel_engine/weather-effects-system.js`,
-already loaded in `index.html`) is the source list — filtering out the
-current mode guarantees a visible change on the ~20% of rounds it triggers,
-rather than a roll that silently "shifts" to the same mode.
+`WEATHER_MODES` (defined in `src/pixel_engine/weather-effects-system.js:7-12`
+as a plain object — `{ CLEAR: 'CLEAR', RAIN: 'RAIN', STEAM_VENT: 'STEAM_VENT',
+POLICE_SIRENS: 'POLICE_SIRENS', NEON_FLICKER: 'NEON_FLICKER' }`, exported to
+`window.WEATHER_MODES` and loaded via `<script src="src/pixel_engine/weather-effects-system.js">`
+at `index.html:1018`, before the inline script) is the source — `Object.values`
+gives the 5 mode strings, filtering out the current mode guarantees a
+visible change on the ~20% of rounds it triggers, rather than a roll that
+silently "shifts" to the same mode.
 
 The dev-console `#weatherSelect` dropdown (`index.html:827-833`) and
 `app.setWeather()` (`index.html:3961-3972`) are left in place as a genuine
