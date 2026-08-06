@@ -76,3 +76,32 @@ test('Weather Environmental Checks: NEON_FLICKER changes betting cost and payout
     assert.equal(alice.stats.streetCred, 3); // Loss
   }
 });
+
+test('Weather Environmental Checks: nextBlack always shifts to a valid weather mode', () => {
+  const { Game } = loadGameModule();
+  const validModes = ['CLEAR', 'RAIN', 'STEAM_VENT', 'POLICE_SIRENS', 'NEON_FLICKER'];
+  const game = new Game();
+  game.addPlayer('Alice');
+  game.addPlayer('Bob');
+
+  for (let i = 0; i < 50; i++) {
+    game.nextBlack();
+    assert.ok(validModes.includes(game.weatherMode), `weatherMode "${game.weatherMode}" must be a valid mode`);
+  }
+});
+
+test('Weather Environmental Checks: nextBlack never "shifts" to the same weather mode it started with', () => {
+  const { Game } = loadGameModule();
+  const game = new Game();
+  game.addPlayer('Alice');
+  game.addPlayer('Bob');
+  game.weatherMode = 'CLEAR';
+
+  let sawAnyShift = false;
+  for (let i = 0; i < 50; i++) {
+    const before = game.weatherMode;
+    game.nextBlack();
+    if (game.weatherMode !== before) sawAnyShift = true;
+  }
+  assert.ok(sawAnyShift, 'expected at least one weather shift across 50 rounds at a 20% chance per round');
+});

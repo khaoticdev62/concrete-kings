@@ -1207,6 +1207,10 @@ class Game {
   }
 
   nextBlack() {
+    if (Math.random() < 0.2) {
+      const modes = ['CLEAR', 'RAIN', 'STEAM_VENT', 'POLICE_SIRENS', 'NEON_FLICKER'].filter(m => m !== this.weatherMode);
+      this.weatherMode = modes[Math.floor(Math.random() * modes.length)];
+    }
     const trigger = ReceiptSystem.maybeTriggerReceipt(this);
     if (trigger) {
       this.currentBlack = {
