@@ -2583,13 +2583,9 @@ const app = {
       const me = this.game.players[this.humanIndex];
       if (me) me.stats.streetCred++;
     } else if (spot.id === 'BODEGA') {
-      alert('🏪 You bought a chopped cheese from the corner Bodega. Community +1.');
-      const me = this.game.players[this.humanIndex];
-      if (me) me.stats.community++;
+      alert('🏪 You bought a chopped cheese from the corner Bodega.');
     } else if (spot.id === 'CHESS_PARK') {
-      alert('♟️ You played chess and learned from a neighborhood elder. Wisdom +1.');
-      const me = this.game.players[this.humanIndex];
-      if (me) me.stats.wisdom++;
+      alert('♟️ You played chess and learned from a neighborhood elder.');
     }
     this.renderGame();
   },
