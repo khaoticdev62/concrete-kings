@@ -2722,12 +2722,14 @@ const app = {
     }
 
     const diceEl = document.getElementById('diceResult');
-    if (bc?.hasDice) {
+    if (bc?.hasDice && bc.effectRolled) {
+      diceEl.innerHTML = '<div class="die">' + bc.rollResult + '</div>';
+    } else if (bc?.hasDice) {
       diceEl.innerHTML = '<span class="die">?</span>';
     } else {
       diceEl.innerHTML = '';
     }
-    document.getElementById('diceNotice').textContent = '';
+    document.getElementById('diceNotice').textContent = (bc?.hasDice && bc.effectRolled && bc.effect) ? ('Dice effect: ' + bc.effect.label) : '';
 
     const weatherNotice = document.getElementById('weatherNotice');
     if (weatherNotice && this.game.weatherMode && this.game.weatherMode !== 'CLEAR') {
@@ -2764,16 +2766,18 @@ const app = {
     this.renderScoreboard();
     this.updateStatHud();
 
+    const isOnline = this.game.mode === MODE.ONLINE;
+
     const vetoBtn = document.getElementById('vetoBtn');
-    if (vetoBtn) vetoBtn.style.display = (this.isJudge() && !this.game.vetoUsed) ? 'inline-block' : 'none';
+    if (vetoBtn) vetoBtn.style.display = (!isOnline && this.isJudge() && !this.game.vetoUsed) ? 'inline-block' : 'none';
     const ddBtn = document.getElementById('doubleDownBtn');
-    if (ddBtn) ddBtn.style.display = (this.isJudge() && !this.game.doubleDownActive) ? 'inline-block' : 'none';
+    if (ddBtn) ddBtn.style.display = (!isOnline && this.isJudge() && !this.game.doubleDownActive) ? 'inline-block' : 'none';
 
     const betPrompt = document.getElementById('betPrompt');
     if (betPrompt) {
       const me = this.game.players[this.humanIndex];
       const alreadyBet = me && this.game.bets && Object.prototype.hasOwnProperty.call(this.game.bets, me.name);
-      const canBet = !!this.game.currentBlack?.hasDice && !alreadyBet;
+      const canBet = !isOnline && !!this.game.currentBlack?.hasDice && !this.game.currentBlack?.effectRolled && !alreadyBet;
       betPrompt.style.display = canBet ? 'block' : 'none';
       if (canBet) {
         const cost = this.game.weatherMode === 'NEON_FLICKER' ? 2 : 1;
@@ -2787,7 +2791,7 @@ const app = {
       const me = this.game.players[this.humanIndex];
       const judge = this.game.players[this.game.judgeIndex % this.game.players.length];
       const eligible = me ? this.game.players.filter(p => p !== me && p !== judge) : [];
-      const showPrompt = !this.game.currentAlliance && eligible.length > 0;
+      const showPrompt = !isOnline && !this.game.currentAlliance && eligible.length > 0;
       alliancePrompt.style.display = showPrompt ? 'block' : 'none';
       if (showPrompt) {
         const select = document.getElementById('allianceTargetSelect');
@@ -4180,12 +4184,9 @@ const app = {
 
 /* Dice click on black card for judge */
 document.getElementById('blackCard').addEventListener('click', () => {
-  if (!app.game.currentBlack?.hasDice) return;
+  if (!app.game.currentBlack?.hasDice || app.game.currentBlack?.effectRolled) return;
   if (app.audioEngine) app.audioEngine.playDiceRoll();
-  const label = app.game.rollDice();
-  const diceEl = document.getElementById('diceResult');
-  diceEl.innerHTML = '<div class="die">' + Math.floor(Math.random()*6+1) + '</div>';
-  document.getElementById('diceNotice').textContent = 'Dice effect: ' + label;
+  app.game.rollDice();
   app.renderGame();
 });
 
