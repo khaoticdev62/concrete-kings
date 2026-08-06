@@ -6,142 +6,486 @@
 <title>Concrete Kings - The Urban Card Game</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@400;600;700&family=Unbounded:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="data:text/css,">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/pixel_engine/pixel-engine.css">
 <style>
   * { box-sizing: border-box; }
   body {
-    margin: 0; min-height: 100vh;
-    font-family: 'Plus Jakarta Sans', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(180deg, #1a1a1a 0%, #2b1d0e 100%);
-    color: #f3e7cf;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'JetBrains Mono', monospace;
+    background-color: #08080a;
+    background-image: 
+      radial-gradient(#181920 1px, transparent 0),
+      radial-gradient(#181920 1px, transparent 0);
+    background-size: 16px 16px;
+    background-position: 0 0, 8px 8px;
+    color: #f4f7ff;
     -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  .wrap {
+    max-width: 1600px;
+    height: 100vh;
+    margin: 0 auto;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
   header {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 4px;
+    padding: 6px 4px;
+    border-bottom: 4px double #474d5e;
+    margin-bottom: 8px;
+    flex-shrink: 0;
   }
   h1 {
-    margin: 0; font-size: 28px; letter-spacing: 1px;
-    background: linear-gradient(90deg, #f7c948, #ff6b35);
+    margin: 0; font-family: 'Press Start 2P', monospace; font-size: 20px;
+    letter-spacing: -1px;
+    background: linear-gradient(180deg, #fff0aa 0%, #f0ab43 50%, #c9822b 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(2px 2px 0px #08080a);
+    animation: ckFlicker 4s infinite alternate;
+  }
+  @keyframes ckFlicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+    20%, 24%, 55% { opacity: 0.95; }
   }
   h2, h3 {
-    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Press Start 2P', monospace;
     letter-spacing: 0.3px;
+    text-shadow: 2px 2px 0px #08080a;
   }
+  h2 { font-size: 14px; color: #ffcd68; }
+  h3 { font-size: 11px; color: #ffc475; }
+  
   .pill {
-    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
-    padding: 8px 12px; border-radius: 999px; font-size: 13px;
+    background: #101116; border: 2px solid #474d5e;
+    padding: 6px 10px; font-size: 11px; font-family: 'Press Start 2P', monospace;
+    color: #85c4ff;
   }
   .panel {
-    background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px; padding: 16px; margin-top: 12px;
+    background: #181920;
+    border: 4px solid #474d5e;
+    border-color: #8b95ab #2d313d #2d313d #8b95ab;
+    box-shadow: 4px 4px 0px #08080a;
+    padding: 10px 14px;
+    margin-top: 0px;
+    border-radius: 0px;
   }
-  .screen { display: none; }
-  .screen.active { display: block; }
+  .screen {
+    display: none;
+    flex: 1;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .screen.active {
+    display: block;
+  }
+  #game.screen.active {
+    display: block;
+    overflow: hidden;
+  }
+  
   button {
-    background: linear-gradient(180deg, #ff7a1a, #e04b00); color:#fff;
-    border: none; padding: 12px 18px; border-radius: 10px; font-weight: 700;
-    cursor: pointer; font-size: 15px;
-    box-shadow: 0 3px 0 rgba(0,0,0,0.25);
-    transition: transform .12s ease, box-shadow .12s ease;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    text-shadow: 1px 1px #08080a;
+    background: #c9822b;
+    color: #f4f7ff;
+    border: 3px solid;
+    border-color: #ffe299 #6e3e14 #6e3e14 #ffe299;
+    padding: 10px 14px;
+    cursor: pointer;
+    box-shadow: 2px 2px 0px #08080a;
+    image-rendering: pixelated;
+    transition: none;
   }
-  button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 5px 0 rgba(0,0,0,0.25); }
-  button:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
+  button:hover:not(:disabled) {
+    background: #f0ab43;
+    border-color: #fff0aa #9c5c1d #9c5c1d #fff0aa;
+  }
+  button:active:not(:disabled) {
+    border-color: #6e3e14 #ffe299 #ffe299 #6e3e14;
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px #08080a;
+  }
   button.secondary {
-    background: rgba(255,255,255,0.12); color:#f3e7cf;
+    background: #474d5e;
+    border-color: #8b95ab #2d313d #2d313d #8b95ab;
   }
-  button:disabled { opacity: .5; cursor: not-allowed; }
-  input[type="text"], input[type="number"] {
-    background: rgba(0,0,0,0.4); color:#fff; border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 10px; padding: 10px 12px; width: 100%; font-size: 15px;
+  button.secondary:hover:not(:disabled) {
+    background: #565e70;
+    border-color: #a0aac2 #393e4d #393e4d #a0aac2;
+  }
+  button.tab-btn.active {
+    background: #ffcd68;
+    color: #101116;
+    border-color: #fff0aa #9c5c1d #9c5c1d #fff0aa;
+    text-shadow: none;
+  }
+  button:disabled {
+    background: #22252e;
+    color: #666e82;
+    border-color: #393e4d #181920 #181920 #393e4d;
+    cursor: not-allowed;
+    box-shadow: none;
+    text-shadow: none;
+  }
+  
+  input[type="text"], input[type="number"], select {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: bold;
+    background: #101116; color:#ffc475; border: 3px solid #474d5e;
+    padding: 8px 10px; width: 100%; font-size: 14px;
     outline: none;
+    box-shadow: inset 2px 2px 0px #08080a;
   }
-  input[type="text"]:focus, input[type="number"]:focus { border-color: #ff6b35; }
+  input[type="text"]:focus, input[type="number"]:focus, select:focus {
+    border-color: #f0ab43;
+    color: #f4f7ff;
+  }
+  
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
-  .player-row { display:flex; justify-content:space-between; align-items:center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
-  .hand { display: grid; grid-template-columns: repeat(auto-fill,minmax(170px,1fr)); gap: 10px; }
-  .card {
-    background: linear-gradient(180deg,#fff7e6,#ffe3b3); color:#1a1105;
-    border-radius: 12px; padding: 14px; min-height: 120px;
-    box-shadow: 0 4px 0 rgba(0,0,0,0.25); cursor: pointer;
-    display: flex; align-items: center; justify-content: center; text-align: center;
-    font-weight: 700; font-size: 14px; transition: transform .15s ease, box-shadow .15s ease;
-    will-change: transform;
+  
+  .retro-table {
+    border: 3px solid #2d313d;
+    background: #101116;
+    padding: 4px;
   }
-  .card:hover { transform: translateY(-4px); box-shadow: 0 8px 0 rgba(0,0,0,0.25); }
-  .card:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
-  .card.selected {
-    outline: 3px solid #ff6b35; transform: translateY(3px);
-    box-shadow: 0 0 0 10px rgba(255,107,53,0.18), 0 4px 0 rgba(0,0,0,0.25);
+  .player-row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 6px 8px; border-bottom: 1px dashed #2d313d;
+    font-size: 13px;
   }
-  .black-card {
-    background: linear-gradient(180deg,#26201b,#0f0c0a); color:#f3e7cf;
-    border-radius: 14px; padding: 18px; min-height: 140px;
-    text-align: center; font-weight: 800; font-size: 16px;
-    box-shadow: 0 4px 0 rgba(0,0,0,0.4);
-    border: 1px solid rgba(255,255,255,0.06);
+  .player-row:last-child { border-bottom: none; }
+  
+  .hand {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding: 12px 6px;
   }
+  .hand::-webkit-scrollbar {
+    height: 10px;
+  }
+  .hand::-webkit-scrollbar-track {
+    background: #101116;
+    border: 1px solid #2d313d;
+  }
+  .hand::-webkit-scrollbar-thumb {
+    background: #474d5e;
+    border: 2px solid #101116;
+  }
+  .hand::-webkit-scrollbar-thumb:hover {
+    background: #c9822b;
+  }
+  
+  .pixel-card-canvas {
+    height: 18vh;
+    min-height: 120px;
+    max-height: 220px;
+    width: auto;
+    aspect-ratio: 2 / 3;
+    cursor: pointer;
+    image-rendering: pixelated;
+    transition: transform 0.1s ease;
+    border: 2px solid transparent;
+    box-shadow: 3px 3px 0px #08080a;
+  }
+  .pixel-card-canvas:hover {
+    transform: translateY(-6px);
+    box-shadow: 5px 9px 0px #08080a;
+  }
+  .pixel-card-canvas.selected {
+    transform: translateY(2px);
+    box-shadow: 1px 1px 0px #08080a;
+    outline: 4px solid #f0ab43;
+  }
+  
   .dice { display: inline-flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
   .die {
-    width: 46px; height: 46px; background:#fff; color:#000; border-radius:10px;
-    display:flex; align-items:center; justify-content:center; font-weight:900;
-    box-shadow: 0 3px 0 rgba(0,0,0,0.35);
-    font-family: 'JetBrains Mono', monospace;
+    width: 44px; height: 44px; background:#fff0aa; color:#101116;
+    border: 3px solid #f0ab43; box-shadow: 3px 3px 0px #08080a;
+    display:flex; align-items:center; justify-content:center;
+    font-family: 'Press Start 2P', monospace; font-size: 16px; font-weight: bold;
   }
   .winner-area { text-align: center; padding: 20px; }
-  .winner-area .card { max-width: 380px; margin: 12px auto; }
-  .topbar { display:flex; gap: 8px; flex-wrap: wrap; }
-  .room-info { font-size: 12px; opacity: .85; }
-  .muted { font-size: 13px; opacity: .8; }
-  .pass-banner { margin-top:8px; font-size:14px; font-weight:700; }
-  .champion {
-    font-size: 24px; font-weight: 900;
-    background: linear-gradient(90deg,#f7c948,#ff6b35);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  .topbar { display:flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .muted { font-size: 12px; color: #8b95ab; }
+  .pass-banner {
+    margin-top: 12px; font-size: 12px; font-weight: 700;
+    background: #2b0d0d; border: 2px solid #d9382e; padding: 12px;
+    text-align: center;
   }
-  .dev-bar { margin-top: 10px; display: grid; gap: 8px; }
-  .dev-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  
+  .dev-bar summary {
+    font-family: 'Press Start 2P', monospace; font-size: 10px; color: #d9382e;
+  }
+  .dev-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+  
   .weather-alert {
     margin-top: 6px; font-weight: 800; font-size: 14px;
-    transition: opacity .3s ease;
+    font-family: 'Press Start 2P', monospace; color: #ff7a45;
+    text-align: center;
   }
-  .location-btn { width: 100%; text-align: left; }
-  .design-links { margin-top: 12px; font-size: 12px; opacity: .7; }
-  .design-links a { color: #ff6b35; text-decoration: none; }
-  .save-bar { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  
   .status-pill {
     display:inline-flex; align-items:center; gap:6px;
-    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-    padding: 6px 10px; border-radius: 999px; font-size: 12px;
+    background: #101116; border: 2px solid #2d313d;
+    padding: 6px 10px; font-size: 11px;
   }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #4caf50; }
-  .bg-scene { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
-  .bg-scene .orb {
-    position: absolute; border-radius: 50%; filter: blur(90px); opacity: .18;
-    animation: ckDriftUp 22s linear infinite;
+  
+  .crt-screen {
+    position: relative;
+    overflow: hidden;
+    border: 4px solid #474d5e;
+    background: #101116;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
   }
-  .bg-scene .orb:nth-child(odd) { animation-duration: 28s; animation-direction: reverse; }
-  @keyframes ckDriftUp {
-    0% { transform: translateY(0) translateX(0); }
-    50% { transform: translateY(-40px) translateX(30px); }
-    100% { transform: translateY(0) translateX(0); }
+  .crt-screen::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+    background-size: 100% 3px;
+    z-index: 999;
+    pointer-events: none;
   }
-  .screen.active .bg-scene .orb { animation-play-state: running; }
-  [data-bg-theme="warm"] .bg-scene .orb { background: #ff6b35, #f7c948, #ffeb3b; }
-  [data-bg-theme="cool"] .bg-scene .orb { background: #4caf50, #2196f3, #03a9f4; }
-  [data-bg-theme="night"] .bg-scene .orb { background: #9c27b0, #ff6b35, #f7c948; }
+  
+  /* Layout Grids */
+  .setup-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 16px;
+  }
+  .game-layout-container {
+    display: flex;
+    height: 100%;
+    gap: 16px;
+    overflow: hidden;
+  }
+  .game-left-col {
+    flex: 2.2;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 100%;
+    overflow: hidden;
+  }
+  .game-right-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 100%;
+    overflow: hidden;
+    min-width: 280px;
+    max-width: 400px;
+  }
+  .stage-panel {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+    min-height: 180px;
+    overflow: hidden;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .stage-panel .canvas-mount-point {
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
+  }
+  @media (max-width: 950px) {
+    .game-layout-container {
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .game-left-col, .game-right-col {
+      flex: none;
+      height: auto;
+      max-width: 100%;
+      overflow: visible;
+    }
+    .stage-panel {
+      height: 250px;
+    }
+  }
+  @media (max-width: 850px) {
+    .setup-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .campaign-list {
+    max-height: 220px;
+    overflow-y: auto;
+    border: 3px solid #2d313d;
+    background: #101116;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .campaign-act-item {
+    padding: 8px 10px;
+    background: #181920;
+    border: 2px solid #2d313d;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+  }
+  .campaign-act-item:hover {
+    border-color: #ffcd68;
+  }
+  .campaign-act-item.selected {
+    border-color: #f0ab43;
+    background: #2b1d0e;
+  }
+  .campaign-act-item.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .campaign-act-item.locked:hover {
+    border-color: #2d313d;
+  }
+  .campaign-act-item.completed {
+    background: #174540;
+    border-color: #339488;
+  }
+  .act-header {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+  }
+  .act-title {
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #f4f7ff;
+  }
+  .act-city {
+    margin-top: 2px;
+    font-size: 10px;
+    color: #8b95ab;
+  }
+  .campaign-details-box {
+    margin-top: 10px;
+    padding: 10px;
+    background: #101116;
+    border: 3px solid #2d313d;
+    min-height: 150px;
+  }
+  
+  .lexicon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+    max-height: 160px;
+    overflow-y: auto;
+    padding: 4px;
+  }
+  .lexicon-item {
+    background: #101116;
+    border: 2px solid #2d313d;
+    padding: 8px;
+  }
+  .lexicon-term {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: #ffc475;
+    margin-bottom: 4px;
+  }
+  .lexicon-definition {
+    font-size: 11px;
+    color: #a0aac2;
+    line-height: 1.3;
+  }
+  
+  .rpg-hud-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+  }
+  .hud-label { color: #8b95ab; }
+  .hud-val { color: #ffcd68; font-weight: bold; }
+  
+  .retro-chat-log {
+    max-height: 120px;
+    overflow-y: auto;
+    background: #101116;
+    border: 3px solid #2d313d;
+    box-shadow: inset 2px 2px 0px #08080a;
+    padding: 8px;
+    font-size: 12px;
+    color: #a0aac2;
+  /* ---------- ACCESSIBILITY OVERRIDES ---------- */
+  body.high-contrast {
+    background: #000000 !important;
+    background-color: #000000 !important;
+  }
+  body.high-contrast .panel,
+  body.high-contrast .retro-card-item {
+    border: 3px solid #ffffff !important;
+    background: #000000 !important;
+    box-shadow: none !important;
+  }
+  body.high-contrast button {
+    border: 3px solid #ffffff !important;
+    background: #000000 !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  body.high-contrast button:hover {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  body.high-contrast .retro-card-item.selected {
+    border: 4px double #ffcd68 !important;
+  }
+  body.high-contrast label,
+  body.high-contrast p,
+  body.high-contrast span,
+  body.high-contrast div {
+    text-shadow: none !important;
+  }
+  
+  body.text-scale-125 { font-size: 1.25rem !important; }
+  body.text-scale-125 .panel h2 { font-size: 1.35rem !important; }
+  body.text-scale-125 .panel h3 { font-size: 1.15rem !important; }
+  
+  body.text-scale-150 { font-size: 1.5rem !important; }
+  body.text-scale-150 .panel h2 { font-size: 1.6rem !important; }
+  body.text-scale-150 .panel h3 { font-size: 1.3rem !important; }
+  
+  body.text-scale-175 { font-size: 1.75rem !important; }
+  body.text-scale-175 .panel h2 { font-size: 1.85rem !important; }
+  body.text-scale-175 .panel h3 { font-size: 1.5rem !important; }
+
+  body.reduced-motion * {
+    animation: none !important;
+    transition: none !important;
+  }
 </style>
 </head>
 <body>
-<div class="bg-scene" aria-hidden="true"></div>
 <div class="wrap">
   <header>
     <h1>CONCRETE KINGS</h1>
     <div class="topbar">
+      <button id="bgmToggleBtn" class="secondary" onclick="app.toggleBGM()">🎵 Music: OFF</button>
+      <button id="sfxToggleBtn" class="secondary" onclick="app.toggleSFX()">🔊 Sound: ON</button>
+      <button class="secondary" onclick="app.toggleAccessModal()">♿ Accessibility</button>
       <div class="pill" id="modeBadge">Offline</div>
       <button class="secondary" onclick="app.showSetup()">Menu</button>
     </div>
@@ -149,177 +493,505 @@
 
   <!-- SETUP -->
   <section id="setup" class="screen active">
-    <div class="panel">
-      <h2 style="margin-top:0;">New Game</h2>
-      <label style="font-weight:600;">Your Name</label>
-      <input id="hostName" value="Host" />
-      <label style="margin-top:10px; font-weight:600;">Players (3-12)</label>
-      <input id="playerCount" type="number" min="3" max="12" value="4" />
-      <label style="margin-top:10px; font-weight:600;">Points to Win</label>
-      <input id="pointsToWin" type="number" min="1" max="50" value="7" />
-      <div class="grid-2" style="margin-top:14px;">
-        <button onclick="app.startLocalGame()">Play Offline (Pass & Play)</button>
-        <button class="secondary" onclick="app.openOnlineLobby()">Online Lobby</button>
+    <div class="setup-grid">
+      <!-- Left Column: New Game Settings -->
+      <div class="panel">
+        <h2 style="margin-top:0;">NEW CHRONICLE</h2>
+        
+        <div style="margin-bottom:12px;">
+          <label style="font-weight:600; display:block; margin-bottom:4px; font-size:10px; font-family:'Press Start 2P', monospace;">PLAYER NAME</label>
+          <input id="hostName" value="Host" />
+        </div>
+        
+        <div style="margin-bottom:12px;">
+          <label style="font-weight:600; display:block; margin-bottom:4px; font-size:10px; font-family:'Press Start 2P', monospace;">CHARACTER CLASS</label>
+          <select id="characterOriginSelect" style="width:100%;">
+            <option value="BARBER">MASTER BARBER (Apron + Scissors)</option>
+            <option value="STREET_SCHOLAR">STREET SCHOLAR (Book + Hoodie)</option>
+            <option value="LOCAL_LEGEND">LOCAL LEGEND (Leather Jacket)</option>
+            <option value="CORNER_MERCHANT">CORNER MERCHANT (Utility Vest)</option>
+            <option value="COMMUNITY_ORGANIZER">COMMUNITY ORGANIZER (Denim Jacket)</option>
+            <option value="UNDERGROUND_DJ">UNDERGROUND DJ (Varsity Violet)</option>
+            <option value="BLOCK_ARCHITECT">BLOCK ARCHITECT (High-Vis Gold)</option>
+            <option value="HUSTLE_VETERAN">HUSTLE VETERAN (Green Tracksuit)</option>
+          </select>
+          <div style="display:flex; align-items:center; gap:12px; margin-top:8px;">
+            <canvas id="setup-character-preview" width="32" height="32" style="width:64px; height:64px; border:3px solid #474d5e; background:#101116; image-rendering:pixelated;"></canvas>
+            <span class="muted" style="line-height:1.3;">Each class has a distinct 16-bit avatar layout. Watch them bob in the preview!</span>
+          </div>
+        </div>
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
+          <div>
+            <label style="font-weight:600; display:block; margin-bottom:4px; font-size:10px; font-family:'Press Start 2P', monospace;">PLAYERS (3-12)</label>
+            <input id="playerCount" type="number" min="3" max="12" value="4" />
+          </div>
+          <div>
+            <label style="font-weight:600; display:block; margin-bottom:4px; font-size:10px; font-family:'Press Start 2P', monospace;">PTS TO WIN</label>
+            <input id="pointsToWin" type="number" min="1" max="50" value="7" />
+          </div>
+        </div>
+        
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:16px;">
+          <div class="grid-2">
+            <button onclick="app.startLocalGame()">PLAY LOCAL</button>
+            <button class="secondary" onclick="app.openOnlineLobby()">ONLINE LOBBY</button>
+          </div>
+          <div class="grid-2">
+            <button class="secondary" onclick="app.showDeckBuilder()">🗂️ DECK BUILDER</button>
+            <button class="secondary" onclick="app.showBoosterShop()">📦 BOOSTER SHOP</button>
+          </div>
+        </div>
+        <div class="muted" style="margin-top:10px;">
+          Offline mode = same device, pass & play.
+        </div>
       </div>
-      <div class="muted" style="margin-top:10px;">
-        Offline = same device, pass & play.
+      
+      <!-- Right Column: Campaign acts -->
+      <div class="panel">
+        <h2 style="margin-top:0; color:#f0ab43;">STORY CAMPAIGN</h2>
+        <p class="muted" style="margin-top:0; font-size:11px;">Complete acts to defeat regional O.G. bosses, gain reputation, and unlock new classes.</p>
+        <button class="primary" style="width:100%; background:#d9382e; border-color:#d9382e; color:#ffffff; font-family:'Press Start 2P', monospace; font-size:8px; margin-bottom:12px; height:36px; padding:0;" onclick="app.startNoirPrototype()">PLAY NOIR PROTOTYPE</button>
+        <div id="campaignActList" class="campaign-list"></div>
+        <div id="campaignActDetails" class="campaign-details-box"></div>
+      </div>
+    </div>
+    
+    <!-- Glossary HUD Block at bottom of setup screen -->
+    <div class="panel" style="margin-top:16px;">
+      <h2 style="margin-top:0; color:#339488;">BLOCK LEXICON HUD</h2>
+      <p class="muted" style="margin-top:0; margin-bottom:10px;">Search definitions and cultural origins of terminology used in the game.</p>
+      <input id="lexiconSearchBox" type="text" placeholder="Search dictionary terms (e.g. Cookout, Receipts, O.G.)..." />
+      <div id="lexiconResults" class="lexicon-grid" style="margin-top:10px;"></div>
+    </div>
+  </section>
+
+  <!-- DECK BUILDER & COLLECTION -->
+  <section id="deckBuilder" class="screen">
+    <div class="panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+        <h2 style="margin-top:0; color:#ffcd68;">DECK BUILDER & COLLECTION</h2>
+        <button class="secondary" onclick="app.showSetup()" style="font-size:9px;">BACK TO MENU</button>
+      </div>
+      <p class="muted" style="margin-top:0; margin-bottom:12px;">Customize the active card pool. Select which white cards are shuffled into the deck.</p>
+      
+      <div style="display:flex; gap:16px; flex-wrap:wrap; height:60vh; min-height:400px; max-height:600px;">
+        <!-- Left Side: Deck Stats & Templates -->
+        <div class="panel" style="flex:0 0 240px; display:flex; flex-direction:column; border-right:2px solid #2d313d; padding-right:12px; margin-bottom:0; background:#101116; box-sizing:border-box;">
+          <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ff7a45;">DECK OVERVIEW</h3>
+          
+          <div style="font-size:11px; margin-bottom:12px; line-height:1.4;">
+            <div>Cards: <b id="deckCountVal" style="color:#6fe8d8;">0</b> <span class="muted">(Min 40)</span></div>
+            <div id="deckValidationWarning" style="color:#d9382e; font-weight:bold; margin-top:4px; font-size:9px;">⚠️ Min 40 cards required!</div>
+          </div>
+          
+          <label style="font-weight:600; display:block; margin-bottom:4px; font-size:8px; font-family:'Press Start 2P', monospace; color:#339488;">TEMPLATES</label>
+          <select id="deckTemplateSelect" style="width:100%; margin-bottom:12px; font-size:11px;" onchange="app.applyDeckTemplate(this.value)">
+            <option value="all">Classic Block (All Cards)</option>
+            <option value="family">Cookout & Family Only</option>
+            <option value="street">Street Hustle & Trap Only</option>
+            <option value="custom">My Custom Selection</option>
+          </select>
+          
+          <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+            <div>
+              <label style="font-weight:600; display:block; margin-bottom:4px; font-size:8px; font-family:'Press Start 2P', monospace; color:#339488;">DECK CODE</label>
+              <textarea id="deckCodeArea" style="width:100%; height:80px; font-size:9px; font-family:monospace; background:#0b0c10; border:1px solid #2d313d; color:#a0aac2; padding:4px; resize:none; box-sizing:border-box;" placeholder="Export/Import code..."></textarea>
+              <div style="display:flex; gap:4px; margin-top:4px;">
+                <button class="secondary" style="padding:2px 4px; font-size:8px; flex:1;" onclick="app.importDeckCode()">IMPORT</button>
+                <button class="secondary" style="padding:2px 4px; font-size:8px; flex:1;" onclick="app.copyDeckCode()">COPY CODE</button>
+              </div>
+            </div>
+          </div>
+          
+          <button onclick="app.saveCustomDeck()" style="width:100%; margin-top:12px;" id="deckSaveBtn">SAVE & APPLY DECK</button>
+        </div>
+        
+        <!-- Right Side: Collection Browser -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:300px; height:100%; overflow:hidden; box-sizing:border-box;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:6px;">
+            <input id="collectionSearchInput" type="text" placeholder="Search cards..." style="font-size:11px; flex:1;" oninput="app.filterCollectionGrid()"/>
+            <button class="secondary" style="font-size:9px; padding:6px 10px;" onclick="app.toggleAllCollection(true)">SELECT ALL</button>
+            <button class="secondary" style="font-size:9px; padding:6px 10px;" onclick="app.toggleAllCollection(false)">CLEAR ALL</button>
+          </div>
+          
+          <!-- Card Grid list -->
+          <div id="collectionGrid" style="flex:1; overflow-y:auto; display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:8px; padding-right:4px;">
+            <!-- Rendered cards go here dynamically -->
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- ONLINE LOBBY -->
   <section id="lobby" class="screen">
-    <div class="bg-scene" aria-hidden="true"></div>
     <div class="panel">
       <h2 style="margin-top:0;">Online Room</h2>
-      <p class="muted">Open this page on every device, enter the same room code, and click Join.</p>
+      <p class="muted">Open this page on other devices, enter matching Room Code, and click Join.</p>
       <div class="grid-2">
         <div>
-          <label style="font-weight:600;">Room Name / Code</label>
+          <label style="font-weight:600; display:block; margin-bottom:4px; font-size:10px; font-family:'Press Start 2P', monospace;">Room Name / Code</label>
           <input id="roomCode" value="concrete-kings-42" />
           <button class="secondary" style="margin-top:8px;" onclick="app.createRoom()">Create Room</button>
         </div>
         <div>
-          <label style="font-weight:600;">Your Name</label>
+          <label style="font-weight:600; display:block; margin-bottom:4px; font-size:10px; font-family:'Press Start 2P', monospace;">Your Name</label>
           <input id="joinName" value="" />
           <button class="secondary" style="margin-top:8px;" onclick="app.joinRoom()">Join Room</button>
         </div>
       </div>
-      <div id="roomStatus" class="status-pill" style="margin-top:10px; display:none;"></div>
-      <button id="startOnlineBtn" style="margin-top:12px;" onclick="app.startOnlineGame()" disabled>Start Game</button>
-      <div class="design-links">
-        Design System:
-        <a href="/design-system/Concrete Kings Game Interfaces.html" target="_blank">Interfaces</a> ·
-        <a href="/design-system/Concrete Kings Card Design System.html" target="_blank">Cards</a> ·
-        <a href="/design-system/Concrete Kings Card Animation System.html" target="_blank">Animations</a> ·
-        <a href="/design-system/Concrete Kings Block Map.html" target="_blank">Block Map</a>
+      <div id="roomStatus" class="status-pill" style="margin-top:12px; display:none; width: 100%;"></div>
+      
+      <!-- Public Lobby Browser & Matchmaking -->
+      <div id="publicLobbyPanel" class="panel" style="margin-top:16px; border: 1px solid #2d313d; background: #101116; padding: 12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <h3 style="margin:0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68;">PUBLIC LOBBIES</h3>
+          <div style="display:flex; gap:8px;">
+            <button class="secondary" style="font-size:8px; padding:4px 8px; margin:0;" onclick="app.refreshLobbyBrowser()">REFRESH</button>
+            <button id="quickPlayBtn" class="primary" style="font-size:8px; padding:4px 8px; margin:0; background:#f0ab43; color:#101116; border-color:#f0ab43;" onclick="app.toggleQuickPlayQueue()">QUICK PLAY</button>
+          </div>
+        </div>
+        
+        <!-- Quick Play Matchmaking Queue Status -->
+        <div id="matchmakingStatus" style="display:none; font-family:'Press Start 2P', monospace; font-size:8px; color:#6fe8d8; text-align:center; padding:8px; border:1px dashed #339488; margin-bottom:8px; background:rgba(51,148,136,0.1);">
+          FINDING MATCH... <span id="matchmakingTimer">0s</span> (<span id="matchmakingCount">1</span>/4 IN QUEUE)
+          <br/>
+          <button class="secondary" style="font-size:7px; padding:2px 4px; margin-top:6px;" onclick="app.toggleQuickPlayQueue(false)">CANCEL</button>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; text-align:left;">
+          <thead>
+            <tr style="border-bottom:2px solid #2d313d; font-size:8px; font-family:'Press Start 2P', monospace; color:#8b95ab;">
+              <th style="padding:4px 6px;">ROOM</th>
+              <th style="padding:4px 6px;">HOST</th>
+              <th style="padding:4px 6px; text-align:center;">PLAYERS</th>
+              <th style="padding:4px 6px; text-align:center;">RULES</th>
+              <th style="padding:4px 6px; text-align:right;">ACTION</th>
+            </tr>
+          </thead>
+          <tbody id="lobbyBrowserTableBody">
+            <tr>
+              <td colspan="5" style="padding:8px; text-align:center; color:#666;">Click Refresh to load active rooms.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Lobby Match Settings Configuration -->
+      <div id="lobbySettingsBox" class="panel" style="margin-top:12px; display:none; border: 1px solid #2d313d; background: #101116; padding: 10px;">
+        <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ff7a45; margin-bottom:8px;">MATCH RULES</h3>
+        <div style="display:flex; align-items:center; justify-content:space-between; font-size:11px;">
+          <span style="font-weight:bold; color:#8b95ab;">TARGET POINTS TO WIN:</span>
+          <div id="lobbyPointsControl"></div>
+        </div>
+      </div>
+      
+      <!-- Connected Players List in Lobby -->
+      <div id="lobbyPlayersBox" class="panel" style="margin-top:12px; display:none; border: 1px solid #2d313d; background: #101116; padding: 10px;">
+        <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68; margin-bottom:8px;">CONNECTED PLAYERS</h3>
+        <div id="lobbyPlayersList" style="display:flex; flex-direction:column; gap:6px; font-size:11px;"></div>
+      </div>
+      
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button id="lobbyReadyBtn" class="secondary" style="flex:1;" onclick="app.toggleLobbyReady()">TIGHTEN UP (READY)</button>
+        <button id="startOnlineBtn" style="flex:2;" onclick="app.startOnlineGame()" disabled>Start Game</button>
+      </div>
+      <div class="design-links" style="margin-top:16px; font-size:11px; text-align:center;">
+        Design System Links:
+        <a href="/design-system/Concrete Kings Game Interfaces.html" target="_blank" style="color:#ff6b35;">Interfaces</a> ·
+        <a href="/design-system/Concrete Kings Card Design System.html" target="_blank" style="color:#ff6b35;">Cards</a> ·
+        <a href="/design-system/Concrete Kings Card Animation System.html" target="_blank" style="color:#ff6b35;">Animations</a> ·
+        <a href="/design-system/Concrete Kings Block Map.html" target="_blank" style="color:#ff6b35;">Block Map</a>
       </div>
     </div>
   </section>
 
   <!-- GAME -->
   <section id="game" class="screen">
-    <div class="bg-scene" aria-hidden="true"></div>
-    <div class="panel">
-      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center;">
-        <div>
-          <span class="status-pill">Round <b id="roundNum">1</b> · Judge: <b id="judgeName">-</b></span>
-        </div>
-        <div class="dice" id="diceResult"></div>
-        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-          <span class="status-pill">Black cards: <b id="blackRemaining">0</b> · Points: <b id="pointsTarget">7</b></span>
-          <button class="secondary" onclick="app.showBlockMap()">Block Map</button>
+    <!-- Viewport Panel (Main Focal Point) -->
+    <div class="panel stage-panel" style="margin-top:0;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <h3 style="margin:0; font-family:'Press Start 2P', monospace; font-size:10px;">BLOCK VIEWPORT: <span id="viewportCity" style="color:#f0ab43;">HARLEM</span></h3>
+        <span class="status-pill" id="viewportWeatherBadge" style="color:#85c4ff; font-weight:bold;">CLEAR</span>
+      </div>
+      
+      <div class="canvas-mount-point crt-screen">
+        <canvas id="stage-canvas" class="pixel-canvas" style="width: 100%; display: block; background: #08080a;"></canvas>
+        <div id="narrativeTextBox" style="display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:#08080a; padding:16px; box-sizing:border-box; color:#f4f7ff; font-family:'JetBrains Mono', monospace; font-size:12px; line-height:1.5; overflow-y:auto; border:3px solid #393e4d;">
+          <h2 id="narrativeBeatTitle" style="font-family:'Press Start 2P', monospace; font-size:10px; color:#f25438; margin-top:0;">THE DROPOFF</h2>
+          <p id="narrativeText" style="margin:8px 0; color:#cbd5ed;">Midnight on 125th...</p>
+          <div style="margin-top:16px; border-top:1px dashed #2d313d; padding-top:8px; font-size:10px; color:#8b95ab; font-family:'Press Start 2P', monospace; font-size:8px;">
+            STATS: <span style="color:#f25438; font-weight:bold;">HEAT: <span id="narrativeHeat">0</span></span> | <span style="color:#5eafff; font-weight:bold;">TRUST: <span id="narrativeTrust">0</span></span>
+          </div>
         </div>
       </div>
-      <div style="margin-top:12px;">
-        <div class="black-card" id="blackCard">...</div>
-      </div>
-      <div id="diceNotice" style="margin-top:8px;" class="muted"></div>
-      <div id="weatherNotice" style="margin-top:6px;" class="muted"></div>
-      <div id="weatherAlert" style="margin-top:6px; font-weight:800; font-size:14px; opacity:0;" class="weather-alert"></div>
-      <div style="margin-top:10px;">
-        <span id="statusText">Waiting...</span>
-      </div>
-      <div id="turnBanner" class="pass-banner"></div>
-      <details class="dev-bar" open>
-        <summary style="cursor:pointer; font-weight:700; letter-spacing:.3px;">Dev Controls</summary>
-        <div class="dev-row">
-          <button class="secondary" onclick="app.ogVeto()">O.G. Veto</button>
-          <button class="secondary" onclick="app.ogDoubleDown()">Double-Down</button>
-          <select id="weatherSelect" onchange="app.setWeather(this.value)" style="background:#181920;color:#ffc475;border:1px solid rgba(255,255,255,0.15);padding:6px 8px;border-radius:8px;">
-            <option value="CLEAR">Weather: Clear</option>
-            <option value="RAIN">Rain</option>
-            <option value="STEAM_VENT">Steam Vent</option>
-            <option value="POLICE_SIRENS">Police Sirens</option>
-            <option value="NEON_FLICKER">Neon Flicker</option>
-          </select>
-          <input id="betInput" type="text" placeholder="Bet target name" style="width:160px;"/>
-          <button class="secondary" onclick="app.placeBetFromUI()">Place Bet</button>
-        </div>
-        <div class="dev-row">
-          <input id="allianceInput" type="text" placeholder="Alliance target name" style="width:180px;"/>
-          <button class="secondary" onclick="app.proposeAllianceFromUI()">Propose Alliance</button>
-          <button class="secondary" onclick="app.resolveReceiptFromUI()">Resolve Receipt</button>
-        </div>
-      </details>
-    </div>
-
-    <div class="panel">
-      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center;">
-        <h3 style="margin:0;">Your Hand</h3>
-        <div id="playerLabel" class="muted">Player: -</div>
-      </div>
-      <div id="hand" class="hand"></div>
-      <div class="save-bar">
-        <button id="submitBtn" onclick="app.submitSelection()" disabled>Submit Selection</button>
-        <button class="secondary" onclick="app.passTurn()">Pass / End Turn</button>
+      
+      <div style="font-size:10px; margin-top:8px; text-align:center; color:#8b95ab;">
+        Walk with <b style="color:#ffcd68;">WASD / Arrows</b>. Enter hotspots (Barber, Bodega, Chess) with <b style="color:#ffcd68;">Enter</b>!
       </div>
     </div>
 
-    <div class="panel">
-      <h3 style="margin-top:0;">Scoreboard</h3>
-      <div id="scoreboard"></div>
-      <div class="save-bar">
-        <button class="secondary" onclick="app.saveGame()">Save Game</button>
-        <button class="secondary" onclick="app.loadGame()">Load Game</button>
-        <span id="saveStatus" class="muted"></span>
-      </div>
-      <div id="chatBox" style="margin-top:10px; display:none;">
-        <div id="chatLog" style="max-height:140px; overflow:auto; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px; font-size:13px;"></div>
-        <div style="display:flex; gap:8px; margin-top:8px;">
-          <input id="chatInput" type="text" placeholder="Say something..." style="flex:1;"/>
-          <button onclick="app.sendChat()">Send</button>
+    <!-- Status readouts bar / ticker -->
+    <div class="panel" style="margin-top:12px; padding: 10px 16px;">
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center;">
+        <span class="status-pill">Round <b id="roundNum" style="color:#ffcd68;">1</b> · Judge: <b id="judgeName" style="color:#ff7a45;">-</b></span>
+        <span id="statusText" style="font-size:12px; font-weight:bold; color:#ffcd68;">Your turn: pick a card to play.</span>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span class="status-pill">Black cards: <b id="blackRemaining">0</b> · Goal: <b id="pointsTarget">7</b></span>
+          <button class="secondary" onclick="app.showBlockMap()" style="padding: 6px 10px; font-size:8px;">BLOCK MAP</button>
         </div>
+      </div>
+      <div id="turnBanner" class="pass-banner" style="display:none;"></div>
+    </div>
+
+    <!-- Game Bottom Layout Grid (Card system UI under the Viewport) -->
+    <div class="game-bottom-grid">
+      <!-- Left Column: Playboard (Active Black Card + Hand) -->
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <!-- Playboard Panel: Black card left, hand right on desktop -->
+        <div class="panel">
+          <div style="display: flex; gap: 20px; align-items: stretch; flex-wrap: wrap;">
+            <!-- Active Black Card + Dice Dicer -->
+            <div style="flex: 0 0 180px; display: flex; flex-direction: column; align-items: center; padding-right: 16px; border-right: 3px dashed #2d313d; min-width: 180px;">
+              <h3 style="margin-top:0; text-align:center; font-size:10px; font-family:'Press Start 2P', monospace;">BLACK CARD</h3>
+              <canvas id="blackCard" width="160" height="240" class="pixel-card-canvas" style="display:block; margin: 0 auto;"></canvas>
+              <div style="display:flex; flex-direction:column; align-items:center; margin-top:12px; gap:6px;">
+                <div class="dice" id="diceResult"></div>
+                <span style="font-size:8px; color:#ffcd68; text-align:center; font-family:'Press Start 2P', monospace;">(Click to roll)</span>
+              </div>
+              <div id="diceNotice" style="margin-top:8px; font-size:10px; text-align:center; color:#85c4ff; line-height:1.2;"></div>
+              <div id="weatherNotice" style="margin-top:4px; font-size:10px; text-align:center; color:#ff7a45; line-height:1.2;"></div>
+              <div id="weatherAlert" class="weather-alert" style="opacity:0;"></div>
+            </div>
+            
+            <!-- Hand / Cards Area -->
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between; min-width: 320px;">
+              <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                  <h3 style="margin:0; font-family:'Press Start 2P', monospace; font-size:11px;">YOUR HAND</h3>
+                  <div id="playerLabel" class="muted" style="font-family:'Press Start 2P', monospace; font-size:9px;">Player: -</div>
+                </div>
+                <div id="hand" class="hand"></div>
+              </div>
+              
+              <div class="save-bar" style="margin-top:12px; display:flex; gap:8px;">
+                <button id="submitBtn" onclick="app.submitSelection()" disabled style="flex:1;">SUBMIT SELECTION</button>
+                <button class="secondary" onclick="app.passTurn()">PASS / END TURN</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right Column: Status HUD, Scoreboard, Chat, Dev Controls -->
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <!-- RPG Stats Panel -->
+        <div class="panel">
+          <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:10px; color:#339488;">RPG STAT HUD</h3>
+          <div class="rpg-hud-grid">
+            <div class="hud-item"><span class="hud-label">CRED:</span> <span id="hudCred" class="hud-val">0</span></div>
+            <div class="hud-item"><span class="hud-label">COMM:</span> <span id="hudComm" class="hud-val">0</span></div>
+            <div class="hud-item"><span class="hud-label">WISD:</span> <span id="hudWisd" class="hud-val">0</span></div>
+            <div class="hud-item"><span class="hud-label">REP:</span> <span id="hudRep" class="hud-val">0</span></div>
+          </div>
+        </div>
+
+        <!-- Scoreboard & Saves -->
+        <div class="panel">
+          <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:10px;">SCOREBOARD</h3>
+          <div id="scoreboard" class="retro-table"></div>
+          <div class="save-bar" style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+            <button class="secondary" onclick="app.saveGame()" style="padding: 6px 10px; font-size:8px; flex:1;">SAVE STATE</button>
+            <button class="secondary" onclick="app.loadGame()" style="padding: 6px 10px; font-size:8px; flex:1;">LOAD STATE</button>
+            <span id="saveStatus" class="muted" style="font-size:9px;"></span>
+          </div>
+        </div>
+
+        <!-- Chat Panel -->
+        <div class="panel">
+          <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:10px;">COMMUNITY CHAT</h3>
+          <div id="chatLog" class="retro-chat-log"></div>
+          <div style="display:flex; gap:8px; margin-top:8px;">
+            <input id="chatInput" type="text" placeholder="Say something in the cipher..." style="font-size:11px;" />
+            <button onclick="app.sendChat()" style="padding:10px; font-size:8px;">SEND</button>
+          </div>
+        </div>
+
+        <!-- Dev Console -->
+        <details class="panel dev-bar">
+          <summary style="cursor:pointer; font-weight:bold;">DEVELOPER_CONSOLE.LOG</summary>
+          <div class="dev-row" style="margin-top:12px;">
+            <button class="secondary" onclick="app.ogVeto()" style="font-size:8px;">O.G. VETO</button>
+            <button class="secondary" onclick="app.ogDoubleDown()" style="font-size:8px;">DOUBLE-DOWN</button>
+            <select id="weatherSelect" onchange="app.setWeather(this.value)" style="width:auto; display:inline-block; font-size:11px;">
+              <option value="CLEAR">WEATHER: CLEAR</option>
+              <option value="RAIN">WEATHER: RAIN STORM</option>
+              <option value="STEAM_VENT">WEATHER: STEAM VENT</option>
+              <option value="POLICE_SIRENS">WEATHER: SIREN FLASH</option>
+              <option value="NEON_FLICKER">WEATHER: NEON FLICKER</option>
+            </select>
+            <!-- ACCESSIBILITY SETTINGS MODAL -->
+  <div id="accessModal" class="panel" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:9999; width:300px; box-shadow: 0 0 20px rgba(0,0,0,0.85); border: 2px solid #ffcd68; background:#151821; padding: 12px; box-sizing:border-box;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #2d313d; padding-bottom:6px;">
+      <h3 style="margin-top:0; margin-bottom:0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68;">ACCESSIBILITY</h3>
+      <button class="secondary" onclick="app.toggleAccessModal()" style="font-size:9px; padding:2px 6px;">X</button>
+    </div>
+    
+    <div style="display:flex; flex-direction:column; gap:10px; font-size:11px;">
+      <div>
+        <label style="font-weight:bold; display:block; margin-bottom:4px; font-size:9px; color:#339488;">COLORBLIND MODE</label>
+        <select id="accessColorblind" style="width:100%;" onchange="app.setAccessColorblind(this.value)">
+          <option value="none">Normal Color</option>
+          <option value="protanopia">Protanopia (Red-Blind)</option>
+          <option value="deuteranopia">Deuteranopia (Green-Blind)</option>
+          <option value="tritanopia">Tritanopia (Blue-Blind)</option>
+          <option value="monochrome">Monochrome (Grayscale)</option>
+        </select>
+      </div>
+      
+      <div>
+        <label style="font-weight:bold; display:block; margin-bottom:4px; font-size:9px; color:#339488;">TEXT SIZE SCALING</label>
+        <select id="accessTextScale" style="width:100%;" onchange="app.setAccessTextScale(this.value)">
+          <option value="100">100% (Default)</option>
+          <option value="125">125% (Large)</option>
+          <option value="150">150% (X-Large)</option>
+          <option value="175">175% (Maximum)</option>
+        </select>
+      </div>
+      
+      <div style="display:flex; justify-content:space-between; align-items:center; background:#101116; padding:6px; border:1px solid #2d313d;">
+        <span style="font-weight:bold; font-size:9px; color:#a0aac2;">HIGH CONTRAST BORDERS</span>
+        <input type="checkbox" id="accessHighContrast" onchange="app.setAccessHighContrast(this.checked)" style="margin:0;"/>
+      </div>
+      
+      <div style="display:flex; justify-content:space-between; align-items:center; background:#101116; padding:6px; border:1px solid #2d313d;">
+        <span style="font-weight:bold; font-size:9px; color:#a0aac2;">REDUCED MOTION</span>
+        <input type="checkbox" id="accessReducedMotion" onchange="app.setAccessReducedMotion(this.checked)" style="margin:0;"/>
+      </div>
+      
+      <div style="display:flex; justify-content:space-between; align-items:center; background:#101116; padding:6px; border:1px solid #2d313d;">
+        <span style="font-weight:bold; font-size:9px; color:#a0aac2;">SHOW FPS COUNTER</span>
+        <input type="checkbox" id="accessShowFps" onchange="app.setAccessShowFps(this.checked)" style="margin:0;"/>
+      </div>
+    </div>
+    
+    <button onclick="app.toggleAccessModal()" style="width:100%; margin-top:14px;">SAVE & CLOSE</button>
+  </div>
+
+  <!-- Inline Colorblind SVG Filters -->
+  <svg style="display:none; width:0; height:0;">
+    <defs>
+      <filter id="protanopia-filter">
+        <feColorMatrix type="matrix" values="0.567, 0.433, 0,     0, 0
+                                             0.558, 0.442, 0,     0, 0
+                                             0,     0.242, 0.758, 0, 0
+                                             0,     0,     0,     1, 0"/>
+      </filter>
+      <filter id="deuteranopia-filter">
+        <feColorMatrix type="matrix" values="0.625, 0.375, 0,   0, 0
+                                             0.7,   0.3,   0,   0, 0
+                                             0,     0.3,   0.7, 0, 0
+                                             0,     0,     0,   1, 0"/>
+      </filter>
+      <filter id="tritanopia-filter">
+        <feColorMatrix type="matrix" values="0.95,  0.05,  0,     0, 0
+                                             0,     0.433, 0.567, 0, 0
+                                             0,     0.475, 0.525, 0, 0
+                                             0,     0,     0,     1, 0"/>
+      </filter>
+    </defs>
+  </svg>
+</div>
+          <div class="dev-row">
+            <input id="betInput" type="text" placeholder="Bet target name" style="width:120px; display:inline-block; font-size:11px;"/>
+            <button class="secondary" onclick="app.placeBetFromUI()" style="font-size:8px;">PLACE BET</button>
+          </div>
+          <div class="dev-row">
+            <input id="allianceInput" type="text" placeholder="Alliance target" style="width:120px; display:inline-block; font-size:11px;"/>
+            <button class="secondary" onclick="app.proposeAllianceFromUI()" style="font-size:8px;">ALLIANCE</button>
+            <button class="secondary" onclick="app.resolveReceiptFromUI()" style="font-size:8px;">RECEIPTS</button>
+          </div>
+        </details>
       </div>
     </div>
   </section>
 
   <!-- JUDGE / RESULTS -->
   <section id="judging" class="screen">
-    <div class="bg-scene" aria-hidden="true"></div>
     <div class="panel">
-      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center;">
-        <h2 style="margin-top:0;">Judge Phase</h2>
-        <span class="status-pill"><span class="status-dot"></span><span id="judgeBadge">Judge: -</span></span>
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px;">
+        <h2>JUDGE PHASE</h2>
+        <span class="status-pill" id="judgeBadge">Judge: -</span>
       </div>
-      <p class="muted">All submissions are in. Pick the winner.</p>
-      <div id="submissions" class="hand"></div>
+      <p class="muted" style="margin-top:0;">All submissions are in. Pick the winning card from the cipher below.</p>
+      
+      <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; margin-top: 10px;">
+        <!-- Black Card View -->
+        <div style="flex: 0 0 180px; display: flex; flex-direction: column; align-items: center; padding-right: 16px; border-right: 3px dashed #2d313d; min-width: 180px;">
+          <h3 style="margin-top:0; text-align:center; font-size:10px; font-family:'Press Start 2P', monospace;">BLACK CARD</h3>
+          <canvas id="judgingBlackCard" width="160" height="240" class="pixel-card-canvas" style="display:block; margin: 0 auto;"></canvas>
+        </div>
+        
+        <!-- Submissions View -->
+        <div style="flex: 1; display: flex; flex-direction: column; min-width: 320px;">
+          <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:11px;">SUBMISSIONS</h3>
+          <div id="submissions" class="hand"></div>
+        </div>
+      </div>
+      
       <div id="judgeNotice" style="margin-top:10px;" class="weather-alert"></div>
-      <div style="margin-top:10px;">
-        <button onclick="app.chooseWinner()" disabled id="crownBtn">Crown Winner</button>
-        <button class="secondary" onclick="app.showGame()">Back to Table</button>
+      <div style="margin-top:14px; display:flex; gap:10px;">
+        <button onclick="app.chooseWinner()" disabled id="crownBtn" style="background:#f0ab43; border-color:#fff0aa #9c5c1d #9c5c1d #fff0aa;">CROWN WINNER</button>
+        <button class="secondary" onclick="app.showGame()">BACK TO TABLE</button>
       </div>
     </div>
   </section>
 
   <!-- ROUND RESULT -->
   <section id="roundResult" class="screen">
-    <div class="bg-scene" aria-hidden="true"></div>
     <div class="panel winner-area">
-      <h2 class="champion" style="margin-top:0;">Round Winner</h2>
-      <div id="winnerName" style="font-size:20px; font-weight:800;"></div>
-      <div id="winnerCard" class="card"></div>
-      <div id="winnerMeta" style="font-size:13px; opacity:.85;"></div>
-      <div style="margin-top:10px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-        <button onclick="app.nextRound()">Next Round</button>
-        <button class="secondary" onclick="app.showGame()">Back to Table</button>
+      <h2 class="champion" style="margin-top:0; color:#f0ab43; font-size:16px;">ROUND WINNER</h2>
+      <div id="winnerName" style="font-size:18px; font-weight:bold; margin-bottom:12px;"></div>
+      <div id="winnerCard" style="display:none;"></div>
+      
+      <div style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin:16px 0;">
+        <!-- Active Prompt Black Card -->
+        <div style="display:flex; flex-direction:column; align-items:center;">
+          <span class="status-pill" style="margin-bottom:8px; font-size:9px;">THE PROMPT</span>
+          <canvas id="roundResultBlackCard" width="160" height="240" class="pixel-card-canvas"></canvas>
+        </div>
+        <!-- Winning White Card -->
+        <div style="display:flex; flex-direction:column; align-items:center;">
+          <span class="status-pill" style="margin-bottom:8px; font-size:9px; color:#ffcd68;">WINNING PLAY</span>
+          <canvas id="winnerCardCanvas" width="160" height="240" class="pixel-card-canvas"></canvas>
+        </div>
+      </div>
+      
+      <div id="winnerMeta" style="font-size:12px; margin-bottom:14px; color:#a0aac2; display:none;"></div>
+      <div style="margin-top:14px; display:flex; gap:10px; justify-content:center;">
+        <button onclick="app.nextRound()">NEXT ROUND</button>
+        <button class="secondary" onclick="app.showGame()">BACK TO TABLE</button>
       </div>
     </div>
   </section>
 
   <!-- BLOCK MAP -->
   <section id="blockMap" class="screen">
-    <div class="bg-scene" aria-hidden="true"></div>
     <div class="panel">
-      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center;">
-        <h2 style="margin-top:0;">Block Map</h2>
-        <span class="status-pill">Reputation: <b id="mapRep">0</b> · Weather: <b id="mapWeather">CLEAR</b></span>
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px;">
+        <h2>BLOCK TRAVEL MAP</h2>
+        <span class="status-pill">Reputation: <b id="mapRep" style="color:#ffcd68;">0</b> · Weather: <b id="mapWeather" style="color:#ff7a45;">CLEAR</b></span>
       </div>
-      <p class="muted">Choose your block and travel to a new location.</p>
-      <div id="locationList" style="margin-top:10px; display:grid; gap:8px;"></div>
-      <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-        <button class="secondary" onclick="app.showGame()">Back to Table</button>
-        <button onclick="app.showSetup()">Exit to Menu</button>
+      <p class="muted">Walk to your new block location. Traveling resets the block weather to Clear.</p>
+      
+      <!-- Canvas moves here when screen is active -->
+      <div class="canvas-mount-point crt-screen" style="margin-bottom:12px;"></div>
+      
+      <div id="locationList" style="margin-top:12px; display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:10px;"></div>
+      <div style="margin-top:16px; display:flex; gap:10px;">
+        <button class="secondary" onclick="app.showGame()">BACK TO TABLE</button>
+        <button onclick="app.showSetup()">EXIT TO MENU</button>
       </div>
     </div>
   </section>
@@ -327,22 +999,33 @@
   <!-- GAME OVER -->
   <section id="gameOver" class="screen">
     <div class="panel winner-area">
-      <h2 class="champion" style="margin-top:0;">Game Over</h2>
-      <div id="champion" class="champion"></div>
-      <div id="finalScore" style="margin-top:8px;"></div>
-      <div style="margin-top:10px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-        <button onclick="app.showSetup()">Play Again</button>
-        <button class="secondary" onclick="app.showSetup()">Menu</button>
+      <h2 class="champion" style="margin-top:0; color:#ffcd68; font-size:20px; animation: ckFlicker 1.5s infinite alternate;">GAME OVER</h2>
+      <div style="font-size:11px; margin-bottom:6px; color:#8b95ab;">BLOCK KING CROWNED:</div>
+      <div id="champion" class="champion" style="font-family:'Press Start 2P', monospace; font-size:16px; color:#f0ab43; margin-bottom:10px;"></div>
+      <canvas id="gameOverWinnerCanvas" width="32" height="32" style="width:64px; height:64px; border:3px solid #f0ab43; background:#101116; image-rendering:pixelated; display:block; margin: 12px auto;"></canvas>
+      <div style="font-size:11px; margin-bottom:6px; color:#8b95ab;">FINAL STANDINGS:</div>
+      <div id="finalScore" style="margin-top:8px; line-height:1.5; color:#a0aac2; font-family:'JetBrains Mono', monospace; margin-bottom:14px;"></div>
+      <div style="margin-top:16px; display:flex; gap:10px; justify-content:center;">
+        <button onclick="app.showSetup()">PLAY AGAIN</button>
+        <button class="secondary" onclick="app.showSetup()">MAIN MENU</button>
       </div>
     </div>
   </section>
 </div>
 
+<script src="src/pixel_engine/pixel-engine.js"></script>
+<script src="src/pixel_engine/card-visual-system.js"></script>
+<script src="src/pixel_engine/weather-effects-system.js"></script>
+<script src="src/pixel_engine/block-map-navigation.js"></script>
+<script src="src/pixel_engine/aave-lexicon-hud.js"></script>
+<script src="src/pixel_engine/campaign-mode.js"></script>
+<script src="src/pixel_engine/audio-sfx-engine.js"></script>
+<script src="src/pixel_engine/story-engine.js"></script>
 <script src="cards.js"></script>
 <script>
-/* ===========================
-   CONCRETE KINGS - Full Game
-   =========================== */
+/* ==================================
+   CONCRETE KINGS - 16-Bit Retro Game
+   ================================== */
 
 const MODE = { OFFLINE:'Offline', ONLINE:'Online' };
 
@@ -383,6 +1066,69 @@ const RECEIPT_POOL = [
   }
 ];
 
+const BOT_DIALOGUE = {
+  'O.G. Big Dave (Master Barber)': {
+    start: "Alright, keep the lineup fresh. Show me what you got.",
+    submit: "Passing the clippers. I'm putting down a clean cut.",
+    judge: "Let me check the trim on these submissions. Who's uncreased?",
+    win: "That's a clean fade! Point goes to me."
+  },
+  'Boss Marcus (Warehouse Legend)': {
+    start: "Ayo, keep the beats heavy. Drop the bass.",
+    submit: "Pasting this track. It's a certified warehouse banger.",
+    judge: "Listening to the vibe... Let's see who's got the real rhythm.",
+    win: "Told you, nobody beats Detroit house! Let's go!"
+  },
+  'Mama Gloria (Community Pillar)': {
+    start: "Bless you all, children. Let's keep it respectable.",
+    submit: "I'm putting down something sweet. Like sweet tea on Sunday.",
+    judge: "Mmhmm, looking at these options... Let's see who's got the right spirit.",
+    win: "Praise be! That's exactly how we do it on the south side."
+  },
+  'El Rey Tico (Corner Merchant)': {
+    start: "No loitering by the terrace! Unless you are playing cards.",
+    submit: "This is a premium import. Best card on the block.",
+    judge: "Checking the register... Who's offering the best deal?",
+    win: "¡Eso es! Big business, big points!"
+  },
+  'Mr. Freddie (Street Scholar)': {
+    start: "Let us discuss the history of these blocks. Play wisely.",
+    submit: "I submit this cultural classic. A masterclass.",
+    judge: "Reviewing the arguments... Let's see who did their homework.",
+    win: "Knowledge is power. A well-earned victory."
+  },
+  'King Trey (Block Architect)': {
+    start: "Let's build this board up. Lay the foundation.",
+    submit: "Drafting a solid layout here.",
+    judge: "Inspecting the structure... Which one of these holds up best?",
+    win: "Blueprint was perfect. That's another floor built!"
+  },
+  'Lady Vern (Local Legend)': {
+    start: "Bay breeze is nice, but these cards are hot. Let's roll.",
+    submit: "Dropping a classic line. Don't slip.",
+    judge: "Peeking at the lineup... Who's representing the block best?",
+    win: "Oakland style! That's how a legend plays."
+  },
+  'Grandmaster Chef Pierre': {
+    start: "The grill is hot, the seasonings are ready. Who wants to get cooked?",
+    submit: "Adding a secret spice to the pile.",
+    judge: "Tasting these submissions... Who brought the real seasoning?",
+    win: "Magnifique! Cooked to perfection. Point to the Chef!"
+  },
+  'Stoop Homie': {
+    start: "Yo, I'm just chillin' on the steps. Deal me in.",
+    submit: "Dropping this right here, casual.",
+    judge: "Looks pretty close. Let me pick my favorite stoop story.",
+    win: "Ayy, stoop life wins again!"
+  },
+  'Bodega Clerk': {
+    start: "Buy something or play cards, no standing around.",
+    submit: "Scanning this card. Beep.",
+    judge: "Looking at the items... Who's getting the discount?",
+    win: "No tax on that point! I take it."
+  }
+};
+
 class Deck {
   constructor(items) { this.items = [...items]; this.index = 0; this.shuffle(); }
   shuffle() {
@@ -403,7 +1149,22 @@ class Game {
     this.players = [];
     this.round = 0;
     this.blackDeck = new Deck(BLACK_CARDS);
-    this.whiteDeck = new Deck(WHITE_CARDS);
+    
+    // Load custom deck if it exists and satisfies min requirements
+    let deckPool = WHITE_CARDS;
+    if (typeof window !== 'undefined' && window.app && window.app.customDeck && window.app.customDeck.length >= 40) {
+      deckPool = window.app.customDeck;
+    } else {
+      const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('ck-custom-deck') : null;
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed && parsed.length >= 40) deckPool = parsed;
+        } catch(e) {}
+      }
+    }
+    this.whiteDeck = new Deck(deckPool);
+
     this.currentBlack = null;
     this.diceEffect = null;
     this.judgeIndex = 0;
@@ -417,6 +1178,8 @@ class Game {
     this.vetoUsed = false;
     this.doubleDownActive = false;
     this.weatherMode = 'CLEAR';
+    this.activeCity = 'Harlem';
+    this.isCampaign = false;
   }
 
   addPlayer(name) {
@@ -641,17 +1404,194 @@ const CornerHustleBetting = {
   }
 };
 
-/* ===========================
-   UI / STATE
-   =========================== */
+/* High-detail canvas scaling helpers for inline draw calls */
+const HD_W = 1280;
+const HD_H = 720;
+const LEGACY_W = 320;
+const LEGACY_H = 180;
+
+function hdScaleX(ctx) {
+  return ctx.canvas.width / HD_W;
+}
+function hdScaleY(ctx) {
+  return ctx.canvas.height / HD_H;
+}
+function hdRect(ctx, x, y, w, h) {
+  const sx = hdScaleX(ctx);
+  const sy = hdScaleY(ctx);
+  return [
+    Math.floor(x * sx),
+    Math.floor(y * sy),
+    Math.max(1, Math.floor(w * sx)),
+    Math.max(1, Math.floor(h * sy))
+  ];
+}
+function hdFont(ctx, basePx) {
+  const s = Math.min(hdScaleX(ctx), hdScaleY(ctx));
+  return Math.max(1, Math.floor(basePx * s)) + 'px monospace';
+}
+
+/* Procedural background drawer for 8 acts */
+function drawProceduralBackground(ctx, city, frame) {
+  const colorMap = CITY_THEME_OVERRIDES[city] || {};
+  const skyTop = city === 'Miami' ? '#521c6e' : (city === 'Detroit' ? '#11233f' : '#0a1526');
+  const skyBottom = city === 'Miami' ? '#ff7a45' : (city === 'Atlanta' ? '#aa2724' : '#11233f');
+  const brickColor = colorMap["7a1d1c"] ? "#" + colorMap["7a1d1c"] : "#7a1d1c";
+  const trimColor = colorMap["474d5e"] ? "#" + colorMap["474d5e"] : "#474d5e";
+
+  const grad = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+  grad.addColorStop(0, skyTop);
+  grad.addColorStop(1, skyBottom);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+  if (city === 'Chicago' || city === 'Oakland') {
+    ctx.fillStyle = '#8b95ab';
+    ctx.fillRect(...hdRect(ctx, 40 + (frame % 4) * 2, 15, 20, 2));
+    ctx.fillRect(...hdRect(ctx, 180 - (frame % 4) * 2, 25, 30, 2));
+  } else {
+    ctx.fillStyle = '#f4f7ff';
+    [[30,10],[110,20],[220,12],[280,25]].forEach(([x,y]) => {
+      const r = hdRect(ctx, x, y, 1, 1);
+      ctx.fillRect(r[0], r[1], r[2], r[3]);
+    });
+  }
+
+  ctx.fillStyle = '#1c375c';
+  if (city === 'Detroit') {
+    ctx.fillRect(...hdRect(ctx, 20, 35, 40, 25));
+    ctx.fillRect(...hdRect(ctx, 50, 20, 5, 20));
+    ctx.fillRect(...hdRect(ctx, 150, 40, 60, 20));
+    ctx.fillRect(...hdRect(ctx, 250, 30, 30, 30));
+  } else if (city === 'Chicago' || city === 'Harlem') {
+    ctx.fillRect(...hdRect(ctx, 10, 20, 25, 40));
+    ctx.fillRect(...hdRect(ctx, 50, 10, 35, 50));
+    ctx.fillRect(...hdRect(ctx, 120, 25, 20, 35));
+    ctx.fillRect(...hdRect(ctx, 180, 15, 30, 45));
+    ctx.fillRect(...hdRect(ctx, 260, 30, 25, 30));
+  } else if (city === 'Miami') {
+    ctx.fillStyle = '#2a1138';
+    [40, 280].forEach(tx => {
+      ctx.fillRect(...hdRect(ctx, tx, 30, 2, 30));
+      ctx.fillRect(...hdRect(ctx, tx - 6, 28, 14, 2));
+      ctx.fillRect(...hdRect(ctx, tx - 4, 26, 10, 2));
+    });
+    ctx.fillStyle = '#1c375c';
+  } else {
+    ctx.fillRect(...hdRect(ctx, 20, 40, 50, 20));
+    ctx.fillRect(...hdRect(ctx, 110, 35, 70, 25));
+    ctx.fillRect(...hdRect(ctx, 220, 45, 60, 15));
+  }
+
+  const lightColor = city === 'Miami' ? '#6fe8d8' : '#ffc475';
+  ctx.fillStyle = lightColor;
+  ctx.fillRect(...hdRect(ctx, 40, 70 - (frame % 2), 4, 4));
+  ctx.fillRect(...hdRect(ctx, 270, 70 - (frame % 2), 4, 4));
+
+  ctx.fillStyle = '#666e82';
+  ctx.fillRect(...hdRect(ctx, 41, 74, 2, 46));
+  ctx.fillRect(...hdRect(ctx, 271, 74, 2, 46));
+
+  ctx.fillStyle = brickColor;
+  if (city === 'Harlem' || city === 'Baltimore') {
+    ctx.fillRect(...hdRect(ctx, 60, 40, 200, 80));
+    ctx.fillStyle = '#2b0d0d';
+    for (let by = 45; by < 120; by += 12) {
+      for (let bx = 60; bx < 260; bx += 20) {
+        ctx.fillRect(...hdRect(ctx, bx + (by % 2 * 5), by, 2, 1));
+      }
+    }
+  } else if (city === 'Chicago') {
+    ctx.fillRect(...hdRect(ctx, 60, 40, 200, 80));
+    ctx.fillStyle = '#393e4d';
+    for (let bx = 60; bx < 260; bx += 40) {
+      ctx.fillRect(...hdRect(ctx, bx, 40, 1, 80));
+    }
+  } else if (city === 'Miami') {
+    ctx.fillRect(...hdRect(ctx, 60, 45, 200, 75));
+    ctx.fillStyle = '#f25438';
+    ctx.fillRect(...hdRect(ctx, 60, 50, 200, 3));
+    ctx.fillRect(...hdRect(ctx, 158, 45, 4, 75));
+  } else if (city === 'Detroit') {
+    ctx.fillRect(...hdRect(ctx, 60, 40, 200, 80));
+    ctx.fillStyle = '#101116';
+    for (let bx = 65; bx < 260; bx += 10) {
+      ctx.fillRect(...hdRect(ctx, bx, 40, 1, 80));
+    }
+  } else {
+    ctx.fillRect(...hdRect(ctx, 60, 40, 200, 80));
+  }
+
+  ctx.fillStyle = (city === 'Miami') ? '#6fe8d8' : ((city === 'Detroit') ? '#181920' : '#ffe299');
+  for (let row = 0; row < 2; row++) {
+    for (let col = 0; col < 5; col++) {
+      if (city === 'Miami' && col === 2) continue;
+      const win = hdRect(ctx, 75 + col * 35, 52 + row * 25, 16, 16);
+      ctx.fillRect(win[0], win[1], win[2], win[3]);
+
+      ctx.fillStyle = '#181920';
+      ctx.fillRect(...hdRect(ctx, 75 + col * 35 + 7, 52 + row * 25, 2, 16));
+      ctx.fillRect(...hdRect(ctx, 75 + col * 35, 52 + row * 25 + 7, 16, 2));
+      ctx.fillStyle = (city === 'Miami') ? '#6fe8d8' : ((city === 'Detroit') ? '#181920' : '#ffe299');
+    }
+  }
+
+  ctx.fillStyle = '#6e3e14';
+  ctx.fillRect(...hdRect(ctx, 145, 75, 30, 45));
+  ctx.fillStyle = '#c9822b';
+  ctx.fillRect(...hdRect(ctx, 170, 98, 2, 2));
+
+  ctx.fillStyle = '#474d5e';
+  ctx.fillRect(...hdRect(ctx, 140, 110, 40, 4));
+  ctx.fillRect(...hdRect(ctx, 135, 114, 50, 4));
+  ctx.fillRect(...hdRect(ctx, 130, 118, 60, 3));
+
+  ctx.fillStyle = trimColor;
+  ctx.fillRect(...hdRect(ctx, 0, 120, 320, 20));
+
+  ctx.fillStyle = '#2d313d';
+  for (let sx = 0; sx < 320; sx += 40) {
+    ctx.fillRect(...hdRect(ctx, sx, 120, 1, 20));
+  }
+
+  ctx.fillStyle = '#101116';
+  ctx.fillRect(...hdRect(ctx, 0, 140, 320, 40));
+
+  ctx.fillStyle = '#ffcd68';
+  for (let rx = 10; rx < 320; rx += 40) {
+    ctx.fillRect(...hdRect(ctx, rx, 158, 20, 4));
+  }
+}
+
+function drawCharacterPreview(ctx, origin, frame) {
+  ctx.fillStyle = '#101116';
+  ctx.fillRect(0, 0, 32, 32);
+  drawHighDetailCharacterSprite(ctx, origin, 0, 18, frame, false, false);
+}
+
+/* ==================================
+   UI / STATE / ENGINE BINDINGS
+   ================================== */
 const app = {
   game: new Game(),
   humanIndex: 0,
   isHost: true,
+  shimmerFrame: 0,
+  remoteAvatars: new Map(),
 
   show(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+    const targetScreen = document.getElementById(id);
+    targetScreen.classList.add('active');
+    
+    const canvasContainer = targetScreen.querySelector('.canvas-mount-point');
+    const stageCanvas = document.getElementById('stage-canvas');
+    if (canvasContainer && stageCanvas) {
+      canvasContainer.appendChild(stageCanvas);
+      if (this.pixelEngine) {
+        setTimeout(() => this.pixelEngine.resize(), 50);
+      }
+    }
   },
   showSetup() { this.show('setup'); },
 
@@ -659,6 +1599,440 @@ const app = {
     if (index < 0 || index >= this.game.players.length) return;
     this.humanIndex = index;
     this.renderGame();
+  },
+
+  init() {
+    this.audioEngine = new ChiptuneAudioEngine();
+    this.weatherSystem = new WeatherEffectsSystem(1280, 720);
+    this.mapController = new BlockMapController({ startX: 600, startY: 500 });
+    this.campaignEngine = new CampaignModeEngine();
+    this.lexiconHUD = new AAVELexiconHUD();
+    
+    this.renderSetupCampaignActs();
+    this.renderSetupGlossary();
+    this.renderCharacterPreview();
+    this.startGlobalAnimationLoop();
+    this.initAccessibility();
+  },
+
+  /* ---------- ACCESSIBILITY SYSTEMS ---------- */
+  initAccessibility() {
+    try {
+      const cb = localStorage.getItem('ck-access-colorblind') || 'none';
+      const ts = localStorage.getItem('ck-access-textscale') || '100';
+      const hc = localStorage.getItem('ck-access-highcontrast') === 'true';
+      const rm = localStorage.getItem('ck-access-reducedmotion') === 'true';
+      const fps = localStorage.getItem('ck-access-showfps') === 'true';
+      
+      const cbEl = document.getElementById('accessColorblind');
+      if (cbEl) cbEl.value = cb;
+      const tsEl = document.getElementById('accessTextScale');
+      if (tsEl) tsEl.value = ts;
+      const hcEl = document.getElementById('accessHighContrast');
+      if (hcEl) hcEl.checked = hc;
+      const rmEl = document.getElementById('accessReducedMotion');
+      if (rmEl) rmEl.checked = rm;
+      const fpsEl = document.getElementById('accessShowFps');
+      if (fpsEl) fpsEl.checked = fps;
+      
+      this.setAccessColorblind(cb);
+      this.setAccessTextScale(ts);
+      this.setAccessHighContrast(hc);
+      this.setAccessReducedMotion(rm);
+      this.setAccessShowFps(fps);
+    } catch(e) {}
+  },
+
+  toggleAccessModal() {
+    const el = document.getElementById('accessModal');
+    if (!el) return;
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    if (this.audioEngine) this.audioEngine.playCardFlip();
+  },
+
+  setAccessColorblind(mode) {
+    localStorage.setItem('ck-access-colorblind', mode);
+    document.body.style.filter = 'none';
+    if (mode === 'protanopia') document.body.style.filter = 'url(#protanopia-filter)';
+    else if (mode === 'deuteranopia') document.body.style.filter = 'url(#deuteranopia-filter)';
+    else if (mode === 'tritanopia') document.body.style.filter = 'url(#tritanopia-filter)';
+    else if (mode === 'monochrome') document.body.style.filter = 'grayscale(100%)';
+  },
+
+  setAccessTextScale(scale) {
+    localStorage.setItem('ck-access-textscale', scale);
+    document.body.classList.remove('text-scale-125', 'text-scale-150', 'text-scale-175');
+    if (scale !== '100') {
+      document.body.classList.add('text-scale-' + scale);
+    }
+  },
+
+  setAccessHighContrast(active) {
+    localStorage.setItem('ck-access-highcontrast', active ? 'true' : 'false');
+    if (active) {
+      document.body.classList.add('high-contrast');
+    } else {
+      document.body.classList.remove('high-contrast');
+    }
+  },
+
+  setAccessReducedMotion(active) {
+    localStorage.setItem('ck-access-reducedmotion', active ? 'true' : 'false');
+    if (active) {
+      document.body.classList.add('reduced-motion');
+    } else {
+      document.body.classList.remove('reduced-motion');
+    }
+  },
+
+  setAccessShowFps(active) {
+    localStorage.setItem('ck-access-showfps', active ? 'true' : 'false');
+    this.showFpsCounter = active;
+    const overlay = document.getElementById('fpsOverlay');
+    if (overlay) {
+      overlay.style.display = active ? 'block' : 'none';
+    }
+  },
+
+  /* ---------- DECK BUILDER & COLLECTION ---------- */
+  showDeckBuilder() {
+    this.show('deckBuilder');
+    
+    // Load dust balance
+    const storedDust = localStorage.getItem('ck-dust-balance');
+    this.dustBalance = storedDust ? parseInt(storedDust, 10) : 0;
+    const balanceVal = document.getElementById('dustBalanceVal');
+    if (balanceVal) balanceVal.textContent = this.dustBalance;
+    
+    // Default tab is collection
+    this.setDeckBuilderTab('collection');
+    this.updateDeckBuilderStats();
+  },
+
+  setDeckBuilderTab(tab) {
+    const colBtn = document.getElementById('tabCollectionBtn');
+    const shopBtn = document.getElementById('tabShopBtn');
+    const colPanel = document.getElementById('collectionPanel');
+    const shopPanel = document.getElementById('shopPanel');
+    if (!colPanel || !shopPanel) return;
+    
+    if (tab === 'collection') {
+      if (colBtn) {
+        colBtn.classList.add('active');
+        colBtn.style.background = '';
+      }
+      if (shopBtn) {
+        shopBtn.classList.remove('active');
+        shopBtn.style.background = '#101116';
+      }
+      colPanel.style.display = 'flex';
+      shopPanel.style.display = 'none';
+      this.renderCollectionGrid();
+    } else {
+      if (shopBtn) {
+        shopBtn.classList.add('active');
+        shopBtn.style.background = '';
+      }
+      if (colBtn) {
+        colBtn.classList.remove('active');
+        colBtn.style.background = '#101116';
+      }
+      colPanel.style.display = 'none';
+      shopPanel.style.display = 'flex';
+      this.renderShopGrid();
+    }
+    if (this.audioEngine) this.audioEngine.playCardFlip();
+  },
+
+  grindCardToDust(card) {
+    const currentDust = parseInt(localStorage.getItem('ck-dust-balance') || '0', 10);
+    const newDust = currentDust + 10;
+    localStorage.setItem('ck-dust-balance', newDust);
+    this.dustBalance = newDust;
+    const balanceVal = document.getElementById('dustBalanceVal');
+    if (balanceVal) balanceVal.textContent = newDust;
+    
+    // Toggle card off if selected
+    const foundIdx = this.customDeck.indexOf(card);
+    if (foundIdx > -1) {
+      this.customDeck.splice(foundIdx, 1);
+    }
+    
+    this.renderCollectionGrid();
+    this.updateDeckBuilderStats();
+    if (this.audioEngine) this.audioEngine.playCardFlip();
+  },
+
+  renderShopGrid() {
+    const grid = document.getElementById('shopGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    
+    const unlocked = JSON.parse(localStorage.getItem('ck-unlocked-cardbacks') || '["classic"]');
+    const equipped = localStorage.getItem('ck-equipped-cardback') || 'classic';
+    const currentDust = parseInt(localStorage.getItem('ck-dust-balance') || '0', 10);
+    
+    const cosmetics = [
+      { id: 'classic', name: 'Classic Slate', cost: 0, desc: 'Original brick texture card trim.', border: '#2d313d' },
+      { id: 'gold', name: 'Drip Gold', cost: 100, desc: 'Premium shining gold foil trim.', border: '#f0ab43' },
+      { id: 'neon', name: 'Neon Bodega', cost: 200, desc: 'Electric cyan-magenta border highlights.', border: '#6fe8d8' },
+      { id: 'graffiti', name: 'Subway Graffiti', cost: 300, desc: 'Vibrant sunset orange street paint style.', border: '#ff7a45' },
+      { id: 'spades', name: 'Spades Felt', cost: 400, desc: 'Casino felt green border with spade symbols.', border: '#10b981' }
+    ];
+    
+    cosmetics.forEach(item => {
+      const isOwned = unlocked.includes(item.id);
+      const isEquipped = equipped === item.id;
+      const canAfford = currentDust >= item.cost;
+      
+      const el = document.createElement('div');
+      el.className = 'retro-card-item' + (isEquipped ? ' selected' : '');
+      el.style.cssText = `
+        background: #151821;
+        border: 2px solid ${isEquipped ? '#ffcd68' : '#2d313d'};
+        border-radius: 4px;
+        padding: 8px;
+        font-size: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 120px;
+        position: relative;
+        text-align: center;
+        box-sizing: border-box;
+      `;
+      
+      let actionBtnHtml = '';
+      if (isEquipped) {
+        actionBtnHtml = `<button disabled style="font-size:8px; width:100%; background:#474d5e; color:#fff; border-color:#565e70; margin:0;">ACTIVE</button>`;
+      } else if (isOwned) {
+        actionBtnHtml = `<button onclick="app.equipCardBack('${item.id}')" style="font-size:8px; width:100%; margin:0;">EQUIP</button>`;
+      } else {
+        actionBtnHtml = `
+          <button onclick="app.buyCardBack('${item.id}', ${item.cost})" ${canAfford ? '' : 'disabled'} 
+                  style="font-size:8px; width:100%; margin:0; background:${canAfford ? '#f0ab43' : '#1b1d24'}; color:${canAfford ? '#101116' : '#666'}; border-color:${canAfford ? '#ffe299' : '#2d313d'};">
+            BUY (${item.cost}✨)
+          </button>
+        `;
+      }
+      
+      el.innerHTML = `
+        <div>
+          <div style="font-family:'Press Start 2P', monospace; font-size:8px; color:${item.border}; margin-bottom:6px;">${item.name.toUpperCase()}</div>
+          <div style="font-size:10px; line-height:1.3; color:#a0aac2; margin-bottom:8px;">${item.desc}</div>
+        </div>
+        <div>
+          ${actionBtnHtml}
+        </div>
+      `;
+      
+      grid.appendChild(el);
+    });
+  },
+
+  buyCardBack(id, cost) {
+    const currentDust = parseInt(localStorage.getItem('ck-dust-balance') || '0', 10);
+    if (currentDust < cost) return alert('Insufficient Receipt Dust!');
+    
+    // Deduct dust
+    const newDust = currentDust - cost;
+    localStorage.setItem('ck-dust-balance', newDust);
+    this.dustBalance = newDust;
+    const balanceVal = document.getElementById('dustBalanceVal');
+    if (balanceVal) balanceVal.textContent = newDust;
+    
+    // Unlock cardback
+    const unlocked = JSON.parse(localStorage.getItem('ck-unlocked-cardbacks') || '["classic"]');
+    if (!unlocked.includes(id)) unlocked.push(id);
+    localStorage.setItem('ck-unlocked-cardbacks', JSON.stringify(unlocked));
+    
+    // Equip immediately
+    this.equipCardBack(id);
+  },
+
+  equipCardBack(id) {
+    localStorage.setItem('ck-equipped-cardback', id);
+    this.renderShopGrid();
+    if (this.audioEngine) this.audioEngine.playGoldShimmer();
+  },
+
+  renderCollectionGrid() {
+    const grid = document.getElementById('collectionGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const query = (document.getElementById('collectionSearchInput').value || '').toLowerCase();
+    
+    if (!this.customDeck) {
+      const stored = localStorage.getItem('ck-custom-deck');
+      if (stored) {
+        try { this.customDeck = JSON.parse(stored); } catch(e) { this.customDeck = [...WHITE_CARDS]; }
+      } else {
+        this.customDeck = [...WHITE_CARDS];
+      }
+    }
+
+    WHITE_CARDS.forEach((card, idx) => {
+      if (query && !card.toLowerCase().includes(query)) return;
+      
+      const isSelected = this.customDeck.includes(card);
+      const cardEl = document.createElement('div');
+      
+      const categoryObj = classifyCardCategory(card, CARD_TYPES.WHITE);
+      const catId = categoryObj ? categoryObj.id : 'INSTITUTIONAL_TRAP';
+      const catName = categoryObj ? categoryObj.name : 'Trap';
+      
+      let catColor = '#888';
+      if (catId === 'SYSTEMIC_PRESSURE') catColor = '#d9382e';
+      if (catId === 'GENTRIFICATION') catColor = '#3b82f6';
+      if (catId === 'CORPORATE_GREED') catColor = '#10b981';
+      if (catId === 'INSTITUTIONAL_TRAP') catColor = '#8b5cf6';
+      
+      cardEl.className = 'retro-card-item' + (isSelected ? ' selected' : '');
+      cardEl.style.cssText = `
+        background: #151821;
+        border: 2px solid ${isSelected ? '#ffcd68' : '#2d313d'};
+        border-radius: 4px;
+        padding: 8px;
+        font-size: 10px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 90px;
+        position: relative;
+        transition: all 0.15s ease;
+      `;
+      
+      cardEl.innerHTML = `
+        <div style="color:#a0aac2; line-height:1.3; font-family:'JetBrains Mono', monospace; word-break:break-word;">${card}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; border-top:1px dashed #2d313d; padding-top:4px; flex-wrap:wrap; gap:4px;">
+          <span style="font-size:8px; font-weight:bold; color:${catColor};">${catName.toUpperCase()}</span>
+          <div style="display:flex; align-items:center; gap:4px;">
+            <button class="secondary" style="font-size:7px; padding:2px 4px; line-height:1; font-family:'Press Start 2P', monospace; background:#101116; border:1px solid #2d313d; color:#ffcd68;" 
+                    onclick="event.stopPropagation(); app.grindCardToDust('${card.replace(/'/g, "\\'")}')">RECYCLE (+10✨)</button>
+            <input type="checkbox" ${isSelected ? 'checked' : ''} style="pointer-events:none; margin:0;"/>
+          </div>
+        </div>
+      `;
+      
+      cardEl.onclick = () => {
+        const foundIdx = this.customDeck.indexOf(card);
+        if (foundIdx > -1) {
+          this.customDeck.splice(foundIdx, 1);
+        } else {
+          this.customDeck.push(card);
+        }
+        this.renderCollectionGrid();
+        this.updateDeckBuilderStats();
+      };
+      
+      grid.appendChild(cardEl);
+    });
+  },
+
+  updateDeckBuilderStats() {
+    const count = this.customDeck ? this.customDeck.length : 0;
+    document.getElementById('deckCountVal').textContent = count;
+    
+    const warn = document.getElementById('deckValidationWarning');
+    const saveBtn = document.getElementById('deckSaveBtn');
+    if (count < 40) {
+      warn.style.display = 'block';
+      saveBtn.disabled = true;
+      saveBtn.style.opacity = '0.5';
+    } else {
+      warn.style.display = 'none';
+      saveBtn.disabled = false;
+      saveBtn.style.opacity = '1';
+    }
+    
+    const indices = [];
+    if (this.customDeck) {
+      this.customDeck.forEach(card => {
+        const idx = WHITE_CARDS.indexOf(card);
+        if (idx > -1) indices.push(idx);
+      });
+    }
+    
+    try {
+      document.getElementById('deckCodeArea').value = btoa(indices.join(','));
+    } catch(e) {
+      document.getElementById('deckCodeArea').value = '';
+    }
+  },
+
+  saveCustomDeck() {
+    if (!this.customDeck || this.customDeck.length < 40) {
+      alert('Your deck must contain at least 40 cards!');
+      return;
+    }
+    localStorage.setItem('ck-custom-deck', JSON.stringify(this.customDeck));
+    alert('Deck successfully saved and active for subsequent games!');
+    this.showSetup();
+  },
+
+  toggleAllCollection(select) {
+    if (select) {
+      this.customDeck = [...WHITE_CARDS];
+    } else {
+      this.customDeck = [];
+    }
+    this.renderCollectionGrid();
+    this.updateDeckBuilderStats();
+  },
+
+  applyDeckTemplate(templateType) {
+    if (templateType === 'all') {
+      this.customDeck = [...WHITE_CARDS];
+    } else if (templateType === 'family') {
+      const familyKeywords = ['mama', 'grandma', 'uncle', 'cookout', 'mac', 'sweet tea', 'folks', 'auntie', 'cousin', 'barber', 'lineup', 'church', 'sermon', 'altar', 'choir', 'pastor', 'deacon', 'family'];
+      this.customDeck = WHITE_CARDS.filter(card => 
+        familyKeywords.some(kw => card.toLowerCase().includes(kw))
+      );
+    } else if (templateType === 'street') {
+      const streetKeywords = ['blunt', 'cop', 'bodega', 'hustle', 'cash', 'rent', 'venmo', 'dollar', 'fee', 'clippers', 'uncreased', 'mixtape', 'rap', 'block', 'street', 'alley', 'siren', 'felony'];
+      this.customDeck = WHITE_CARDS.filter(card => 
+        streetKeywords.some(kw => card.toLowerCase().includes(kw))
+      );
+    }
+    this.renderCollectionGrid();
+    this.updateDeckBuilderStats();
+  },
+
+  importDeckCode() {
+    const code = document.getElementById('deckCodeArea').value.trim();
+    if (!code) return;
+    try {
+      const indicesStr = atob(code);
+      const indices = indicesStr.split(',').map(Number);
+      const newDeck = [];
+      indices.forEach(idx => {
+        if (WHITE_CARDS[idx]) newDeck.push(WHITE_CARDS[idx]);
+      });
+      if (newDeck.length < 40) {
+        alert('Imported deck must contain at least 40 cards!');
+        return;
+      }
+      this.customDeck = newDeck;
+      document.getElementById('deckTemplateSelect').value = 'custom';
+      this.renderCollectionGrid();
+      this.updateDeckBuilderStats();
+      alert('Deck code successfully imported!');
+    } catch(e) {
+      alert('Invalid deck code!');
+    }
+  },
+
+  copyDeckCode() {
+    const area = document.getElementById('deckCodeArea');
+    area.select();
+    document.execCommand('copy');
+    alert('Deck code copied to clipboard!');
+  },
+
+  filterCollectionGrid() {
+    this.renderCollectionGrid();
   },
 
   startLocalGame() {
@@ -669,12 +2043,23 @@ const app = {
     this.game = new Game();
     this.game.mode = MODE.OFFLINE;
     this.game.pointsToWin = pts;
+    this.game.activeCity = 'Harlem';
 
     for (let i = 0; i < count; i++) {
       const name = i === 0 ? host : 'Player ' + (i+1);
       this.game.addPlayer(name);
     }
+    
+    const originKey = document.getElementById('characterOriginSelect').value;
+    this.mapController.setOrigin(originKey);
+    
     this.humanIndex = 0;
+    this.game.players[0].origin = originKey;
+    const origins = Object.keys(CHARACTER_ORIGINS);
+    for (let i = 1; i < count; i++) {
+      this.game.players[i].origin = origins[i % origins.length];
+    }
+    
     this.game.dealAll();
     this.game.nextBlack();
     this.game.advanceJudge();
@@ -688,28 +2073,90 @@ const app = {
   showPassDevice() {
     const banner = document.getElementById('turnBanner');
     if (!banner) return;
+    if (this.game.isCampaign) {
+      banner.style.display = 'none';
+      return;
+    }
     const current = this.game.players[this.humanIndex].name;
     const next = this.game.players[(this.humanIndex + 1) % this.game.players.length].name;
     const isJudge = this.isJudge();
     const reason = isJudge
-      ? 'You are judge. Review all submissions and pick the winner.'
-      : 'Pick one card from your hand, then submit.';
+      ? 'You are the O.G. Judge. Review all submissions and choose the winner.'
+      : 'Select one card from your hand, then submit.';
     banner.style.display = 'block';
     banner.style.visibility = 'visible';
     banner.style.opacity = '1';
     banner.innerHTML = `
-      <div style="margin-bottom:8px;">Pass device to <b>${current}</b></div>
-      <button onclick="app.localPlayer(${(this.humanIndex + 1) % this.game.players.length})">I am ${next}</button>
-      <div style="margin-top:8px; opacity:.85;">${reason}</div>
+      <div style="font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68; margin-bottom:8px;">
+        PASS DEVICE TO: <span style="color:#f4f7ff;">${current.toUpperCase()}</span>
+      </div>
+      <button onclick="app.localPlayer(${(this.humanIndex + 1) % this.game.players.length})">I AM ${next.toUpperCase()}</button>
+      <div style="margin-top:8px; font-size:11px; opacity:.85;">${reason}</div>
     `;
   },
 
-  /* ---------- ONLINE ---------- */
+  /* ---------- ONLINE Lobby & Sync ---------- */
   openOnlineLobby() {
     this.show('lobby');
+    const hostVal = document.getElementById('hostName').value.trim();
+    document.getElementById('joinName').value = hostVal || 'Player';
     document.getElementById('roomStatus').textContent = '';
     document.getElementById('startOnlineBtn').disabled = true;
+    
+    const readyBtn = document.getElementById('lobbyReadyBtn');
+    if (readyBtn) {
+      readyBtn.textContent = 'TIGHTEN UP (READY)';
+      readyBtn.style.borderColor = '';
+    }
+    
+    const settingsBox = document.getElementById('lobbySettingsBox');
+    if (settingsBox) settingsBox.style.display = 'none';
+
+    const box = document.getElementById('lobbyPlayersBox');
+    if (box) box.style.display = 'none';
+    const list = document.getElementById('lobbyPlayersList');
+    if (list) list.innerHTML = '';
+
     this.detectLocalRoom();
+    this.refreshLobbyBrowser();
+  },
+
+  renderLobbyPlayers() {
+    const box = document.getElementById('lobbyPlayersBox');
+    const list = document.getElementById('lobbyPlayersList');
+    if (!box || !list) return;
+    
+    if (this.game.players && this.game.players.length > 0) {
+      box.style.display = 'block';
+      list.innerHTML = this.game.players.map((p, idx) => {
+        const isMe = idx === this.humanIndex;
+        const origin = p.name === this.game.players[this.humanIndex]?.name 
+          ? document.getElementById('characterOriginSelect').value
+          : (this.remoteAvatars.get(p.name)?.origin || 'BARBER');
+        return `
+          <div style="padding:6px; background:#101116; border:1px solid #2d313d; display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-weight:bold; color:${isMe ? '#ffcd68' : '#f4f7ff'};">${p.name} ${isMe ? '<span style="font-size:8px; opacity:0.75;">(YOU)</span>' : ''}</span>
+              <span style="font-size:7px; font-family:'Press Start 2P', monospace; padding:2px 4px; border:1px solid ${p.ready || idx === 0 ? '#10b981' : '#474d5e'}; color:${p.ready || idx === 0 ? '#10b981' : '#8b95ab'};">
+                ${p.ready || idx === 0 ? 'READY' : 'WAITING'}
+              </span>
+            </div>
+            <span style="font-size:9px; color:#ff7a45; font-family:'Press Start 2P', monospace;">${origin.toUpperCase()}</span>
+          </div>
+        `;
+      }).join('');
+
+      const allReady = this.game.players.every((p, idx) => {
+        if (idx === 0) return true;
+        return !!p.ready;
+      });
+      const startBtn = document.getElementById('startOnlineBtn');
+      if (startBtn) {
+        startBtn.disabled = !(this.isHost && this.game.players.length >= 3 && allReady);
+      }
+    } else {
+      box.style.display = 'none';
+    }
   },
   detectLocalRoom() {
     try {
@@ -726,18 +2173,24 @@ const app = {
   createRoom() {
     const code = document.getElementById('roomCode').value.trim() || 'room-' + Math.floor(Math.random()*9999);
     const host = document.getElementById('joinName').value.trim() || 'Host';
+    
+    const pts = parseInt(document.getElementById('pointsToWin').value, 10) || 7;
+    this.game = new Game();
+    this.game.pointsToWin = pts;
+    
     this.game.room = { code, host, state: { players: [] } };
     this.isHost = true;
     this.humanIndex = 0;
     this.game.players = [];
     this.game.addPlayer(host);
+    
     try { localStorage.setItem('ck-last-room', JSON.stringify({ code, host })); } catch {}
-    document.getElementById('roomStatus').innerHTML = `<b>Room:</b> ${code}<br><b>Share this code</b> so friends can join.<br>They'll need to open this same page.`;
-    document.getElementById('startOnlineBtn').disabled = false;
+    document.getElementById('roomStatus').innerHTML = `<b>Room Code:</b> ${code}<br>Share this code so friends can join.`;
+    this.updateLobbySettingsDisplay();
+    document.getElementById('startOnlineBtn').disabled = true;
     this.persistRoom();
-    if (this.ws && this.ws.readyState === 1) {
-      this.ws.send(JSON.stringify({ type:'join', roomCode: code, playerName: host }));
-    }
+    
+    this.initOnline();
   },
   joinRoom() {
     const code = document.getElementById('roomCode').value.trim();
@@ -749,12 +2202,11 @@ const app = {
     this.game.players = [];
     this.game.addPlayer(name);
     try { localStorage.setItem('ck-last-room', JSON.stringify({ code, host: name })); } catch {}
-    document.getElementById('roomStatus').innerHTML = `<b>Joined room:</b> ${code}<br>Waiting for host to start...`;
+    document.getElementById('roomStatus').innerHTML = `<b>Joined:</b> ${code}<br>Waiting for host to start game...`;
     document.getElementById('startOnlineBtn').disabled = true;
     this.persistRoom();
-    if (this.ws && this.ws.readyState === 1) {
-      this.ws.send(JSON.stringify({ type:'join', roomCode: code, playerName: name }));
-    }
+    
+    this.initOnline();
   },
   persistRoom() {
     if (!this.game.room) return;
@@ -765,26 +2217,471 @@ const app = {
     this.game.mode = MODE.ONLINE;
     this.show('game');
     this.game.pointsToWin = 7;
-    this.initOnline();
     setTimeout(() => {
       if (this.ws && this.ws.readyState === 1) {
         this.ws.send(JSON.stringify({ type:'start', roomCode: this.game.room.code }));
       }
     }, 0);
-    const chat = document.getElementById('chatBox');
-    if (chat) chat.style.display = 'block';
     this.game.dealAll();
     this.game.nextBlack();
     this.game.advanceJudge();
     this.game.players.forEach(p => this.game.refillHand(p));
     this.renderGame();
-    try {
-      localStorage.setItem('ck-room-' + this.game.room.code, JSON.stringify({
-        code: this.game.room.code,
-        host: this.game.room.host,
-        state: { players: this.game.players.map(p => ({ name: p.name, points: p.points })) }
-      }));
-    } catch {}
+  },
+
+  /* ---------- Sound and Music Toggles ---------- */
+  toggleBGM() {
+    this.audioEngine.init();
+    const isPlaying = this.audioEngine.isPlayingBGM;
+    if (isPlaying) {
+      this.audioEngine.stopBGM();
+      document.getElementById('bgmToggleBtn').textContent = '🎵 Music: OFF';
+    } else {
+      const city = this.game.activeCity || 'Harlem';
+      this.audioEngine.startBGM(city);
+      document.getElementById('bgmToggleBtn').textContent = '🎵 Music: ON';
+    }
+  },
+  toggleSFX() {
+    this.audioEngine.init();
+    const isMuted = this.audioEngine.isMuted;
+    this.audioEngine.setMuted(!isMuted);
+    document.getElementById('sfxToggleBtn').textContent = !isMuted ? '🔊 Sound: OFF' : '🔊 Sound: ON';
+  },
+
+  /* ---------- Campaign Act chronicle selector ---------- */
+  renderSetupCampaignActs() {
+    const listEl = document.getElementById('campaignActList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    
+    CAMPAIGN_ACTS.forEach(act => {
+      const isUnlocked = this.campaignEngine.unlockedActs.includes(act.act);
+      const isCompleted = this.campaignEngine.completedActs.includes(act.act);
+      
+      const el = document.createElement('div');
+      el.className = 'campaign-act-item ' + (isUnlocked ? 'unlocked' : 'locked') + (isCompleted ? ' completed' : '');
+      if (this.campaignEngine.currentActIndex === act.act - 1) el.classList.add('selected');
+      
+      el.innerHTML = `
+        <div class="act-header">
+          <span class="act-num">ACT ${act.act}</span>
+          <span class="act-status">${isCompleted ? '👑 COMPLETED' : (isUnlocked ? 'UNLOCKED' : '🔒 LOCKED')}</span>
+        </div>
+        <div class="act-title">${act.title}</div>
+        ${isUnlocked ? `<div class="act-city">${act.city} · Target: ${act.pointsToWin} pts</div>` : ''}
+      `;
+      
+      if (isUnlocked) {
+        el.onclick = () => {
+          this.campaignEngine.selectAct(act.act);
+          if (this.audioEngine) this.audioEngine.playCardFlip();
+          this.renderSetupCampaignActs();
+          this.showCampaignActDetails(act);
+        };
+      }
+      listEl.appendChild(el);
+    });
+    
+    const currentAct = this.campaignEngine.getCurrentAct();
+    this.showCampaignActDetails(currentAct);
+  },
+  showCampaignActDetails(act) {
+    const detailEl = document.getElementById('campaignActDetails');
+    if (!detailEl) return;
+    
+    const isUnlocked = this.campaignEngine.unlockedActs.includes(act.act);
+    if (!isUnlocked) {
+      detailEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #666e82;">Select an unlocked Act to view details.</div>';
+      return;
+    }
+    
+    detailEl.innerHTML = `
+      <h3 style="margin-top:0; color:#ffcd68;">${act.title.toUpperCase()}</h3>
+      <div style="font-size:12px; margin-bottom:6px; color:#ffc475;"><b>LOCATION:</b> ${act.city}</div>
+      <div style="font-size:12px; margin-bottom:6px; color:#f0ab43;"><b>BOSS O.G.:</b> ${act.bossOG}</div>
+      <p style="font-size:12px; line-height:1.4; margin-bottom:8px;">${act.description}</p>
+      <div style="font-size:11px; margin-bottom:10px; background:rgba(0,0,0,0.35); padding: 8px; border: 1px dashed #474d5e;">
+        <b>GOAL:</b> Match victory at ${act.pointsToWin} Points<br/>
+        <b>REWARD:</b> Unlock next Act + unlock origin.
+      </div>
+      <button onclick="app.startCampaignGame()" style="width:100%; text-align:center;">LAUNCH ACT CHRONICLE</button>
+    `;
+  },
+  startCampaignGame() {
+    const act = this.campaignEngine.getCurrentAct();
+    const host = document.getElementById('hostName').value.trim() || 'Hero';
+    
+    this.game = new Game();
+    this.game.mode = MODE.OFFLINE;
+    this.game.pointsToWin = act.pointsToWin;
+    this.game.activeCity = act.city;
+    this.game.isCampaign = true;
+    
+    if (this.pixelEngine) {
+      this.pixelEngine.setCityTheme(act.city);
+    }
+    
+    this.game.addPlayer(host);
+    const originKey = document.getElementById('characterOriginSelect').value;
+    this.game.players[0].stats.reputation = this.campaignEngine.playerReputation;
+    this.mapController.setOrigin(originKey);
+    
+    // Add campaign bot players
+    this.game.addPlayer(act.bossOG);
+    this.game.addPlayer('Stoop Homie');
+    this.game.addPlayer('Bodega Clerk');
+    
+    // Set origins for campaign players
+    this.game.players[0].origin = originKey;
+    this.game.players[1].origin = act.unlockedOrigin || 'BARBER';
+    this.game.players[2].origin = 'LOCAL_LEGEND';
+    this.game.players[3].origin = 'CORNER_MERCHANT';
+    
+    this.humanIndex = 0;
+    this.game.dealAll();
+    this.game.nextBlack();
+    this.game.advanceJudge();
+    this.game.players.forEach(p => this.game.refillHand(p));
+    
+    if (this.audioEngine) {
+      this.audioEngine.playGoldShimmer();
+      if (this.audioEngine.isPlayingBGM) {
+        this.audioEngine.startBGM(act.city);
+      }
+    }
+    
+    this.setWeather('CLEAR');
+    this.show('game');
+    this.showPassDevice();
+    this.renderGame();
+    
+    // Announce boss start dialogue
+    const bossDialogue = BOT_DIALOGUE[act.bossOG];
+    if (bossDialogue) {
+      setTimeout(() => {
+        this.appendChat(act.bossOG, bossDialogue.start, false);
+      }, 800);
+    }
+    
+    if (this.isJudge()) {
+      this.runCampaignBotTurns();
+    }
+  },
+
+  setGlossaryTab(tab) {
+    const lexBtn = document.getElementById('tabLexiconBtn');
+    const ruleBtn = document.getElementById('tabRulebookBtn');
+    const lexPanel = document.getElementById('lexiconTabPanel');
+    const rulePanel = document.getElementById('rulebookTabPanel');
+    if (!lexPanel || !rulePanel) return;
+    
+    if (tab === 'lexicon') {
+      if (lexBtn) {
+        lexBtn.classList.add('active');
+        lexBtn.style.background = '';
+      }
+      if (ruleBtn) {
+        ruleBtn.classList.remove('active');
+        ruleBtn.style.background = '#101116';
+      }
+      lexPanel.style.display = 'flex';
+      rulePanel.style.display = 'none';
+    } else {
+      if (ruleBtn) {
+        ruleBtn.classList.add('active');
+        ruleBtn.style.background = '';
+      }
+      if (lexBtn) {
+        lexBtn.classList.remove('active');
+        lexBtn.style.background = '#101116';
+      }
+      lexPanel.style.display = 'none';
+      rulePanel.style.display = 'block';
+    }
+    if (this.audioEngine) this.audioEngine.playCardFlip();
+  },
+
+  /* ---------- Lexicon dictionary search HUD ---------- */
+  renderSetupGlossary() {
+    const box = document.getElementById('lexiconSearchBox');
+    if (!box) return;
+    
+    const renderList = (query = '') => {
+      const listEl = document.getElementById('lexiconResults');
+      if (!listEl) return;
+      listEl.innerHTML = '';
+      
+      const items = this.lexiconHUD.getFilteredTerms(query);
+      items.forEach(item => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'lexicon-item';
+        itemEl.innerHTML = `
+          <div class="lexicon-term">${item.term.toUpperCase()}</div>
+          <div class="lexicon-definition">${item.definition}</div>
+        `;
+        listEl.appendChild(itemEl);
+      });
+    };
+    
+    box.addEventListener('input', (e) => {
+      renderList(e.target.value);
+    });
+    renderList('');
+  },
+
+  /* ---------- Character avatar preview ---------- */
+  renderCharacterPreview() {
+    const canvas = document.getElementById('setup-character-preview');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    
+    const select = document.getElementById('characterOriginSelect');
+    if (!select) return;
+    
+    const updatePreview = () => {
+      const originKey = select.value;
+      const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
+      drawCharacterPreview(ctx, origin, this.shimmerFrame);
+    };
+    
+    select.addEventListener('change', updatePreview);
+    updatePreview();
+  },
+
+  /* ---------- Presenter and loops ---------- */
+  startGlobalAnimationLoop() {
+    let lastTime = 0;
+    const fps = 12;
+    const interval = 1000 / fps;
+    
+    // FPS tracking variables
+    let lastFpsTime = 0;
+    let framesCount = 0;
+    let currentFps = 0;
+    
+    const loop = (timestamp) => {
+      if (!lastTime) lastTime = timestamp;
+      const elapsed = timestamp - lastTime;
+      
+      // Calculate real FPS
+      if (!lastFpsTime) lastFpsTime = timestamp;
+      framesCount++;
+      if (timestamp - lastFpsTime >= 1000) {
+        currentFps = framesCount;
+        framesCount = 0;
+        lastFpsTime = timestamp;
+        
+        const fpsEl = document.getElementById('fpsOverlay');
+        if (fpsEl && this.showFpsCounter) {
+          fpsEl.textContent = 'FPS: ' + currentFps;
+        }
+      }
+      
+      if (elapsed > interval) {
+        lastTime = timestamp - (elapsed % interval);
+        this.shimmerFrame = (this.shimmerFrame + 1) % 4;
+        
+        // 1. Setup avatar preview
+        if (document.getElementById('setup').classList.contains('active')) {
+          const setupCanvas = document.getElementById('setup-character-preview');
+          if (setupCanvas) {
+            const ctx = setupCanvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            const originKey = document.getElementById('characterOriginSelect').value;
+            const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
+            drawCharacterPreview(ctx, origin, this.shimmerFrame);
+          }
+        }
+
+        // 1.5. Game Over winner avatar bobbing
+        if (document.getElementById('gameOver').classList.contains('active')) {
+          const overCanvas = document.getElementById('gameOverWinnerCanvas');
+          if (overCanvas && this.winnerOrigin) {
+            const ctx = overCanvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            drawCharacterPreview(ctx, this.winnerOrigin, this.shimmerFrame);
+          }
+        }
+        
+        // 2. Active location viewport stage
+        const gameActive = document.getElementById('game').classList.contains('active');
+        const mapActive = document.getElementById('blockMap').classList.contains('active');
+        if (gameActive || mapActive) {
+          const stageCanvas = document.getElementById('stage-canvas');
+          if (stageCanvas) {
+            if (!this.pixelEngine) {
+              this.pixelEngine = new PixelCanvasEngine(stageCanvas, {
+                nativeWidth: 1280,
+                nativeHeight: 720,
+                highDetail: true,
+                cityTheme: this.game.activeCity || 'Harlem'
+              });
+            }
+            
+            this.mapController.update();
+            this.weatherSystem.advanceFrame();
+            
+            const vCtx = this.pixelEngine.virtualCtx;
+            this.pixelEngine.clearNative('#08080a');
+            
+            const city = this.game.activeCity || 'Harlem';
+            drawProceduralBackground(vCtx, city, this.shimmerFrame);
+            
+            this.weatherSystem.render(vCtx);
+            this.mapController.render(vCtx);
+            
+            // Draw remote characters if multiplayer
+            if (this.game.mode === MODE.ONLINE && this.remoteAvatars) {
+              this.remoteAvatars.forEach((p, name) => {
+                const px = Math.floor(p.x);
+                const py = Math.floor(p.y);
+                const origin = CHARACTER_ORIGINS[p.origin] || CHARACTER_ORIGINS.BARBER;
+                drawHighDetailCharacterSprite(vCtx, origin, px, py, p.frame, false, true, name);
+              });
+            }
+            
+            this.pixelEngine.present();
+            
+            // Proximity action checks
+            if (this.mapController.activeHotspot) {
+              if (this.mapController.keys['enter']) {
+                this.mapController.keys['enter'] = false;
+                this.triggerHotspot(this.mapController.activeHotspot);
+              }
+            }
+            
+            // Multiplayer positions synchronization
+            if (this.game.mode === MODE.ONLINE && this.ws && this.ws.readyState === 1) {
+              if (this.mapController.isMoving || (this.lastX !== this.mapController.x || this.lastY !== this.mapController.y)) {
+                this.ws.send(JSON.stringify({
+                  type: 'avatar_update',
+                  x: this.mapController.x,
+                  y: this.mapController.y,
+                  origin: this.mapController.origin.id,
+                  frame: this.mapController.animFrame,
+                  cityTheme: city
+                }));
+                this.lastX = this.mapController.x;
+                this.lastY = this.mapController.y;
+              }
+            }
+          }
+        }
+        
+        // 3. Shimmer cards update
+        this.updateCanvasCards();
+      }
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  },
+
+  triggerHotspot(spot) {
+    if (this.audioEngine) this.audioEngine.playGoldShimmer();
+    if (spot.id === 'BARBER_SHOP') {
+      alert('💈 Master Barber gave you a clean lineup! Street Cred +1.');
+      const me = this.game.players[this.humanIndex];
+      if (me) me.stats.streetCred++;
+    } else if (spot.id === 'BODEGA') {
+      alert('🏪 You bought a chopped cheese from the corner Bodega. Community +1.');
+      const me = this.game.players[this.humanIndex];
+      if (me) me.stats.community++;
+    } else if (spot.id === 'CHESS_PARK') {
+      alert('♟️ You played chess and learned from a neighborhood elder. Wisdom +1.');
+      const me = this.game.players[this.humanIndex];
+      if (me) me.stats.wisdom++;
+    }
+    this.renderGame();
+  },
+
+  updateCanvasCards() {
+    const handEl = document.getElementById('hand');
+    if (handEl && document.getElementById('game').classList.contains('active')) {
+      const canvases = handEl.querySelectorAll('canvas');
+      const me = this.game.players[this.humanIndex];
+      if (me && canvases.length === me.hand.length) {
+        canvases.forEach((canvas, i) => {
+          const isSelected = this.game.selected.has(i);
+          const cardText = me.hand[i];
+          const category = classifyCardCategory(cardText, CARD_TYPES.WHITE);
+          
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = false;
+          
+          const cardRenderer = new CardVisualRenderer({ width: 160, height: 240 });
+          cardRenderer.shimmerFrame = this.shimmerFrame;
+          cardRenderer.renderCard(ctx, cardText, category, isSelected);
+        });
+      }
+    }
+    
+    const bc = this.game.currentBlack;
+    const blackCanvas = document.getElementById('blackCard');
+    if (blackCanvas && bc && document.getElementById('game').classList.contains('active')) {
+      const ctx = blackCanvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      const category = classifyCardCategory(bc.prompt, CARD_TYPES.BLACK);
+      const cardRenderer = new CardVisualRenderer({ width: 160, height: 240 });
+      cardRenderer.shimmerFrame = this.shimmerFrame;
+      cardRenderer.renderCard(ctx, bc.prompt || '...', category, false);
+    }
+    
+    const judgingActive = document.getElementById('judging').classList.contains('active');
+    if (judgingActive) {
+      const judgingBlackCanvas = document.getElementById('judgingBlackCard');
+      if (judgingBlackCanvas && bc) {
+        const ctx = judgingBlackCanvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        const category = classifyCardCategory(bc.prompt, CARD_TYPES.BLACK);
+        const cardRenderer = new CardVisualRenderer({ width: 160, height: 240 });
+        cardRenderer.shimmerFrame = this.shimmerFrame;
+        cardRenderer.renderCard(ctx, bc.prompt || '...', category, false);
+      }
+      
+      const submissionsEl = document.getElementById('submissions');
+      if (submissionsEl) {
+        const canvases = submissionsEl.querySelectorAll('canvas');
+        if (canvases.length === this.game.submissions.length) {
+          canvases.forEach((canvas, i) => {
+            const cardText = this.game.submissions[i].card;
+            const category = classifyCardCategory(cardText, CARD_TYPES.WHITE);
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            
+            const cardRenderer = new CardVisualRenderer({ width: 160, height: 240 });
+            cardRenderer.shimmerFrame = this.shimmerFrame;
+            cardRenderer.renderCard(ctx, cardText, category, false);
+          });
+        }
+      }
+    }
+    
+    const resultActive = document.getElementById('roundResult').classList.contains('active');
+    if (resultActive) {
+      const resultBlackCanvas = document.getElementById('roundResultBlackCard');
+      if (resultBlackCanvas && bc) {
+        const ctx = resultBlackCanvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        const category = classifyCardCategory(bc.prompt, CARD_TYPES.BLACK);
+        const cardRenderer = new CardVisualRenderer({ width: 160, height: 240 });
+        cardRenderer.shimmerFrame = this.shimmerFrame;
+        cardRenderer.renderCard(ctx, bc.prompt || '...', category, false);
+      }
+      
+      const winnerCardCanvas = document.getElementById('winnerCardCanvas');
+      if (winnerCardCanvas) {
+        const cardText = document.getElementById('winnerCard').textContent;
+        const category = classifyCardCategory(cardText, CARD_TYPES.WHITE);
+        const ctx = winnerCardCanvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        
+        const cardRenderer = new CardVisualRenderer({ width: 160, height: 240 });
+        cardRenderer.shimmerFrame = this.shimmerFrame;
+        cardRenderer.renderCard(ctx, cardText, category, false);
+      }
+    }
   },
 
   /* ---------- RENDER ---------- */
@@ -794,6 +2691,7 @@ const app = {
       this.showPassDevice();
     } else if (banner) {
       banner.textContent = '';
+      banner.style.display = 'none';
     }
 
     document.getElementById('modeBadge').textContent = this.game.mode;
@@ -804,10 +2702,18 @@ const app = {
     document.getElementById('playerLabel').textContent = 'Player: ' + this.game.players[this.humanIndex].name;
 
     const bc = this.game.currentBlack;
-    document.getElementById('blackCard').innerHTML = (bc.hasDice ? '🎲 ' : '') + (bc.prompt || '...');
+    const canvas = document.getElementById('blackCard');
+    if (canvas && bc) {
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      const category = classifyCardCategory(bc.prompt, CARD_TYPES.BLACK);
+      const cardRenderer = new CardVisualRenderer({ width: 160, height: 240 });
+      cardRenderer.shimmerFrame = this.shimmerFrame;
+      cardRenderer.renderCard(ctx, bc.prompt || '...', category, false);
+    }
 
     const diceEl = document.getElementById('diceResult');
-    if (bc.hasDice) {
+    if (bc?.hasDice) {
       diceEl.innerHTML = '<span class="die">?</span>';
     } else {
       diceEl.innerHTML = '';
@@ -823,9 +2729,26 @@ const app = {
 
     const isJudge = this.isJudge();
     if (isJudge) {
-      document.getElementById('statusText').textContent = 'You are the judge. Others play first.';
+      document.getElementById('statusText').textContent = 'You are the O.G. Judge. Others play first.';
     } else {
       document.getElementById('statusText').textContent = 'Your turn: pick a card to play.';
+    }
+
+    const viewCity = document.getElementById('viewportCity');
+    if (viewCity) {
+      viewCity.textContent = (this.game.activeCity || 'Harlem').toUpperCase();
+    }
+    
+    const weatherBadge = document.getElementById('viewportWeatherBadge');
+    if (weatherBadge) {
+      weatherBadge.textContent = (this.game.weatherMode || 'CLEAR').replace(/_/g, ' ');
+    }
+
+    if (this.weatherSystem) {
+      this.weatherSystem.setMode(this.game.weatherMode);
+    }
+    if (this.pixelEngine) {
+      this.pixelEngine.setCityTheme(this.game.activeCity || 'Harlem');
     }
 
     this.renderHand();
@@ -836,28 +2759,103 @@ const app = {
     const handEl = document.getElementById('hand');
     const me = this.game.players[this.humanIndex];
     handEl.innerHTML = '';
-    me.hand.forEach((card, i) => {
-      const el = document.createElement('div');
-      el.className = 'card';
-      if (this.game.selected.has(i)) el.classList.add('selected');
-      el.textContent = card;
-      el.onclick = () => this.toggleCard(i);
-      handEl.appendChild(el);
-    });
+    
+    if (me && me.hand) {
+      me.hand.forEach((card, i) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 160;
+        canvas.height = 240;
+        canvas.className = 'pixel-card-canvas';
+        if (this.game.selected.has(i)) canvas.classList.add('selected');
+        
+        canvas.onclick = () => this.toggleCard(i);
+        handEl.appendChild(canvas);
+      });
+    }
+    
+    this.updateCanvasCards();
     document.getElementById('submitBtn').disabled = this.game.selected.size === 0 || this.isJudge();
   },
 
   renderScoreboard() {
     const el = document.getElementById('scoreboard');
-    el.innerHTML = this.game.players.map(p =>
-      `<div class="player-row"><span>${p.name}</span><span>${p.points} pts</span></div>`
-    ).join('');
+    if (el) {
+      el.innerHTML = this.game.players.map(p =>
+        `<div class="player-row">
+          <span>${p.name}</span>
+          <span style="color:#ffcd68;">${p.points} pts</span>
+        </div>`
+      ).join('');
+    }
+    this.renderReceiptsTab();
+  },
+
+  switchRightTab(tabId) {
+    if (tabId === 'scoreboard') {
+      const sbTab = document.getElementById('rightTabScoreboard');
+      const rcTab = document.getElementById('rightTabReceipts');
+      if (sbTab) sbTab.style.display = 'block';
+      if (rcTab) rcTab.style.display = 'none';
+      const sbBtn = document.getElementById('tabScoreboardBtn');
+      const rcBtn = document.getElementById('tabReceiptsBtn');
+      if (sbBtn) { sbBtn.classList.add('active'); sbBtn.classList.remove('secondary'); }
+      if (rcBtn) { rcBtn.classList.remove('active'); rcBtn.classList.add('secondary'); }
+    } else {
+      const sbTab = document.getElementById('rightTabScoreboard');
+      const rcTab = document.getElementById('rightTabReceipts');
+      if (sbTab) sbTab.style.display = 'none';
+      if (rcTab) rcTab.style.display = 'block';
+      const sbBtn = document.getElementById('tabScoreboardBtn');
+      const rcBtn = document.getElementById('tabReceiptsBtn');
+      if (sbBtn) { sbBtn.classList.remove('active'); sbBtn.classList.add('secondary'); }
+      if (rcBtn) { rcBtn.classList.add('active'); rcBtn.classList.remove('secondary'); }
+      this.renderReceiptsTab();
+    }
+    if (this.audioEngine) this.audioEngine.playCardFlip();
+  },
+
+  renderReceiptsTab() {
+    const allianceText = document.getElementById('allianceStatusText');
+    if (allianceText) {
+      if (this.game && this.game.currentAlliance) {
+        const { proposer, target, formedRound } = this.game.currentAlliance;
+        allianceText.innerHTML = `Active: <b style="color:#ffc475;">${proposer}</b> & <b style="color:#ffc475;">${target}</b> (Rd ${formedRound})`;
+      } else {
+        allianceText.textContent = "No active alliances.";
+      }
+    }
+    
+    const receiptsEl = document.getElementById('receiptsList');
+    if (receiptsEl) {
+      const me = this.game && this.game.players ? this.game.players[this.humanIndex] : null;
+      if (!me || !me.receipts || me.receipts.length === 0) {
+        receiptsEl.innerHTML = '<div class="muted" style="font-size:10px; padding:6px; text-align:center;">No receipts held. Win rounds to collect them.</div>';
+        return;
+      }
+      
+      receiptsEl.innerHTML = me.receipts.map(r => {
+        const color = r.status === 'active' ? '#ff7a45' : (r.status === 'resolved' ? '#6fe8d8' : '#d9382e');
+        return `
+          <div style="background:#101116; border:1px solid #2d313d; padding:6px; margin-bottom:2px;">
+            <div style="display:flex; justify-content:space-between; font-size:8px; font-weight:bold; margin-bottom:2px;">
+              <span style="color:${color};">${r.status.toUpperCase()}</span>
+              <span class="muted">Rd ${r.roundEarned}</span>
+            </div>
+            <div style="font-size:10px; line-height:1.2; color:#f4f7ff;">${r.earnText}</div>
+          </div>
+        `;
+      }).join('');
+    }
   },
 
   toggleCard(index) {
     if (this.isJudge()) return;
-    if (this.game.selected.has(index)) this.game.selected.delete(index);
-    else if (this.game.selected.size < 1) this.game.selected.add(index);
+    if (this.game.selected.has(index)) {
+      this.game.selected.delete(index);
+    } else if (this.game.selected.size < 1) {
+      this.game.selected.add(index);
+      if (this.audioEngine) this.audioEngine.playCardFlip();
+    }
     this.renderHand();
   },
 
@@ -868,8 +2866,26 @@ const app = {
   submitSelection() {
     if (this.isJudge() || this.game.selected.size === 0) return;
     const idx = Array.from(this.game.selected)[0];
+    
+    if (this.game.mode === MODE.ONLINE) {
+      const card = this.game.players[this.humanIndex].hand[idx];
+      this.ws.send(JSON.stringify({
+        type: 'submission',
+        card: card
+      }));
+      this.game.players[this.humanIndex].hand.splice(idx, 1);
+      this.game.selected.clear();
+      this.renderGame();
+      this.checkPhase();
+      return;
+    }
+
     this.game.submit(this.humanIndex, idx);
-    this.checkPhase();
+    if (this.game.isCampaign) {
+      this.runCampaignBotTurns();
+    } else {
+      this.checkPhase();
+    }
   },
 
   passTurn() {
@@ -898,14 +2914,18 @@ const app = {
     const subEl = document.getElementById('submissions');
     subEl.innerHTML = '';
     this.game.submissions.forEach((s, i) => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.textContent = s.card;
-      card.onclick = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 160;
+      canvas.height = 240;
+      canvas.className = 'pixel-card-canvas';
+      canvas.onclick = () => {
         if (this.isJudge()) this.chooseWinner(i);
       };
-      subEl.appendChild(card);
+      subEl.appendChild(canvas);
     });
+    
+    this.updateCanvasCards();
+    
     document.getElementById('judgeNotice').innerHTML = `
       ${this.isJudge() ? '<b>Judge time.</b> Tap a submission to crown it.' : 'Judge is picking...'}<br/>
       <span class="muted">Weather: ${this.game.weatherMode}${this.game.currentAlliance ? ' | Alliance active' : ''}</span>
@@ -913,106 +2933,945 @@ const app = {
   },
 
   chooseWinner(index) {
+    if (this.storyEngine && this.storyEngine.active) {
+      const win = this.game.submissions[index];
+      const result = this.storyEngine.applyWinnerCard(win.card);
+      this.game.submissions = [];
+      this.game.selected.clear();
+      
+      if (result.ended) {
+        document.getElementById('winnerName').textContent = result.endingTitle;
+        document.getElementById('winnerCard').textContent = result.endingText;
+        document.getElementById('winnerMeta').textContent = `FINAL STATS: HEAT ${this.storyEngine.heat} | TRUST ${this.storyEngine.trust}`;
+        
+        const nextBtn = document.querySelector('#roundResult button');
+        if (nextBtn) {
+          nextBtn.setAttribute('onclick', 'app.endNarrativeGame()');
+          nextBtn.textContent = 'BACK TO STOOP';
+        }
+      } else {
+        document.getElementById('winnerName').textContent = `BEAT WINNER: ${win.player.toUpperCase()}`;
+        document.getElementById('winnerCard').textContent = `"${win.card}"`;
+        document.getElementById('winnerMeta').textContent = result.consequenceText;
+        
+        const nextBtn = document.querySelector('#roundResult button');
+        if (nextBtn) {
+          nextBtn.setAttribute('onclick', 'app.nextRound()');
+          nextBtn.textContent = 'NEXT ROUND';
+        }
+      }
+      this.show('roundResult');
+      return;
+    }
+
     const win = this.game.submissions[index];
     const winner = this.game.players.find(p => p.name === win.player);
-    if (winner) {
-      winner.points++;
-      const allianceResult = AllianceSystem.resolveRound(this.game, winner);
-      ReceiptSystem.resolveTrigger(this.game, winner);
-      ReceiptSystem.awardWin(this.game, winner);
-      if (this.game.doubleDownActive) {
-        winner.points++;
-        this.game.doubleDownActive = false;
+    if (!winner) return;
+
+    if (this.game.mode === MODE.ONLINE) {
+      const judgeName = this.game.players[this.game.judgeIndex % this.game.players.length].name;
+      const judgeIsBot = (judgeName !== (document.getElementById('joinName').value.trim() || 'Player') && !this.remoteAvatars.has(judgeName));
+      if (this.isJudge() || (this.isHost && judgeIsBot)) {
+        this.ws.send(JSON.stringify({
+          type: 'winner',
+          player: winner.name,
+          card: win.card
+        }));
       }
+      return;
     }
+
+    if (this.audioEngine) this.audioEngine.playVictoryFanfare();
+    winner.points++;
+    const allianceResult = AllianceSystem.resolveRound(this.game, winner);
+    ReceiptSystem.resolveTrigger(this.game, winner);
+    ReceiptSystem.awardWin(this.game, winner);
+    if (this.game.doubleDownActive) {
+      winner.points++;
+      this.game.doubleDownActive = false;
+    }
+    
     document.getElementById('winnerName').textContent = winner.name;
     document.getElementById('winnerCard').textContent = win.card;
     document.getElementById('winnerMeta').textContent = `${this.game.currentBlack.prompt}`;
+    
     this.show('roundResult');
+    this.updateCanvasCards();
+    
     if (winner.points >= this.game.pointsToWin) {
-      setTimeout(() => this.endGame(winner), 800);
+      setTimeout(() => this.endGame(winner), 1200);
     }
   },
 
   nextRound() {
     this.game.advanceJudge();
+    
+    if (this.storyEngine && this.storyEngine.active) {
+      const beat = this.storyEngine.getCurrentBeat();
+      this.game.currentBlack = {
+        raw: beat.blackCard,
+        prompt: beat.blackCard,
+        hasDice: false,
+        effect: null
+      };
+      this.renderNarrativeBeat();
+      this.show('game');
+      this.renderGame();
+      this.runNarrativeBotTurns();
+      return;
+    }
+    
+    if (this.game.mode === MODE.ONLINE) {
+      if (this.isHost) {
+        this.game.nextBlack();
+        this.ws.send(JSON.stringify({
+          type: 'black',
+          prompt: this.game.currentBlack.prompt,
+          hasDice: this.game.currentBlack.hasDice
+        }));
+      }
+      this.game.dealAll();
+      this.game.players.forEach(p => this.game.refillHand(p));
+      this.show('game');
+      this.renderGame();
+      if (this.isHost) {
+        setTimeout(() => this.runOnlineBotTurns(), 1000);
+      }
+      return;
+    }
+
     this.game.nextBlack();
     this.game.dealAll();
     this.game.players.forEach(p => this.game.refillHand(p));
     this.show('game');
     this.showPassDevice();
     this.renderGame();
+    if (this.game.isCampaign && this.isJudge()) {
+      this.runCampaignBotTurns();
+    }
+  },
+
+  evaluateCardSynergy(bossName, cardText, promptText) {
+    cardText = (cardText || '').toLowerCase();
+    promptText = (promptText || '').toLowerCase();
+    
+    // Heuristic categories
+    const categories = {
+      family: ['mama', 'grandma', 'uncle', 'cookout', 'thanksgiving', 'reunion', 'mac', 'cheese', 'cousin', 'auntie', 'church', 'family', 'folks', 'sermon'],
+      street: ['blunt', 'cop', 'bodega', 'hustle', 'cash', 'rent', 'venmo', 'dollar', 'fee', 'clippers', 'uncreased', 'mixtape', 'rap', 'block', 'street', 'alley', 'siren', 'felony', 'dj', 'ticket', 'promoter'],
+      church: ['pastor', 'choir', 'usher', 'robe', 'pew', 'church', 'preach', 'deacon', 'sermon', 'altar', 'communion', 'amen'],
+      food: ['pizza', 'cooks', 'cooler', 'food', 'mac', 'sweet tea', 'barbecue', 'bbq', 'ribs', 'potato salad', 'peach cobbler', 'chicken', 'gravy'],
+      humor: ['tiktok', 'argument', 'apple pay', 'gas station', 'promoter', 'followers', 'beef', 'dating', 'side piece', 'tinder', 'scam']
+    };
+    
+    // Determine card tags
+    const cardTags = [];
+    for (const [cat, kws] of Object.entries(categories)) {
+      if (kws.some(kw => cardText.includes(kw))) {
+        cardTags.push(cat);
+      }
+    }
+    
+    // Determine prompt tags
+    const promptTags = [];
+    for (const [cat, kws] of Object.entries(categories)) {
+      if (kws.some(kw => promptText.includes(kw))) {
+        promptTags.push(cat);
+      }
+    }
+    
+    let score = 5.0; // Base score
+    
+    // 1. Synergy with prompt keywords
+    cardTags.forEach(tag => {
+      if (promptTags.includes(tag)) {
+        score += 2.0; // Prompt synergy boost
+      }
+    });
+    
+    // 2. Synergy with Boss personality profile
+    const boss = bossName.toLowerCase();
+    if (boss.includes('dave') || boss.includes('barber')) {
+      if (cardTags.includes('family')) score += 1.5;
+      if (cardTags.includes('street')) score += 1.0;
+    } else if (boss.includes('marcus') || boss.includes('legend')) {
+      if (cardTags.includes('street')) score += 1.5;
+      if (cardTags.includes('humor')) score += 1.0;
+    } else if (boss.includes('gloria') || boss.includes('pillar')) {
+      if (cardTags.includes('family')) score += 1.5;
+      if (cardTags.includes('church')) score += 1.5;
+    } else if (boss.includes('tico') || boss.includes('merchant')) {
+      if (cardTags.includes('street')) score += 1.5;
+      if (cardTags.includes('humor')) score += 1.5;
+    } else if (boss.includes('freddie') || boss.includes('scholar')) {
+      if (cardTags.includes('church')) score += 1.5;
+      if (cardTags.includes('family')) score += 1.0;
+    } else if (boss.includes('trey') || boss.includes('architect')) {
+      if (cardTags.includes('street')) score += 1.5;
+      if (cardTags.includes('family')) score += 1.0;
+    } else if (boss.includes('vern') || boss.includes('local')) {
+      if (cardTags.includes('family')) score += 1.5;
+      if (cardTags.includes('street')) score += 1.5;
+    } else if (boss.includes('pierre') || boss.includes('chef')) {
+      if (cardTags.includes('food')) score += 2.0;
+      if (cardTags.includes('family')) score += 1.0;
+    }
+    
+    // Add small random noise to make it feel natural/human
+    score += Math.random() * 1.5;
+    
+    return score;
+  },
+
+  runOnlineBotTurns() {
+    if (this.game.mode !== MODE.ONLINE || !this.isHost) return;
+    const humanName = document.getElementById('joinName').value.trim() || document.getElementById('hostName').value.trim() || 'Player';
+    const bots = this.game.players.filter(p => p.name !== humanName && !this.remoteAvatars.has(p.name));
+    if (bots.length === 0) return;
+    
+    const judgeIdx = this.game.judgeIndex % this.game.players.length;
+    const judgeName = this.game.players[judgeIdx].name;
+    const isBotJudge = (judgeName !== humanName && !this.remoteAvatars.has(judgeName));
+    const promptText = this.game.currentBlack ? this.game.currentBlack.prompt : '';
+    const submittedPlayers = new Set(this.game.submissions.map(s => s.player));
+    
+    bots.forEach(p => {
+      if (p.name !== judgeName && !submittedPlayers.has(p.name)) {
+        if (p.hand.length === 0) {
+          this.game.refillHand(p);
+        }
+        let bestIdx = 0;
+        let bestScore = -999;
+        p.hand.forEach((card, cIdx) => {
+          const score = this.evaluateCardSynergy(p.name, card, promptText);
+          if (score > bestScore) {
+            bestScore = score;
+            bestIdx = cIdx;
+          }
+        });
+        const cardText = p.hand[bestIdx];
+        p.hand.splice(bestIdx, 1);
+        this.game.refillHand(p);
+        
+        this.ws.send(JSON.stringify({
+          type: 'submission',
+          player: p.name,
+          card: cardText
+        }));
+        
+        const dialogue = BOT_DIALOGUE[p.name];
+        if (dialogue && Math.random() < 0.4) {
+          setTimeout(() => {
+            this.ws.send(JSON.stringify({
+              type: 'chat',
+              text: `[BOT] ${p.name}: ${dialogue.submit}`
+            }));
+          }, 800 + Math.random() * 800);
+        }
+      }
+    });
+    
+    const activeScreen = document.querySelector('.screen.active')?.id;
+    if (activeScreen === 'judging' && isBotJudge) {
+      const submissionsCount = this.game.submissions.length;
+      const expectedSubmissions = this.game.players.length - 1;
+      
+      if (submissionsCount >= expectedSubmissions) {
+        let bestWinIdx = 0;
+        let bestWinScore = -999;
+        this.game.submissions.forEach((sub, sIdx) => {
+          const score = this.evaluateCardSynergy(judgeName, sub.card, promptText);
+          if (score > bestWinScore) {
+            bestWinScore = score;
+            bestWinIdx = sIdx;
+          }
+        });
+        const win = this.game.submissions[bestWinIdx];
+        const judgeDialogue = BOT_DIALOGUE[judgeName];
+        if (judgeDialogue) {
+          this.ws.send(JSON.stringify({
+            type: 'chat',
+            text: `[BOT] ${judgeName}: ${judgeDialogue.judge}`
+          }));
+        }
+        setTimeout(() => {
+          this.ws.send(JSON.stringify({
+            type: 'winner',
+            player: win.player,
+            card: win.card
+          }));
+          const winnerDialogue = BOT_DIALOGUE[win.player];
+          if (winnerDialogue) {
+            setTimeout(() => {
+              this.ws.send(JSON.stringify({
+                type: 'chat',
+                text: `[BOT] ${win.player}: ${winnerDialogue.win}`
+              }));
+            }, 1000);
+          }
+        }, 2000 + Math.random() * 1000);
+      }
+    }
+  },
+
+  runCampaignBotTurns() {
+    if (!this.game.isCampaign) return;
+    const judgeIdx = this.game.judgeIndex % this.game.players.length;
+    const humanIsJudge = (judgeIdx === 0);
+    const promptText = this.game.currentBlack ? this.game.currentBlack.prompt : '';
+
+    if (humanIsJudge) {
+      this.game.selected.clear();
+      this.game.players.forEach((p, idx) => {
+        if (idx !== 0) {
+          let bestIdx = 0;
+          let bestScore = -999;
+          p.hand.forEach((card, cIdx) => {
+            const score = this.evaluateCardSynergy(p.name, card, promptText);
+            if (score > bestScore) {
+              bestScore = score;
+              bestIdx = cIdx;
+            }
+          });
+          
+          this.game.submit(idx, bestIdx);
+          
+          const dialogue = BOT_DIALOGUE[p.name];
+          if (dialogue && Math.random() < 0.4) {
+            setTimeout(() => {
+              this.appendChat(p.name, dialogue.submit, false);
+            }, 800 + Math.random() * 800);
+          }
+        }
+      });
+      this.enterJudging();
+    } else {
+      const judgeName = this.game.players[judgeIdx].name;
+      
+      this.game.players.forEach((p, idx) => {
+        if (idx !== 0 && idx !== judgeIdx) {
+          let bestIdx = 0;
+          let bestScore = -999;
+          p.hand.forEach((card, cIdx) => {
+            const score = this.evaluateCardSynergy(p.name, card, promptText);
+            if (score > bestScore) {
+              bestScore = score;
+              bestIdx = cIdx;
+            }
+          });
+          this.game.submit(idx, bestIdx);
+          
+          const dialogue = BOT_DIALOGUE[p.name];
+          if (dialogue && Math.random() < 0.4) {
+            setTimeout(() => {
+              this.appendChat(p.name, dialogue.submit, false);
+            }, 500 + Math.random() * 500);
+          }
+        }
+      });
+      
+      const submissionsCount = this.game.submissions.length;
+      if (submissionsCount > 0) {
+        let bestWinIdx = 0;
+        let bestWinScore = -999;
+        
+        this.game.submissions.forEach((sub, sIdx) => {
+          const score = this.evaluateCardSynergy(judgeName, sub.card, promptText);
+          if (score > bestWinScore) {
+            bestWinScore = score;
+            bestWinIdx = sIdx;
+          }
+        });
+        
+        const judgeDialogue = BOT_DIALOGUE[judgeName];
+        if (judgeDialogue) {
+          this.appendChat(judgeName, judgeDialogue.judge, false);
+        }
+        
+        setTimeout(() => {
+          this.chooseWinner(bestWinIdx);
+          
+          const winnerPlayerName = this.game.submissions[bestWinIdx].player;
+          const winnerDialogue = BOT_DIALOGUE[winnerPlayerName];
+          if (winnerDialogue) {
+            setTimeout(() => {
+              this.appendChat(winnerPlayerName, winnerDialogue.win, false);
+            }, 1000);
+          }
+        }, 1500 + Math.random() * 1000);
+      }
+    }
   },
 
   endGame(winner) {
     document.getElementById('champion').textContent = winner.name;
+    
+    let rewardText = '';
+    if (winner.name === this.game.players[0].name) {
+      const isCamp = this.game.isCampaign;
+      const dustEarned = isCamp ? 100 : 50;
+      const currentDust = parseInt(localStorage.getItem('ck-dust-balance') || '0', 10);
+      localStorage.setItem('ck-dust-balance', currentDust + dustEarned);
+      rewardText = `<br/><span style="font-size:9px; color:#6fe8d8;">+${dustEarned} DUST EARNED! ✨</span>`;
+    }
+
+    document.getElementById('champion').innerHTML = winner.name + rewardText;
+    
     document.getElementById('finalScore').innerHTML = this.game.players.map(p =>
-      `${p.name}: ${p.points}`
+      `${p.name}: ${p.points} pts`
     ).join('<br>');
+    
+    const originKey = winner.origin || 'BARBER';
+    this.winnerOrigin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
+    
     this.show('gameOver');
+    
+    if (this.game.isCampaign && winner.name === this.game.players[0].name) {
+      this.campaignEngine.completeCurrentAct();
+      this.renderSetupCampaignActs();
+    }
   },
 
   /* ---------- ONLINE / CHAT ---------- */
   initOnline() {
+    // If we already connected to list rooms, we can just trigger join!
+    if (this.ws && this.ws.readyState === 1) {
+      const roomCode = document.getElementById('roomCode').value.trim();
+      const playerName = document.getElementById('joinName').value.trim() || document.getElementById('hostName').value.trim();
+      const originKey = document.getElementById('characterOriginSelect').value;
+      const city = this.game.activeCity || 'Harlem';
+      
+      this.ws.send(JSON.stringify({
+        type: 'join',
+        roomCode,
+        playerName,
+        characterOrigin: originKey,
+        cityTheme: city
+      }));
+      return;
+    }
+    
+    this.remoteAvatars = new Map();
     const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
     this.ws = new WebSocket(`${protocol}//${location.host}`);
+    
+    this.ws.onopen = () => {
+      const roomCode = document.getElementById('roomCode').value.trim();
+      const playerName = document.getElementById('joinName').value.trim() || document.getElementById('hostName').value.trim();
+      const originKey = document.getElementById('characterOriginSelect').value;
+      const city = this.game.activeCity || 'Harlem';
+      
+      this.ws.send(JSON.stringify({
+        type: 'join',
+        roomCode,
+        playerName,
+        characterOrigin: originKey,
+        cityTheme: city
+      }));
+    };
+    
     this.ws.onmessage = (ev) => {
       let msg;
       try { msg = JSON.parse(ev.data); } catch { return; }
-      if (msg.type === 'joined') {
-        this.game.players = msg.players.map(p => ({ name: p.name, hand: [], points: p.points || 0, stats: { streetCred:0, community:0, wisdom:0, reputation:0 }, receipts: [] }));
-        this.humanIndex = this.game.players.findIndex(p => p.name === msg.playerName);
-        this.renderGame();
+      this.handleWsMessage(msg);
+    };
+  },
+
+  initOnlineLobbyConn() {
+    if (this.ws && this.ws.readyState === 1) {
+      this.ws.send(JSON.stringify({ type: 'list_rooms' }));
+      return;
+    }
+    
+    this.remoteAvatars = new Map();
+    const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    this.ws = new WebSocket(`${protocol}//${location.host}`);
+    
+    this.ws.onopen = () => {
+      this.ws.send(JSON.stringify({ type: 'list_rooms' }));
+    };
+    
+    this.ws.onmessage = (ev) => {
+      let msg;
+      try { msg = JSON.parse(ev.data); } catch { return; }
+      this.handleWsMessage(msg);
+    };
+  },
+
+  handleWsMessage(msg) {
+    if (msg.type === 'queue_status') {
+      const countEl = document.getElementById('matchmakingCount');
+      if (countEl) countEl.textContent = msg.count;
+    }
+    
+    if (msg.type === 'match_found') {
+      clearInterval(this.matchmakingInterval);
+      this.matchmakingInterval = null;
+      const statusBox = document.getElementById('matchmakingStatus');
+      if (statusBox) statusBox.style.display = 'none';
+      const qpBtn = document.getElementById('quickPlayBtn');
+      if (qpBtn) {
+        qpBtn.textContent = 'QUICK PLAY';
+        qpBtn.style.background = '#f0ab43';
+        qpBtn.style.borderColor = '#f0ab43';
+        qpBtn.style.color = '#101116';
       }
-      if (msg.type === 'game_start') {
-        this.game.mode = MODE.ONLINE;
-        this.game.dealAll();
-        this.game.nextBlack();
-        this.game.advanceJudge();
-        this.game.players.forEach(p => this.game.refillHand(p));
-        this.show('game');
-        this.renderGame();
+      
+      document.getElementById('roomCode').value = msg.roomCode;
+      this.isHost = !!msg.isHost;
+      this.game = new Game();
+      this.game.pointsToWin = 5;
+      
+      const myName = document.getElementById('joinName').value.trim() || 'Player';
+      this.game.room = { code: msg.roomCode, host: msg.isHost ? myName : 'Host', state: { players: [] } };
+      this.humanIndex = 0;
+      this.game.players = [];
+      this.game.addPlayer(myName);
+      
+      if (this.ws && this.ws.readyState === 1) {
+        const originKey = document.getElementById('characterOriginSelect').value;
+        const city = this.game.activeCity || 'Harlem';
+        this.ws.send(JSON.stringify({
+          type: 'join',
+          roomCode: msg.roomCode,
+          playerName: myName,
+          characterOrigin: originKey,
+          cityTheme: city
+        }));
       }
-      if (msg.type === 'black') {
-        this.game.currentBlack = { raw: msg.prompt, prompt: msg.prompt, hasDice: !!msg.hasDice, effect: null };
-        this.renderGame();
-      }
-      if (msg.type === 'roll') {
-        this.game.currentBlack.prompt = msg.prompt;
-        document.getElementById('diceResult').innerHTML = '<div class="die">' + Math.floor(Math.random()*6+1) + '</div>';
-        this.renderGame();
-      }
-      if (msg.type === 'submission') {
-        this.game.submissions.push({ player: msg.player, card: msg.card });
-        this.checkPhase();
-      }
-      if (msg.type === 'judge_phase') this.enterJudging();
-      if (msg.type === 'winner') {
-        const w = this.game.players.find(p => p.name === msg.player);
-        if (w) {
-          w.points++;
-          AllianceSystem.resolveRound(this.game, w);
-          ReceiptSystem.resolveTrigger(this.game, w);
-          ReceiptSystem.awardWin(this.game, w);
+      
+      document.getElementById('roomStatus').innerHTML = msg.isHost 
+        ? `<b>Room Code:</b> ${msg.roomCode}<br>Quick Play Match Found! Press Start to launch.` 
+        : `<b>Joined:</b> ${msg.roomCode}<br>Quick Play Match Found! Waiting for start...`;
+      document.getElementById('roomStatus').style.display = 'block';
+    }
+
+    if (msg.type === 'rooms_list') {
+      this.renderLobbyBrowserList(msg.rooms);
+    }
+    
+    if (msg.type === 'joined') {
+      this.game.players = msg.players.map(p => ({
+        name: p.name, hand: [], points: p.points || 0,
+        stats: { streetCred:0, community:0, wisdom:0, reputation:0 }, receipts: [],
+        ready: !!p.ready
+      }));
+      this.humanIndex = this.game.players.findIndex(p => p.name === msg.playerName);
+      this.game.pointsToWin = msg.pointsToWin || 7;
+      
+      msg.players.forEach(p => {
+        if (p.name !== msg.playerName) {
+          this.remoteAvatars.set(p.name, { x: p.x || 140, y: p.y || 124, origin: p.origin || 'BARBER', frame: 0 });
         }
-        document.getElementById('winnerName').textContent = msg.player;
-        document.getElementById('winnerCard').textContent = msg.card;
-        document.getElementById('winnerMeta').textContent = this.game.currentBlack.prompt;
-        this.show('roundResult');
+      });
+      
+      this.updateLobbySettingsDisplay();
+      this.renderLobbyPlayers();
+      this.renderGame();
+    }
+    
+    if (msg.type === 'room_players') {
+      this.game.players = msg.players.map(p => ({
+        name: p.name, hand: [], points: p.points || 0,
+        stats: { streetCred:0, community:0, wisdom:0, reputation:0 }, receipts: [],
+        ready: !!p.ready
+      }));
+      const myName = document.getElementById('joinName').value.trim() || document.getElementById('hostName').value.trim() || 'Player';
+      this.humanIndex = this.game.players.findIndex(p => p.name === myName);
+      if (this.humanIndex === -1) this.humanIndex = 0;
+      
+      msg.players.forEach(p => {
+        if (p.name !== myName) {
+          this.remoteAvatars.set(p.name, { x: p.x || 140, y: p.y || 124, origin: p.origin || 'BARBER', frame: 0 });
+        }
+      });
+      
+      this.renderLobbyPlayers();
+      this.renderGame();
+    }
+    
+    if (msg.type === 'settings') {
+      this.game.pointsToWin = msg.pointsToWin;
+      this.updateLobbySettingsDisplay();
+    }
+    
+    if (msg.type === 'avatar_update') {
+      if (msg.player && msg.player !== this.game.players[this.humanIndex]?.name) {
+        this.remoteAvatars.set(msg.player, {
+          x: msg.x, y: msg.y, origin: msg.origin, frame: msg.frame
+        });
       }
-      if (msg.type === 'chat') this.appendChat(msg.playerName, msg.text);
-      if (msg.type === 'system') {
-        this.appendChat('System', msg.text, true);
+    }
+    
+    if (msg.type === 'game_start') {
+      this.game.mode = MODE.ONLINE;
+      this.game.pointsToWin = msg.pointsToWin || 7;
+      this.game.dealAll();
+      
+      if (this.isHost) {
+        this.game.nextBlack();
+        this.ws.send(JSON.stringify({
+          type: 'black',
+          prompt: this.game.currentBlack.prompt,
+          hasDice: this.game.currentBlack.hasDice
+        }));
+      }
+      
+      this.game.advanceJudge();
+      this.game.players.forEach(p => this.game.refillHand(p));
+      this.show('game');
+      this.renderGame();
+      
+      if (this.isHost) {
+        setTimeout(() => this.runOnlineBotTurns(), 1000);
+      }
+    }
+    
+    if (msg.type === 'black') {
+      this.game.currentBlack = { raw: msg.prompt, prompt: msg.prompt, hasDice: !!msg.hasDice, effect: null };
+      this.renderGame();
+    }
+    
+    if (msg.type === 'roll') {
+      this.game.currentBlack.prompt = msg.prompt;
+      if (this.audioEngine) this.audioEngine.playDiceRoll();
+      const diceEl = document.getElementById('diceResult');
+      diceEl.innerHTML = '<div class="die">' + Math.floor(Math.random()*6+1) + '</div>';
+      this.renderGame();
+    }
+    
+    if (msg.type === 'submission') {
+      this.game.submissions.push({ player: msg.player, card: msg.card });
+      this.checkPhase();
+      if (this.isHost) {
+        this.runOnlineBotTurns();
+      }
+    }
+    
+    if (msg.type === 'judge_phase') {
+      this.enterJudging();
+      if (this.isHost) {
+        this.runOnlineBotTurns();
+      }
+    }
+    
+    if (msg.type === 'winner') {
+      if (this.audioEngine) this.audioEngine.playVictoryFanfare();
+      const w = this.game.players.find(p => p.name === msg.player);
+      if (w) {
+        w.points++;
+        AllianceSystem.resolveRound(this.game, w);
+        ReceiptSystem.resolveTrigger(this.game, w);
+        ReceiptSystem.awardWin(this.game, w);
+      }
+      document.getElementById('winnerName').textContent = msg.player;
+      document.getElementById('winnerCard').textContent = msg.card;
+      document.getElementById('winnerMeta').textContent = this.game.currentBlack.prompt;
+      this.show('roundResult');
+      this.updateCanvasCards();
+    }
+    
+    if (msg.type === 'chat') this.appendChat(msg.playerName, msg.text);
+    
+    if (msg.type === 'system') {
+      this.appendChat('System', msg.text, true);
+    }
+  },
+
+  matchmakingInterval: null,
+  matchmakingSeconds: 0,
+  toggleQuickPlayQueue(enable) {
+    const statusBox = document.getElementById('matchmakingStatus');
+    const qpBtn = document.getElementById('quickPlayBtn');
+    if (!statusBox || !qpBtn) return;
+    const myName = document.getElementById('hostName').value.trim() || document.getElementById('joinName').value.trim() || 'Player';
+    document.getElementById('joinName').value = myName;
+    const currentlyActive = (statusBox.style.display === 'block');
+    const targetEnable = (enable === undefined) ? !currentlyActive : !!enable;
+    if (targetEnable) {
+      if (!this.ws || this.ws.readyState !== 1) {
+        this.initOnlineLobbyConn();
+        const checkConn = setInterval(() => {
+          if (this.ws && this.ws.readyState === 1) {
+            clearInterval(checkConn);
+            const originKey = document.getElementById('characterOriginSelect').value;
+            const city = this.game.activeCity || 'Harlem';
+            this.ws.send(JSON.stringify({
+              type: 'join_queue',
+              playerName: myName,
+              characterOrigin: originKey,
+              cityTheme: city
+            }));
+          }
+        }, 100);
+      } else {
+        const originKey = document.getElementById('characterOriginSelect').value;
+        const city = this.game.activeCity || 'Harlem';
+        this.ws.send(JSON.stringify({
+          type: 'join_queue',
+          playerName: myName,
+          characterOrigin: originKey,
+          cityTheme: city
+        }));
+      }
+      statusBox.style.display = 'block';
+      qpBtn.textContent = 'QUEUED';
+      qpBtn.style.background = '#339488';
+      qpBtn.style.borderColor = '#339488';
+      qpBtn.style.color = '#ffffff';
+      this.matchmakingSeconds = 0;
+      document.getElementById('matchmakingTimer').textContent = '0s';
+      clearInterval(this.matchmakingInterval);
+      this.matchmakingInterval = setInterval(() => {
+        this.matchmakingSeconds++;
+        document.getElementById('matchmakingTimer').textContent = `${this.matchmakingSeconds}s`;
+      }, 1000);
+    } else {
+      if (this.ws && this.ws.readyState === 1) {
+        this.ws.send(JSON.stringify({ type: 'leave_queue' }));
+      }
+      statusBox.style.display = 'none';
+      qpBtn.textContent = 'QUICK PLAY';
+      qpBtn.style.background = '#f0ab43';
+      qpBtn.style.borderColor = '#f0ab43';
+      qpBtn.style.color = '#101116';
+      clearInterval(this.matchmakingInterval);
+      this.matchmakingInterval = null;
+    }
+  },
+
+  refreshLobbyBrowser() {
+    if (this.ws && this.ws.readyState === 1) {
+      this.ws.send(JSON.stringify({ type: 'list_rooms' }));
+    } else {
+      this.initOnlineLobbyConn();
+    }
+  },
+
+  startNoirPrototype() {
+    this.storyEngine = new NarrativeStoryEngine();
+    this.storyEngine.reset();
+    
+    this.game = new Game();
+    this.game.mode = MODE.OFFLINE;
+    this.game.isCampaign = false;
+    this.game.pointsToWin = 99;
+    
+    const myName = document.getElementById('hostName').value.trim() || 'Player';
+    this.game.players = [];
+    this.game.addPlayer(myName);
+    this.game.addPlayer("O.G. Big Dave (Master Barber)");
+    this.game.addPlayer("Stoop Homie");
+    this.game.addPlayer("Bodega Clerk");
+    
+    const originKey = document.getElementById('characterOriginSelect').value;
+    this.game.players[0].origin = originKey;
+    this.game.players[1].origin = 'BARBER';
+    this.game.players[2].origin = 'LOCAL_LEGEND';
+    this.game.players[3].origin = 'CORNER_MERCHANT';
+    
+    this.humanIndex = 0;
+    
+    const narrativeWhiteTexts = NARRATIVE_WHITE_DECK.map(c => c.text);
+    
+    this.game.dealAll = () => {
+      this.game.players.forEach(p => {
+        p.hand = [];
+        for (let i = 0; i < 7; i++) {
+          const cardText = narrativeWhiteTexts[Math.floor(Math.random() * narrativeWhiteTexts.length)];
+          p.hand.push(cardText);
+        }
+      });
+    };
+    
+    this.game.refillHand = (player) => {
+      while (player.hand.length < 7) {
+        const cardText = narrativeWhiteTexts[Math.floor(Math.random() * narrativeWhiteTexts.length)];
+        player.hand.push(cardText);
       }
     };
+    
+    this.game.dealAll();
+    
+    const beat = this.storyEngine.getCurrentBeat();
+    this.game.currentBlack = {
+      raw: beat.blackCard,
+      prompt: beat.blackCard,
+      hasDice: false,
+      effect: null
+    };
+    
+    this.game.judgeIndex = 0;
+    
+    document.getElementById('narrativeTextBox').style.display = 'block';
+    document.getElementById('stage-canvas').style.display = 'none';
+    
+    this.renderNarrativeBeat();
+    this.show('game');
+    this.renderGame();
+    this.runNarrativeBotTurns();
+  },
+  
+  renderNarrativeBeat() {
+    if (!this.storyEngine) return;
+    const beat = this.storyEngine.getCurrentBeat();
+    if (!beat) return;
+    
+    document.getElementById('narrativeBeatTitle').textContent = `BEAT ${beat.beat}: ${beat.title.toUpperCase()}`;
+    document.getElementById('narrativeText').textContent = beat.narrative;
+    document.getElementById('narrativeHeat').textContent = this.storyEngine.heat;
+    document.getElementById('narrativeTrust').textContent = this.storyEngine.trust;
+  },
+  
+  runNarrativeBotTurns() {
+    if (!this.storyEngine || !this.storyEngine.active) return;
+    const promptText = this.game.currentBlack ? this.game.currentBlack.prompt : '';
+    
+    this.game.players.forEach((p, idx) => {
+      if (idx !== 0) {
+        if (p.hand.length === 0) {
+          this.game.refillHand(p);
+        }
+        let bestIdx = 0;
+        let bestScore = -999;
+        p.hand.forEach((card, cIdx) => {
+          const score = this.evaluateCardSynergy(p.name, card, promptText);
+          if (score > bestScore) {
+            bestScore = score;
+            bestIdx = cIdx;
+          }
+        });
+        
+        const cardText = p.hand[bestIdx];
+        p.hand.splice(bestIdx, 1);
+        this.game.refillHand(p);
+        
+        this.game.submissions.push({ player: p.name, card: cardText });
+      }
+    });
+    
+    this.enterJudging();
+  },
+  
+  endNarrativeGame() {
+    this.storyEngine = null;
+    document.getElementById('narrativeTextBox').style.display = 'none';
+    document.getElementById('stage-canvas').style.display = 'block';
+    
+    const nextBtn = document.querySelector('#roundResult button');
+    if (nextBtn) {
+      nextBtn.setAttribute('onclick', 'app.nextRound()');
+      nextBtn.textContent = 'NEXT ROUND';
+    }
+    
+    this.show('setup');
+  },
+
+  renderLobbyBrowserList(rooms) {
+    const tbody = document.getElementById('lobbyBrowserTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    if (!rooms || rooms.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" style="padding:8px; text-align:center; color:#666;">No active rooms found. Create one to begin!</td>
+        </tr>
+      `;
+      return;
+    }
+    
+    rooms.forEach(room => {
+      const tr = document.createElement('tr');
+      tr.style.cssText = 'border-bottom:1px solid #2d313d; font-size:10px; font-family:"JetBrains Mono", monospace; vertical-align:middle;';
+      tr.innerHTML = `
+        <td style="padding:6px; color:#ffcd68; font-weight:bold;">${room.code}</td>
+        <td style="padding:6px; color:#f4f7ff;">${room.host}</td>
+        <td style="padding:6px; color:#a0aac2; text-align:center;">${room.count}</td>
+        <td style="padding:6px; color:#ff7a45; text-align:center;">${room.pointsToWin} PTS</td>
+        <td style="padding:6px; text-align:right;">
+          <button onclick="app.joinPublicRoom('${room.code.replace(/'/g, "\\'")}')" style="font-size:7px; padding:3px 6px; font-family:'Press Start 2P', monospace; margin:0;">JOIN</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  },
+
+  joinPublicRoom(code) {
+    document.getElementById('roomCode').value = code;
+    this.joinRoom();
+  },
+
+  updateLobbySettingsDisplay() {
+    const box = document.getElementById('lobbySettingsBox');
+    const control = document.getElementById('lobbyPointsControl');
+    if (!box || !control) return;
+    
+    box.style.display = 'block';
+    
+    if (this.isHost) {
+      control.innerHTML = `
+        <input type="number" id="lobbyPointsInput" min="1" max="50" value="${this.game.pointsToWin || 7}" 
+               style="width:50px; font-size:11px; text-align:center; padding:2px; font-family:'Press Start 2P', monospace; background:#101116; border:1px solid #2d313d; color:#ffcd68;"
+               onchange="app.changeLobbyPoints(this.value)"/>
+      `;
+    } else {
+      control.innerHTML = `
+        <span style="font-weight:bold; color:#ffcd68; font-family:'Press Start 2P', monospace; font-size:11px;">
+          ${this.game.pointsToWin || 7} PTS
+        </span>
+      `;
+    }
+  },
+
+  changeLobbyPoints(val) {
+    const pts = parseInt(val, 10) || 7;
+    this.game.pointsToWin = pts;
+    if (this.ws && this.ws.readyState === 1) {
+      this.ws.send(JSON.stringify({ type: 'settings', pointsToWin: pts }));
+    }
   },
 
   sendChat() {
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
-    if (!text || !this.ws) return;
-    this.ws.send(JSON.stringify({ type: 'chat', text }));
+    if (!text) return;
+    if (this.game.mode === MODE.ONLINE && this.ws && this.ws.readyState === 1) {
+      this.ws.send(JSON.stringify({ type: 'chat', text }));
+    }
+    const myName = this.game.players && this.game.players[this.humanIndex] 
+      ? this.game.players[this.humanIndex].name 
+      : (document.getElementById('hostName').value.trim() || 'You');
+    this.appendChat(myName, text);
     input.value = '';
+  },
+
+  sendPresetChat(text) {
+    if (this.game.mode === MODE.ONLINE && this.ws && this.ws.readyState === 1) {
+      this.ws.send(JSON.stringify({ type: 'chat', text }));
+    }
+    const myName = this.game.players && this.game.players[this.humanIndex] 
+      ? this.game.players[this.humanIndex].name 
+      : (document.getElementById('hostName').value.trim() || 'You');
+    this.appendChat(myName, text);
+    if (this.audioEngine) this.audioEngine.playCardFlip();
+  },
+
+  toggleLobbyReady() {
+    const myPlayer = this.game.players && this.game.players[this.humanIndex];
+    if (myPlayer) {
+      myPlayer.ready = !myPlayer.ready;
+      if (this.ws && this.ws.readyState === 1) {
+        this.ws.send(JSON.stringify({ type: 'ready', ready: myPlayer.ready }));
+      }
+      const readyBtn = document.getElementById('lobbyReadyBtn');
+      if (readyBtn) {
+        readyBtn.textContent = myPlayer.ready ? 'READY! 👑' : 'TIGHTEN UP (READY)';
+        readyBtn.style.borderColor = myPlayer.ready ? '#10b981' : '';
+      }
+      this.renderLobbyPlayers();
+      if (this.audioEngine) this.audioEngine.playCardFlip();
+    }
   },
 
   appendChat(name, text, muted) {
@@ -1043,8 +3902,12 @@ const app = {
   setWeather(mode) {
     const prev = this.game.weatherMode;
     this.game.weatherMode = mode;
+    if (this.weatherSystem) {
+      this.weatherSystem.setMode(mode);
+    }
     if (prev !== mode) {
       this.animateWeatherNotice(mode);
+      if (this.audioEngine) this.audioEngine.playSodiumHum();
     }
     this.renderGame();
   },
@@ -1086,7 +3949,7 @@ const app = {
       };
       localStorage.setItem('ck-save', JSON.stringify(state));
       const el = document.getElementById('saveStatus');
-      if (el) el.textContent = 'Game saved.';
+      if (el) el.textContent = 'State saved.';
       setTimeout(() => { if (el) el.textContent = ''; }, 1500);
     } catch (e) {
       alert('Save failed: ' + e.message);
@@ -1137,11 +4000,11 @@ const app = {
     if (!target) return alert('Enter an alliance target name');
     const result = AllianceSystem.proposeAlliance(this.game, this.game.players[this.humanIndex].name, target);
     input.value = '';
-    alert(result.status);
+    alert('Alliance ' + result.status);
   },
   resolveReceiptFromUI() {
     const trigger = ReceiptSystem.maybeTriggerReceipt(this.game);
-    alert(trigger ? 'Receipt trigger found.' : 'No receipt trigger this round.');
+    alert(trigger ? 'Receipt trigger: ' + trigger.resolutionPrompt : 'No receipt trigger this round.');
   },
 
   /* ---------- BLOCK MAP ---------- */
@@ -1172,10 +4035,17 @@ const app = {
     locations.forEach(loc => {
       const btn = document.createElement('button');
       btn.className = 'secondary';
-      btn.textContent = loc.name + ' (' + loc.city + ')';
+      btn.textContent = loc.name;
       btn.onclick = () => {
         this.setWeather('CLEAR');
-        alert('Traveled to ' + loc.name + '. Weather reset to Clear.');
+        this.game.activeCity = loc.city;
+        if (this.pixelEngine) {
+          this.pixelEngine.setCityTheme(loc.city);
+        }
+        if (this.audioEngine && this.audioEngine.isPlayingBGM) {
+          this.audioEngine.startBGM(loc.city);
+        }
+        alert('Traveled to ' + loc.name + ' (' + loc.city + '). Weather reset to Clear.');
         this.show('game');
         this.showPassDevice();
         this.renderGame();
@@ -1188,6 +4058,7 @@ const app = {
 /* Dice click on black card for judge */
 document.getElementById('blackCard').addEventListener('click', () => {
   if (!app.game.currentBlack?.hasDice) return;
+  if (app.audioEngine) app.audioEngine.playDiceRoll();
   const label = app.game.rollDice();
   const diceEl = document.getElementById('diceResult');
   diceEl.innerHTML = '<div class="die">' + Math.floor(Math.random()*6+1) + '</div>';
@@ -1195,7 +4066,12 @@ document.getElementById('blackCard').addEventListener('click', () => {
   app.renderGame();
 });
 
-/* key submit */
+/* Start game initializer */
+window.addEventListener('load', () => {
+  app.init();
+});
+
+/* key submit listener */
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && document.getElementById('game').classList.contains('active')) {
     const btn = document.getElementById('submitBtn');

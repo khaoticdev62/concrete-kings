@@ -219,19 +219,48 @@ class CardVisualRenderer {
     const w = this.width;
     const h = this.height;
 
+    let equippedBack = 'classic';
+    if (typeof window !== 'undefined' && window.localStorage) {
+      equippedBack = localStorage.getItem('ck-equipped-cardback') || 'classic';
+    }
+
     // Outer border
     ctx.lineWidth = 4;
-    ctx.strokeStyle = isSelected ? '#f0ab43' : category.primaryColor;
+    if (equippedBack === 'gold') {
+      ctx.strokeStyle = '#f0ab43';
+    } else if (equippedBack === 'neon') {
+      ctx.strokeStyle = '#6fe8d8';
+    } else if (equippedBack === 'graffiti') {
+      ctx.strokeStyle = '#ff7a45';
+    } else if (equippedBack === 'spades') {
+      ctx.strokeStyle = '#10b981';
+    } else {
+      ctx.strokeStyle = isSelected ? '#f0ab43' : category.primaryColor;
+    }
     ctx.strokeRect(2, 2, w - 4, h - 4);
 
     // Inner frame dividing line
-    ctx.strokeStyle = '#393e4d';
+    ctx.strokeStyle = (equippedBack === 'gold') ? '#ffe299' : '#393e4d';
     ctx.lineWidth = 2;
     ctx.strokeRect(6, 6, w - 12, h - 12);
     ctx.beginPath();
     ctx.moveTo(6, 120);
     ctx.lineTo(w - 6, 120);
     ctx.stroke();
+
+    // Corner highlights for premium card backs
+    if (equippedBack === 'gold') {
+      ctx.fillStyle = '#ffe299';
+      ctx.fillRect(4, 4, 3, 3);
+      ctx.fillRect(w - 7, 4, 3, 3);
+      ctx.fillRect(4, h - 7, 3, 3);
+      ctx.fillRect(w - 7, h - 7, 3, 3);
+    } else if (equippedBack === 'spades') {
+      ctx.fillStyle = '#10b981';
+      ctx.font = '8px monospace';
+      ctx.fillText('♠', 10, 15);
+      ctx.fillText('♠', w - 15, 15);
+    }
   }
 
   renderCategoryBadge(ctx, category) {

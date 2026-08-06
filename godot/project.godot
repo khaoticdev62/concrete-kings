@@ -1,0 +1,19 @@
+config_version=5
+
+[application]
+config/name="Concrete Kings: The Block Chronicles"
+config/features=PackedStringArray("4.2", "Forward Plus")
+
+[display]
+window/size/viewport_width=320
+window/size/viewport_height=180
+window/size/mode=0
+window/stretch/mode="viewport"
+window/stretch/aspect="keep"
+window/stretch/scale=1.0
+
+[rendering]
+textures/canvas_textures/default_texture_filter=0
+textures/vram_compression/import_etc2_astc=true
+2d/snap/snap_2d_transforms_to_pixel=true
+2d/snap/snap_2d_vertices_to_pixel=true

@@ -1,7 +1,7 @@
 /**
  * Concrete Kings: The Block Chronicles
  * Weather & Environmental Effects System (4-Frame Budget)
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 
 const WEATHER_MODES = {
@@ -13,7 +13,7 @@ const WEATHER_MODES = {
 };
 
 class WeatherEffectsSystem {
-  constructor(nativeWidth = 320, nativeHeight = 180) {
+  constructor(nativeWidth = 1280, nativeHeight = 720) {
     this.width = nativeWidth;
     this.height = nativeHeight;
     this.activeMode = WEATHER_MODES.RAIN;
@@ -64,7 +64,7 @@ class WeatherEffectsSystem {
   }
 
   /**
-   * Render active weather effects on native 320x180 canvas
+   * Render active weather effects on native 1280x720 canvas
    */
   render(ctx) {
     if (this.activeMode === WEATHER_MODES.CLEAR) return;

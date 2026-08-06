@@ -1,11 +1,11 @@
 /**
  * Concrete Kings: The Block Chronicles
- * Pixel Engine - HTML5 320x180 Native Canvas & Palette Swap Engine
- * Version: 1.0.0
+ * Pixel Engine - HTML5 1280x720 Native Canvas & Palette Swap Engine
+ * Version: 1.1.0
  */
 
-const NATIVE_WIDTH = 320;
-const NATIVE_HEIGHT = 180;
+const NATIVE_WIDTH = 1280;
+const NATIVE_HEIGHT = 720;
 
 const MASTER_PALETTE_64 = {
   blacks_grays: [
@@ -55,15 +55,16 @@ function calculateIntegerScale(viewportWidth, viewportHeight, nativeW = NATIVE_W
 }
 
 /**
- * PixelCanvasEngine manages native 320x180 resolution rendering to HTML5 display canvas.
+ * PixelCanvasEngine manages native 1280x720 resolution rendering to HTML5 display canvas.
  */
 class PixelCanvasEngine {
   constructor(displayCanvas, options = {}) {
     this.displayCanvas = displayCanvas;
     this.displayCtx = displayCanvas.getContext("2d", { alpha: false, desynchronized: true });
     
-    this.nativeWidth = options.nativeWidth || NATIVE_WIDTH;
-    this.nativeHeight = options.nativeHeight || NATIVE_HEIGHT;
+    this.highDetail = !!options.highDetail;
+    this.nativeWidth = options.nativeWidth || (this.highDetail ? 1280 : NATIVE_WIDTH);
+    this.nativeHeight = options.nativeHeight || (this.highDetail ? 720 : NATIVE_HEIGHT);
     this.activeCity = options.cityTheme || "Harlem";
     
     // Virtual native canvas for pixel rendering
@@ -121,7 +122,7 @@ class PixelCanvasEngine {
     this.displayCtx.fillStyle = "#08080a";
     this.displayCtx.fillRect(0, 0, this.displayCanvas.width, this.displayCanvas.height);
 
-    // Blit virtual 320x180 canvas scaled with crisp nearest-neighbor
+    // Blit virtual canvas scaled with crisp nearest-neighbor
     this.displayCtx.drawImage(
       this.virtualCanvas,
       0, 0, this.nativeWidth, this.nativeHeight,
@@ -179,19 +180,193 @@ class SpriteRenderer {
       }
     }
 
-    this.offscreenCtx.putImageData(imgData, 0, 0);
-    targetCtx.drawImage(this.offscreenCanvas, Math.floor(dx), Math.floor(dy));
-  }
-}
-
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    NATIVE_WIDTH,
-    NATIVE_HEIGHT,
-    MASTER_PALETTE_64,
-    CITY_THEME_OVERRIDES,
-    calculateIntegerScale,
-    PixelCanvasEngine,
-    SpriteRenderer
-  };
-}
+     this.offscreenCtx.putImageData(imgData, 0, 0);
+     targetCtx.drawImage(this.offscreenCanvas, Math.floor(dx), Math.floor(dy));
+   }
+ }
+ 
+ function drawHighDetailCharacterSprite(ctx, origin, px, py, frame, isLarge, isMoving, labelName) {
+   const scale = isLarge ? 4 : 1;
+   const yBob = isMoving ? (frame % 2) * (isLarge ? 8 : 2) : (frame === 1 ? (isLarge ? 4 : 1) : 0);
+   const legOffset = isMoving ? (frame === 1 ? (isLarge ? 8 : 2) : (frame === 3 ? (isLarge ? -8 : -2) : 0)) : 0;
+ 
+   // 1. Draw Drop Shadow (64-bit ambient shadow)
+   ctx.fillStyle = 'rgba(8, 8, 10, 0.35)';
+   if (isLarge) {
+     ctx.beginPath();
+     ctx.ellipse(px + 64, py + 48, 36, 8, 0, 0, Math.PI * 2);
+     ctx.fill();
+   } else {
+     ctx.beginPath();
+     ctx.ellipse(px + 16, py + 11, 10, 2.5, 0, 0, Math.PI * 2);
+     ctx.fill();
+   }
+ 
+   // 2. Head & Facial Details
+   ctx.fillStyle = origin.skinColor;
+   if (isLarge) {
+     ctx.fillRect(px + 48, py - 72 + yBob, 32, 32); // Head base
+     
+     // Melanin shading shadow (left side & bottom)
+     ctx.fillStyle = 'rgba(20, 10, 7, 0.25)';
+     ctx.fillRect(px + 48, py - 72 + yBob, 8, 32);
+     ctx.fillRect(px + 48, py - 48 + yBob, 32, 8);
+     
+     // Cool Shades / Sunglasses
+     ctx.fillStyle = '#101116';
+     ctx.fillRect(px + 54, py - 64 + yBob, 22, 8); // Glasses base
+     ctx.fillStyle = '#f4f7ff';
+     ctx.fillRect(px + 56, py - 64 + yBob, 2, 2);  // Highlight left
+     ctx.fillRect(px + 68, py - 64 + yBob, 2, 2);  // Highlight right
+   } else {
+     ctx.fillRect(px + 12, py - 18 + yBob, 8, 8);
+     
+     // Skin shadow
+     ctx.fillStyle = 'rgba(20, 10, 7, 0.25)';
+     ctx.fillRect(px + 12, py - 18 + yBob, 2, 8);
+     
+     // Simple shades
+     ctx.fillStyle = '#101116';
+     ctx.fillRect(px + 13, py - 16 + yBob, 6, 2);
+   }
+ 
+   // 3. Hair / Dreads / Afro styling
+   ctx.fillStyle = origin.hairColor;
+   if (isLarge) {
+     ctx.fillRect(px + 40, py - 80 + yBob, 48, 16); // Hair base
+     
+     // 64-bit hairline trim/highlights
+     ctx.fillStyle = origin.skinColor;
+     ctx.fillRect(px + 44, py - 66 + yBob, 4, 2);  // Sideburn left
+     ctx.fillRect(px + 80, py - 66 + yBob, 4, 2);  // Sideburn right
+     
+     // Add textures for locks or afro
+     ctx.fillStyle = '#181920';
+     for (let hx = px + 42; hx < px + 88; hx += 8) {
+       ctx.fillRect(hx, py - 78 + yBob, 2, 8); // texture strands
+     }
+   } else {
+     ctx.fillRect(px + 10, py - 20 + yBob, 12, 4);
+     
+     // Tiny sideburn highlight
+     ctx.fillStyle = origin.skinColor;
+     ctx.fillRect(px + 11, py - 17 + yBob, 1, 1);
+   }
+ 
+   // 4. Gold Rope Chain Accent
+   ctx.fillStyle = '#f0ab43';
+   if (isLarge) {
+     ctx.fillRect(px + 56, py - 40 + yBob, 16, 6);
+     ctx.fillStyle = '#ffe299'; // Shine
+     ctx.fillRect(px + 60, py - 40 + yBob, 4, 2);
+     ctx.fillRect(px + 68, py - 38 + yBob, 2, 2);
+   } else {
+     ctx.fillRect(px + 14, py - 10 + yBob, 4, 2);
+     ctx.fillStyle = '#ffe299';
+     ctx.fillRect(px + 15, py - 10 + yBob, 1, 1);
+   }
+ 
+   // 5. Outfit / Hoodie / Varsity Jacket
+   ctx.fillStyle = origin.outfitColor;
+   if (isLarge) {
+     ctx.fillRect(px + 40, py - 40 + yBob, 48, 40); // Hoodie base
+     
+     // Jacket borders/cuffs (contrasting black outline)
+     ctx.fillStyle = '#101116';
+     ctx.fillRect(px + 38, py - 40 + yBob, 2, 40); // left sleeve edge
+     ctx.fillRect(px + 88, py - 40 + yBob, 2, 40); // right sleeve edge
+     
+     // Hoodie draws/strings details
+     ctx.fillStyle = '#f4f7ff';
+     ctx.fillRect(px + 60, py - 34 + yBob, 2, 10);
+     ctx.fillRect(px + 66, py - 34 + yBob, 2, 10);
+   } else {
+     ctx.fillRect(px + 10, py - 10 + yBob, 12, 10);
+   }
+ 
+   // 6. Apron (Barber specific)
+   if (origin.apronColor) {
+     ctx.fillStyle = origin.apronColor;
+     if (isLarge) {
+       ctx.fillRect(px + 48, py - 36 + yBob, 32, 36);
+       
+       // Apron leather straps & pockets
+       ctx.fillStyle = '#6e3e14'; // Brown straps
+       ctx.fillRect(px + 48, py - 36 + yBob, 32, 4);
+       ctx.fillRect(px + 52, py - 32 + yBob, 2, 32);
+       ctx.fillRect(px + 74, py - 32 + yBob, 2, 32);
+       
+       // Scissors pocket detail
+       ctx.fillStyle = '#2d313d';
+       ctx.fillRect(px + 60, py - 16 + yBob, 8, 8);
+       ctx.fillStyle = '#a0aac2'; // Silver scissors loop
+       ctx.fillRect(px + 62, py - 20 + yBob, 4, 4);
+     } else {
+       ctx.fillRect(px + 12, py - 9 + yBob, 8, 9);
+       ctx.fillStyle = '#6e3e14';
+       ctx.fillRect(px + 12, py - 9 + yBob, 8, 1);
+     }
+   }
+ 
+   // 7. Pants / Legs
+   ctx.fillStyle = origin.pantsColor;
+   if (isLarge) {
+     ctx.fillRect(px + 44 + legOffset, py, 16, 40);
+     ctx.fillRect(px + 68 - legOffset, py, 16, 40);
+     
+     // Pants shadow wrinkles
+     ctx.fillStyle = 'rgba(8, 8, 10, 0.2)';
+     ctx.fillRect(px + 44 + legOffset, py + 12, 16, 4);
+     ctx.fillRect(px + 68 - legOffset, py + 12, 16, 4);
+   } else {
+     ctx.fillRect(px + 11 + legOffset, py, 4, 10);
+     ctx.fillRect(px + 17 - legOffset, py, 4, 10);
+   }
+ 
+   // 8. Premium Sneakers
+   ctx.fillStyle = '#f4f7ff';
+   if (isLarge) {
+     ctx.fillRect(px + 36 + legOffset, py + 40, 24, 12);
+     ctx.fillRect(px + 68 - legOffset, py + 40, 24, 12);
+     
+     ctx.fillStyle = origin.outfitColor;
+     ctx.fillRect(px + 42 + legOffset, py + 44, 12, 2);
+     ctx.fillRect(px + 74 - legOffset, py + 44, 12, 2);
+     
+     ctx.fillStyle = '#2d313d';
+     ctx.fillRect(px + 36 + legOffset, py + 50, 24, 2);
+     ctx.fillRect(px + 68 - legOffset, py + 50, 24, 2);
+   } else {
+     ctx.fillRect(px + 9 + legOffset, py + 10, 6, 3);
+     ctx.fillRect(px + 17 - legOffset, py + 10, 6, 3);
+     
+     ctx.fillStyle = '#2d313d';
+     ctx.fillRect(px + 9 + legOffset, py + 12, 6, 1);
+     ctx.fillRect(px + 17 - legOffset, py + 12, 6, 1);
+   }
+ 
+   // 9. Floating Name Tag
+   if (labelName) {
+     ctx.fillStyle = '#ffffff';
+     ctx.font = isLarge ? 'bold 12px monospace' : '5px monospace';
+     ctx.textAlign = 'center';
+     ctx.fillText(labelName.toUpperCase(), px + (isLarge ? 64 : 16), py - (isLarge ? 90 : 24));
+   }
+ }
+ 
+ if (typeof window !== 'undefined') {
+   window.drawHighDetailCharacterSprite = drawHighDetailCharacterSprite;
+ }
+ 
+ if (typeof module !== 'undefined' && module.exports) {
+   module.exports = {
+     NATIVE_WIDTH,
+     NATIVE_HEIGHT,
+     MASTER_PALETTE_64,
+     CITY_THEME_OVERRIDES,
+     calculateIntegerScale,
+     PixelCanvasEngine,
+     SpriteRenderer,
+     drawHighDetailCharacterSprite
+   };
+ }

@@ -67,8 +67,9 @@
   const citySelect = document.getElementById("city-select");
 
   const engine = new PixelCanvasEngine(canvas, {
-    nativeWidth: 320,
-    nativeHeight: 180,
+    nativeWidth: 1280,
+    nativeHeight: 720,
+    highDetail: true,
     cityTheme: "Harlem"
   });
 
@@ -103,65 +104,65 @@
 
     // Draw horizon sky gradient
     ctx.fillStyle = "#11233f";
-    ctx.fillRect(0, 0, 320, 60);
+    ctx.fillRect(0, 0, 1280, 240);
 
     // Draw streetlamps in background
     ctx.fillStyle = "#ffc475";
-    ctx.fillRect(40, 70 - (frame % 2), 4, 4); // Streetlamp pulse
-    ctx.fillRect(270, 70 - (frame % 2), 4, 4);
+    ctx.fillRect(160, 280 - (frame % 2) * 8, 16, 16); // Streetlamp pulse
+    ctx.fillRect(1080, 280 - (frame % 2) * 8, 16, 16);
 
     ctx.fillStyle = "#666e82";
-    ctx.fillRect(41, 74, 2, 46);
-    ctx.fillRect(271, 74, 2, 46);
+    ctx.fillRect(328, 328, 8, 184);
+    ctx.fillRect(1088, 328, 8, 184);
 
     // Draw procedural building facade
     ctx.fillStyle = brickColor;
-    ctx.fillRect(60, 40, 200, 80);
+    ctx.fillRect(240, 160, 800, 320);
 
     // Draw windows
     ctx.fillStyle = "#ffe299";
     for (let row = 0; row < 2; row++) {
       for (let col = 0; col < 5; col++) {
-        ctx.fillRect(75 + col * 35, 52 + row * 25, 16, 16);
+        ctx.fillRect(300 + col * 140, 208 + row * 100, 64, 64);
       }
     }
 
     // Draw sidewalk
     ctx.fillStyle = "#474d5e";
-    ctx.fillRect(0, 120, 320, 20);
+    ctx.fillRect(0, 480, 1280, 80);
 
     // Draw asphalt road
     ctx.fillStyle = "#101116";
-    ctx.fillRect(0, 140, 320, 40);
+    ctx.fillRect(0, 560, 1280, 160);
 
     // Draw road markings
     ctx.fillStyle = "#ffcd68";
-    for (let x = 10; x < 320; x += 40) {
-      ctx.fillRect(x, 158, 20, 4);
+    for (let x = 40; x < 1280; x += 160) {
+      ctx.fillRect(x, 632, 80, 16);
     }
 
-    // Draw Barber character (32x32 bounding box) with 4-frame breathing idle
-    const heroY = 98 - (frame === 1 ? 1 : 0);
+    // Draw Barber character (128x128 bounding box) with 4-frame breathing idle
+    const heroY = 392 - (frame === 1 ? 4 : 0);
     ctx.fillStyle = "#26120b"; // Skin base
-    ctx.fillRect(148, heroY, 8, 8); // Head
+    ctx.fillRect(592, heroY, 32, 32); // Head
 
     ctx.fillStyle = "#3d2218"; // Locs
-    ctx.fillRect(146, heroY - 2, 12, 4);
+    ctx.fillRect(576, heroY - 8, 48, 16);
 
     ctx.fillStyle = "#d9382e"; // Hoodie
-    ctx.fillRect(144, heroY + 8, 16, 10);
+    ctx.fillRect(576, heroY + 32, 64, 40);
 
     ctx.fillStyle = "#f4f7ff"; // Apron
-    ctx.fillRect(147, heroY + 9, 10, 9);
+    ctx.fillRect(588, heroY + 36, 40, 36);
 
     ctx.fillStyle = "#274f80"; // Jeans
-    ctx.fillRect(146, heroY + 18, 12, 10);
+    ctx.fillRect(584, heroY + 72, 48, 40);
 
     ctx.fillStyle = "#f4f7ff"; // Fresh sneakers
-    ctx.fillRect(144, heroY + 28, 6, 4);
-    ctx.fillRect(154, heroY + 28, 6, 4);
+    ctx.fillRect(576, heroY + 112, 24, 16);
+    ctx.fillRect(616, heroY + 112, 24, 16);
 
-    // Present virtual 320x180 to screen
+    // Present virtual canvas to screen
     engine.present();
     requestAnimationFrame(renderLoop);
   }

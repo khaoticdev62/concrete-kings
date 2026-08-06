@@ -8,6 +8,7 @@ const BOUNDARY = "document.getElementById('blackCard')";
 
 function loadGameModule() {
   const cardsScript = fs.readFileSync(CARDS_JS, 'utf8');
+  const storyScript = fs.readFileSync(path.join(__dirname, '..', '..', 'src', 'pixel_engine', 'story-engine.js'), 'utf8');
   const html = fs.readFileSync(INDEX_HTML, 'utf8');
   const match = html.match(/<script>([\s\S]*)<\/script>/);
   if (!match) throw new Error('index.html: could not find inline <script> block');
@@ -19,7 +20,7 @@ function loadGameModule() {
   const testable = script.slice(0, boundaryIndex);
   const context = { console, Math };
   vm.createContext(context);
-  const wrapped = `${cardsScript}\n${testable}\n({ Deck, Game, ReceiptSystem, AllianceSystem, RECEIPT_POOL, BLACK_CARDS, WHITE_CARDS, DICE_EFFECTS });`;
+  const wrapped = `${cardsScript}\n${storyScript}\n${testable}\n({ Deck, Game, ReceiptSystem, AllianceSystem, RECEIPT_POOL, BLACK_CARDS, WHITE_CARDS, DICE_EFFECTS, app, NarrativeStoryEngine, NARRATIVE_BEATS, ENDINGS });`;
   return vm.runInContext(wrapped, context);
 }
 

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Concrete Kings — Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@400;600;700&family=Unbounded:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh;
+    font-family: 'Plus Jakarta Sans', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(180deg, #1a1a1a 0%, #2b1d0e 100%);
+    color: #f3e7cf;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 4px;
+  }
+  h1 {
+    margin: 0; font-size: 28px; letter-spacing: 1px;
+    background: linear-gradient(90deg, #f7c948, #ff6b35);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .pill {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+    padding: 8px 12px; border-radius: 999px; font-size: 13px;
+  }
+  .panel {
+    background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; padding: 16px; margin-top: 12px;
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+  .muted { font-size: 13px; opacity: .8; }
+  a { color: #ff6b35; text-decoration: none; }
+  a:hover { color: #e04b00; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>CONCRETE KINGS — DESIGN SYSTEM</h1>
+    <div class="pill">Claude Design Outputs</div>
+  </header>
+
+  <div class="panel">
+    <h2>Fully Wired Files</h2>
+    <p class="muted">These pages include bundled runtime dependencies and are ready to run.</p>
+    <div class="grid-2" style="margin-top:10px;">
+      <div>
+        <a href="./Concrete Kings Game Interfaces.html">
+          <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:14px;">
+            <div style="font-weight:800; font-size:15px;">Game Interfaces</div>
+            <div class="muted" style="margin-top:6px;">Character create, game board, judge, results, block map, cookout, game over</div>
+          </div>
+        </a>
+      </div>
+      <div>
+        <a href="./Concrete Kings Card Design System.html">
+          <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:14px;">
+            <div style="font-weight:800; font-size:15px;">Card Design System</div>
+            <div class="muted" style="margin-top:6px;">Black/white cards, variants, states, typography, color, and anatomy</div>
+          </div>
+        </a>
+      </div>
+      <div>
+        <a href="./Concrete Kings Card Animation System.html">
+          <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:14px;">
+            <div style="font-weight:800; font-size:15px;">Card Animations</div>
+            <div class="muted" style="margin-top:6px;">Deal, submit, hover, dice, weather, and feedback animations</div>
+          </div>
+        </a>
+      </div>
+      <div>
+        <a href="./Concrete Kings Block Map.html">
+          <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:14px;">
+            <div style="font-weight:800; font-size:15px;">Block Map</div>
+            <div class="muted" style="margin-top:6px;">City themes, locations, weather, events, audio, and settings</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Source Files</h2>
+    <p class="muted">These are Claude Design source bundles that depend on `wireframes/support.js` and React 18.</p>
+    <div class="grid-2" style="margin-top:10px;">
+      <a href="./wireframes/game-interfaces-standalone-src.html">game-interfaces-standalone-src.html</a>
+      <a href="./wireframes/card-design-system-standalone-src.html">card-design-system-standalone-src.html</a>
+      <a href="./wireframes/card-animation-system-standalone-src.html">card-animation-system-standalone-src.html</a>
+      <a href="./wireframes/block-map-standalone-src.html">block-map-standalone-src.html</a>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Dependencies</h2>
+    <p class="muted">The four top-level bundled pages include dependencies inline. For source pages, these runtime files are required:</p>
+    <div style="margin-top:8px;">
+      <a href="./wireframes/support.js">support.js</a> · <a href="./wireframes/city-engine.js">city-engine.js</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

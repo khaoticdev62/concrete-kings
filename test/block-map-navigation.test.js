@@ -19,9 +19,9 @@ test('Block Map Navigation: 8 Character Origins are defined', () => {
 });
 
 test('Block Map Navigation: BlockMapController adheres to 4-frame animation budget and canvas bounds', () => {
-  const controller = new BlockMapController({ startX: 100, startY: 124 });
-  assert.equal(controller.x, 100);
-  assert.equal(controller.y, 124);
+  const controller = new BlockMapController({ startX: 300, startY: 500 });
+  assert.equal(controller.x, 300);
+  assert.equal(controller.y, 500);
   assert.equal(controller.animFrame, 0);
 
   for (let i = 0; i < 40; i++) {
@@ -29,12 +29,12 @@ test('Block Map Navigation: BlockMapController adheres to 4-frame animation budg
   }
 
   assert.ok(controller.animFrame >= 0 && controller.animFrame <= 3, 'Frame budget stays within 0..3');
-  assert.ok(controller.x >= 10 && controller.x <= 280, 'Player stays inside horizontal canvas bounds');
-  assert.ok(controller.y >= 118 && controller.y <= 142, 'Player stays inside sidewalk bounds');
+  assert.ok(controller.x >= 10 && controller.x <= 1130, 'Player stays inside horizontal canvas bounds');
+  assert.ok(controller.y >= 150 && controller.y <= 540, 'Player stays inside sidewalk bounds');
 });
 
 test('Block Map Navigation: Proximity trigger accurately detects active stoop hotspot', () => {
-  const controller = new BlockMapController({ startX: 80, startY: 124 });
+  const controller = new BlockMapController({ startX: 300, startY: 500 });
   controller.update();
   assert.ok(controller.activeHotspot);
   assert.equal(controller.activeHotspot.id, 'BARBER_SHOP');

@@ -1,7 +1,7 @@
 /**
  * Concrete Kings: The Block Chronicles
  * Interactive Block Map Navigation & Walkable Character System
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 
 const CHARACTER_ORIGINS = {
@@ -79,15 +79,28 @@ const CHARACTER_ORIGINS = {
   }
 };
 
+let drawHighDetailCharacterSpriteFn;
+if (typeof window !== 'undefined' && window.drawHighDetailCharacterSprite) {
+  drawHighDetailCharacterSpriteFn = window.drawHighDetailCharacterSprite;
+} else if (typeof require !== 'undefined') {
+  try {
+    drawHighDetailCharacterSpriteFn = require('./pixel-engine.js').drawHighDetailCharacterSprite;
+  } catch (e) {
+    drawHighDetailCharacterSpriteFn = () => {};
+  }
+} else {
+  drawHighDetailCharacterSpriteFn = () => {};
+}
+
 class BlockMapController {
   constructor(options = {}) {
-    this.width = options.width || 320;
-    this.height = options.height || 180;
+    this.width = options.width || 1280;
+    this.height = options.height || 720;
 
     // Player State
-    this.x = options.startX || 150;
-    this.y = options.startY || 124;
-    this.speed = 2; // Pixels per tick
+    this.x = options.startX || 600;
+    this.y = options.startY || 550;
+    this.speed = 4; // Pixels per tick
     this.facing = 'RIGHT'; // LEFT, RIGHT
     this.isMoving = false;
 
@@ -100,9 +113,9 @@ class BlockMapController {
 
     // Hotspot trigger definitions
     this.hotspots = [
-      { id: 'BARBER_SHOP', name: 'Barber Shop Stoop', x: 80, y: 124, width: 24, prompt: 'Press Enter to get a lineup' },
-      { id: 'BODEGA', name: 'Corner Bodega', x: 160, y: 124, width: 32, prompt: 'Press Enter to enter Bodega' },
-      { id: 'CHESS_PARK', name: 'Park Chess Tables', x: 240, y: 124, width: 24, prompt: 'Press Enter to play chess' }
+      { id: 'BARBER_SHOP', name: 'Barber Shop Stoop', x: 300, y: 550, width: 90, prompt: 'Press Enter to get a lineup' },
+      { id: 'BODEGA', name: 'Corner Bodega', x: 600, y: 550, width: 120, prompt: 'Press Enter to enter Bodega' },
+      { id: 'CHESS_PARK', name: 'Park Chess Tables', x: 900, y: 550, width: 90, prompt: 'Press Enter to play chess' }
     ];
 
     this.activeHotspot = null;
@@ -150,9 +163,9 @@ class BlockMapController {
 
     this.isMoving = (dx !== 0 || dy !== 0);
 
-    // Apply movement with bounds checking (Sidewalk bounds y: 118..142)
-    const nextX = Math.max(10, Math.min(this.width - 40, this.x + dx));
-    const nextY = Math.max(118, Math.min(142, this.y + dy));
+    // Apply movement with bounds checking
+    const nextX = Math.max(10, Math.min(this.width - 150, this.x + dx));
+    const nextY = Math.max(150, Math.min(this.height - 180, this.y + dy));
 
     this.x = nextX;
     this.y = nextY;
@@ -178,71 +191,37 @@ class BlockMapController {
   }
 
   /**
-   * Render 32x32 Walkable Character & Hotspots onto 320x180 Canvas
+   * Render 128x128 Walkable Character & Hotspots onto 1280x720 Canvas
    */
   render(ctx) {
     // 1. Render Hotspot Indicators
     this.hotspots.forEach(spot => {
       const isNear = (this.activeHotspot === spot);
       ctx.fillStyle = isNear ? '#f0ab43' : '#474d5e';
-      ctx.fillRect(spot.x, spot.y + 12, 16, 2);
+      ctx.fillRect(spot.x, spot.y + 45, 60, 8);
 
       if (isNear) {
         // Render 4-frame pulse icon over active hotspot
         ctx.fillStyle = '#ffc475';
-        ctx.fillRect(spot.x + 6, spot.y - 12 - (this.animFrame % 2), 4, 4);
+        ctx.fillRect(spot.x + 20, spot.y - 45 - (this.animFrame % 2) * 4, 16, 16);
       }
     });
 
-    // 2. Render Player Character (32x32 bounding box)
+    // 2. Render Player Character (128x128 bounding box) using 64-bit high detail sprite
     const frame = this.animFrame;
     const px = Math.floor(this.x);
     const py = Math.floor(this.y);
-
-    // Anim A-06 Breathing Idle vs Anim A-07 Walk Step
-    const yBob = this.isMoving ? (frame % 2) * 2 : (frame === 1 ? 1 : 0);
-    const legOffset = this.isMoving ? (frame === 1 ? 2 : (frame === 3 ? -2 : 0)) : 0;
-
-    // Head & Hair
-    ctx.fillStyle = this.origin.skinColor;
-    ctx.fillRect(px + 12, py - 18 + yBob, 8, 8); // Head
-
-    ctx.fillStyle = this.origin.hairColor;
-    ctx.fillRect(px + 10, py - 20 + yBob, 12, 4); // Hair / Locs / Afro
-
-    // Gold rope chain accent
-    ctx.fillStyle = '#f0ab43';
-    ctx.fillRect(px + 15, py - 9 + yBob, 2, 2);
-
-    // Jacket / Hoodie
-    ctx.fillStyle = this.origin.outfitColor;
-    ctx.fillRect(px + 10, py - 10 + yBob, 12, 10);
-
-    // Apron (Barber specific)
-    if (this.origin.apronColor) {
-      ctx.fillStyle = this.origin.apronColor;
-      ctx.fillRect(px + 12, py - 9 + yBob, 8, 9);
-    }
-
-    // Pants / Legs
-    ctx.fillStyle = this.origin.pantsColor;
-    ctx.fillRect(px + 11 + legOffset, py, 4, 10);
-    ctx.fillRect(px + 17 - legOffset, py, 4, 10);
-
-    // Fresh White Sneakers
-    ctx.fillStyle = '#f4f7ff';
-    ctx.fillRect(px + 9 + legOffset, py + 10, 6, 3);
-    ctx.fillRect(px + 17 - legOffset, py + 10, 6, 3);
+    drawHighDetailCharacterSpriteFn(ctx, this.origin, px, py, frame, true, this.isMoving);
 
     // 3. Render Active Hotspot Banner Prompt
     if (this.activeHotspot) {
       ctx.fillStyle = 'rgba(8, 8, 10, 0.85)';
-      ctx.fillRect(40, 160, 240, 16);
+      ctx.fillRect(160, 580, 960, 64);
 
       ctx.fillStyle = '#ffc475';
-      ctx.font = 'bold 9px monospace';
+      ctx.font = 'bold 32px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText(this.activeHotspot.prompt.toUpperCase(), 160, 171);
+      ctx.fillText(this.activeHotspot.prompt.toUpperCase(), 640, 620);
     }
   }
 }
