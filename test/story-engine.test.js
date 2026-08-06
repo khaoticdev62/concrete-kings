@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { NarrativeStoryEngine, NARRATIVE_BEATS, ENDINGS } = require('../src/pixel_engine/story-engine.js');
+const { NarrativeStoryEngine, NARRATIVE_BEATS, ENDINGS, ORIGIN_TAG_AFFINITY } = require('../src/pixel_engine/story-engine.js');
 
 test('Story Engine: initializes with correct defaults', () => {
   const engine = new NarrativeStoryEngine();
@@ -61,16 +61,55 @@ test('Story Engine: ending triggers based on threshold (The Trap Ending)', () =>
 test('Story Engine: ending triggers based on threshold (The Exit Ending)', () => {
   const engine = new NarrativeStoryEngine();
   engine.reset();
-  
+
   // Play 5 family/church cards to trigger The Exit ending
   engine.applyWinnerCard("Grandma's secret sweet potato pie recipe"); // Beat 1 (+1 Trust)
   engine.applyWinnerCard("Grandma's secret sweet potato pie recipe"); // Beat 2 (+1 Trust -> 2 Trust)
   engine.applyWinnerCard("Grandma's secret sweet potato pie recipe"); // Beat 3 (+1 Trust -> 3 Trust)
   engine.applyWinnerCard("Grandma's secret sweet potato pie recipe"); // Beat 4 (+2 Trust -> 5 Trust)
   const result = engine.applyWinnerCard("Grandma's secret sweet potato pie recipe"); // Beat 5 (+1 Trust -> 6 Trust)
-  
+
   assert.equal(result.ended, true);
   assert.equal(result.endingTitle, "THE EXIT");
   assert.ok(result.endingText.includes("out clean"));
   assert.equal(engine.active, false);
+});
+
+test('Story Engine: exposes an origin-to-tag affinity table for all 8 origins', () => {
+  assert.deepEqual(ORIGIN_TAG_AFFINITY, {
+    BARBER: 'family',
+    STREET_SCHOLAR: 'church',
+    LOCAL_LEGEND: 'street',
+    CORNER_MERCHANT: 'food',
+    COMMUNITY_ORGANIZER: 'family',
+    UNDERGROUND_DJ: 'humor',
+    BLOCK_ARCHITECT: 'church',
+    HUSTLE_VETERAN: 'street',
+  });
+});
+
+test('Story Engine: reset() with no origin keeps existing zero-arg behavior', () => {
+  const engine = new NarrativeStoryEngine();
+  engine.reset();
+  assert.equal(engine.origin, null);
+});
+
+test('Story Engine: origin bonus reduces heat and boosts trust when winning tag matches affinity', () => {
+  const engine = new NarrativeStoryEngine();
+  engine.reset('LOCAL_LEGEND'); // ORIGIN_TAG_AFFINITY.LOCAL_LEGEND === 'street'
+  // Beat 1 street card base consequence: heat +1, trust +0
+  const result = engine.applyWinnerCard("A Glock 19 with the serial scratched off");
+  assert.equal(engine.heat, 0, 'bonus should reduce the +1 base heat down to 0');
+  assert.equal(engine.trust, 1, 'bonus should add +1 on top of the +0 base trust');
+  assert.equal(result.ended, false);
+});
+
+test('Story Engine: origin bonus does not apply when winning tag does not match affinity', () => {
+  const engine = new NarrativeStoryEngine();
+  engine.reset('BARBER'); // ORIGIN_TAG_AFFINITY.BARBER === 'family'
+  // Beat 1 street card base consequence: heat +1, trust +0 (BARBER favors family, not street)
+  const result = engine.applyWinnerCard("A Glock 19 with the serial scratched off");
+  assert.equal(engine.heat, 1, 'no bonus: heat should equal the base +1');
+  assert.equal(engine.trust, 0, 'no bonus: trust should equal the base +0');
+  assert.equal(result.ended, false);
 });

@@ -116,6 +116,17 @@ const ENDINGS = {
   }
 };
 
+const ORIGIN_TAG_AFFINITY = {
+  BARBER: 'family',
+  STREET_SCHOLAR: 'church',
+  LOCAL_LEGEND: 'street',
+  CORNER_MERCHANT: 'food',
+  COMMUNITY_ORGANIZER: 'family',
+  UNDERGROUND_DJ: 'humor',
+  BLOCK_ARCHITECT: 'church',
+  HUSTLE_VETERAN: 'street',
+};
+
 class NarrativeStoryEngine {
   constructor() {
     this.beat = 1;
@@ -123,14 +134,16 @@ class NarrativeStoryEngine {
     this.trust = 0;
     this.active = false;
     this.history = [];
+    this.origin = null;
   }
 
-  reset() {
+  reset(originKey = null) {
     this.beat = 1;
     this.heat = 0;
     this.trust = 0;
     this.active = true;
     this.history = [];
+    this.origin = originKey;
   }
 
   getCurrentBeat() {
@@ -144,8 +157,15 @@ class NarrativeStoryEngine {
     if (!currentBeatData) return { text: "No more beats", ended: true };
 
     const consequence = currentBeatData.tagConsequences[category] || { heat: 0, trust: 0, text: "Nothing happens." };
-    this.heat = Math.max(0, this.heat + consequence.heat);
-    this.trust = Math.max(0, this.trust + consequence.trust);
+    const originBonus = this.origin && ORIGIN_TAG_AFFINITY[this.origin] === category;
+    let heatDelta = consequence.heat;
+    let trustDelta = consequence.trust;
+    if (originBonus) {
+      if (heatDelta > 0) heatDelta -= 1;
+      trustDelta += 1;
+    }
+    this.heat = Math.max(0, this.heat + heatDelta);
+    this.trust = Math.max(0, this.trust + trustDelta);
 
     this.history.push({
       beat: this.beat,
@@ -182,7 +202,8 @@ if (typeof module !== 'undefined' && module.exports) {
     NarrativeStoryEngine,
     NARRATIVE_BEATS,
     NARRATIVE_WHITE_DECK,
-    ENDINGS
+    ENDINGS,
+    ORIGIN_TAG_AFFINITY
   };
 }
 
@@ -191,4 +212,5 @@ if (typeof window !== 'undefined') {
   window.NARRATIVE_BEATS = NARRATIVE_BEATS;
   window.NARRATIVE_WHITE_DECK = NARRATIVE_WHITE_DECK;
   window.ENDINGS = ENDINGS;
+  window.ORIGIN_TAG_AFFINITY = ORIGIN_TAG_AFFINITY;
 }
