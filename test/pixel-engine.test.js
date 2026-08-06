@@ -169,3 +169,29 @@ test('Pixel Engine: setCityTheme invalidates the background cache only on an act
   assert.equal(fakeEngine.activeCity, 'Chicago');
   assert.equal(fakeEngine.needsBgRedraw, true, 'Changing city must invalidate the cached background');
 });
+
+test('Pixel Engine: drawHighDetailCharacterSprite shades via palette-index shifts, never flat black/white overlays', () => {
+  const fillStyles = [];
+  const mockCtx = {
+    fillRect() {}, beginPath() {}, ellipse() {}, fill() {},
+    font: '', textAlign: '', fillText() {}
+  };
+  Object.defineProperty(mockCtx, 'fillStyle', {
+    get() { return fillStyles[fillStyles.length - 1]; },
+    set(v) { fillStyles.push(v); }
+  });
+
+  const origin = {
+    hairColor: '#140A07', skinColor: '#522717', outfitColor: '#393E4D',
+    apronColor: '#F4F7FF', pantsColor: '#181920'
+  };
+  drawHighDetailCharacterSprite(mockCtx, origin, 0, 0, 1, true, true, 'Boss');
+
+  const forbidden = ['rgba(20, 10, 7, 0.25)', 'rgba(8, 8, 10, 0.2)'];
+  forbidden.forEach(style => {
+    assert.ok(!fillStyles.includes(style), `Shading must not use flat overlay "${style}" — shift the palette index instead`);
+  });
+
+  const shadowSkin = paletteShift(origin.skinColor, -2);
+  assert.ok(fillStyles.includes(shadowSkin), 'Melanin shading must be the palette-shifted skin tone');
+});

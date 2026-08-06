@@ -269,9 +269,9 @@ class SpriteRenderer {
    ctx.fillStyle = origin.skinColor;
    if (isLarge) {
      ctx.fillRect(px + 48, py - 72 + yBob, 32, 32); // Head base
-     
-     // Melanin shading shadow (left side & bottom)
-     ctx.fillStyle = 'rgba(20, 10, 7, 0.25)';
+
+     // Melanin shading shadow (left side & bottom) — palette-index shift, no black overlay
+     ctx.fillStyle = paletteShift(origin.skinColor, -2);
      ctx.fillRect(px + 48, py - 72 + yBob, 8, 32);
      ctx.fillRect(px + 48, py - 48 + yBob, 32, 8);
      
@@ -283,11 +283,11 @@ class SpriteRenderer {
      ctx.fillRect(px + 68, py - 64 + yBob, 2, 2);  // Highlight right
    } else {
      ctx.fillRect(px + 12, py - 18 + yBob, 8, 8);
-     
-     // Skin shadow
-     ctx.fillStyle = 'rgba(20, 10, 7, 0.25)';
+
+     // Skin shadow — palette-index shift, no black overlay
+     ctx.fillStyle = paletteShift(origin.skinColor, -1);
      ctx.fillRect(px + 12, py - 18 + yBob, 2, 8);
-     
+
      // Simple shades
      ctx.fillStyle = '#101116';
      ctx.fillRect(px + 13, py - 16 + yBob, 6, 2);
@@ -376,9 +376,9 @@ class SpriteRenderer {
    if (isLarge) {
      ctx.fillRect(px + 44 + legOffset, py, 16, 40);
      ctx.fillRect(px + 68 - legOffset, py, 16, 40);
-     
-     // Pants shadow wrinkles
-     ctx.fillStyle = 'rgba(8, 8, 10, 0.2)';
+
+     // Pants shadow wrinkles — palette-index shift, no black overlay
+     ctx.fillStyle = paletteShift(origin.pantsColor, -1);
      ctx.fillRect(px + 44 + legOffset, py + 12, 16, 4);
      ctx.fillRect(px + 68 - legOffset, py + 12, 16, 4);
    } else {
