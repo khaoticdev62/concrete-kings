@@ -791,8 +791,6 @@
           <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:10px; color:#339488;">RPG STAT HUD</h3>
           <div class="rpg-hud-grid">
             <div class="hud-item"><span class="hud-label">CRED:</span> <span id="hudCred" class="hud-val">0</span></div>
-            <div class="hud-item"><span class="hud-label">COMM:</span> <span id="hudComm" class="hud-val">0</span></div>
-            <div class="hud-item"><span class="hud-label">WISD:</span> <span id="hudWisd" class="hud-val">0</span></div>
             <div class="hud-item"><span class="hud-label">REP:</span> <span id="hudRep" class="hud-val">0</span></div>
           </div>
         </div>
@@ -2751,6 +2749,15 @@ const app = {
 
     this.renderHand();
     this.renderScoreboard();
+    this.updateStatHud();
+  },
+
+  updateStatHud() {
+    const me = this.game.players[this.humanIndex];
+    const credEl = document.getElementById('hudCred');
+    const repEl = document.getElementById('hudRep');
+    if (credEl) credEl.textContent = me ? me.stats.streetCred : 0;
+    if (repEl) repEl.textContent = me ? me.stats.reputation : 0;
   },
 
   renderHand() {
