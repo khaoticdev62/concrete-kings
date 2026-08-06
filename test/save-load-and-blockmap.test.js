@@ -21,8 +21,6 @@ test('Save/Load: state shape can be serialized and restored equivalently', () =>
       points: p.points,
       hand: p.hand.slice(),
       streetCred: p.stats.streetCred,
-      community: p.stats.community,
-      wisdom: p.stats.wisdom,
       reputation: p.stats.reputation,
       receipts: p.receipts.slice()
     })),
@@ -58,8 +56,6 @@ test('Save/Load: restored state rehydrates fields used by UI/systems', () => {
       points: p.points,
       hand: p.hand.slice(),
       streetCred: p.stats.streetCred,
-      community: p.stats.community,
-      wisdom: p.stats.wisdom,
       reputation: p.stats.reputation,
       receipts: p.receipts.slice()
     })),
@@ -79,8 +75,6 @@ test('Save/Load: restored state rehydrates fields used by UI/systems', () => {
     hand: p.hand.slice(),
     stats: {
       streetCred: p.streetCred || 0,
-      community: p.community || 0,
-      wisdom: p.wisdom || 0,
       reputation: p.reputation || 0
     },
     receipts: p.receipts.slice()

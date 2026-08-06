@@ -27,7 +27,7 @@ test('resolveTrigger is a no-op when the round had no receipt trigger', () => {
   game.currentBlack = { raw: 'x', prompt: 'x', hasDice: false, effect: null };
   const winner = game.players[1];
   ReceiptSystem.resolveTrigger(game, winner);
-  assert.deepEqual(winner.stats, { streetCred: 0, community: 0, wisdom: 0, reputation: 0 });
+  assert.deepEqual(winner.stats, { streetCred: 0, reputation: 0 });
 });
 
 test('resolveTrigger resolves the receipt and rewards owner + O.G. when the owner wins', () => {
@@ -49,7 +49,7 @@ test('resolveTrigger fails the receipt and penalizes the owner when someone else
   const judge = game.players[0];
   ReceiptSystem.resolveTrigger(game, other);
   assert.equal(owner.receipts[0].status, 'failed');
-  assert.deepEqual(owner.stats, { streetCred: -1, community: -1, wisdom: -1, reputation: -1 });
+  assert.deepEqual(owner.stats, { streetCred: -1, reputation: -1 });
   assert.equal(judge.stats.reputation, 0);
-  assert.deepEqual(other.stats, { streetCred: 0, community: 0, wisdom: 0, reputation: 0 });
+  assert.deepEqual(other.stats, { streetCred: 0, reputation: 0 });
 });

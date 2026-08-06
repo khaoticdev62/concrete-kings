@@ -19,6 +19,6 @@ test('Game.addPlayer initializes stats at zero and an empty receipts list', () =
   const { Game } = loadGameModule();
   const game = new Game();
   game.addPlayer('Alice');
-  assert.deepEqual(game.players[0].stats, { streetCred: 0, community: 0, wisdom: 0, reputation: 0 });
+  assert.deepEqual(game.players[0].stats, { streetCred: 0, reputation: 0 });
   assert.deepEqual(game.players[0].receipts, []);
 });

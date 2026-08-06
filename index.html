@@ -1186,7 +1186,7 @@ class Game {
     if (this.players.length >= 12) throw new Error('Max 12 players');
     this.players.push({
       name, hand: [], points: 0,
-      stats: { streetCred: 0, community: 0, wisdom: 0, reputation: 0 },
+      stats: { streetCred: 0, reputation: 0 },
       receipts: []
     });
   }
@@ -1309,8 +1309,6 @@ const ReceiptSystem = {
     } else {
       receipt.status = 'failed';
       owner.stats.streetCred -= 1;
-      owner.stats.community -= 1;
-      owner.stats.wisdom -= 1;
       owner.stats.reputation -= 1;
     }
   },
@@ -3510,7 +3508,7 @@ const app = {
     if (msg.type === 'joined') {
       this.game.players = msg.players.map(p => ({
         name: p.name, hand: [], points: p.points || 0,
-        stats: { streetCred:0, community:0, wisdom:0, reputation:0 }, receipts: [],
+        stats: { streetCred: 0, reputation: 0 }, receipts: [],
         ready: !!p.ready
       }));
       this.humanIndex = this.game.players.findIndex(p => p.name === msg.playerName);
@@ -3530,7 +3528,7 @@ const app = {
     if (msg.type === 'room_players') {
       this.game.players = msg.players.map(p => ({
         name: p.name, hand: [], points: p.points || 0,
-        stats: { streetCred:0, community:0, wisdom:0, reputation:0 }, receipts: [],
+        stats: { streetCred: 0, reputation: 0 }, receipts: [],
         ready: !!p.ready
       }));
       const myName = document.getElementById('joinName').value.trim() || document.getElementById('hostName').value.trim() || 'Player';
@@ -3997,8 +3995,6 @@ const app = {
           points: p.points,
           hand: p.hand,
           streetCred: p.stats?.streetCred,
-          community: p.stats?.community,
-          wisdom: p.stats?.wisdom,
           reputation: p.stats?.reputation,
           receipts: p.receipts
         })),
@@ -4029,8 +4025,6 @@ const app = {
         hand: p.hand || [],
         stats: {
           streetCred: p.streetCred || 0,
-          community: p.community || 0,
-          wisdom: p.wisdom || 0,
           reputation: p.reputation || 0
         },
         receipts: p.receipts || []
