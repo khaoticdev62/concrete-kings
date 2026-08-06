@@ -123,3 +123,31 @@ test('Story Engine: markAbilityUsed succeeds once then reports already used', ()
   assert.equal(engine.markAbilityUsed(), false, 'second call must fail, ability already used');
   assert.equal(engine.specialAbilityUsed, true, 'state must stay used after the failed second call');
 });
+
+test('Story Engine: winning a secret-flagged card records it without duplicates', () => {
+  const engine = new NarrativeStoryEngine();
+  engine.reset();
+  engine.applyWinnerCard("A stolen police scanner buzzing with codes");
+  assert.deepEqual(engine.secrets, ["A stolen police scanner buzzing with codes"]);
+  engine.applyWinnerCard("A stolen police scanner buzzing with codes");
+  assert.deepEqual(engine.secrets, ["A stolen police scanner buzzing with codes"], 'duplicate secret must not be recorded twice');
+});
+
+test('Story Engine: 2+ secrets unlock The Insider ending even with high heat', () => {
+  const engine = new NarrativeStoryEngine();
+  engine.reset();
+
+  // Beats 1-2: earn two distinct secrets
+  engine.applyWinnerCard("A stolen police scanner buzzing with codes"); // street secret
+  engine.applyWinnerCard("Your cousin's neighborhood security warning"); // family secret
+
+  // Beats 3-5: pile on heat via street cards, which alone would trigger The Trap ending
+  engine.applyWinnerCard("A Glock 19 with the serial scratched off");
+  engine.applyWinnerCard("A Glock 19 with the serial scratched off");
+  const result = engine.applyWinnerCard("A Glock 19 with the serial scratched off");
+
+  assert.equal(engine.secrets.length, 2);
+  assert.equal(result.ended, true);
+  assert.equal(result.endingTitle, "THE INSIDER");
+  assert.ok(result.endingText.includes("secrets"));
+});

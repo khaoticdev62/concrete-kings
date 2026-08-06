@@ -76,29 +76,30 @@ const NARRATIVE_WHITE_DECK = [
   { text: "A brick of unregistered burner phones", category: "street" },
   { text: "Wad of dirty cash wrapped in rubber bands", category: "street" },
   { text: "Graffiti tags freshly painted on the bodega gate", category: "street" },
-  { text: "A stolen police scanner buzzing with codes", category: "street" },
-  
+  { text: "A stolen police scanner buzzing with codes", category: "street", secret: true },
+
   { text: "Grandma's secret sweet potato pie recipe", category: "family" },
   { text: "A warm hug from Mama Gloria", category: "family" },
   { text: "Collard greens seasoned with smoked ham hock", category: "family" },
   { text: "An old family photo inside a cracked frame", category: "family" },
-  { text: "Your cousin's neighborhood security warning", category: "family" },
-  
+  { text: "Your cousin's neighborhood security warning", category: "family", secret: true },
+
   { text: "A blessed prayer oil bottle from the usher board", category: "church" },
-  { text: "Sunday service program signed by the pastor", category: "church" },
+  { text: "Sunday service program signed by the pastor", category: "church", secret: true },
   { text: "The choir robe embroidered deacon patch", category: "church" },
   { text: "A booming gospel hymn sung from the heart", category: "church" },
   { text: "A collection plate filled with loose quarters", category: "church" },
-  
+
   { text: "A bag of hot fries and a blue drink", category: "food" },
   { text: "Uncooked chopped cheese ingredients", category: "food" },
   { text: "A greasy bag of corner chicken wings", category: "food" },
   { text: "Ice-cold sweet tea brewed in a gallon milk jug", category: "food" },
-  
+  { text: "A bodega ledger with names you shouldn't know", category: "food", secret: true },
+
   { text: "A TikTok dancer doing the hustle on 125th", category: "humor" },
   { text: "A master barber doing a line-up with a dull blade", category: "humor" },
   { text: "A loud stoop conversation about absolutely nothing", category: "humor" },
-  { text: "An uncle claiming he used to run with the Panthers", category: "humor" }
+  { text: "An uncle claiming he used to run with the Panthers", category: "humor", secret: true }
 ];
 
 const ENDINGS = {
@@ -113,6 +114,10 @@ const ENDINGS = {
   hustle: {
     title: "THE HUSTLE",
     text: "In the chaos, the package is dropped, and you scramble out of the warehouse side vent. Marcus vanishes. The cops find nothing. By tomorrow morning, you are right back on the stoop, counting small bills, planning the next run. Balanced stats. The grind goes on."
+  },
+  insider: {
+    title: "THE INSIDER",
+    text: "You never picked a side. Street, family, church, corner store — you just kept your ears open and your mouth shut. When the dust settles on 125th, you walk away without the package and without a scratch. What you've got is better than cash: you know where every body on this block is buried. Marcus doesn't own you. You own his secrets."
   }
 };
 
@@ -136,6 +141,7 @@ class NarrativeStoryEngine {
     this.history = [];
     this.origin = null;
     this.specialAbilityUsed = false;
+    this.secrets = [];
   }
 
   reset(originKey = null) {
@@ -146,6 +152,7 @@ class NarrativeStoryEngine {
     this.history = [];
     this.origin = originKey;
     this.specialAbilityUsed = false;
+    this.secrets = [];
   }
 
   markAbilityUsed() {
@@ -175,6 +182,10 @@ class NarrativeStoryEngine {
     this.heat = Math.max(0, this.heat + heatDelta);
     this.trust = Math.max(0, this.trust + trustDelta);
 
+    if (matchedCard && matchedCard.secret && !this.secrets.includes(matchedCard.text)) {
+      this.secrets.push(matchedCard.text);
+    }
+
     this.history.push({
       beat: this.beat,
       card: cardText,
@@ -184,9 +195,10 @@ class NarrativeStoryEngine {
 
     if (this.beat >= 5) {
       let endingKey = "hustle";
-      if (this.heat >= 3) endingKey = "trap";
+      if (this.secrets.length >= 2) endingKey = "insider";
+      else if (this.heat >= 3) endingKey = "trap";
       else if (this.trust >= 3) endingKey = "exit";
-      
+
       const ending = ENDINGS[endingKey];
       this.active = false;
       return {
