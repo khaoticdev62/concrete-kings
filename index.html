@@ -763,8 +763,12 @@
               <div id="diceNotice" style="margin-top:8px; font-size:10px; text-align:center; color:#85c4ff; line-height:1.2;"></div>
               <div id="weatherNotice" style="margin-top:4px; font-size:10px; text-align:center; color:#ff7a45; line-height:1.2;"></div>
               <div id="weatherAlert" class="weather-alert" style="opacity:0;"></div>
+              <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px; width:100%;">
+                <button id="vetoBtn" onclick="app.ogVeto()" style="display:none; font-size:8px;">VETO (O.G. POWER)</button>
+                <button id="doubleDownBtn" onclick="app.ogDoubleDown()" style="display:none; font-size:8px;">DOUBLE DOWN (O.G. POWER)</button>
+              </div>
             </div>
-            
+
             <!-- Hand / Cards Area -->
             <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between; min-width: 320px;">
               <div>
@@ -820,8 +824,6 @@
         <details class="panel dev-bar">
           <summary style="cursor:pointer; font-weight:bold;">DEVELOPER_CONSOLE.LOG</summary>
           <div class="dev-row" style="margin-top:12px;">
-            <button class="secondary" onclick="app.ogVeto()" style="font-size:8px;">O.G. VETO</button>
-            <button class="secondary" onclick="app.ogDoubleDown()" style="font-size:8px;">DOUBLE-DOWN</button>
             <select id="weatherSelect" onchange="app.setWeather(this.value)" style="width:auto; display:inline-block; font-size:11px;">
               <option value="CLEAR">WEATHER: CLEAR</option>
               <option value="RAIN">WEATHER: RAIN STORM</option>
@@ -2750,6 +2752,11 @@ const app = {
     this.renderHand();
     this.renderScoreboard();
     this.updateStatHud();
+
+    const vetoBtn = document.getElementById('vetoBtn');
+    if (vetoBtn) vetoBtn.style.display = (this.isJudge() && !this.game.vetoUsed) ? 'inline-block' : 'none';
+    const ddBtn = document.getElementById('doubleDownBtn');
+    if (ddBtn) ddBtn.style.display = (this.isJudge() && !this.game.doubleDownActive) ? 'inline-block' : 'none';
   },
 
   updateStatHud() {
@@ -3950,6 +3957,7 @@ const app = {
 
   /* ---------- DEV CONTROLS ---------- */
   ogVeto() {
+    if (!this.isJudge()) return;
     if (!this.game.triggerVeto()) {
       alert('Veto unavailable or already used.');
     } else {
@@ -3957,6 +3965,7 @@ const app = {
     }
   },
   ogDoubleDown() {
+    if (!this.isJudge()) return;
     if (!this.game.triggerDoubleDown()) {
       alert('Double-Down already active.');
     } else {

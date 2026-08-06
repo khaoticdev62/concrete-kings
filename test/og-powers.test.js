@@ -40,3 +40,31 @@ test('O.G. Powers: Double-Down awards double points to winner', () => {
 
   assert.equal(alice.points, 2);
 });
+
+test('O.G. Powers: ogVeto is a no-op for a non-judge player', () => {
+  const { Game, app } = loadGameModule();
+  app.game = new Game();
+  app.game.addPlayer('Judge');
+  app.game.addPlayer('Alice');
+  app.humanIndex = 1;
+  app.game.judgeIndex = 0;
+  app.game.currentBlack = { prompt: 'Original Card', hasDice: false };
+
+  app.ogVeto();
+
+  assert.equal(app.game.vetoUsed, false);
+  assert.equal(app.game.currentBlack.prompt, 'Original Card');
+});
+
+test('O.G. Powers: ogDoubleDown is a no-op for a non-judge player', () => {
+  const { Game, app } = loadGameModule();
+  app.game = new Game();
+  app.game.addPlayer('Judge');
+  app.game.addPlayer('Alice');
+  app.humanIndex = 1;
+  app.game.judgeIndex = 0;
+
+  app.ogDoubleDown();
+
+  assert.equal(app.game.doubleDownActive, false);
+});
