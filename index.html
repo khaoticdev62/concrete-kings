@@ -767,6 +767,11 @@
                 <button id="vetoBtn" onclick="app.ogVeto()" style="display:none; font-size:8px;">VETO (O.G. POWER)</button>
                 <button id="doubleDownBtn" onclick="app.ogDoubleDown()" style="display:none; font-size:8px;">DOUBLE DOWN (O.G. POWER)</button>
               </div>
+              <div id="betPrompt" style="display:none; margin-top:8px; text-align:center;">
+                <div id="betCostLabel" style="font-size:8px; color:#a0aac2; margin-bottom:4px;"></div>
+                <button onclick="app.placeBetFromUI('high')" style="font-size:8px;">BET HIGH</button>
+                <button onclick="app.placeBetFromUI('low')" style="font-size:8px;">BET LOW</button>
+              </div>
             </div>
 
             <!-- Hand / Cards Area -->
@@ -903,10 +908,6 @@
     </defs>
   </svg>
 </div>
-          <div class="dev-row">
-            <input id="betInput" type="text" placeholder="Bet target name" style="width:120px; display:inline-block; font-size:11px;"/>
-            <button class="secondary" onclick="app.placeBetFromUI()" style="font-size:8px;">PLACE BET</button>
-          </div>
           <div class="dev-row">
             <input id="allianceInput" type="text" placeholder="Alliance target" style="width:120px; display:inline-block; font-size:11px;"/>
             <button class="secondary" onclick="app.proposeAllianceFromUI()" style="font-size:8px;">ALLIANCE</button>
@@ -2757,6 +2758,19 @@ const app = {
     if (vetoBtn) vetoBtn.style.display = (this.isJudge() && !this.game.vetoUsed) ? 'inline-block' : 'none';
     const ddBtn = document.getElementById('doubleDownBtn');
     if (ddBtn) ddBtn.style.display = (this.isJudge() && !this.game.doubleDownActive) ? 'inline-block' : 'none';
+
+    const betPrompt = document.getElementById('betPrompt');
+    if (betPrompt) {
+      const me = this.game.players[this.humanIndex];
+      const alreadyBet = me && this.game.bets && Object.prototype.hasOwnProperty.call(this.game.bets, me.name);
+      const canBet = !!this.game.currentBlack?.hasDice && !alreadyBet;
+      betPrompt.style.display = canBet ? 'block' : 'none';
+      if (canBet) {
+        const cost = this.game.weatherMode === 'NEON_FLICKER' ? 2 : 1;
+        const label = document.getElementById('betCostLabel');
+        if (label) label.textContent = `Bet ${cost} Street Cred`;
+      }
+    }
   },
 
   updateStatHud() {
@@ -4055,13 +4069,15 @@ const app = {
       alert('Load failed: ' + e.message);
     }
   },
-  placeBetFromUI() {
-    const input = document.getElementById('betInput');
-    const target = input.value.trim();
-    if (!target) return alert('Enter a bet target name');
-    const ok = this.game.placeBet(this.game.players[this.humanIndex].name, 'high');
-    input.value = '';
-    alert(ok ? 'Bet placed.' : 'Bet failed.');
+  placeBetFromUI(pick) {
+    const me = this.game.players[this.humanIndex];
+    if (!me) return;
+    const cost = this.game.weatherMode === 'NEON_FLICKER' ? 2 : 1;
+    if (!this.game.placeBet(me.name, pick)) {
+      alert(`Not enough Street Cred (need ${cost}).`);
+      return;
+    }
+    this.renderGame();
   },
   proposeAllianceFromUI() {
     const input = document.getElementById('allianceInput');
