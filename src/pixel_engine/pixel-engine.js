@@ -37,6 +37,34 @@ const CITY_THEME_OVERRIDES = {
   NOLA:      { "7a1d1c": "d97843", "666e82": "246961" }
 };
 
+const PALETTE_GROUPS = [
+  MASTER_PALETTE_64.blacks_grays,
+  MASTER_PALETTE_64.warm_tones,
+  MASTER_PALETTE_64.cool_tones,
+  MASTER_PALETTE_64.skin_tones
+];
+
+/**
+ * Shifts a hex color `steps` positions within its MASTER_PALETTE_64 tone group.
+ * Negative steps darken (shadow), positive steps lighten (highlight).
+ * Clamps at group boundaries; returns the input unchanged if not a palette color.
+ */
+function paletteShift(hex, steps) {
+  const normalized = hex.toUpperCase();
+  for (const group of PALETTE_GROUPS) {
+    const index = group.indexOf(normalized);
+    if (index !== -1) {
+      const clamped = Math.max(0, Math.min(group.length - 1, index + steps));
+      return group[clamped];
+    }
+  }
+  return hex;
+}
+
+function snapToPixel(value) {
+  return Math.floor(value);
+}
+
 /**
  * Calculates strict integer scaling factors and letterboxing margins.
  */
@@ -356,6 +384,8 @@ class SpriteRenderer {
  
  if (typeof window !== 'undefined') {
    window.drawHighDetailCharacterSprite = drawHighDetailCharacterSprite;
+   window.paletteShift = paletteShift;
+   window.snapToPixel = snapToPixel;
  }
  
  if (typeof module !== 'undefined' && module.exports) {
@@ -367,6 +397,8 @@ class SpriteRenderer {
      calculateIntegerScale,
      PixelCanvasEngine,
      SpriteRenderer,
-     drawHighDetailCharacterSprite
+     drawHighDetailCharacterSprite,
+     paletteShift,
+     snapToPixel
    };
  }

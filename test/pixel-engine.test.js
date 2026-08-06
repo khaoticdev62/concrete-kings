@@ -6,7 +6,9 @@ const {
   MASTER_PALETTE_64,
   CITY_THEME_OVERRIDES,
   calculateIntegerScale,
-  drawHighDetailCharacterSprite
+  drawHighDetailCharacterSprite,
+  paletteShift,
+  snapToPixel
 } = require('../src/pixel_engine/pixel-engine.js');
 
 test('Pixel Engine: Master Palette contains exactly 64 unique hex colors across 4 groups', () => {
@@ -63,7 +65,7 @@ test('Pixel Engine: drawHighDetailCharacterSprite executes correctly on mock can
     textAlign: '',
     fillText() {}
   };
-  
+
   const origin = {
     hairColor: '#140a07',
     skinColor: '#522717',
@@ -71,7 +73,7 @@ test('Pixel Engine: drawHighDetailCharacterSprite executes correctly on mock can
     apronColor: '#f4f7ff',
     pantsColor: '#181920'
   };
-  
+
   // Test small scale render
   assert.doesNotThrow(() => {
     drawHighDetailCharacterSprite(mockCtx, origin, 0, 0, 1, false, false, 'Player');
@@ -81,4 +83,24 @@ test('Pixel Engine: drawHighDetailCharacterSprite executes correctly on mock can
   assert.doesNotThrow(() => {
     drawHighDetailCharacterSprite(mockCtx, origin, 0, 0, 1, true, true, 'Boss');
   });
+});
+
+test('Pixel Engine: paletteShift shifts down within the same tone group for shadows', () => {
+  assert.equal(paletteShift('#7A1D1C', -1), '#4D1414');
+  assert.equal(paletteShift('#7a1d1c', 1), '#AA2724');
+});
+
+test('Pixel Engine: paletteShift clamps at group boundaries instead of wrapping or throwing', () => {
+  assert.equal(paletteShift('#08080A', -5), '#08080A');
+  assert.equal(paletteShift('#F4F7FF', 5), '#F4F7FF');
+});
+
+test('Pixel Engine: paletteShift returns the input unchanged for colors outside the master palette', () => {
+  assert.equal(paletteShift('#123456', 1), '#123456');
+});
+
+test('Pixel Engine: snapToPixel floors fractional coordinates toward negative infinity', () => {
+  assert.equal(snapToPixel(3.9), 3);
+  assert.equal(snapToPixel(-2.1), -3);
+  assert.equal(snapToPixel(5), 5);
 });
