@@ -2061,6 +2061,9 @@ const app = {
     
     this.humanIndex = 0;
     this.game.players[0].origin = originKey;
+    const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
+    this.game.players[0].stats.streetCred += origin.startingStats.streetCred;
+    this.game.players[0].stats.reputation += origin.startingStats.reputation;
     const origins = Object.keys(CHARACTER_ORIGINS);
     for (let i = 1; i < count; i++) {
       this.game.players[i].origin = origins[i % origins.length];
@@ -3566,6 +3569,12 @@ const app = {
         ready: !!p.ready
       }));
       this.humanIndex = this.game.players.findIndex(p => p.name === msg.playerName);
+      if (this.humanIndex !== -1) {
+        const originKey = document.getElementById('characterOriginSelect').value;
+        const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
+        this.game.players[this.humanIndex].stats.streetCred += origin.startingStats.streetCred;
+        this.game.players[this.humanIndex].stats.reputation += origin.startingStats.reputation;
+      }
       this.game.pointsToWin = msg.pointsToWin || 7;
       
       msg.players.forEach(p => {
@@ -3588,7 +3597,11 @@ const app = {
       const myName = document.getElementById('joinName').value.trim() || document.getElementById('hostName').value.trim() || 'Player';
       this.humanIndex = this.game.players.findIndex(p => p.name === myName);
       if (this.humanIndex === -1) this.humanIndex = 0;
-      
+      const originKey = document.getElementById('characterOriginSelect').value;
+      const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
+      this.game.players[this.humanIndex].stats.streetCred += origin.startingStats.streetCred;
+      this.game.players[this.humanIndex].stats.reputation += origin.startingStats.reputation;
+
       msg.players.forEach(p => {
         if (p.name !== myName) {
           this.remoteAvatars.set(p.name, { x: p.x || 140, y: p.y || 124, origin: p.origin || 'BARBER', frame: 0 });

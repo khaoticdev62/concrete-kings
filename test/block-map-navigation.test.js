@@ -18,6 +18,26 @@ test('Block Map Navigation: 8 Character Origins are defined', () => {
   assert.ok(CHARACTER_ORIGINS.HUSTLE_VETERAN);
 });
 
+test('Block Map Navigation: every origin has a flavor line and a starting stat bonus', () => {
+  const expected = {
+    BARBER: { streetCred: 0, reputation: 2 },
+    STREET_SCHOLAR: { streetCred: 1, reputation: 0 },
+    LOCAL_LEGEND: { streetCred: 0, reputation: 2 },
+    CORNER_MERCHANT: { streetCred: 2, reputation: 0 },
+    COMMUNITY_ORGANIZER: { streetCred: 0, reputation: 2 },
+    UNDERGROUND_DJ: { streetCred: 1, reputation: 1 },
+    BLOCK_ARCHITECT: { streetCred: 1, reputation: -1 },
+    HUSTLE_VETERAN: { streetCred: 2, reputation: 1 }
+  };
+  for (const [key, bonus] of Object.entries(expected)) {
+    const origin = CHARACTER_ORIGINS[key];
+    assert.ok(origin, `expected origin ${key} to exist`);
+    assert.equal(typeof origin.flavor, 'string');
+    assert.ok(origin.flavor.length > 0, `expected ${key} to have non-empty flavor text`);
+    assert.deepEqual(origin.startingStats, bonus, `expected ${key} startingStats to match design spec`);
+  }
+});
+
 test('Block Map Navigation: BlockMapController adheres to 4-frame animation budget and canvas bounds', () => {
   const controller = new BlockMapController({ startX: 300, startY: 500 });
   assert.equal(controller.x, 300);

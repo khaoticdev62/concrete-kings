@@ -12,7 +12,9 @@ const CHARACTER_ORIGINS = {
     skinColor: '#26120b',  // Rich Ebony (#26120B)
     outfitColor: '#d9382e',// Street Flame Hoodie (#D9382E)
     apronColor: '#f4f7ff', // Crisp White Apron
-    pantsColor: '#274f80'  // Slate Denim (#274F80)
+    pantsColor: '#274f80', // Slate Denim (#274F80)
+    flavor: "Everybody's business runs through your chair. You hear it first, you know it best.",
+    startingStats: { streetCred: 0, reputation: 2 }
   },
   STREET_SCHOLAR: {
     id: 'STREET_SCHOLAR',
@@ -21,7 +23,9 @@ const CHARACTER_ORIGINS = {
     skinColor: '#522717',  // Warm Umber
     outfitColor: '#393e4d',// Weathered Slate Hoodie
     apronColor: null,
-    pantsColor: '#181920'  // Dark Charcoal
+    pantsColor: '#181920', // Dark Charcoal
+    flavor: "Books over corners, but you still know every angle the block's got.",
+    startingStats: { streetCred: 1, reputation: 0 }
   },
   LOCAL_LEGEND: {
     id: 'LOCAL_LEGEND',
@@ -30,7 +34,9 @@ const CHARACTER_ORIGINS = {
     skinColor: '#3b1c11',  // Dark Chocolate
     outfitColor: '#6b341d',// Leather Bomber (#6B341D)
     apronColor: null,
-    pantsColor: '#101116'
+    pantsColor: '#101116',
+    flavor: "They wrote songs about you. Reputation walks in the room before you do.",
+    startingStats: { streetCred: 0, reputation: 2 }
   },
   CORNER_MERCHANT: {
     id: 'CORNER_MERCHANT',
@@ -39,7 +45,9 @@ const CHARACTER_ORIGINS = {
     skinColor: '#be6436',  // Honey Amber
     outfitColor: '#9c5c1d',// Utility Vest (#9C5C1D)
     apronColor: null,
-    pantsColor: '#474d5e'
+    pantsColor: '#474d5e',
+    flavor: "Bodega counter's your throne. You see everything, you say nothing — for now.",
+    startingStats: { streetCred: 2, reputation: 0 }
   },
   COMMUNITY_ORGANIZER: {
     id: 'COMMUNITY_ORGANIZER',
@@ -48,7 +56,9 @@ const CHARACTER_ORIGINS = {
     skinColor: '#854224',  // Warm Mahogany
     outfitColor: '#366ba6',// Denim Jacket (#366BA6)
     apronColor: null,
-    pantsColor: '#22252e'
+    pantsColor: '#22252e',
+    flavor: "You rally the block before the block even knows it needs rallying.",
+    startingStats: { streetCred: 0, reputation: 2 }
   },
   UNDERGROUND_DJ: {
     id: 'UNDERGROUND_DJ',
@@ -57,7 +67,9 @@ const CHARACTER_ORIGINS = {
     skinColor: '#a1522c',  // Golden Bronze
     outfitColor: '#521c6e',// Varsity Violet (#521C6E)
     apronColor: null,
-    pantsColor: '#101116'
+    pantsColor: '#101116',
+    flavor: "You keep the party alive till sunrise. Nobody forgets who kept it moving.",
+    startingStats: { streetCred: 1, reputation: 1 }
   },
   BLOCK_ARCHITECT: {
     id: 'BLOCK_ARCHITECT',
@@ -66,7 +78,9 @@ const CHARACTER_ORIGINS = {
     skinColor: '#3b1c11',
     outfitColor: '#ffcd68',// High-Vis Gold (#FFCD68)
     apronColor: null,
-    pantsColor: '#274f80'
+    pantsColor: '#274f80',
+    flavor: "Still earning your stripes — building trust takes longer than building blueprints.",
+    startingStats: { streetCred: 1, reputation: -1 }
   },
   HUSTLE_VETERAN: {
     id: 'HUSTLE_VETERAN',
@@ -75,7 +89,9 @@ const CHARACTER_ORIGINS = {
     skinColor: '#d97843',  // Warm Copper
     outfitColor: '#174540',// Forest Green Tracksuit (#174540)
     apronColor: null,
-    pantsColor: '#174540'
+    pantsColor: '#174540',
+    flavor: "Old scars, older respect. You've been out here longer than most been alive.",
+    startingStats: { streetCred: 2, reputation: 1 }
   }
 };
 
