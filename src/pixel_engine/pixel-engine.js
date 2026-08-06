@@ -88,26 +88,41 @@ function calculateIntegerScale(viewportWidth, viewportHeight, nativeW = NATIVE_W
 class PixelCanvasEngine {
   constructor(displayCanvas, options = {}) {
     this.displayCanvas = displayCanvas;
-    this.displayCtx = displayCanvas.getContext("2d", { alpha: false, desynchronized: true });
-    
+    this.displayCtx = displayCanvas.getContext("2d", { alpha: false, desynchronized: true, willReadFrequently: false });
+
     this.highDetail = !!options.highDetail;
     this.nativeWidth = options.nativeWidth || (this.highDetail ? 1280 : NATIVE_WIDTH);
     this.nativeHeight = options.nativeHeight || (this.highDetail ? 720 : NATIVE_HEIGHT);
     this.activeCity = options.cityTheme || "Harlem";
-    
+
     // Virtual native canvas for pixel rendering
     this.virtualCanvas = document.createElement("canvas");
     this.virtualCanvas.width = this.nativeWidth;
     this.virtualCanvas.height = this.nativeHeight;
-    this.virtualCtx = this.virtualCanvas.getContext("2d", { alpha: false });
+    this.virtualCtx = this.virtualCanvas.getContext("2d", { alpha: false, willReadFrequently: false });
+
+    // Offscreen background/midground layers for parallax caching
+    this.bgLayer = document.createElement("canvas");
+    this.bgLayer.width = this.nativeWidth;
+    this.bgLayer.height = this.nativeHeight;
+    this.bgCtx = this.bgLayer.getContext("2d", { willReadFrequently: false });
+    this.setupSmoothing(this.bgCtx);
+
+    this.mgLayer = document.createElement("canvas");
+    this.mgLayer.width = this.nativeWidth;
+    this.mgLayer.height = this.nativeHeight;
+    this.mgCtx = this.mgLayer.getContext("2d", { willReadFrequently: false });
+    this.setupSmoothing(this.mgCtx);
+
+    this.needsBgRedraw = true;
 
     this.setupSmoothing(this.displayCtx);
     this.setupSmoothing(this.virtualCtx);
-    
+
     this.currentScaleInfo = null;
     this.animationFrameCount = 4; // Strict 4-frame budget
     this.currentAnimFrame = 0;
-    
+
     this.resize();
   }
 
@@ -119,9 +134,29 @@ class PixelCanvasEngine {
   }
 
   setCityTheme(cityName) {
-    if (CITY_THEME_OVERRIDES[cityName]) {
+    if (CITY_THEME_OVERRIDES[cityName] && cityName !== this.activeCity) {
       this.activeCity = cityName;
+      this.invalidateBackground();
     }
+  }
+
+  drawBackground(drawFn) {
+    if (this.needsBgRedraw) {
+      this.bgCtx.clearRect(0, 0, this.nativeWidth, this.nativeHeight);
+      drawFn(this.bgCtx, this.nativeWidth, this.nativeHeight);
+      this.needsBgRedraw = false;
+    }
+    this.virtualCtx.drawImage(this.bgLayer, 0, 0);
+  }
+
+  drawMidground(drawFn, offsetX = 0) {
+    this.mgCtx.clearRect(0, 0, this.nativeWidth, this.nativeHeight);
+    drawFn(this.mgCtx, this.nativeWidth, this.nativeHeight);
+    this.virtualCtx.drawImage(this.mgLayer, Math.floor(offsetX), 0);
+  }
+
+  invalidateBackground() {
+    this.needsBgRedraw = true;
   }
 
   resize() {

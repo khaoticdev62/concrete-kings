@@ -6,6 +6,7 @@ const {
   MASTER_PALETTE_64,
   CITY_THEME_OVERRIDES,
   calculateIntegerScale,
+  PixelCanvasEngine,
   drawHighDetailCharacterSprite,
   paletteShift,
   snapToPixel
@@ -103,4 +104,68 @@ test('Pixel Engine: snapToPixel floors fractional coordinates toward negative in
   assert.equal(snapToPixel(3.9), 3);
   assert.equal(snapToPixel(-2.1), -3);
   assert.equal(snapToPixel(5), 5);
+});
+
+test('Pixel Engine: drawBackground caches static content and only redraws when invalidated', () => {
+  const drawCalls = [];
+  const fakeEngine = {
+    needsBgRedraw: true,
+    bgCtx: { clearRect() {} },
+    bgLayer: 'BG_LAYER_TOKEN',
+    virtualCtx: { drawImage(img) { drawCalls.push(img); } },
+    nativeWidth: 1280,
+    nativeHeight: 720
+  };
+  const drawFn = () => drawCalls.push('drawn');
+
+  PixelCanvasEngine.prototype.drawBackground.call(fakeEngine, drawFn);
+  assert.equal(fakeEngine.needsBgRedraw, false);
+  assert.deepEqual(drawCalls, ['drawn', 'BG_LAYER_TOKEN']);
+
+  PixelCanvasEngine.prototype.drawBackground.call(fakeEngine, drawFn);
+  assert.deepEqual(drawCalls, ['drawn', 'BG_LAYER_TOKEN', 'BG_LAYER_TOKEN'], 'Second call must skip drawFn and reuse the cached layer');
+
+  fakeEngine.needsBgRedraw = true;
+  PixelCanvasEngine.prototype.drawBackground.call(fakeEngine, drawFn);
+  assert.deepEqual(drawCalls, ['drawn', 'BG_LAYER_TOKEN', 'BG_LAYER_TOKEN', 'drawn', 'BG_LAYER_TOKEN'], 'invalidateBackground must force a redraw');
+});
+
+test('Pixel Engine: drawMidground redraws every call and applies an integer-snapped parallax offset', () => {
+  const drawCalls = [];
+  const fakeEngine = {
+    mgCtx: { clearRect() {} },
+    mgLayer: 'MG_LAYER_TOKEN',
+    virtualCtx: {
+      drawImage(img, x, y) { drawCalls.push([img, x, y]); }
+    },
+    nativeWidth: 1280,
+    nativeHeight: 720
+  };
+  const drawFn = () => drawCalls.push('drawn');
+
+  PixelCanvasEngine.prototype.drawMidground.call(fakeEngine, drawFn, 12.9);
+  PixelCanvasEngine.prototype.drawMidground.call(fakeEngine, drawFn, 12.9);
+
+  assert.equal(drawCalls.filter(c => c === 'drawn').length, 2, 'Midground has no cache — it redraws every call');
+  assert.deepEqual(drawCalls[1], ['MG_LAYER_TOKEN', 12, 0], 'Offset must be floored to an integer');
+});
+
+test('Pixel Engine: invalidateBackground sets needsBgRedraw to true', () => {
+  const fakeEngine = { needsBgRedraw: false };
+  PixelCanvasEngine.prototype.invalidateBackground.call(fakeEngine);
+  assert.equal(fakeEngine.needsBgRedraw, true);
+});
+
+test('Pixel Engine: setCityTheme invalidates the background cache only on an actual city change', () => {
+  const fakeEngine = {
+    activeCity: 'Harlem',
+    needsBgRedraw: false,
+    invalidateBackground() { this.needsBgRedraw = true; }
+  };
+  PixelCanvasEngine.prototype.setCityTheme.call(fakeEngine, 'Harlem');
+  assert.equal(fakeEngine.needsBgRedraw, false, 'Setting the same city must not force a redraw');
+
+  PixelCanvasEngine.prototype.setCityTheme.call(fakeEngine, 'Chicago');
+  assert.equal(fakeEngine.activeCity, 'Chicago');
+  assert.equal(fakeEngine.needsBgRedraw, true, 'Changing city must invalidate the cached background');
 });
