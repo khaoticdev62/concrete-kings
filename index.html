@@ -1014,6 +1014,7 @@
 </div>
 
 <script src="src/pixel_engine/pixel-engine.js"></script>
+<script src="src/pixel_engine/lightmap.js"></script>
 <script src="src/pixel_engine/card-visual-system.js"></script>
 <script src="src/pixel_engine/weather-effects-system.js"></script>
 <script src="src/pixel_engine/block-map-navigation.js"></script>
@@ -1432,7 +1433,7 @@ function hdFont(ctx, basePx) {
 }
 
 /* Procedural background drawer for 8 acts */
-function drawProceduralBackground(ctx, city, frame) {
+function drawSkyAndFarLayer(ctx, city, frame) {
   const colorMap = CITY_THEME_OVERRIDES[city] || {};
   const skyTop = city === 'Miami' ? '#521c6e' : (city === 'Detroit' ? '#11233f' : '#0a1526');
   const skyBottom = city === 'Miami' ? '#ff7a45' : (city === 'Atlanta' ? '#aa2724' : '#11233f');
@@ -1491,6 +1492,12 @@ function drawProceduralBackground(ctx, city, frame) {
   ctx.fillStyle = '#666e82';
   ctx.fillRect(...hdRect(ctx, 41, 74, 2, 46));
   ctx.fillRect(...hdRect(ctx, 271, 74, 2, 46));
+}
+
+function drawNearLayer(ctx, city, frame) {
+  const colorMap = CITY_THEME_OVERRIDES[city] || {};
+  const brickColor = colorMap["7a1d1c"] ? "#" + colorMap["7a1d1c"] : "#7a1d1c";
+  const trimColor = colorMap["474d5e"] ? "#" + colorMap["474d5e"] : "#474d5e";
 
   ctx.fillStyle = brickColor;
   if (city === 'Harlem' || city === 'Baltimore') {
@@ -2522,13 +2529,26 @@ const app = {
             
             this.mapController.update();
             this.weatherSystem.advanceFrame();
-            
+
             const vCtx = this.pixelEngine.virtualCtx;
             this.pixelEngine.clearNative('#08080a');
-            
+
             const city = this.game.activeCity || 'Harlem';
-            drawProceduralBackground(vCtx, city, this.shimmerFrame);
-            
+            this.pixelEngine.setCityTheme(city);
+
+            this.pixelEngine.drawBackground(bgCtx => drawSkyAndFarLayer(bgCtx, city, this.shimmerFrame));
+
+            const scrollOffset = Math.floor(this.mapController.x * 0.15);
+            this.pixelEngine.drawMidground(mgCtx => drawNearLayer(mgCtx, city, this.shimmerFrame), -scrollOffset);
+
+            const heat = (this.storyEngine && this.storyEngine.heat) || 0;
+            const lightmapKey = city + '_' + heat;
+            if (this.lightmapKey !== lightmapKey) {
+              this.lightmapCanvas = generateLightmapCanvas(this.pixelEngine.nativeWidth, this.pixelEngine.nativeHeight, city, heat);
+              this.lightmapKey = lightmapKey;
+            }
+            applyLightmap(vCtx, this.lightmapCanvas);
+
             this.weatherSystem.render(vCtx);
             this.mapController.render(vCtx);
             
