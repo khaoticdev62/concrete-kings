@@ -2913,7 +2913,14 @@ const app = {
     this.show('judging');
     const subEl = document.getElementById('submissions');
     subEl.innerHTML = '';
+    const canRedo = !!(this.storyEngine && this.storyEngine.active && !this.storyEngine.specialAbilityUsed);
     this.game.submissions.forEach((s, i) => {
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.gap = '4px';
+
       const canvas = document.createElement('canvas');
       canvas.width = 160;
       canvas.height = 240;
@@ -2921,15 +2928,55 @@ const app = {
       canvas.onclick = () => {
         if (this.isJudge()) this.chooseWinner(i);
       };
-      subEl.appendChild(canvas);
+      wrapper.appendChild(canvas);
+
+      if (canRedo) {
+        const redoBtn = document.createElement('button');
+        redoBtn.className = 'secondary';
+        redoBtn.textContent = 'Force Redo';
+        redoBtn.style.fontSize = '9px';
+        redoBtn.onclick = (evt) => {
+          evt.stopPropagation();
+          this.forceRedoSubmission(i);
+        };
+        wrapper.appendChild(redoBtn);
+      }
+
+      subEl.appendChild(wrapper);
     });
-    
+
     this.updateCanvasCards();
-    
+
     document.getElementById('judgeNotice').innerHTML = `
       ${this.isJudge() ? '<b>Judge time.</b> Tap a submission to crown it.' : 'Judge is picking...'}<br/>
       <span class="muted">Weather: ${this.game.weatherMode}${this.game.currentAlliance ? ' | Alliance active' : ''}</span>
     `;
+  },
+
+  forceRedoSubmission(index) {
+    if (!this.storyEngine || !this.storyEngine.markAbilityUsed()) return;
+    const sub = this.game.submissions[index];
+    if (!sub) return;
+    const player = this.game.players.find(p => p.name === sub.player);
+    if (!player) return;
+
+    const promptText = this.game.currentBlack ? this.game.currentBlack.prompt : '';
+    let bestIdx = 0;
+    let bestScore = -999;
+    player.hand.forEach((card, cIdx) => {
+      const score = this.evaluateCardSynergy(player.name, card, promptText);
+      if (score > bestScore) {
+        bestScore = score;
+        bestIdx = cIdx;
+      }
+    });
+
+    const newCard = player.hand[bestIdx];
+    player.hand.splice(bestIdx, 1);
+    this.game.refillHand(player);
+    sub.card = newCard;
+
+    this.enterJudging();
   },
 
   chooseWinner(index) {
@@ -2942,8 +2989,11 @@ const app = {
       if (result.ended) {
         document.getElementById('winnerName').textContent = result.endingTitle;
         document.getElementById('winnerCard').textContent = result.endingText;
-        document.getElementById('winnerMeta').textContent = `FINAL STATS: HEAT ${this.storyEngine.heat} | TRUST ${this.storyEngine.trust}`;
-        
+        const secretsLine = this.storyEngine.secrets.length > 0
+          ? ` | SECRETS: ${this.storyEngine.secrets.join('; ')}`
+          : '';
+        document.getElementById('winnerMeta').textContent = `FINAL STATS: HEAT ${this.storyEngine.heat} | TRUST ${this.storyEngine.trust}${secretsLine}`;
+
         const nextBtn = document.querySelector('#roundResult button');
         if (nextBtn) {
           nextBtn.setAttribute('onclick', 'app.endNarrativeGame()');
@@ -3649,22 +3699,22 @@ const app = {
   },
 
   startNoirPrototype() {
+    const originKey = document.getElementById('characterOriginSelect').value;
     this.storyEngine = new NarrativeStoryEngine();
-    this.storyEngine.reset();
-    
+    this.storyEngine.reset(originKey);
+
     this.game = new Game();
     this.game.mode = MODE.OFFLINE;
     this.game.isCampaign = false;
     this.game.pointsToWin = 99;
-    
+
     const myName = document.getElementById('hostName').value.trim() || 'Player';
     this.game.players = [];
     this.game.addPlayer(myName);
     this.game.addPlayer("O.G. Big Dave (Master Barber)");
     this.game.addPlayer("Stoop Homie");
     this.game.addPlayer("Bodega Clerk");
-    
-    const originKey = document.getElementById('characterOriginSelect').value;
+
     this.game.players[0].origin = originKey;
     this.game.players[1].origin = 'BARBER';
     this.game.players[2].origin = 'LOCAL_LEGEND';
