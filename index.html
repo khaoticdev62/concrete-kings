@@ -783,7 +783,12 @@
                 </div>
                 <div id="hand" class="hand"></div>
               </div>
-              
+
+              <div id="alliancePrompt" style="display:none; margin-bottom:8px;">
+                <select id="allianceTargetSelect" style="width:auto; display:inline-block; font-size:10px;"></select>
+                <button onclick="app.proposeAllianceFromUI()" style="font-size:8px;">PROPOSE COOKOUT ALLIANCE</button>
+              </div>
+
               <div class="save-bar" style="margin-top:12px; display:flex; gap:8px;">
                 <button id="submitBtn" onclick="app.submitSelection()" disabled style="flex:1;">SUBMIT SELECTION</button>
                 <button class="secondary" onclick="app.passTurn()">PASS / END TURN</button>
@@ -909,8 +914,6 @@
   </svg>
 </div>
           <div class="dev-row">
-            <input id="allianceInput" type="text" placeholder="Alliance target" style="width:120px; display:inline-block; font-size:11px;"/>
-            <button class="secondary" onclick="app.proposeAllianceFromUI()" style="font-size:8px;">ALLIANCE</button>
             <button class="secondary" onclick="app.resolveReceiptFromUI()" style="font-size:8px;">RECEIPTS</button>
           </div>
         </details>
@@ -2771,6 +2774,21 @@ const app = {
         if (label) label.textContent = `Bet ${cost} Street Cred`;
       }
     }
+
+    const alliancePrompt = document.getElementById('alliancePrompt');
+    if (alliancePrompt) {
+      const me = this.game.players[this.humanIndex];
+      const judge = this.game.players[this.game.judgeIndex % this.game.players.length];
+      const eligible = me ? this.game.players.filter(p => p !== me && p !== judge) : [];
+      const showPrompt = !this.game.currentAlliance && eligible.length > 0;
+      alliancePrompt.style.display = showPrompt ? 'block' : 'none';
+      if (showPrompt) {
+        const select = document.getElementById('allianceTargetSelect');
+        if (select) {
+          select.innerHTML = eligible.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+        }
+      }
+    }
   },
 
   updateStatHud() {
@@ -4080,12 +4098,11 @@ const app = {
     this.renderGame();
   },
   proposeAllianceFromUI() {
-    const input = document.getElementById('allianceInput');
-    const target = input.value.trim();
-    if (!target) return alert('Enter an alliance target name');
-    const result = AllianceSystem.proposeAlliance(this.game, this.game.players[this.humanIndex].name, target);
-    input.value = '';
-    alert('Alliance ' + result.status);
+    const me = this.game.players[this.humanIndex];
+    const targetName = document.getElementById('allianceTargetSelect')?.value;
+    if (!me || !targetName) return;
+    AllianceSystem.proposeAlliance(this.game, me.name, targetName);
+    this.renderGame();
   },
   resolveReceiptFromUI() {
     const trigger = ReceiptSystem.maybeTriggerReceipt(this.game);
