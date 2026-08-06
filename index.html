@@ -2954,11 +2954,12 @@ const app = {
   },
 
   forceRedoSubmission(index) {
-    if (!this.storyEngine || !this.storyEngine.markAbilityUsed()) return;
+    if (!this.storyEngine) return;
     const sub = this.game.submissions[index];
     if (!sub) return;
     const player = this.game.players.find(p => p.name === sub.player);
     if (!player) return;
+    if (!this.storyEngine.markAbilityUsed()) return;
 
     const promptText = this.game.currentBlack ? this.game.currentBlack.prompt : '';
     let bestIdx = 0;
@@ -2992,7 +2993,9 @@ const app = {
         const secretsLine = this.storyEngine.secrets.length > 0
           ? ` | SECRETS: ${this.storyEngine.secrets.join('; ')}`
           : '';
-        document.getElementById('winnerMeta').textContent = `FINAL STATS: HEAT ${this.storyEngine.heat} | TRUST ${this.storyEngine.trust}${secretsLine}`;
+        const metaEl = document.getElementById('winnerMeta');
+        metaEl.style.display = 'block';
+        metaEl.textContent = `FINAL STATS: HEAT ${this.storyEngine.heat} | TRUST ${this.storyEngine.trust}${secretsLine}`;
 
         const nextBtn = document.querySelector('#roundResult button');
         if (nextBtn) {
@@ -3054,8 +3057,6 @@ const app = {
   },
 
   nextRound() {
-    this.game.advanceJudge();
-    
     if (this.storyEngine && this.storyEngine.active) {
       const beat = this.storyEngine.getCurrentBeat();
       this.game.currentBlack = {
@@ -3070,7 +3071,9 @@ const app = {
       this.runNarrativeBotTurns();
       return;
     }
-    
+
+    this.game.advanceJudge();
+
     if (this.game.mode === MODE.ONLINE) {
       if (this.isHost) {
         this.game.nextBlack();
