@@ -2785,7 +2785,11 @@ const app = {
       if (showPrompt) {
         const select = document.getElementById('allianceTargetSelect');
         if (select) {
+          const previousValue = select.value;
           select.innerHTML = eligible.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+          if (previousValue && eligible.some(p => p.name === previousValue)) {
+            select.value = previousValue;
+          }
         }
       }
     }
