@@ -3005,7 +3005,9 @@ const app = {
       } else {
         document.getElementById('winnerName').textContent = `BEAT WINNER: ${win.player.toUpperCase()}`;
         document.getElementById('winnerCard').textContent = `"${win.card}"`;
-        document.getElementById('winnerMeta').textContent = result.consequenceText;
+        const beatMetaEl = document.getElementById('winnerMeta');
+        beatMetaEl.style.display = 'block';
+        beatMetaEl.textContent = result.consequenceText;
         
         const nextBtn = document.querySelector('#roundResult button');
         if (nextBtn) {
@@ -3046,7 +3048,9 @@ const app = {
     
     document.getElementById('winnerName').textContent = winner.name;
     document.getElementById('winnerCard').textContent = win.card;
-    document.getElementById('winnerMeta').textContent = `${this.game.currentBlack.prompt}`;
+    const classicMetaEl = document.getElementById('winnerMeta');
+    classicMetaEl.style.display = 'block';
+    classicMetaEl.textContent = `${this.game.currentBlack.prompt}`;
     
     this.show('roundResult');
     this.updateCanvasCards();
@@ -3619,7 +3623,9 @@ const app = {
       }
       document.getElementById('winnerName').textContent = msg.player;
       document.getElementById('winnerCard').textContent = msg.card;
-      document.getElementById('winnerMeta').textContent = this.game.currentBlack.prompt;
+      const onlineMetaEl = document.getElementById('winnerMeta');
+      onlineMetaEl.style.display = 'block';
+      onlineMetaEl.textContent = this.game.currentBlack.prompt;
       this.show('roundResult');
       this.updateCanvasCards();
     }
