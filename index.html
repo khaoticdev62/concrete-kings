@@ -4229,6 +4229,20 @@ const app = {
     this.storyEngine = new NarrativeStoryEngine();
     this.storyEngine.reset(originKey);
 
+    const secretTextMap = {
+      police_scanner: 'A stolen police scanner buzzing with codes',
+      security_warning: "Your cousin's neighborhood security warning",
+      pastor_program: 'Sunday service program signed by the pastor',
+      bodega_ledger: "A bodega ledger with names you shouldn't know",
+      panther_uncle: 'An uncle claiming he used to run with the Panthers'
+    };
+    const secretSelectEl = document.getElementById('characterSecretSelect');
+    const chosenSecretKey = secretSelectEl ? secretSelectEl.value : '';
+    const chosenSecretText = secretTextMap[chosenSecretKey];
+    if (chosenSecretText && !this.storyEngine.secrets.includes(chosenSecretText)) {
+      this.storyEngine.secrets.push(chosenSecretText);
+    }
+
     this.game = new Game();
     this.game.mode = MODE.OFFLINE;
     this.game.isCampaign = false;
