@@ -137,6 +137,7 @@ class NarrativeStoryEngine {
     this.beat = 1;
     this.heat = 0;
     this.trust = 0;
+    this.day = 1;
     this.active = false;
     this.history = [];
     this.origin = null;
@@ -148,6 +149,7 @@ class NarrativeStoryEngine {
     this.beat = 1;
     this.heat = 0;
     this.trust = 0;
+    this.day = 1;
     this.active = true;
     this.history = [];
     this.origin = originKey;
@@ -209,6 +211,7 @@ class NarrativeStoryEngine {
       };
     } else {
       this.beat++;
+      if (this.beat % 2 === 0) this.day++;
       return {
         consequenceText: consequence.text,
         ended: false

@@ -151,3 +151,16 @@ test('Story Engine: 2+ secrets unlock The Insider ending even with high heat', (
   assert.equal(result.endingTitle, "THE INSIDER");
   assert.ok(result.endingText.includes("secrets"));
 });
+
+test('Story Engine: day starts at 1 and increments every 2nd beat', () => {
+  const engine = new NarrativeStoryEngine();
+  engine.reset();
+  assert.equal(engine.day, 1);
+
+  engine.applyWinnerCard("A ridiculous scent cracks a smile"); // beat 1 -> 2
+  assert.equal(engine.day, 2);
+  engine.applyWinnerCard("Grandma's secret sweet potato pie recipe"); // beat 2 -> 3
+  assert.equal(engine.day, 2);
+  engine.applyWinnerCard("Grandma's secret sweet potato pie recipe"); // beat 3 -> 4
+  assert.equal(engine.day, 3);
+});
