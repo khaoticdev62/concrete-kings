@@ -1,0 +1,91 @@
+CONCRETE KINGS — UI WIREFRAME DECISION PANEL / NARRATIVE
+Full Detail / ASCII-Safe / Aligned to 1280x720
+================================================
+
+NATIVE RESOLUTION: 1280x720
+FORMAT: ASCII-safe borders only
+
+DECISION PANEL / NARRATIVE SCREEN
+- Top HUD repeats
+- Center: beat title, narrative block, choices
+- Bottom: utility actions
+
++--------------------------------------------------------------------+
+| CONCRETE KINGS    BEAT 02A: THE GOSSIP    DAY 1    HEAT: 2/10      |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | BEAT TITLE                                                 |   |
+|   | Left-aligned title, upper case, amber                       |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   | Narrative text block with automatic line wrap at 110 chars   |   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [A] CHOICE ONE      [B] CHOICE TWO                         |   |
+|   | [C] CHOICE THREE   [D] CHOICE FOUR                         |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ USE ABILITY ]  [ VIEW SECRET ]  [ OPEN MAP ]             |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+CHOICE FORMAT RULES
+- One action verb + target noun per choice
+- Choices tagged with trust+/-, heat+/-, secret trigger, item requirement
+- Locked choices show grayed state and tooltip requirement
+
+NARRATIVE TEXT RULES
+- Max 110 characters per line
+- Beat title left-aligned, uppercase, amber
+- Body text left-aligned, white, 1.5 line spacing
+
+UTILITY ACTIONS
+- USE ABILITY: opens ability menu if available
+- VIEW SECRET: shows current secrets/flags
+- OPEN MAP: overlays city map without leaving narrative
+
+ADDITIONAL VIEWS
+
+DECISION PANEL — ABILITY MENU
++--------------------------------------------------------------------+
+| ABILITIES                                                          |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [1] SHARP LOOK        Cooldown: 2 beats                      |   |
+|   | [2] STREET TALK       Cooldown: 3 beats                      |   |
+|   | [3] HUSTLE            Cooldown: 1 beat                       |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ BACK ]                                                   |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+DECISION PANEL — SECRET OVERLAY
++--------------------------------------------------------------------+
+| SECRETS / FLAGS                                                     |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | Secret A: discovered                                      |   |
+|   | Secret B: hidden                                          |   |
+|   | Flag: Marquez_watching = true                              |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ BACK ]                                                   |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+DECISION PANEL — LOCKED CHOICE TOOLTIP
+- If requirement missing: choice shows locked state
+- Tooltip appears below choice: requires ITEM_X or SECRET_Y
+- Input still moves focus; confirm on locked choice plays fail sound
+
+TRANSITION RULES
+- Choice confirm -> resolve immediate feedback -> stat delta -> continue
+- Ability use -> cooldown applied -> return to narrative
+- Open map -> map overlay -> back returns to narrative

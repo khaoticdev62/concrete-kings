@@ -1,0 +1,117 @@
+CONCRETE KINGS — UI WIREFRAME MAIN GAME SCREEN
+Full Detail / ASCII-Safe / Aligned to 1280x720
+================================================
+
+NATIVE RESOLUTION: 1280x720
+FORMAT: ASCII-safe borders only
+
+MAIN GAME SCREEN (DEFAULT STATE)
+- Top HUD: title left, location center, day/heat right
+- Center: story panel
+- Lower middle: state panel + card play area side by side
+- Bottom: action bar
+
++--------------------------------------------------------------------+
+| CONCRETE KINGS    HARLEM — 125TH ST    DAY 1    HEAT: 2/10         |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   |  STORY PANEL                                               |   |
+|   |  80% width / 40% height                                    |   |
+|   |  Lore text, card art preview, portrait placeholder          |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +----------------------------+  +----------------------------+    |
+|   | STATE PANEL                |  | CARD PLAY AREA             |    |
+|   | Trust / Heat / Rep / Cash  |  | Black card + white options  |    |
+|   | 20% width / 30% height     |  | 60% width / 30% height     |    |
+|   +----------------------------+  +----------------------------+    |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | ACTION BAR                                                |   |
+|   | [ PLAY ]  [ INVENTORY ]  [ MAP ]  [ QUESTS ]              |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+INTERACTION MAP
+- Story panel: advance text/reveal options
+- Card play area: select A/B/C/D
+- Action bar: shortcuts 1/2/3/4 or bumpers
+
+MAIN GAME SCREEN (JUDGING STATE)
++--------------------------------------------------------------------+
+| CONCRETE KINGS    HARLEM — 125TH ST    DAY 1    HEAT: 2/10         |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | TIMER                                                      |   |
+|   | 00:12                                                      |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +----------------------------+  +----------------------------+    |
+|   | WHITE CARDS ON TABLE       |  | VOTING PANEL               |    |
+|   | W1 / W2 / W3 / W4         |  | [VOTE] / [SKIP]            |    |
+|   +----------------------------+  +----------------------------+    |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ CONFIRM VOTE ]  [ PASS ]                                |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+MAIN GAME SCREEN (RESOLUTION STATE)
++--------------------------------------------------------------------+
+| CONCRETE KINGS    HARLEM — 125TH ST    DAY 1    HEAT: 2/10         |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | OUTCOME TEXT                                               |   |
+|   | Result + flavor text                                       |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | STAT DELTA                                                 |   |
+|   | Trust +1  Heat -1  Rep +1  Cash +15                        |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ CONTINUE ]                                               |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+MAIN GAME SCREEN (ENDING STATE)
++--------------------------------------------------------------------+
+| CONCRETE KINGS — ENDING                                            |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | ENDING CINEMATIC / TEXT                                     |   |
+|   | Final beat + outcome                                        |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | FINAL STATS                                                 |   |
+|   | Trust / Heat / Rep / Cash / Secrets / Flags                 |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ NEW GAME ]  [ REVIEW LOG ]                               |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+PANEL PLACEMENT RULES
+- Story panel always fills the central narrative focus
+- State panel stays left-lower for quick reference
+- Card play is always right-lower during play states
+- Action bar is always bottom-center in default state
+- Judging replaces story panel with timer + voting stack
+
+TEXT LAYOUT RULES
+- Max narrative width: 1040 px
+- Max choice width: 520 px per choice slot
+- HUD font row height: 36 px
+- Panel padding: 18 px internal on all sides
+
+STATE TRANSITIONS
+- Default -> Card Selected -> Judging -> Resolution -> Default/Ending
+- Judgment timeout: 12 seconds then auto-randomize
+- Resolution hold: 5 seconds or confirm

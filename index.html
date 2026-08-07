@@ -552,6 +552,11 @@
         <h2 style="margin-top:0; color:#f0ab43;">STORY CAMPAIGN</h2>
         <p class="muted" style="margin-top:0; font-size:11px;">Complete acts to defeat regional O.G. bosses, gain reputation, and unlock new classes.</p>
         <button class="primary" style="width:100%; background:#d9382e; border-color:#d9382e; color:#ffffff; font-family:'Press Start 2P', monospace; font-size:8px; margin-bottom:12px; height:36px; padding:0;" onclick="app.startNoirPrototype()">PLAY NOIR PROTOTYPE</button>
+        <button class="primary" style="width:100%; background:#c9822b; border-color:#c9822b; color:#ffffff; font-family:'Press Start 2P', monospace; font-size:8px; margin-bottom:12px; height:36px; padding:0;" onclick="app.startStreetDiceSandbox()">🎲 PLAY STREET DICE</button>
+        <button class="primary" style="width:100%; background:#339488; border-color:#339488; color:#ffffff; font-family:'Press Start 2P', monospace; font-size:8px; margin-bottom:12px; height:36px; padding:0;" onclick="app.startBodegaRunSandbox()">🏪 PLAY BODEGA RUN</button>
+        <button class="primary" style="width:100%; background:#274f80; border-color:#274f80; color:#ffffff; font-family:'Press Start 2P', monospace; font-size:8px; margin-bottom:12px; height:36px; padding:0;" onclick="app.startHaircutChallengeSandbox()">💈 PLAY HAIRCUT CHALLENGE</button>
+        <button class="primary" style="width:100%; background:#9c7a3c; border-color:#9c7a3c; color:#ffffff; font-family:'Press Start 2P', monospace; font-size:8px; margin-bottom:12px; height:36px; padding:0;" onclick="app.startLockpickingSandbox()">🔑 PLAY LOCKPICKING</button>
+        <button class="primary" style="width:100%; background:#eb8e52; border-color:#eb8e52; color:#ffffff; font-family:'Press Start 2P', monospace; font-size:8px; margin-bottom:12px; height:36px; padding:0;" onclick="app.startNegotiationSandbox()">🤝 PLAY NEGOTIATION</button>
         <div id="campaignActList" class="campaign-list"></div>
         <div id="campaignActDetails" class="campaign-details-box"></div>
       </div>
@@ -716,8 +721,9 @@
         <span class="status-pill" id="viewportWeatherBadge" style="color:#85c4ff; font-weight:bold;">CLEAR</span>
       </div>
       
-      <div class="canvas-mount-point crt-screen">
+      <div class="canvas-mount-point crt-screen" style="position: relative;">
         <canvas id="stage-canvas" class="pixel-canvas" style="width: 100%; display: block; background: #08080a;"></canvas>
+        <canvas id="minigame-canvas" class="pixel-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: auto; display: none; background: transparent; image-rendering: pixelated;"></canvas>
         <div id="narrativeTextBox" style="display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:#08080a; padding:16px; box-sizing:border-box; color:#f4f7ff; font-family:'JetBrains Mono', monospace; font-size:12px; line-height:1.5; overflow-y:auto; border:3px solid #393e4d;">
           <h2 id="narrativeBeatTitle" style="font-family:'Press Start 2P', monospace; font-size:10px; color:#f25438; margin-top:0;">THE DROPOFF</h2>
           <p id="narrativeText" style="margin:8px 0; color:#cbd5ed;">Midnight on 125th...</p>
@@ -1026,6 +1032,16 @@
 <script src="src/pixel_engine/audio-sfx-engine.js"></script>
 <script src="src/pixel_engine/story-engine.js"></script>
 <script src="cards.js"></script>
+<script src="src/pixel_engine/mini-games/mini-game-state.js"></script>
+<script src="src/pixel_engine/mini-games/mini-game-input.js"></script>
+<script src="src/pixel_engine/mini-games/mini-game-ui.js"></script>
+<script src="src/pixel_engine/mini-games/mini-game-loop.js"></script>
+<script src="src/pixel_engine/mini-games/mini-game-manager.js"></script>
+<script src="src/pixel_engine/mini-games/games/street-dice.js"></script>
+<script src="src/pixel_engine/mini-games/games/bodega-run.js"></script>
+<script src="src/pixel_engine/mini-games/games/haircut-challenge.js"></script>
+<script src="src/pixel_engine/mini-games/games/lockpicking.js"></script>
+<script src="src/pixel_engine/mini-games/games/negotiation.js"></script>
 <script>
 /* ==================================
    CONCRETE KINGS - 16-Bit Retro Game
@@ -1613,6 +1629,40 @@ const app = {
     this.mapController = new BlockMapController({ startX: 600, startY: 500 });
     this.campaignEngine = new CampaignModeEngine();
     this.lexiconHUD = new AAVELexiconHUD();
+    
+    // Initialize mini-game manager
+    const minigameCanvas = document.getElementById('minigame-canvas');
+    if (minigameCanvas) {
+      this.miniGameManager = new MiniGameManager(minigameCanvas);
+      this.miniGameManager.registerGame('street_dice', StreetDice);
+      this.miniGameManager.registerGame('bodega_run', BodegaRun);
+      this.miniGameManager.registerGame('haircut_challenge', HaircutChallenge);
+      this.miniGameManager.registerGame('lockpicking', Lockpicking);
+      this.miniGameManager.registerGame('negotiation', Negotiation);
+    }
+    
+    // Bind global mini-game completion listener
+    window.addEventListener('minigame:complete', (e) => {
+      const result = e.detail;
+      if (this.game && this.game.players[this.humanIndex]) {
+        const me = this.game.players[this.humanIndex];
+        if (result.cashDelta) me.stats.streetCred = Math.max(0, (me.stats.streetCred || 0) + result.cashDelta);
+        if (result.reputationDelta) me.stats.reputation = Math.max(0, (me.stats.reputation || 0) + result.reputationDelta);
+      }
+      if (this.storyEngine) {
+        if (result.heatDelta) this.storyEngine.heat = Math.max(0, this.storyEngine.heat + result.heatDelta);
+        if (result.trustDelta) {
+          this.storyEngine.trust = Math.max(0, this.storyEngine.trust + (result.trustDelta.general || 0));
+        }
+        if (result.secretsUnlocked && result.secretsUnlocked.length > 0) {
+          result.secretsUnlocked.forEach(sec => {
+            if (!this.storyEngine.secrets.includes(sec)) {
+              this.storyEngine.secrets.push(sec);
+            }
+          });
+        }
+      }
+    });
     
     this.renderSetupCampaignActs();
     this.renderSetupGlossary();
@@ -2588,19 +2638,49 @@ const app = {
   },
 
   triggerHotspot(spot) {
+    if (typeof app !== 'undefined' && app.miniGameActive) return;
     if (this.audioEngine) this.audioEngine.playGoldShimmer();
+    
     if (spot.id === 'BARBER_SHOP') {
-      alert('💈 Master Barber gave you a clean lineup! Street Cred +1.');
-      const me = this.game.players[this.humanIndex];
-      if (me) me.stats.streetCred++;
+      if (this.miniGameManager) {
+        this.miniGameManager.start('haircut_challenge', { npc: { name: 'Master Barber' }, location: 'Barbershop', stake: 20, difficulty: 'medium' });
+      } else {
+        alert('💈 Master Barber gave you a clean lineup! Street Cred +1.');
+        const me = this.game.players[this.humanIndex];
+        if (me) me.stats.streetCred++;
+      }
     } else if (spot.id === 'BODEGA') {
-      alert('🏪 You bought a chopped cheese from the corner Bodega. Street Cred +1.');
-      const me = this.game.players[this.humanIndex];
-      if (me) me.stats.streetCred++;
+      if (this.miniGameManager) {
+        this.miniGameManager.start('bodega_run', { npc: { name: 'Mr. Chen' }, location: 'Corner Bodega', stake: 20, difficulty: 'medium' });
+      } else {
+        alert('🏪 You bought a chopped cheese from the corner Bodega. Street Cred +1.');
+        const me = this.game.players[this.humanIndex];
+        if (me) me.stats.streetCred++;
+      }
     } else if (spot.id === 'CHESS_PARK') {
-      alert('♟️ You played chess and learned from a neighborhood elder. Reputation +1.');
-      const me = this.game.players[this.humanIndex];
-      if (me) me.stats.reputation++;
+      if (this.miniGameManager) {
+        this.miniGameManager.start('street_dice', { npc: { name: 'T-Bone' }, location: 'Chess Park Corner', stake: 20, dc: 12 });
+      } else {
+        alert('♟️ You played chess and learned from a neighborhood elder. Reputation +1.');
+        const me = this.game.players[this.humanIndex];
+        if (me) me.stats.reputation++;
+      }
+    } else if (spot.id === 'LOCKED_DOOR') {
+      if (this.miniGameManager) {
+        this.miniGameManager.start('lockpicking', { npc: { id: 'lock', name: 'Lock cylinder' }, location: 'Back Alley Gate', stake: 20, difficulty: 'hard' });
+      } else {
+        alert('🔑 You picked the lock successfully! Reputation +1.');
+        const me = this.game.players[this.humanIndex];
+        if (me) me.stats.reputation++;
+      }
+    } else if (spot.id === 'SHOP_DEAL') {
+      if (this.miniGameManager) {
+        this.miniGameManager.start('negotiation', { npc: { id: 'chen', name: 'Mr. Chen' }, location: 'Corner Bodega', stake: 20, difficulty: 'medium' });
+      } else {
+        alert('🤝 You negotiated a fair deal! Reputation +1.');
+        const me = this.game.players[this.humanIndex];
+        if (me) me.stats.reputation++;
+      }
     }
     this.renderGame();
   },
@@ -3122,6 +3202,19 @@ const app = {
   nextRound() {
     if (this.storyEngine && this.storyEngine.active) {
       const beat = this.storyEngine.getCurrentBeat();
+      
+      // Hook: Intercept progression at Beat 3 ("The Checkpoint") with a mini-game check
+      if (beat && beat.beat === 3 && this.miniGameManager) {
+        this.show('game');
+        this.miniGameManager.start('street_dice', {
+          npc: { id: 'tbone', name: 'T-Bone' },
+          location: 'Chess Park Corner',
+          stake: 20,
+          dc: 12
+        });
+        return;
+      }
+      
       this.game.currentBlack = {
         raw: beat.blackCard,
         prompt: beat.blackCard,
@@ -3838,6 +3931,156 @@ const app = {
     this.show('game');
     this.renderGame();
     this.runNarrativeBotTurns();
+  },
+  
+  startStreetDiceSandbox() {
+    const originKey = document.getElementById('characterOriginSelect').value;
+    
+    // Set up dummy game and players to support stats updates
+    this.game = new Game();
+    this.game.mode = MODE.OFFLINE;
+    this.game.isCampaign = false;
+    this.humanIndex = 0;
+    this.game.players = [];
+    this.game.addPlayer("Player");
+    this.game.players[0].origin = originKey;
+    
+    // Set starting stats based on origin
+    const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
+    this.game.players[0].stats.streetCred += origin.startingStats.streetCred;
+    this.game.players[0].stats.reputation += origin.startingStats.reputation;
+    
+    // Move canvas to game view and switch screen
+    this.show('game');
+    
+    if (this.miniGameManager) {
+      this.miniGameManager.start('street_dice', {
+        npc: { id: 'tbone', name: 'T-Bone' },
+        location: 'Chess Park Corner',
+        stake: 20,
+        dc: 12
+      });
+    }
+  },
+
+  startBodegaRunSandbox() {
+    const originKey = document.getElementById('characterOriginSelect').value;
+    
+    // Set up dummy game and players to support stats updates
+    this.game = new Game();
+    this.game.mode = MODE.OFFLINE;
+    this.game.isCampaign = false;
+    this.humanIndex = 0;
+    this.game.players = [];
+    this.game.addPlayer("Player");
+    this.game.players[0].origin = originKey;
+    
+    // Set starting stats based on origin
+    const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
+    this.game.players[0].stats.streetCred += origin.startingStats.streetCred;
+    this.game.players[0].stats.reputation += origin.startingStats.reputation;
+    
+    // Move canvas to game view and switch screen
+    this.show('game');
+    
+    if (this.miniGameManager) {
+      this.miniGameManager.start('bodega_run', {
+        npc: { id: 'chen', name: 'Mr. Chen' },
+        location: 'Corner Bodega',
+        stake: 20,
+        difficulty: 'medium'
+      });
+    }
+  },
+
+  startHaircutChallengeSandbox() {
+    const originKey = document.getElementById('characterOriginSelect').value;
+    
+    // Set up dummy game and players to support stats updates
+    this.game = new Game();
+    this.game.mode = MODE.OFFLINE;
+    this.game.isCampaign = false;
+    this.humanIndex = 0;
+    this.game.players = [];
+    this.game.addPlayer("Player");
+    this.game.players[0].origin = originKey;
+    
+    // Set starting stats based on origin
+    const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
+    this.game.players[0].stats.streetCred += origin.startingStats.streetCred;
+    this.game.players[0].stats.reputation += origin.startingStats.reputation;
+    
+    // Move canvas to game view and switch screen
+    this.show('game');
+    
+    if (this.miniGameManager) {
+      this.miniGameManager.start('haircut_challenge', {
+        npc: { id: 'barber', name: 'Master Barber' },
+        location: 'Barbershop',
+        stake: 20,
+        difficulty: 'medium'
+      });
+    }
+  },
+
+  startLockpickingSandbox() {
+    const originKey = document.getElementById('characterOriginSelect').value;
+    
+    // Set up dummy game and players to support stats updates
+    this.game = new Game();
+    this.game.mode = MODE.OFFLINE;
+    this.game.isCampaign = false;
+    this.humanIndex = 0;
+    this.game.players = [];
+    this.game.addPlayer("Player");
+    this.game.players[0].origin = originKey;
+    
+    // Set starting stats based on origin
+    const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
+    this.game.players[0].stats.streetCred += origin.startingStats.streetCred;
+    this.game.players[0].stats.reputation += origin.startingStats.reputation;
+    
+    // Move canvas to game view and switch screen
+    this.show('game');
+    
+    if (this.miniGameManager) {
+      this.miniGameManager.start('lockpicking', {
+        npc: { id: 'lock', name: 'Lock cylinder' },
+        location: 'Back Alley Gate',
+        stake: 20,
+        difficulty: 'hard'
+      });
+    }
+  },
+
+  startNegotiationSandbox() {
+    const originKey = document.getElementById('characterOriginSelect').value;
+    
+    // Set up dummy game and players to support stats updates
+    this.game = new Game();
+    this.game.mode = MODE.OFFLINE;
+    this.game.isCampaign = false;
+    this.humanIndex = 0;
+    this.game.players = [];
+    this.game.addPlayer("Player");
+    this.game.players[0].origin = originKey;
+    
+    // Set starting stats based on origin
+    const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
+    this.game.players[0].stats.streetCred += origin.startingStats.streetCred;
+    this.game.players[0].stats.reputation += origin.startingStats.reputation;
+    
+    // Move canvas to game view and switch screen
+    this.show('game');
+    
+    if (this.miniGameManager) {
+      this.miniGameManager.start('negotiation', {
+        npc: { id: 'chen', name: 'Mr. Chen' },
+        location: 'Corner Bodega',
+        stake: 20,
+        difficulty: 'medium'
+      });
+    }
   },
   
   renderNarrativeBeat() {

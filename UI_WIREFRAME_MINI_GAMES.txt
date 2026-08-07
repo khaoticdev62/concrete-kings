@@ -1,0 +1,89 @@
+CONCRETE KINGS — UI WIREFRAME MINI GAMES
+Full Detail / ASCII-Safe / Aligned to 1280x720
+================================================
+
+NATIVE RESOLUTION: 1280x720
+FORMAT: ASCII-safe borders only
+
+MINI GAME HUD (ALL MINI GAMES)
+- Top: mini game name, heat, rep
+- Upper middle: HUD + timer/stats
+- Center: gameplay canvas/interaction area
+- Bottom: quit/retry/stats
+
++--------------------------------------------------------------------+
+| MINI GAME NAME    HEAT: 7/10    REP: FEARED                        |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +----------------------------+  +----------------------------+    |
+|   | MINI GAME HUD             |  | TIMER / STATS              |    |
+|   | Objective / Location       |  | Timer / Attempts / Tool     |    |
+|   +----------------------------+  +----------------------------+    |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | GAMEPLAY CANVAS / INTERACTION AREA                         |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ QUIT ]  [ RETRY ]  [ VIEW STATS ]                        |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+RULES
+- Quit applies penalty; no retry unless quest or paid cash
+- Stats panel shows best result, cash spent, items used, time
+
+MINI GAME COMPLETION SCREEN
++--------------------------------------------------------------------+
+| MINI GAME NAME — COMPLETE    HEAT: 7/10    REP: FEARED             |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | RESULT                                                     |   |
+|   | Success / Partial / Failure                                |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | REWARDS / PENALTIES                                        |   |
+|   | Cash +20  Trust +1  Heat -1                                |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ CONTINUE ]  [ RETRY ]                                    |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+MINI GAME CATALOG OVERVIEW
+ 1. Haircut Challenge      Timing window
+ 2. Street Dice            Roll + modifier
+ 3. Lockpicking            Timing + skill
+ 4. Alley Chase            Grid movement/stealth
+ 5. Negotiation            Social check
+ 6. Barber Challenge       Rhythm/timing sequence
+ 7. Burner Phone Hack      Puzzle input
+ 8. Gossip Network         Knowledge puzzle
+ 9. Crafting               Resource selection
+10. King of the Block      Social vote
+
+SELECTION SCREEN
++--------------------------------------------------------------------+
+| MINI GAMES                                                         |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | AVAILABLE                                                  |   |
+|   | [1] Haircut Challenge   Ray's Shop   Difficulty: Easy       |   |
+|   | [2] Street Dice         Alley       Difficulty: Medium     |   |
+|   | [3] Lockpicking         Safe House   Difficulty: Hard       |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ BACK ]                                                   |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+INTERACTION RULES
+- Selection screen shows trigger location, difficulty, reward hint
+- Confirm starts mini game immediately
+- Quit from gameplay returns to selection with penalty
+- Retry only if quest-linked or cash-paid

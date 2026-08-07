@@ -131,7 +131,9 @@ class BlockMapController {
     this.hotspots = [
       { id: 'BARBER_SHOP', name: 'Barber Shop Stoop', x: 300, y: 550, width: 90, prompt: 'Press Enter to get a lineup' },
       { id: 'BODEGA', name: 'Corner Bodega', x: 600, y: 550, width: 120, prompt: 'Press Enter to enter Bodega' },
-      { id: 'CHESS_PARK', name: 'Park Chess Tables', x: 900, y: 550, width: 90, prompt: 'Press Enter to play chess' }
+      { id: 'SHOP_DEAL', name: 'Bodega Counter Deal', x: 780, y: 550, width: 90, prompt: 'Press Enter to negotiate deal' },
+      { id: 'CHESS_PARK', name: 'Park Chess Tables', x: 950, y: 550, width: 90, prompt: 'Press Enter to play chess' },
+      { id: 'LOCKED_DOOR', name: 'Locked Alley Door', x: 1150, y: 550, width: 90, prompt: 'Press Enter to pick lock' }
     ];
 
     this.activeHotspot = null;

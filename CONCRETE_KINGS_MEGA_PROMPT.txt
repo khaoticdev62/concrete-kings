@@ -1,0 +1,513 @@
+CONCRETE KINGS — MEGA PROMPT DOCUMENT
+Combined: Wireframes, Mini Games, Pixel Art, City Art
+================================================
+
+NATIVE RESOLUTION: 1280x720 (integer scaled to display)
+ART DNA: Noir pixel art, high contrast, warm amber/cyan accents, modern urban America
+STYLE: Grounded, sun-faded, rain-soaked, concrete-heavy, practical-light-first
+RENDERING: Nearest-neighbor only, integer coordinates, no blur, 4-frame animation budget
+INPUT: Keyboard, mouse, touch, controller-first
+ARCHITECTURE: Plain JS modules, no frameworks, no build step
+TERMINAL FORMAT: ASCII-safe only; no Unicode box drawing
+
+QUALITY DISCIPLINE:
+- Every screen has exact panel placement, HUD rules, and interaction map
+- Every prompt has exact palette lock, seed strategy, and failure rules
+- Every mini game returns a standardized result payload
+- Every city asset set has day/night/rain variants and parallax rules
+
+
+================================================
+PART 1 — UI WIREFRAMES (FULL DETAIL, ASCII-SAFE)
+================================================
+
+REFERENCE FILES:
+- C:\Users\thecr\concrete-kings\UI_WIREFRAME_MAIN_GAME_SCREEN.txt
+- C:\Users\thecr\concrete-kings\UI_WIREFRAME_CHARACTER_CREATION.txt
+- C:\Users\thecr\concrete-kings\UI_WIREFRAME_GAME_BOARD.txt
+- C:\Users\thecr\concrete-kings\UI_WIREFRAME_DECISION_PANEL.txt
+- C:\Users\thecr\concrete-kings\UI_WIREFRAME_CITY_MAP.txt
+- C:\Users\thecr\concrete-kings\UI_WIREFRAME_NPC_POI_SCENES.txt
+- C:\Users\thecr\concrete-kings\UI_WIREFRAME_MINI_GAMES.txt
+
+GLOBAL RULES:
+- Top HUD repeats on every view: title, location, day, heat
+- Max 4 interactive choices per row
+- Primary action buttons anchored bottom-center or bottom-right
+- Color intent: amber = trust/warm, cyan = tech/secret, red = heat/danger
+- Text zones reserved at exact widths; no overflow beyond 1280
+
+MAIN GAME SCREEN
+- Reference: UI_WIREFRAME_MAIN_GAME_SCREEN.txt
+- Layout: top HUD, story panel, state + card play, action bar
+- States: Default, Card Selected, Judging, Resolution, Ending
+- Interaction: story panel advance, card play A/B/C/D, action bar shortcuts
+
+CHARACTER CREATION SCREEN
+- Reference: UI_WIREFRAME_CHARACTER_CREATION.txt
+- Layout: origin + attributes / appearance + secret / confirmation bar
+- No in-game HUD during creation
+- Confirm validates origin, attributes, secret, portrait
+
+GAME BOARD / MAIN GAMEPLAY
+- Reference: UI_WIREFRAME_GAME_BOARD.txt
+- States: Default, Card Selected, Judging, Resolution, Ending
+- Transition: judgment 12s timeout, resolution 5s or confirm
+
+DECISION PANEL / NARRATIVE
+- Reference: UI_WIREFRAME_DECISION_PANEL.txt
+- Center: beat title, narrative block, choices
+- Bottom: ability / secret / map utilities
+- Locked choices show tooltip requirement
+
+CITY / BLOCK MAP
+- Reference: UI_WIREFRAME_CITY_MAP.txt
+- Tile grid at 32x32 units
+- Symbols: @ player, R/J/M/K NPCs, */?/! quests, # fog
+- Overlays: fast travel, quest filter
+
+NPC / POI SCENE SCREENS
+- Reference: UI_WIREFRAME_NPC_POI_SCENES.txt
+- Top: location/time/weather
+- Left: NPC portrait + state
+- Right: interactions + quest mini-panel
+- Bottom: leave / use item / open quests
+- States: friendly, neutral, hostile, scared, busy
+
+MINI GAME HUD
+- Reference: UI_WIREFRAME_MINI_GAMES.txt
+- Top: name/heat/rep
+- Upper: HUD + timer/stats
+- Center: gameplay canvas
+- Bottom: quit/retry/stats
+- Completion: result + rewards/penalties + continue/retry
+
+
+================================================
+PART 2 — ELITE MINI GAME MECHANICS (FULL DETAIL)
+================================================
+
+CORE LOOP:
+  EXPLORE -> INTERACT -> PLAY MINI GAME -> RESOLVE -> REPEAT
+
+STATE MACHINE:
+  IDLE -> LOBBY -> PLAY -> RESOLVE -> REWARD -> EXIT -> IDLE
+
+GLOBAL RESULT PAYLOAD:
+  success: boolean
+  tier: critical | success | partial | failure
+  trustDelta: number
+  heatDelta: number
+  cashDelta: number
+  reputationDelta: string
+  secretsUnlocked: string[]
+  flagsSet: string[]
+  items: { add: [], remove: [] }
+  questUpdates: { id, stage, newFlags[] }
+
+DIFFICULTY:
+  Easy:     DC  8-10
+  Medium:   DC 11-13
+  Hard:     DC 14-16
+  Extreme:  DC 17-18
+
+ATTRIBUTES:
+  STR  -> physical, stealth, climb, force
+  WIT  -> puzzles, negotiation, hacking, locks
+  SOUL -> social, leadership, empathy, intimidation
+  CASH -> purchases, bribes, gear, entry
+
+SUCCESS TIERS:
+  Critical: >= DC + 6
+  Success:  >= DC
+  Partial:   >= DC - 5
+  Failure:   < DC - 5
+
+FAILURE RULES:
+- Failure applies heatDelta +2 minimum
+- Partial applies heatDelta +1 and cashDelta penalty possible
+- Critical may unlock secret or remove heat
+
+MINI GAME CATALOG
+1. Haircut Challenge
+   Type: timing window
+   Trigger: Ray / shop hours
+   Mechanics: hit 8 timing windows with fade-in/out markers; straight razor bonus removes 1 miss
+   Rewards: cash, rep + neat, trust
+   Failure: cut too short -> cash penalty, rep - messy
+
+2. Street Dice
+   Type: roll + modifier
+   Trigger: hustler NPC, alley
+   Mechanics: 2d6 + WIT modifier vs DC; hidden opponent roll
+   Rewards: cash pot, trust
+   Failure: lose ante, heat +1
+
+3. Lockpicking
+   Type: timing + skill
+   Trigger: door, safe, locker
+   Mechanics: 6 tumbler windows; each success advances pin; 3 pins needed
+   Rewards: access, secret chance, trust
+   Failure: alarm trigger, heat +2
+
+4. Alley Chase
+   Type: grid movement/stealth
+   Trigger: ambush, escape
+   Mechanics: tile grid, Marquez AI with 2-tile lookahead; hide in shadow = pause timer
+   Rewards: safety, secret, trust
+   Failure: caught -> cash loss, heat +3, item loss
+
+5. Negotiation
+   Type: social check
+   Trigger: vendor, bodega, debt
+   Mechanics: 4-round bid/ask with WIT/SOUL bonuses; hidden NPC floor/ceiling
+   Rewards: lower price, info, trust
+   Failure: pay full price or leave
+
+6. Barber Challenge
+   Type: rhythm/timing sequence
+   Trigger: barbershop contest
+   Mechanics: repeat 8-beat pattern with increasing speed; perfect/miss/great window
+   Rewards: cash pot, rep, secret
+   Failure: no prize, heat +1
+
+7. Burner Phone Hack
+   Type: puzzle input
+   Trigger: tech NPC, safe house
+   Mechanics: 4-digit code with 2 clues; 3 attempts; each wrong attempt increases police proximity
+   Rewards: secret, cash, trust
+   Failure: phone bricked, heat +2
+
+8. Gossip Network
+   Type: knowledge puzzle
+   Trigger: bar, bodega
+   Mechanics: connect 5 nodes in correct order using overheard clues; 1 wrong node allowed
+   Rewards: secret, quest flag, rep
+   Failure: misinformation, heat +1
+
+9. Crafting
+   Type: resource selection
+   Trigger: safe house, workshop
+   Mechanics: choose 3 ingredients from 6; recipe requires exact combo or 4-of-5 substitute
+   Rewards: item, cash, trust
+   Failure: wasted materials, heat +0
+
+10. King of the Block
+    Type: social vote
+    Trigger: block event
+    Mechanics: 3-round voting; each round you campaign using 1 attribute spend; majority wins
+    Rewards: rep, district control flag, cash
+    Failure: lose influence, heat +1
+
+INPUT ABSTRACT MAP:
+  confirm, cancel, up, down, left, right, action1, action2, pause
+
+Implementation requirements:
+- requestAnimationFrame loop with delta-time
+- Input state stored each frame; resolved inside update()
+- 4-frame animation budget for all motion/animation
+- 1280x720 native overlay canvas; scaled to display
+- Controller + mobile + keyboard-only completion path
+- Exactly one completion event per mini game
+
+Event rules:
+- On resolve, set miniGameResult object and freeze input
+- Do not mutate world state until RESOLVE state
+- Reward/penalty application happens in REWARD state only
+
+
+================================================
+PART 3 — ELITE PIXEL ART GENERATION SYSTEM (FULL DETAIL)
+================================================
+
+STYLE BIBLE:
+  - Noir, modern urban America, present day
+  - Light sources: streetlamp, neon, headlight, kitchen window, fluorescent
+  - Shadows: half-face shadow, rim light, practicals only, no magical glow
+  - Atmosphere: rain, steam, smoke, haze
+  - 4-frame animation budget
+
+LOCKED PALETTE:
+  Amber   #ffbf00
+  Cyan    #00e5ff
+  Red     #ff3b3b
+  White   #f0f0f0
+  Black   #0a0a0a
+  Concrete #7a7a7a
+  Steel   #b0c4de
+
+UNIVERSAL PROMPT TEMPLATE:
+  [SUBJECT], [ACTION OR POSE], [VIEW],
+  pixel art, [SIZE],
+  limited palette [HEX1, HEX2, HEX3],
+  noir style, modern urban America,
+  transparent background, game sprite, clean edges,
+  [SHADING RULE], [ATMOSPHERE]
+
+CHARACTER DNA — FULL CAST
+  RAY: Black man, late 40s, Caesar cut, black barber jacket, warm eyes, 5'10"
+  JADA: Black woman, late 20s, box braids, black hoodie, scar on left cheek, 5'6"
+  MARQUEZ: Latina, early 40s, tight bun, trench coat, badge on belt, 5'7"
+  MR. CHEN: older Chinese man, 60s, glasses, white apron, tea steam, 5'5"
+  THE KID: Black boy, 14, blue hoodie, scared eyes, tough stance, 5'2"
+  T-BONE: Black man, 30s, shaved head, gold tooth, leather jacket, 6'0"
+  OLD MAN JENKINS: white man, 70s, hearing aid, cardigan, cigarette, 5'8"
+  MARCUS: Black man, 20s, dreadlocks, hoodie, skateboard, 5'9"
+  THE STRANGER: unknown gender, long coat, hat pulled low, hidden face, 6'0"
+
+CHARACTER PROMPT RULES:
+- Start every character prompt with identity line
+- Add one signature prop in every variant
+- Lock seed per character ID; reuse seed for all variants
+- Generate portrait at 2x, then downscale to 64x64 or 128x128
+
+CARD ART RULES
+Black cards:
+- Allegorical scene or object, not a specific face
+- Readable at thumbnail size
+- Aspect 2:3
+- Two max focal elements
+- Background simplified to silhouette
+
+White cards:
+- Bust portrait, identity-locked character or archetype
+- Thumbnail-readable face
+- Rim light required
+- Background dark/none
+
+CINEMATIC / CUTSCENE RULES
+- Aspect 16:9
+- Noir composition: foreground silhouette, midground action, background light source
+- Rim light on hero; antagonist stays in shadow until reveal
+- Color grade: desaturated shadows, warm highlights, grain
+- 4-frame animation budget for camera moves or environmental motion
+
+CONSISTENCY RULES:
+- Lock seed per character ID
+- Same prompt structure for variants; only change action, view, atmosphere
+- Generate at 2x target resolution, then nearest-neighbor downscale
+- Manual cleanup: remove anti-aliasing, enforce hard edges, quantize to locked palette
+- If two assets must match, generate both in one batch with same seed and style stack
+
+PIPELINE WORKFLOW:
+  1. Write DNA-locked prompt
+  2. Generate at 2x target resolution
+  3. Downscale with nearest-neighbor
+  4. Remove gradients that break cel shading
+  5. Quantize palette to allowed colors
+  6. Test at play resolution; if unreadable, simplify silhouette
+
+QUALITY CONTROL:
+  [ ] Silhouette reads before detail
+  [ ] Palette locked to approved colors
+  [ ] No blur, no anti-aliasing
+  [ ] Character DNA preserved across variants
+  [ ] Card art readable at 128x192 px
+  [ ] Cinematic readable at 320x180 internal
+  [ ] Transparent backgrounds where required
+  [ ] Seed recorded in asset manifest
+
+FAILURE MODES & FIXES:
+  Too much detail:     Add simple shapes, readable at small size
+  Wrong palette:       Append locked palette hex values
+  Blurry edges:        Add clean edges, flat cel shading, no anti-aliasing
+  Photorealistic:      Add pixel art, 16-bit style, game sprite
+  Inconsistent style:  Lock seed, reuse exact style stack
+  Busy composition:    Add single focal object, shallow depth
+  Wrong era:           Add present day, modern urban America, 2020s
+  Too dark:            Add visible subjects, readable at play size
+
+
+================================================
+PART 4 — REAL CITY ART PROMPT SYSTEM + MULTI-CITY APPENDIX (FULL DETAIL)
+================================================
+
+TILE RULES:
+  - Module sizes: 32x32, 64x64, 128x128
+  - Facades use width x height module notation: 2w_3h
+  - Textures must be square and seamless
+  - Parallax layers: Layer 0 simplified -> Layer 4 detailed
+  - One dominant light source per scene
+
+DISTRICT 1: 125TH STREET
+  Palette: #8b3a3a, #7a7a7a, #2a2a2a, #ffbf00, #00e5ff, #f0e6d3
+  POIs: barbershop, bodega, stoop, alley, fire escape
+  Light: streetlamp + neon
+  Facades: brownstone_2w_3h, bodega_2w_2h, barbershop_2w_2h, tenement_2w_4h
+  Ground: sidewalk_32x32, asphalt_32x32, puddle_32x32
+  Props: fire_escape_64x64, streetlamp_64x128, bodega_awning_128x32, barbershop_pole_32x128
+
+DISTRICT 2: JADA'S BLOCK
+  Palette: #cceeff, #ff2d7a, #00e5ff, #1f1f1f, #6b4c35, #d4c5a9
+  POIs: bar, bodega, laundromat, jukebox, pool table
+  Light: neon + fluorescent
+  Facades: bar_facade_2w_2h, bodega_facade_2w_2h, laundromat_facade_2w_2h
+  Ground: wet_asphalt_32x32, neon_reflection_32x32, sidewalk_32x32
+  Props: neon_open_64x64, jukebox_64x128, pool_table_128x128, bar_stool_32x64
+
+DISTRICT 3: INSTITUTIONAL
+  Palette: #8a8a8a, #5a5a5a, #b8b8b8, #b0c4de, #00e5ff, #ff3b3b
+  POIs: precinct, interrogation room, cruiser, cell
+  Light: fluorescent + cruiser light
+  Facades: precinct_front_3w_3h, precinct_brick_2w_3h
+  Ground: linoleum_floor_32x32, concrete_slab_32x32
+  Props: fluorescent_light_64x32, one_way_mirror_64x64, police_cruiser_128x64
+
+DISTRICT 4: SAFE HOUSE
+  Palette: #d9d0c3, #6b4c35, #5a4a3a, #ffcc80, #2a2a2a, #f0e6d3
+  POIs: cottage, porch, armchair, cot, bookshelf
+  Light: table lamp + streetlamp
+  Facades: wood_frame_2w_2h, wood_frame_2w_3h
+  Ground: plaster_wall_32x32, wood_floor_32x32
+  Props: table_lamp_32x64, cot_64x64, armchair_64x64, bookshelf_64x128
+
+TEXTURE PROMPTS:
+  BRICK WALL: seamless texture, red brick wall, weathered, sun-faded, mortar cracking, 1024x1024, tileable, no lighting, neutral, game-ready, PBR-ready
+  CONCRETE WALL: seamless texture, poured concrete, subtle aggregate, water stains, 1024x1024, tileable, no lighting, neutral, game-ready, PBR-ready
+  WET ASPHALT: seamless texture, wet asphalt, rain texture, puddle micro-detail, tire tracks, 1024x1024, tileable, no lighting, neutral, game-ready, PBR-ready
+  CHECKERBOARD TILE: seamless texture, black white checkerboard tile, classic barbershop, worn grout, 1024x1024, tileable, no lighting, neutral, game-ready, PBR-ready
+
+PARALLAX LAYER RULES:
+  Layer 0: sky/skyline, lightest, least contrast
+  Layer 1: far buildings, simplified silhouettes, no windows
+  Layer 2: mid buildings, basic shapes, repeating patterns
+  Layer 3: near buildings, detail, windows, signs
+  Layer 4: street level, props, vehicles, NPCs
+
+WEATHER/TIME VARIANTS:
+  Day: warm gray shadows, short shadows, neon reads as colored rectangles
+  Night: deep blue/black shadows, emissive sources only, wet mirrors
+  Rain: diagonal pixel streaks, wet reflections, steam/haze
+  Snow: white additive layer, reduced contrast, footprints
+
+BATCH WORKFLOW:
+  1. Reference photo day/night/rain
+  2. Pixel tileset generation
+  3. Texture maps
+  4. Parallax layers
+  5. Nearest-neighbor test at 1280x720
+  6. Seed + palette manifest
+
+----------------------------------------
+MULTI-CITY APPENDIX
+----------------------------------------
+
+CITY 1 — DETROIT, MI
+Identity: Brutalist decay, industrial grace, sun-faded brick
+Palette: #8b3a3a, #7a7a7a, #2a2a2a, #ffbf00, #00e5ff, #f0e6d3
+Light: flat daylight warehouse windows; amber sodium at night
+Districts: Midtown warehouses, East English Village bungalows, Southwest auto shops, Downtown Brutalist plaza
+POIs: warehouse loft, record shop, mural, parking lot, auto shop, scrapyard, cement plant, riverbank, concrete library, plaza fountain
+Modules: warehouse_3w_2h, bungalow_2w_2h, bungalow_2w_3h, auto_shop_2w_2h, brutalist_plaza_3w_2h
+
+CITY 2 — MIAMI, FL
+Identity: Art Deco pastels, neon humidity, ocean light
+Palette: #ffd1dc, #ff2d7a, #00e5ff, #4ecdc4, #2d5a27, #f5e6d3
+Light: neon sign glow on wet pavement; ocean haze backlight
+Districts: South Beach, Little Havana, Wynwood, Downtown
+POIs: oceanfront hotel, diner, laundromat, beach access, parking garage, cafe ventanita, domino park, cigar shop, mural wall, gallery, brewery, courthouse, arena, transit, hotel lobby, rooftop
+Modules: art_deco_hotel_3w_3h, pastel_apartment_2w_3h, ventanita_1w_2h, warehouse_2w_2h
+
+CITY 3 — BALTIMORE, MD
+Identity: colorful rowhouse canyon, formstone, humid light
+Palette: #8b3a3a, #c9bdb5, #f0e6d3, #2a2a2a, #00e5ff, #1a1a1a
+Light: afternoon sun on rowhouse ends; porch light at night
+Districts: West Baltimore, Station North, Fells Point, Mount Vernon
+POIs: rowhouse stoop, corner store, church, alley, park, metal shop, gallery, laundromat, rail cut, record store, cobblestone pub, shipping wall, pier, market, library, mansion, hospital, hotel
+Modules: rowhouse_2w_3h, rowhouse_2w_4h, formstone_2w_2h, pub_front_2w_2h, mansion_2w_3h
+
+CITY 4 — CHICAGO, IL
+Identity: steel and stone, lake wind, elevated train shadow
+Palette: #d9d0c3, #b0c4de, #cceeff, #00e5ff, #ffbf00, #1a1a1a
+Light: winter sun reflecting off lake; train shadow crossing facade
+Districts: South Side, West Side, Downtown, North Side lakefront
+POIs: corner bodega, church, barbershop, laundromat, alley, warehouse, rail yard, auto shop, vacant lot, warehouse loft, elevated train, plaza, lobby, newsstand, parking structure, beach, boardwalk, diner, park, marina
+Modules: bodega_2w_2h, church_2w_3h, barbershop_2w_2h, warehouse_3w_2h, limestone_tower_3w_4h
+
+CITY 5 — NEW YORK, NY
+Identity: brick canyon, neon density, pre-war bones
+Palette: #8b3a3a, #b86f4f, #b0c4de, #ff2d7a, #00e5ff, #f0e6d3
+Light: bodega fluorescent; neon bar sign on wet asphalt
+Districts: Harlem, Lower East Side, Williamsburg, Midtown
+POIs: barbershop, bodega, stoop, subway entrance, laundromat, tenement fire escape, bar, back alley, community garden, warehouse loft, gallery, bridge view, waterfront, record shop, hotel lobby, diner, precinct, courthouse, newsstand
+Modules: Harlem_2w_3h, tenement_2w_4h, warehouse_3w_2h, brick_apartment_2w_3h
+
+CITY 6 — LOS ANGELES, CA
+Identity: low-rise sprawl, car culture, dry heat, dark glamour
+Palette: #e8d5b7, #1f1f1f, #ff2d7a, #00e5ff, #2d5a27, #ffbf00
+Light: headlight on wet wall; kitchen window onto parking lot
+Districts: Koreatown, East LA, South LA, Westlake
+POIs: restaurant, bar, motel, parking structure, karaoke bar, taqueria, mural wall, park, garage, church, barbershop, car lot, liquor store, alley, recording studio, hospital, school, apartment, street market
+Modules: stucco_apartment_2w_3h, motel_2w_2h, taqueria_1w_2h, barbershop_2w_2h
+
+CITY QUALITY CONTROL:
+  [ ] Skyline mood matches city
+  [ ] Materials are correct per city
+  [ ] Light source is city-native
+  [ ] POI set is realistic
+  [ ] Palette lock is respected
+  [ ] No architectural mashups
+  [ ] Era markers are consistent
+  [ ] Weather behavior is city-native
+
+
+================================================
+PART 5 — IMPLEMENTATION EXECUTION ORDER & VERIFICATION
+================================================
+
+EXECUTION ORDER:
+1. UI_WIREFRAME_MAIN_GAME_SCREEN.txt
+2. UI_WIREFRAME_CHARACTER_CREATION.txt
+3. UI_WIREFRAME_GAME_BOARD.txt
+4. UI_WIREFRAME_DECISION_PANEL.txt
+5. UI_WIREFRAME_CITY_MAP.txt
+6. UI_WIREFRAME_NPC_POI_SCENES.txt
+7. UI_WIREFRAME_MINI_GAMES.txt
+8. MINIGAME_ELITE_MECHANICS_PROMPT.md
+9. PIXEL_ART_ELITE_GENERATION_SYSTEM.md
+10. CITY_ART_PROMPTS.md
+11. THIS MEGA DOCUMENT
+
+NOTES:
+- Wireframes are available as standalone files.
+- Part 1 references these files by exact path so reviewers can inspect them directly.
+- The standalone files contain additional state-specific views and interaction maps.
+
+VERIFICATION CHECKLIST:
+  [ ] All screens map to 1280x720
+  [ ] All ASCII wireframes use ASCII-safe borders only
+  [ ] HUD repeats exactly across all views
+  [ ] Mini game state machine has no unreachable state
+  [ ] Mini game result payload fields are exhaustive and typed
+  [ ] Every mini game has unique trigger, mechanic, reward, failure
+  [ ] Every prompt template includes palette, seed, size, style, cleanup
+  [ ] Character DNA includes identity, age, attire, signature prop, height
+  [ ] Card art rules enforce readability at small size
+  [ ] Cinematic rules enforce noir composition and color grade
+  [ ] City district palettes have exactly 6 colors
+  [ ] Tileset modules are named consistently
+  [ ] Texture prompts are square, seamless, no lighting
+  [ ] Parallax layers follow far-simplified -> near-detailed rule
+  [ ] Weather/time variants map to concrete visual changes
+  [ ] Multi-city appendix prevents architectural mashups
+  [ ] Batch workflow is repeatable with seed manifest output
+  [ ] No dependencies beyond plain JS modules
+  [ ] No build step required
+
+REJECTION CRITERIA:
+  - Reject any generated asset with blur or anti-aliasing
+  - Reject any prompt missing palette lock or seed lock
+  - Reject any mini game missing exactly one completion event
+  - Reject any wireframe using Unicode box drawing
+  - Reject any city asset with mixed-district materials
+
+REFINEMENT RULES:
+  - If a section lacks exact values, add them before execution
+  - If a template is vague, replace with exact prompt string
+  - If a palette drifts, regenerate with locked hex values
+  - If a mini game is ambiguous, add explicit win/loss condition
+  - If a wireframe is unclear, add panel dimensions in words
+
+================================================
+END OF MEGA PROMPT DOCUMENT
+================================================

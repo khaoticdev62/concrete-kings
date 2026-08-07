@@ -1,0 +1,74 @@
+CONCRETE KINGS — UI WIREFRAME CHARACTER CREATION
+Full Detail / ASCII-Safe / Aligned to 1280x720
+================================================
+
+NATIVE RESOLUTION: 1280x720
+FORMAT: ASCII-safe borders only
+
+CHARACTER CREATION SCREEN
+- Left column: origin + attributes
+- Right column: appearance + secret
+- Bottom: confirmation bar
+- No in-game HUD during creation
+
++--------------------------------------------------------------------+
+| CONCRETE KINGS — CHARACTER CREATION                                |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +----------------------------+  +----------------------------+    |
+|   | ORIGIN SELECT             |  | APPEARANCE                  |    |
+|   |                           |  |                              |    |
+|   | [1] Barber                |  | Hair: [ fade / waves / bald ]|    |
+|   | [2] Hustler               |  | Fit:  [ slim / bulky / tight ]|   |
+|   | [3] Mechanic              |  | Prop: [ clippers / chain ]    |   |
+|   | [4] Student               |  |                              |    |
+|   |                           |  | Portrait preview             |    |
+|   +----------------------------+  +----------------------------+    |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | ATTRIBUTES                                                |   |
+|   | STR [====      ] 4   WIT [====      ] 6                  |   |
+|   | SOUL [===       ] 3   CASH [==       ] 2                 |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | SECRET / BACKSTORY                                        |   |
+|   | [Choose one starting secret]                              |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ REVIEW ]  [ CONFIRM ]  [ RANDOMIZE ]                    |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+ORIGIN RULES
+- Barber: WIT +2, SOUL +1, CASH +1, secret = shop debt
+- Hustler: CASH +2, WIT +1, STR +1, secret = marked by Marquez
+- Mechanic: STR +2, CASH +1, WIT +1, secret = stolen car
+- Student: WIT +2, SOUL +1, STR +1, secret = expelled for fighting
+
+APPEARANCE RULES
+- Appearance does not change gameplay stats
+- Must select one option per category before confirm
+- Portrait preview updates immediately
+
+SECRET RULES
+- Exactly one secret at creation
+- Secret affects dialogue tags and hidden quest flags
+- Cannot duplicate secret across saves
+
+CONFIRM VALIDATION
+- All origins have distinct attribute arrays
+- One secret selected
+- Portrait preview present
+
+INPUT MAP
+- D-pad / arrows: move selection
+- Confirm: select
+- Cancel: back within panel
+- Review: shows summary overlay
+- Randomize: rerolls origin + attributes within bounds
+
+TRANSITIONS
+- Confirm -> save preview -> load main game screen
+- Back from review -> return to creation

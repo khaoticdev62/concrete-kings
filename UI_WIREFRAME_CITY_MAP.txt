@@ -1,0 +1,93 @@
+CONCRETE KINGS — UI WIREFRAME CITY / BLOCK MAP
+Full Detail / ASCII-Safe / Aligned to 1280x720
+================================================
+
+NATIVE RESOLUTION: 1280x720
+FORMAT: ASCII-safe borders only
+
+CITY / BLOCK MAP SCREEN
+- Top HUD repeats
+- Center: tile map grid with symbols
+- Bottom: legend and map controls
+
++--------------------------------------------------------------------+
+| CONCRETE KINGS — MAP    DAY 1    HEAT: 2/10                        |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   |  [125TH ST] [BAR] [BODEGA] [ALLEY] [SAFE HOUSE]          |   |
+|   |  YOU = @                                                   |   |
+|   |  NPC  = R  J  M  K                                         |   |
+|   |  QUEST = *  ?  !                                           |   |
+|   |  FOG   = #                                                 |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ LEGEND ]  [ ZOOM IN ]  [ ZOOM OUT ]  [ FAST TRAVEL ]    |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+MAP LEGEND
+  @  = player
+  R/J/M/K = NPCs
+  * = active quest
+  ? = hidden quest
+  ! = urgent quest
+  # = fog / unexplored
+  B = barbershop
+  D = bodega
+  A = alley
+  H = safe house
+  P = park
+
+TILE RULES
+- Grid aligned to 32x32 pixel units
+- Fog hides unexplored tiles and hidden quest tiles
+- Fast travel unlocks only after visited tile is cleared of active heat
+- NPC blink red if hostile, green if friendly
+
+CONTROLS
+- D-pad / arrows: move cursor
+- Confirm: select tile / travel
+- Cancel: back to game
+- Zoom in/out: increases tile detail level
+
+ADDITIONAL VIEWS
+
+MAP — FAST TRAVEL
++--------------------------------------------------------------------+
+| FAST TRAVEL                                                        |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [125TH ST]  CLEAR     [ SELECT ]                           |   |
+|   | [BAR]       HEAT 3   [ SELECT ]                           |   |
+|   | [BODEGA]    CLEAR     [ SELECT ]                           |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ BACK ]                                                   |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+MAP — QUEST FILTER
++--------------------------------------------------------------------+
+| MAP — QUEST FILTER                                                 |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | SHOW: [ACTIVE] [HIDDEN] [URGENT] [ALL]                     |   |
+|   |                                                             |   |
+|   | * Active quest tile highlighted                             |   |
+|   | ! Urgent quest tile blinking                                |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ BACK ]                                                   |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+TRANSITION RULES
+- Tile select -> confirm travel -> loading -> new location
+- Cancel from any overlay -> back to map
+- Map overlay from other screens -> back returns to prior screen

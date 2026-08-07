@@ -1,0 +1,93 @@
+CONCRETE KINGS — UI WIREFRAME NPC / POI SCENES
+Full Detail / ASCII-Safe / Aligned to 1280x720
+================================================
+
+NATIVE RESOLUTION: 1280x720
+FORMAT: ASCII-safe borders only
+
+NPC / POI SCENE SCREEN
+- Top: location + time + weather
+- Left: NPC portrait/silhouette with state indicator
+- Right: interaction choices + quest log mini-panel
+- Bottom: [ LEAVE ]  [ USE ITEM ]  [ OPEN QUESTS ]
+
++--------------------------------------------------------------------+
+| BARBERSHOP — AFTERNOON    HEAT: 2/10                               |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +----------------------------+  +----------------------------+    |
+|   | NPC PORTRAIT               |  | INTERACTIONS               |    |
+|   |                            |  |                            |    |
+|   | [ Ray ]                    |  | [ Talk ]  [ Quest ]        |    |
+|   | State: friendly            |  | [ Trade ] [ Leave ]        |    |
+|   | Trust: 3/5                 |  |                            |    |
+|   +----------------------------+  +----------------------------+    |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | QUEST LOG (MINI)                                           |   |
+|   | * The Gossip — talk to Ray                                 |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ LEAVE ]  [ USE ITEM ]  [ OPEN QUESTS ]                   |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+NPC STATE RULES
+- Friendly: green indicator, full interaction set
+- Neutral: amber indicator, limited trade/talk only
+- Hostile: red indicator, confrontation or leave only
+- Scared: gray indicator, minimal dialogue, flee option
+- Busy: blue indicator, wait or interrupt with risk
+
+DIALOGUE RULES
+- Choices tagged with trust+/-, heat+/-, secret trigger, item requirement
+- If requirement missing: choice grayed, tooltip shows requirement
+- Leave option always present unless quest-required scene
+
+INTERACTION TYPES
+- Talk: advances dialogue beat
+- Quest: shows available quest stages
+- Trade: opens item/cash exchange
+- Mini Game: launches skill challenge
+- Leave: exits scene with no penalty unless hostile
+
+SCENE TYPES
+
+EXTERIOR — STREET / STOOP / ALLEY / PARK / CORNER
++--------------------------------------------------------------------+
+| 125TH ST — STREET    DAY    HEAT: 2/10                             |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +----------------------------+  +----------------------------+    |
+|   | SCENE VIEW                  |  | CHOICES                   |    |
+|   | Stoop, fire escape, rain    |  | [ Approach ] [ Wait ]      |    |
+|   | wet pavement, neon sign     |  | [ Hide ]   [ Leave ]       |    |
+|   +----------------------------+  +----------------------------+    |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ LEAVE ]  [ USE ITEM ]  [ OPEN QUESTS ]                   |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+INTERIOR — BARBERSHOP / BAR / BODEGA / SAFE HOUSE / APARTMENT
++--------------------------------------------------------------------+
+| BARBERSHOP — AFTERNOON    HEAT: 2/10                               |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +----------------------------+  +----------------------------+    |
+|   | INTERIOR VIEW               |  | CHOICES                   |    |
+|   | Checkerboard tile, mirror   |  | [ Sit ] [ Gossip ]        |    |
+|   | heat lamp glow, chairs      |  | [ Work ] [ Leave ]        |    |
+|   +----------------------------+  +----------------------------+    |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ LEAVE ]  [ USE ITEM ]  [ OPEN QUESTS ]                   |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+QUEST INTERACTION FLOW
+- Quest available: quest tag shown under NPC name
+- Quest stage updates trigger new dialogue choices
+- Quest complete: reward choice appears
+- Quest hidden: only revealed after condition met
