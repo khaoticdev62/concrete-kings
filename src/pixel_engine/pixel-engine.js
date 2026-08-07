@@ -37,6 +37,34 @@ const CITY_THEME_OVERRIDES = {
   NOLA:      { "7a1d1c": "d97843", "666e82": "246961" }
 };
 
+const PALETTE_GROUPS = [
+  MASTER_PALETTE_64.blacks_grays,
+  MASTER_PALETTE_64.warm_tones,
+  MASTER_PALETTE_64.cool_tones,
+  MASTER_PALETTE_64.skin_tones
+];
+
+/**
+ * Shifts a hex color `steps` positions within its MASTER_PALETTE_64 tone group.
+ * Negative steps darken (shadow), positive steps lighten (highlight).
+ * Clamps at group boundaries; returns the input unchanged if not a palette color.
+ */
+function paletteShift(hex, steps) {
+  const normalized = hex.toUpperCase();
+  for (const group of PALETTE_GROUPS) {
+    const index = group.indexOf(normalized);
+    if (index !== -1) {
+      const clamped = Math.max(0, Math.min(group.length - 1, index + steps));
+      return group[clamped];
+    }
+  }
+  return hex;
+}
+
+function snapToPixel(value) {
+  return Math.floor(value);
+}
+
 /**
  * Calculates strict integer scaling factors and letterboxing margins.
  */
@@ -60,26 +88,41 @@ function calculateIntegerScale(viewportWidth, viewportHeight, nativeW = NATIVE_W
 class PixelCanvasEngine {
   constructor(displayCanvas, options = {}) {
     this.displayCanvas = displayCanvas;
-    this.displayCtx = displayCanvas.getContext("2d", { alpha: false, desynchronized: true });
-    
+    this.displayCtx = displayCanvas.getContext("2d", { alpha: false, desynchronized: true, willReadFrequently: false });
+
     this.highDetail = !!options.highDetail;
     this.nativeWidth = options.nativeWidth || (this.highDetail ? 1280 : NATIVE_WIDTH);
     this.nativeHeight = options.nativeHeight || (this.highDetail ? 720 : NATIVE_HEIGHT);
     this.activeCity = options.cityTheme || "Harlem";
-    
+
     // Virtual native canvas for pixel rendering
     this.virtualCanvas = document.createElement("canvas");
     this.virtualCanvas.width = this.nativeWidth;
     this.virtualCanvas.height = this.nativeHeight;
-    this.virtualCtx = this.virtualCanvas.getContext("2d", { alpha: false });
+    this.virtualCtx = this.virtualCanvas.getContext("2d", { alpha: false, willReadFrequently: false });
+
+    // Offscreen background/midground layers for parallax caching
+    this.bgLayer = document.createElement("canvas");
+    this.bgLayer.width = this.nativeWidth;
+    this.bgLayer.height = this.nativeHeight;
+    this.bgCtx = this.bgLayer.getContext("2d", { willReadFrequently: false });
+    this.setupSmoothing(this.bgCtx);
+
+    this.mgLayer = document.createElement("canvas");
+    this.mgLayer.width = this.nativeWidth;
+    this.mgLayer.height = this.nativeHeight;
+    this.mgCtx = this.mgLayer.getContext("2d", { willReadFrequently: false });
+    this.setupSmoothing(this.mgCtx);
+
+    this.needsBgRedraw = true;
 
     this.setupSmoothing(this.displayCtx);
     this.setupSmoothing(this.virtualCtx);
-    
+
     this.currentScaleInfo = null;
     this.animationFrameCount = 4; // Strict 4-frame budget
     this.currentAnimFrame = 0;
-    
+
     this.resize();
   }
 
@@ -91,9 +134,29 @@ class PixelCanvasEngine {
   }
 
   setCityTheme(cityName) {
-    if (CITY_THEME_OVERRIDES[cityName]) {
+    if (CITY_THEME_OVERRIDES[cityName] && cityName !== this.activeCity) {
       this.activeCity = cityName;
+      this.invalidateBackground();
     }
+  }
+
+  drawBackground(drawFn) {
+    if (this.needsBgRedraw) {
+      this.bgCtx.clearRect(0, 0, this.nativeWidth, this.nativeHeight);
+      drawFn(this.bgCtx, this.nativeWidth, this.nativeHeight);
+      this.needsBgRedraw = false;
+    }
+    this.virtualCtx.drawImage(this.bgLayer, 0, 0);
+  }
+
+  drawMidground(drawFn, offsetX = 0) {
+    this.mgCtx.clearRect(0, 0, this.nativeWidth, this.nativeHeight);
+    drawFn(this.mgCtx, this.nativeWidth, this.nativeHeight);
+    this.virtualCtx.drawImage(this.mgLayer, Math.floor(offsetX), 0);
+  }
+
+  invalidateBackground() {
+    this.needsBgRedraw = true;
   }
 
   resize() {
@@ -206,9 +269,9 @@ class SpriteRenderer {
    ctx.fillStyle = origin.skinColor;
    if (isLarge) {
      ctx.fillRect(px + 48, py - 72 + yBob, 32, 32); // Head base
-     
-     // Melanin shading shadow (left side & bottom)
-     ctx.fillStyle = 'rgba(20, 10, 7, 0.25)';
+
+     // Melanin shading shadow (left side & bottom) — palette-index shift, no black overlay
+     ctx.fillStyle = paletteShift(origin.skinColor, -2);
      ctx.fillRect(px + 48, py - 72 + yBob, 8, 32);
      ctx.fillRect(px + 48, py - 48 + yBob, 32, 8);
      
@@ -220,11 +283,11 @@ class SpriteRenderer {
      ctx.fillRect(px + 68, py - 64 + yBob, 2, 2);  // Highlight right
    } else {
      ctx.fillRect(px + 12, py - 18 + yBob, 8, 8);
-     
-     // Skin shadow
-     ctx.fillStyle = 'rgba(20, 10, 7, 0.25)';
+
+     // Skin shadow — palette-index shift, no black overlay
+     ctx.fillStyle = paletteShift(origin.skinColor, -1);
      ctx.fillRect(px + 12, py - 18 + yBob, 2, 8);
-     
+
      // Simple shades
      ctx.fillStyle = '#101116';
      ctx.fillRect(px + 13, py - 16 + yBob, 6, 2);
@@ -313,9 +376,9 @@ class SpriteRenderer {
    if (isLarge) {
      ctx.fillRect(px + 44 + legOffset, py, 16, 40);
      ctx.fillRect(px + 68 - legOffset, py, 16, 40);
-     
-     // Pants shadow wrinkles
-     ctx.fillStyle = 'rgba(8, 8, 10, 0.2)';
+
+     // Pants shadow wrinkles — palette-index shift, no black overlay
+     ctx.fillStyle = paletteShift(origin.pantsColor, -1);
      ctx.fillRect(px + 44 + legOffset, py + 12, 16, 4);
      ctx.fillRect(px + 68 - legOffset, py + 12, 16, 4);
    } else {
@@ -356,6 +419,8 @@ class SpriteRenderer {
  
  if (typeof window !== 'undefined') {
    window.drawHighDetailCharacterSprite = drawHighDetailCharacterSprite;
+   window.paletteShift = paletteShift;
+   window.snapToPixel = snapToPixel;
  }
  
  if (typeof module !== 'undefined' && module.exports) {
@@ -367,6 +432,8 @@ class SpriteRenderer {
      calculateIntegerScale,
      PixelCanvasEngine,
      SpriteRenderer,
-     drawHighDetailCharacterSprite
+     drawHighDetailCharacterSprite,
+     paletteShift,
+     snapToPixel
    };
  }

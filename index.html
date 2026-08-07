@@ -1018,6 +1018,7 @@
 </div>
 
 <script src="src/pixel_engine/pixel-engine.js"></script>
+<script src="src/pixel_engine/lightmap.js"></script>
 <script src="src/pixel_engine/card-visual-system.js"></script>
 <script src="src/pixel_engine/weather-effects-system.js"></script>
 <script src="src/pixel_engine/block-map-navigation.js"></script>
@@ -1438,7 +1439,7 @@ function hdFont(ctx, basePx) {
 }
 
 /* Procedural background drawer for 8 acts */
-function drawProceduralBackground(ctx, city, frame) {
+function drawSkyAndFarLayer(ctx, city, frame) {
   const colorMap = CITY_THEME_OVERRIDES[city] || {};
   const skyTop = city === 'Miami' ? '#521c6e' : (city === 'Detroit' ? '#11233f' : '#0a1526');
   const skyBottom = city === 'Miami' ? '#ff7a45' : (city === 'Atlanta' ? '#aa2724' : '#11233f');
@@ -1451,17 +1452,11 @@ function drawProceduralBackground(ctx, city, frame) {
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-  if (city === 'Chicago' || city === 'Oakland') {
-    ctx.fillStyle = '#8b95ab';
-    ctx.fillRect(...hdRect(ctx, 40 + (frame % 4) * 2, 15, 20, 2));
-    ctx.fillRect(...hdRect(ctx, 180 - (frame % 4) * 2, 25, 30, 2));
-  } else {
-    ctx.fillStyle = '#f4f7ff';
-    [[30,10],[110,20],[220,12],[280,25]].forEach(([x,y]) => {
-      const r = hdRect(ctx, x, y, 1, 1);
-      ctx.fillRect(r[0], r[1], r[2], r[3]);
-    });
-  }
+  ctx.fillStyle = '#f4f7ff';
+  [[30,10],[110,20],[220,12],[280,25]].forEach(([x,y]) => {
+    const r = hdRect(ctx, x, y, 1, 1);
+    ctx.fillRect(r[0], r[1], r[2], r[3]);
+  });
 
   ctx.fillStyle = '#1c375c';
   if (city === 'Detroit') {
@@ -1487,6 +1482,34 @@ function drawProceduralBackground(ctx, city, frame) {
     ctx.fillRect(...hdRect(ctx, 20, 40, 50, 20));
     ctx.fillRect(...hdRect(ctx, 110, 35, 70, 25));
     ctx.fillRect(...hdRect(ctx, 220, 45, 60, 15));
+  }
+
+  ctx.fillStyle = trimColor;
+  ctx.fillRect(...hdRect(ctx, 0, 120, 320, 20));
+
+  ctx.fillStyle = '#2d313d';
+  for (let sx = 0; sx < 320; sx += 40) {
+    ctx.fillRect(...hdRect(ctx, sx, 120, 1, 20));
+  }
+
+  ctx.fillStyle = '#101116';
+  ctx.fillRect(...hdRect(ctx, 0, 140, 320, 40));
+
+  ctx.fillStyle = '#ffcd68';
+  for (let rx = 10; rx < 320; rx += 40) {
+    ctx.fillRect(...hdRect(ctx, rx, 158, 20, 4));
+  }
+}
+
+function drawNearLayer(ctx, city, frame) {
+  const colorMap = CITY_THEME_OVERRIDES[city] || {};
+  const brickColor = colorMap["7a1d1c"] ? "#" + colorMap["7a1d1c"] : "#7a1d1c";
+  const trimColor = colorMap["474d5e"] ? "#" + colorMap["474d5e"] : "#474d5e";
+
+  if (city === 'Chicago' || city === 'Oakland') {
+    ctx.fillStyle = '#8b95ab';
+    ctx.fillRect(...hdRect(ctx, 40 + (frame % 4) * 2, 15, 20, 2));
+    ctx.fillRect(...hdRect(ctx, 180 - (frame % 4) * 2, 25, 30, 2));
   }
 
   const lightColor = city === 'Miami' ? '#6fe8d8' : '#ffc475';
@@ -1552,21 +1575,6 @@ function drawProceduralBackground(ctx, city, frame) {
   ctx.fillRect(...hdRect(ctx, 135, 114, 50, 4));
   ctx.fillRect(...hdRect(ctx, 130, 118, 60, 3));
 
-  ctx.fillStyle = trimColor;
-  ctx.fillRect(...hdRect(ctx, 0, 120, 320, 20));
-
-  ctx.fillStyle = '#2d313d';
-  for (let sx = 0; sx < 320; sx += 40) {
-    ctx.fillRect(...hdRect(ctx, sx, 120, 1, 20));
-  }
-
-  ctx.fillStyle = '#101116';
-  ctx.fillRect(...hdRect(ctx, 0, 140, 320, 40));
-
-  ctx.fillStyle = '#ffcd68';
-  for (let rx = 10; rx < 320; rx += 40) {
-    ctx.fillRect(...hdRect(ctx, rx, 158, 20, 4));
-  }
 }
 
 function drawCharacterPreview(ctx, origin, frame) {
@@ -2531,13 +2539,26 @@ const app = {
             
             this.mapController.update();
             this.weatherSystem.advanceFrame();
-            
+
             const vCtx = this.pixelEngine.virtualCtx;
             this.pixelEngine.clearNative('#08080a');
-            
+
             const city = this.game.activeCity || 'Harlem';
-            drawProceduralBackground(vCtx, city, this.shimmerFrame);
-            
+            this.pixelEngine.setCityTheme(city);
+
+            this.pixelEngine.drawBackground(bgCtx => drawSkyAndFarLayer(bgCtx, city, this.shimmerFrame));
+
+            const scrollOffset = Math.floor(this.mapController.x * 0.15);
+            this.pixelEngine.drawMidground(mgCtx => drawNearLayer(mgCtx, city, this.shimmerFrame), -scrollOffset);
+
+            const heat = (this.storyEngine && this.storyEngine.heat) || 0;
+            const lightmapKey = city + '_' + heat;
+            if (this.lightmapKey !== lightmapKey) {
+              this.lightmapCanvas = generateLightmapCanvas(this.pixelEngine.nativeWidth, this.pixelEngine.nativeHeight, city, heat);
+              this.lightmapKey = lightmapKey;
+            }
+            applyLightmap(vCtx, this.lightmapCanvas);
+
             this.weatherSystem.render(vCtx);
             this.mapController.render(vCtx);
             

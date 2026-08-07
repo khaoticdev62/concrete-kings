@@ -122,6 +122,33 @@ function classifyCardCategory(cardText, cardType = CARD_TYPES.WHITE) {
   }
 }
 
+const textWrapCache = new Map();
+
+function wrapCardText(ctx, text, maxWidth) {
+  const cacheKey = (text || '') + '|' + maxWidth;
+  if (textWrapCache.has(cacheKey)) {
+    return textWrapCache.get(cacheKey);
+  }
+
+  const words = (text || '').split(' ');
+  const lines = [];
+  let line = '';
+  for (let n = 0; n < words.length; n++) {
+    const testLine = line + words[n] + ' ';
+    const metrics = ctx.measureText(testLine);
+    if (metrics.width > maxWidth && n > 0) {
+      lines.push(line);
+      line = words[n] + ' ';
+    } else {
+      line = testLine;
+    }
+  }
+  lines.push(line);
+
+  textWrapCache.set(cacheKey, lines);
+  return lines;
+}
+
 /**
  * Pixel Card Renderer Engine
  */
@@ -274,8 +301,6 @@ class CardVisualRenderer {
   }
 
   renderCardText(ctx, text, category) {
-    ctx.fillStyle = category.type === CARD_TYPES.BLACK ? '#f4f7ff' : '#181920';
-    
     // Background fill for lower text area
     ctx.fillStyle = category.type === CARD_TYPES.BLACK ? '#101116' : '#fff7e6';
     ctx.fillRect(8, 142, this.width - 16, this.height - 150);
@@ -284,24 +309,14 @@ class CardVisualRenderer {
     ctx.font = 'bold 11px sans-serif';
     ctx.textAlign = 'center';
 
-    // Simple multi-line text wrapper
-    const words = (text || '').split(' ');
-    let line = '';
-    let y = 162;
     const maxWidth = this.width - 24;
+    const lines = wrapCardText(ctx, text, maxWidth);
 
-    for (let n = 0; n < words.length; n++) {
-      const testLine = line + words[n] + ' ';
-      const metrics = ctx.measureText(testLine);
-      if (metrics.width > maxWidth && n > 0) {
-        ctx.fillText(line, this.width / 2, y);
-        line = words[n] + ' ';
-        y += 14;
-      } else {
-        line = testLine;
-      }
-    }
-    ctx.fillText(line, this.width / 2, y);
+    let y = 162;
+    lines.forEach(line => {
+      ctx.fillText(line, this.width / 2, y);
+      y += 14;
+    });
   }
 
   /**
