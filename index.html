@@ -2875,6 +2875,7 @@ const app = {
     this.renderHand();
     this.renderScoreboard();
     this.updateStatHud();
+    this.updateTopHud('game');
 
     const isOnline = this.game.mode === MODE.ONLINE;
 
@@ -4122,6 +4123,7 @@ const app = {
     document.getElementById('narrativeText').textContent = beat.narrative;
     document.getElementById('narrativeHeat').textContent = this.storyEngine.heat;
     document.getElementById('narrativeTrust').textContent = this.storyEngine.trust;
+    this.updateTopHud('game');
   },
   
   runNarrativeBotTurns() {
