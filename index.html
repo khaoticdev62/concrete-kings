@@ -857,7 +857,6 @@
         <span id="statusText" style="font-size:12px; font-weight:bold; color:#ffcd68;">Your turn: pick a card to play.</span>
         <div style="display:flex; gap:8px; align-items:center;">
           <span class="status-pill">Black cards: <b id="blackRemaining">0</b> · Goal: <b id="pointsTarget">7</b></span>
-          <button class="secondary" onclick="app.showBlockMap()" style="padding: 6px 10px; font-size:8px;">BLOCK MAP</button>
         </div>
       </div>
       <div id="turnBanner" class="pass-banner" style="display:none;"></div>
@@ -1039,6 +1038,11 @@
           </div>
         </details>
       </div>
+    </div>
+    
+    <!-- Action Bar -->
+    <div class="panel" style="margin-top:12px; padding:10px 16px; display:flex; justify-content:center;">
+      <button class="secondary" onclick="app.showBlockMap()" style="padding:8px 24px; font-size:9px;">[ MAP ]</button>
     </div>
   </section>
 
