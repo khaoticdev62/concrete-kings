@@ -489,6 +489,11 @@
       <div class="pill" id="modeBadge">Offline</div>
       <button class="secondary" onclick="app.showSetup()">Menu</button>
     </div>
+    <div id="topHudStrip" style="display:none; justify-content:space-between; align-items:center; gap:16px; margin-top:8px; padding:8px 12px; background:#101116; border:2px solid #2d313d; font-family:'Press Start 2P', monospace; font-size:9px; color:#f4f7ff;">
+      <span id="topHudLocation" style="color:#ffcd68;">HARLEM</span>
+      <span id="topHudDay">DAY 1</span>
+      <span id="topHudHeat" style="color:#f25438;">HEAT: 0/10</span>
+    </div>
   </header>
 
   <!-- SETUP -->
@@ -1607,7 +1612,8 @@ const app = {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const targetScreen = document.getElementById(id);
     targetScreen.classList.add('active');
-    
+    this.updateTopHud(id);
+
     const canvasContainer = targetScreen.querySelector('.canvas-mount-point');
     const stageCanvas = document.getElementById('stage-canvas');
     if (canvasContainer && stageCanvas) {
@@ -1618,6 +1624,28 @@ const app = {
     }
   },
   showSetup() { this.show('setup'); },
+
+  updateTopHud(screenId) {
+    const strip = document.getElementById('topHudStrip');
+    if (!strip) return;
+    if (screenId === 'setup' || screenId === 'lobby' || screenId === 'deckBuilder') {
+      strip.style.display = 'none';
+      return;
+    }
+    strip.style.display = 'flex';
+
+    const useStory = !!(this.storyEngine && this.storyEngine.active);
+    const day = useStory ? this.storyEngine.day : (this.game ? this.game.day : 1);
+    const heat = useStory ? this.storyEngine.heat : 0;
+    const location = ((this.game && this.game.activeCity) || 'Harlem').toUpperCase();
+
+    const locationEl = document.getElementById('topHudLocation');
+    const dayEl = document.getElementById('topHudDay');
+    const heatEl = document.getElementById('topHudHeat');
+    if (locationEl) locationEl.textContent = location;
+    if (dayEl) dayEl.textContent = `DAY ${day}`;
+    if (heatEl) heatEl.textContent = `HEAT: ${heat}/10`;
+  },
 
   localPlayer(index) {
     if (index < 0 || index >= this.game.players.length) return;
