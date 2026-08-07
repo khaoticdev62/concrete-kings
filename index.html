@@ -837,10 +837,38 @@
         <canvas id="stage-canvas" class="pixel-canvas" style="width: 100%; display: block; background: #08080a;"></canvas>
         <canvas id="minigame-canvas" class="pixel-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: auto; display: none; background: transparent; image-rendering: pixelated;"></canvas>
         <div id="narrativeTextBox" style="display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:#08080a; padding:16px; box-sizing:border-box; color:#f4f7ff; font-family:'JetBrains Mono', monospace; font-size:12px; line-height:1.5; overflow-y:auto; border:3px solid #393e4d;">
-          <h2 id="narrativeBeatTitle" style="font-family:'Press Start 2P', monospace; font-size:10px; color:#f25438; margin-top:0;">THE DROPOFF</h2>
-          <p id="narrativeText" style="margin:8px 0; color:#cbd5ed;">Midnight on 125th...</p>
-          <div style="margin-top:16px; border-top:1px dashed #2d313d; padding-top:8px; font-size:10px; color:#8b95ab; font-family:'Press Start 2P', monospace; font-size:8px;">
-            STATS: <span style="color:#f25438; font-weight:bold;">HEAT: <span id="narrativeHeat">0</span></span> | <span style="color:#5eafff; font-weight:bold;">TRUST: <span id="narrativeTrust">0</span></span>
+          <h2 id="narrativeBeatTitle" style="font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68; margin-top:0; text-align:left;">THE DROPOFF</h2>
+          <p id="narrativeText" style="margin:8px 0; color:#ffffff; max-width:110ch; line-height:1.5; text-align:left;">Midnight on 125th...</p>
+          
+          <!-- Narrative Choice Grid (First 4 cards in hand mapped to choices) -->
+          <div id="narrativeChoices" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px;"></div>
+          
+          <!-- Locked Choice Tooltip -->
+          <div id="lockedChoiceTooltip" style="font-size:9px; color:#f25438; font-family:'Press Start 2P', monospace; margin-top:8px; min-height:12px; text-align:center;"></div>
+
+          <div style="margin-top:16px; border-top:1px dashed #2d313d; padding-top:8px; font-size:10px; color:#8b95ab; font-family:'Press Start 2P', monospace; font-size:8px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              STATS: <span style="color:#f25438; font-weight:bold;">HEAT: <span id="narrativeHeat">0</span></span> | <span style="color:#5eafff; font-weight:bold;">TRUST: <span id="narrativeTrust">0</span></span>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="secondary" onclick="app.showAbilityMenu()" style="font-size:8px; padding:4px 8px;">[ USE ABILITY ]</button>
+              <button class="secondary" onclick="app.showSecretOverlay()" style="font-size:8px; padding:4px 8px;">[ VIEW SECRET ]</button>
+              <button class="secondary" onclick="app.showBlockMap()" style="font-size:8px; padding:4px 8px;">[ OPEN MAP ]</button>
+            </div>
+          </div>
+
+          <!-- Drawer 1: Ability Menu Overlay -->
+          <div id="abilityMenuOverlay" style="display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:#101116; border:3px solid #ffcd68; padding:16px; box-sizing:border-box; z-index:1000; overflow-y:auto;">
+            <h2 style="font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68; margin-top:0; border-bottom:1px solid #2d313d; padding-bottom:6px;">ABILITIES</h2>
+            <div id="abilitiesList" style="margin:16px 0; font-family:'Press Start 2P', monospace; font-size:8px; display:flex; flex-direction:column; gap:8px;"></div>
+            <button class="secondary" onclick="document.getElementById('abilityMenuOverlay').style.display='none'" style="width:100%; font-family:'Press Start 2P', monospace; font-size:8px;">[ BACK ]</button>
+          </div>
+
+          <!-- Drawer 2: Secrets Overlay -->
+          <div id="secretOverlay" style="display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:#101116; border:3px solid #ffcd68; padding:16px; box-sizing:border-box; z-index:1000; overflow-y:auto;">
+            <h2 style="font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68; margin-top:0; border-bottom:1px solid #2d313d; padding-bottom:6px;">SECRETS / FLAGS</h2>
+            <div id="secretsList" style="margin:16px 0; font-family:'Press Start 2P', monospace; font-size:8px; color:#cbd5ed; line-height:1.5; text-align:left; display:flex; flex-direction:column; gap:6px;"></div>
+            <button class="secondary" onclick="document.getElementById('secretOverlay').style.display='none'" style="width:100%; font-family:'Press Start 2P', monospace; font-size:8px;">[ BACK ]</button>
           </div>
         </div>
       </div>
@@ -4593,7 +4621,150 @@ const app = {
     document.getElementById('narrativeText').textContent = beat.narrative;
     document.getElementById('narrativeHeat').textContent = this.storyEngine.heat;
     document.getElementById('narrativeTrust').textContent = this.storyEngine.trust;
+    
+    const choicesDiv = document.getElementById('narrativeChoices');
+    if (choicesDiv) {
+      choicesDiv.innerHTML = '';
+      const me = this.game ? this.game.players[this.humanIndex] : null;
+      if (me && me.hand) {
+        me.hand.slice(0, 4).forEach((card, i) => {
+          const btn = document.createElement('button');
+          btn.style.textAlign = 'left';
+          btn.style.fontFamily = "'Press Start 2P', monospace";
+          btn.style.fontSize = '8px';
+          btn.style.padding = '8px';
+          btn.style.display = 'block';
+          btn.style.width = '100%';
+          btn.style.lineHeight = '1.4';
+          
+          const category = classifyCardCategory(card, CARD_TYPES.WHITE);
+          const consequence = beat.tagConsequences[category] || { heat: 0, trust: 0, text: '' };
+          
+          btn.innerHTML = `[${String.fromCharCode(65 + i)}] PLAY ${card.toUpperCase()}<br/>` +
+                          `<span style="font-size:7px; color:#ffcd68;">(Heat: ${consequence.heat > 0 ? '+' : ''}${consequence.heat}, Trust: ${consequence.trust > 0 ? '+' : ''}${consequence.trust})</span>`;
+          
+          // Dependency locks checks
+          let locked = false;
+          let lockReason = '';
+          
+          if (card.toLowerCase().includes('glock') && me.stats && me.stats.reputation < 3) {
+            locked = true;
+            lockReason = "Requires REP 3+";
+          }
+          if (card.toLowerCase().includes('ledger') && me.stats && me.stats.streetCred < 20) {
+            locked = true;
+            lockReason = "Requires CASH 20+";
+          }
+
+          if (locked) {
+            btn.style.opacity = '0.5';
+            btn.style.color = '#8b95ab';
+            btn.style.cursor = 'not-allowed';
+            btn.onmouseenter = () => {
+              const tooltip = document.getElementById('lockedChoiceTooltip');
+              if (tooltip) tooltip.textContent = `LOCKED: ${lockReason}`;
+            };
+            btn.onmouseleave = () => {
+              const tooltip = document.getElementById('lockedChoiceTooltip');
+              if (tooltip) tooltip.textContent = '';
+            };
+            btn.onclick = (evt) => {
+              evt.stopPropagation();
+              if (this.audioEngine) this.audioEngine.playFailureBuzzer();
+              else alert('Locked! ' + lockReason);
+            };
+          } else {
+            btn.onclick = () => {
+              this.playNarrativeCard(i);
+            };
+          }
+          choicesDiv.appendChild(btn);
+        });
+      }
+    }
+    
     this.updateTopHud();
+  },
+
+  playNarrativeCard(handIndex) {
+    if (!this.game) return;
+    this.game.selected.clear();
+    this.game.selected.add(handIndex);
+    this.submitSelection();
+  },
+
+  showAbilityMenu() {
+    const overlay = document.getElementById('abilityMenuOverlay');
+    const list = document.getElementById('abilitiesList');
+    if (!overlay || !list || !this.storyEngine) return;
+    
+    list.innerHTML = '';
+    const abilities = this.storyEngine.abilities || [];
+    if (abilities.length === 0) {
+      list.innerHTML = '<div class="muted">No abilities available.</div>';
+    } else {
+      abilities.forEach(a => {
+        const item = document.createElement('div');
+        item.style.display = 'flex';
+        item.style.justifyContent = 'space-between';
+        item.style.alignItems = 'center';
+        item.style.borderBottom = '1px dashed #2d313d';
+        item.style.padding = '8px 0';
+
+        const isCooldown = a.currentCooldown > 0;
+        item.innerHTML = `
+          <div>
+            <span style="color:#ffcd68; font-weight:bold;">${a.label.toUpperCase()}</span><br/>
+            <span class="muted" style="font-size:7px;">Cooldown: ${a.cooldownBeats} beats</span>
+          </div>
+          <div>
+            ${isCooldown 
+              ? `<span style="color:#f25438;">COOLDOWN: ${a.currentCooldown} beats</span>` 
+              : `<button onclick="app.useAbilityInMenu('${a.id}')" style="font-size:8px; padding:2px 6px;">[ USE ]</button>`}
+          </div>
+        `;
+        list.appendChild(item);
+      });
+    }
+    
+    overlay.style.display = 'block';
+  },
+
+  useAbilityInMenu(id) {
+    if (id === 'redo') {
+      alert("This ability ('Force Redo') can only be used during the Judging phase when reviewing submissions.");
+    }
+  },
+
+  showSecretOverlay() {
+    const overlay = document.getElementById('secretOverlay');
+    const list = document.getElementById('secretsList');
+    if (!overlay || !list || !this.storyEngine) return;
+
+    list.innerHTML = '';
+    const secrets = this.storyEngine.secrets || [];
+    
+    list.innerHTML += `<h3 style="margin:0; font-size:9px; color:#ffcd68;">DISCOVERED SECRETS:</h3>`;
+    if (secrets.length === 0) {
+      list.innerHTML += `<div class="muted" style="margin-left:8px;">No secrets discovered yet.</div>`;
+    } else {
+      secrets.forEach(s => {
+        list.innerHTML += `<div style="color:#ffffff; margin-left:8px;">• ${s}</div>`;
+      });
+    }
+
+    list.innerHTML += `<h3 style="margin:12px 0 0 0; font-size:9px; color:#ffcd68;">STORYLINE FLAGS:</h3>`;
+    const heatVal = this.storyEngine.heat;
+    const trustVal = this.storyEngine.trust;
+    
+    list.innerHTML += `<div style="margin-left:8px;">`;
+    list.innerHTML += `<div>• heat_level_high = ${heatVal >= 5}</div>`;
+    list.innerHTML += `<div>• marquez_watching = ${heatVal > 2}</div>`;
+    list.innerHTML += `<div>• neighborhood_trust_built = ${trustVal >= 3}</div>`;
+    list.innerHTML += `<div>• campaign_day = ${this.storyEngine.day}</div>`;
+    list.innerHTML += `</div>`;
+
+    overlay.style.display = 'block';
   },
   
   runNarrativeBotTurns() {

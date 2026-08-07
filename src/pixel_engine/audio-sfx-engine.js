@@ -186,6 +186,32 @@ class ChiptuneAudioEngine {
   }
 
   /**
+   * Sound: Failure Buzzer (Low frequency raw saw wave)
+   */
+  playFailureBuzzer() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(110, now);
+    osc.frequency.linearRampToValueAtTime(100, now + 0.25);
+
+    gain.gain.setValueAtTime(0.25 * this.masterVolume, now);
+    gain.gain.linearRampToValueAtTime(0.001, now + 0.25);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.25);
+  }
+
+  /**
    * Procedural 8-Bit Chiptune Hip-Hop BGM Engine (90 BPM Boom-Bap Loop)
    */
   startBGM(theme = 'Harlem') {

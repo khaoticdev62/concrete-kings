@@ -140,8 +140,21 @@ class NarrativeStoryEngine {
     this.active = false;
     this.history = [];
     this.origin = null;
-    this.specialAbilityUsed = false;
+    this.abilities = [
+      { id: 'redo', label: 'Force Redo', cooldownBeats: 2, currentCooldown: 0 }
+    ];
     this.secrets = [];
+  }
+
+  get specialAbilityUsed() {
+    return this.abilities.some(a => a.id === 'redo' && a.currentCooldown > 0);
+  }
+
+  set specialAbilityUsed(val) {
+    const redo = this.abilities.find(a => a.id === 'redo');
+    if (redo) {
+      redo.currentCooldown = val ? redo.cooldownBeats : 0;
+    }
   }
 
   reset(originKey = null) {
@@ -151,14 +164,20 @@ class NarrativeStoryEngine {
     this.active = true;
     this.history = [];
     this.origin = originKey;
-    this.specialAbilityUsed = false;
+    this.abilities = [
+      { id: 'redo', label: 'Force Redo', cooldownBeats: 2, currentCooldown: 0 }
+    ];
     this.secrets = [];
   }
 
   markAbilityUsed() {
-    if (this.specialAbilityUsed) return false;
-    this.specialAbilityUsed = true;
-    return true;
+    const redo = this.abilities.find(a => a.id === 'redo');
+    if (redo) {
+      if (redo.currentCooldown > 0) return false;
+      redo.currentCooldown = redo.cooldownBeats;
+      return true;
+    }
+    return false;
   }
 
   getCurrentBeat() {
@@ -209,6 +228,11 @@ class NarrativeStoryEngine {
       };
     } else {
       this.beat++;
+      if (this.abilities) {
+        this.abilities.forEach(a => {
+          if (a.currentCooldown > 0) a.currentCooldown--;
+        });
+      }
       return {
         consequenceText: consequence.text,
         ended: false
