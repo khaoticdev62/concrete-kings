@@ -815,8 +815,10 @@
         <div class="panel">
           <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:10px; color:#339488;">RPG STAT HUD</h3>
           <div class="rpg-hud-grid">
-            <div class="hud-item"><span class="hud-label">CRED:</span> <span id="hudCred" class="hud-val">0</span></div>
+            <div class="hud-item"><span class="hud-label">TRUST:</span> <span id="hudTrust" class="hud-val">0</span></div>
+            <div class="hud-item"><span class="hud-label">HEAT:</span> <span id="hudHeat" class="hud-val">0</span></div>
             <div class="hud-item"><span class="hud-label">REP:</span> <span id="hudRep" class="hud-val">0</span></div>
+            <div class="hud-item"><span class="hud-label">CASH:</span> <span id="hudCred" class="hud-val">0</span></div>
           </div>
         </div>
 
@@ -2921,8 +2923,13 @@ const app = {
     const me = this.game.players[this.humanIndex];
     const credEl = document.getElementById('hudCred');
     const repEl = document.getElementById('hudRep');
+    const trustEl = document.getElementById('hudTrust');
+    const heatEl = document.getElementById('hudHeat');
     if (credEl) credEl.textContent = me ? me.stats.streetCred : 0;
     if (repEl) repEl.textContent = me ? me.stats.reputation : 0;
+    const useStory = !!(this.storyEngine && this.storyEngine.active);
+    if (trustEl) trustEl.textContent = useStory ? this.storyEngine.trust : 0;
+    if (heatEl) heatEl.textContent = useStory ? this.storyEngine.heat : 0;
   },
 
   renderHand() {
