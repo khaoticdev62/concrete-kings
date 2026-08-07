@@ -12,7 +12,7 @@
 
 - No new dependencies, no build step — this is a plain-JS, single-file client (`docs/CLAUDE.md`).
 - `player.stats` stays exactly `{ streetCred, reputation }` — do not add a third stat field. `streetCred` already functions as spendable cash; the wireframe's "Cash" HUD label displays it directly.
-- `test/helpers/load-app.js` extracts `Game` (and other classes) from `index.html`'s inline script only up to the text boundary `"document.getElementById('blackCard')".addEventListener` — anything defined after that point (all `app` object methods, including `show`, `renderGame`, `updateStatHud`) is **not** reachable from `node --test` and must be verified manually in-browser. Anything defined before that point (`Game` class, `NarrativeStoryEngine` via its own `module.exports`) is unit-testable.
+- `test/helpers/load-app.js` extracts `Game`, `app`, and other classes from `index.html`'s inline script up to the text boundary `"document.getElementById('blackCard')".addEventListener`. The `app` object literal (including `show`, `renderGame`, `updateStatHud`, `updateTopHud`) closes before that boundary and IS reachable from `node --test` via `loadGameModule().app`, given a minimal fake `document`/`window`. This plan's DOM-wiring tasks (3, 4, 5) were still verified manually rather than with a unit test — that was a missed opportunity, not a hard constraint, and a later phase may add DOM-wiring unit tests using this same `app` export.
 - Follow existing code style exactly: inline `style="..."` attributes (no new CSS classes unless one already exists for the purpose), `'Press Start 2P', monospace` for labels/headers, `document.getElementById(...)` null-guards matching the pattern already used throughout `renderGame()`.
 
 ---
@@ -349,7 +349,7 @@ Immediately after the closing of `show(id)` (right after `showSetup() { this.sho
 
 - [ ] **Step 3: Manual verification**
 
-No automated test — `show()` and the app object are defined after `test/helpers/load-app.js`'s extraction boundary (see Global Constraints). Verify manually per Task 6's checklist once Task 4 is also done, since `updateTopHud` has no visible caller until then.
+No automated test written for this step (manually verified per Task 6's checklist; see corrected Global Constraints note above). Verify manually per Task 6's checklist once Task 4 is also done, since `updateTopHud` has no visible caller until then.
 
 - [ ] **Step 4: Commit**
 

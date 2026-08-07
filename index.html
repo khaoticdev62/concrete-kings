@@ -489,12 +489,12 @@
       <div class="pill" id="modeBadge">Offline</div>
       <button class="secondary" onclick="app.showSetup()">Menu</button>
     </div>
-    <div id="topHudStrip" style="display:none; justify-content:space-between; align-items:center; gap:16px; margin-top:8px; padding:8px 12px; background:#101116; border:2px solid #2d313d; font-family:'Press Start 2P', monospace; font-size:9px; color:#f4f7ff;">
-      <span id="topHudLocation" style="color:#ffcd68;">HARLEM</span>
-      <span id="topHudDay">DAY 1</span>
-      <span id="topHudHeat" style="color:#f25438;">HEAT: 0/10</span>
-    </div>
   </header>
+  <div id="topHudStrip" style="display:none; justify-content:space-between; align-items:center; gap:16px; margin-top:8px; padding:8px 12px; background:#101116; border:2px solid #2d313d; font-family:'Press Start 2P', monospace; font-size:9px; color:#f4f7ff;">
+    <span id="topHudLocation" style="color:#ffcd68;">HARLEM</span>
+    <span id="topHudDay">DAY 1</span>
+    <span id="topHudHeat" style="color:#f25438;">HEAT: 0/10</span>
+  </div>
 
   <!-- SETUP -->
   <section id="setup" class="screen active">
@@ -1175,7 +1175,6 @@ class Game {
   constructor() {
     this.players = [];
     this.round = 0;
-    this.day = 1;
     this.blackDeck = new Deck(BLACK_CARDS);
     
     // Load custom deck if it exists and satisfies min requirements
@@ -1275,7 +1274,10 @@ class Game {
   advanceJudge() {
     this.judgeIndex++;
     this.round++;
-    if (this.round % 3 === 0) this.day++;
+  }
+
+  get day() {
+    return Math.floor(this.round / 3) + 1;
   }
 
   submit(playerIndex, cardIndex) {
@@ -1614,7 +1616,7 @@ const app = {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const targetScreen = document.getElementById(id);
     targetScreen.classList.add('active');
-    this.updateTopHud(id);
+    this.updateTopHud();
 
     const canvasContainer = targetScreen.querySelector('.canvas-mount-point');
     const stageCanvas = document.getElementById('stage-canvas');
@@ -1627,9 +1629,11 @@ const app = {
   },
   showSetup() { this.show('setup'); },
 
-  updateTopHud(screenId) {
+  updateTopHud() {
     const strip = document.getElementById('topHudStrip');
     if (!strip) return;
+    const activeScreen = document.querySelector('.screen.active');
+    const screenId = activeScreen ? activeScreen.id : null;
     if (screenId === 'setup' || screenId === 'lobby' || screenId === 'deckBuilder') {
       strip.style.display = 'none';
       return;
@@ -2877,7 +2881,7 @@ const app = {
     this.renderHand();
     this.renderScoreboard();
     this.updateStatHud();
-    this.updateTopHud('game');
+    this.updateTopHud();
 
     const isOnline = this.game.mode === MODE.ONLINE;
 
@@ -4130,7 +4134,7 @@ const app = {
     document.getElementById('narrativeText').textContent = beat.narrative;
     document.getElementById('narrativeHeat').textContent = this.storyEngine.heat;
     document.getElementById('narrativeTrust').textContent = this.storyEngine.trust;
-    this.updateTopHud('game');
+    this.updateTopHud();
   },
   
   runNarrativeBotTurns() {
