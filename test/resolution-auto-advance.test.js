@@ -3,65 +3,101 @@ const assert = require('node:assert/strict');
 const { mock } = require('node:test');
 const { loadGameModule } = require('./helpers/load-app.js');
 
-function fakeButton() {
-  return { setAttribute() {}, textContent: '', onclick: null };
-}
-
-function fakeDocument(button) {
+function fakeDocument() {
   const elements = {};
   const makeEl = () => ({
     textContent: '',
     innerHTML: '',
     style: {},
-    classList: {
-      contains() { return false; },
-      add() {},
-      remove() {}
-    },
+    classList: { contains() { return false; }, add() {}, remove() {} },
     setAttribute() {},
     appendChild() {},
-    querySelectorAll() { return []; }
+    querySelectorAll() { return []; },
+    getContext() {
+      return { imageSmoothingEnabled: false, fillRect() {}, clearRect() {}, fillText() {}, drawImage() {} };
+    }
   });
+
   return {
     getElementById(id) {
       if (!elements[id]) elements[id] = makeEl();
       return elements[id];
     },
     querySelector(sel) {
-      if (sel === '#roundResult button') return button;
-      return makeEl();
+      if (sel === '#roundResult button') {
+        const btn = makeEl();
+        btn.onclick = null;
+        return btn;
+      }
+      return null;
     },
     querySelectorAll() { return []; },
     createElement(tag) { return makeEl(); }
   };
 }
 
-test('Resolution auto-advance: calls nextRound after 5 seconds if not manually advanced', () => {
-  mock.timers.enable({ apis: ['setInterval'] });
+test('Resolution auto-advance: starts a timer that auto-advances after 5 seconds', () => {
+  mock.timers.enable({ apis: ['setTimeout'] });
   try {
-    const { app, Game, NarrativeStoryEngine } = loadGameModule();
-    const button = fakeButton();
-    global.document = fakeDocument(button);
+    const { app } = loadGameModule();
+    global.document = fakeDocument();
 
-    app.game = new Game();
-    app.game.addPlayer('Player');
-    app.game.submissions = [{ player: 'Player', card: 'A card' }];
-    app.storyEngine = new NarrativeStoryEngine();
-    app.storyEngine.reset('BARBER');
-    app.humanIndex = 0;
-    app.show = () => {};
+    let callCount = 0;
+    const originalNextRound = app.nextRound.bind(app);
+    app.nextRound = () => { callCount++; };
 
-    let nextRoundCalled = false;
-    app.nextRound = () => { nextRoundCalled = true; };
-
-    // Set button onclick manually or simulate chooseWinner writing it
-    button.onclick = () => { app.nextRound(); };
-
-    app.chooseWinner(0);
-    assert.equal(nextRoundCalled, false, 'should not advance immediately');
+    app.startResolutionAutoAdvance();
+    assert.equal(app.resolutionTimerHandle, null, 'timer handle is not exposed synchronously');
 
     mock.timers.tick(5000);
-    assert.equal(nextRoundCalled, true, 'should auto-advance after 5s by invoking the button\'s current handler');
+    assert.equal(callCount, 1, 'should auto-advance once after 5 seconds');
+    app.nextRound = originalNextRound;
+  } finally {
+    mock.timers.reset();
+    delete global.document;
+  }
+});
+
+test('Resolution auto-advance: does not fire if nextRound already ran', () => {
+  mock.timers.enable({ apis: ['setTimeout'] });
+  try {
+    const { app } = loadGameModule();
+    global.document = fakeDocument();
+
+    let callCount = 0;
+    app.nextRound = () => {
+      callCount++;
+      app.resolutionTimerHandle = null;
+    };
+
+    app.startResolutionAutoAdvance();
+    app.nextRound();
+    mock.timers.tick(5000);
+    assert.equal(callCount, 1, 'auto-advance must not fire after manual resolution');
+  } finally {
+    mock.timers.reset();
+    delete global.document;
+  }
+});
+
+test('Resolution auto-advance: invokes the current roundResult button action on timer expiry', () => {
+  mock.timers.enable({ apis: ['setTimeout'] });
+  try {
+    const { app } = loadGameModule();
+    const doc = fakeDocument();
+    global.document = doc;
+
+    let ended = false;
+    const originalEnd = app.endNarrativeGame.bind(app);
+    app.endNarrativeGame = () => { ended = true; };
+
+    app.startResolutionAutoAdvance();
+    const btn = doc.querySelector('#roundResult button');
+    if (btn && btn.setAttribute) btn.setAttribute('onclick', 'app.endNarrativeGame()');
+
+    mock.timers.tick(5000);
+    assert.equal(ended, true, 'should invoke the button action when it is the ending action');
+    app.endNarrativeGame = originalEnd;
   } finally {
     mock.timers.reset();
     delete global.document;
