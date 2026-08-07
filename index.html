@@ -1168,6 +1168,7 @@ class Game {
   constructor() {
     this.players = [];
     this.round = 0;
+    this.day = 1;
     this.blackDeck = new Deck(BLACK_CARDS);
     
     // Load custom deck if it exists and satisfies min requirements
@@ -1267,6 +1268,7 @@ class Game {
   advanceJudge() {
     this.judgeIndex++;
     this.round++;
+    if (this.round % 3 === 0) this.day++;
   }
 
   submit(playerIndex, cardIndex) {
