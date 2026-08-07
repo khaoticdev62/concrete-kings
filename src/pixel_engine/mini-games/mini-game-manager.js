@@ -122,11 +122,21 @@ class MiniGameManager {
     if (hud.top) {
       let xOffset = 24;
       hud.top.forEach(item => {
+        const labelUpper = String(item.label).toUpperCase();
+        let valColor = '#ffcd68';
+        if (labelUpper.includes('HEAT')) {
+          valColor = '#f25438';
+        } else if (labelUpper.includes('REP')) {
+          valColor = '#47e589';
+        } else if (labelUpper.includes('NAME') || labelUpper.includes('PLAYER')) {
+          valColor = '#ffffff';
+        }
+
         this.ui.drawText(`${item.label}:`, xOffset, 18, { font: 'Press Start 2P', size: '10px', color: '#8b95ab' });
         
         // Push value label past the key string
         const valX = xOffset + (item.label.length * 10) + 12;
-        this.ui.drawText(String(item.value), valX, 12, { font: 'VT323', size: '22px', color: '#ffcd68' });
+        this.ui.drawText(String(item.value), valX, 12, { font: 'VT323', size: '22px', color: valColor });
         
         xOffset += 300;
       });

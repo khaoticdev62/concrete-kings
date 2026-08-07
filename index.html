@@ -514,6 +514,7 @@
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showBoosterShop()">SHOP</button>
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showBlockMap()">BLOCK MAP</button>
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showLexicon()">LEXICON</button>
+          <button class="secondary" style="font-size:8px; padding:8px; grid-column: span 2;" onclick="app.showMinigameCatalog()">MINI-GAME CATALOG</button>
         </div>
 
         <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
@@ -1281,6 +1282,63 @@
     </div>
   </section>
 
+  <!-- MINI-GAME SELECTION CATALOG -->
+  <section id="minigameCatalog" class="screen">
+    <div class="panel" style="max-width: 800px; margin: 0 auto;">
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:12px; border-bottom:2px solid #2d313d; padding-bottom:6px;">
+        <h2 style="margin:0; font-family:'Press Start 2P', monospace; font-size:12px;">MINI-GAME SELECTION CATALOG</h2>
+      </div>
+      <p class="muted" style="margin-top:0; margin-bottom:16px;">Test your street skills in free-play mini-games below. Play to boost your stats!</p>
+      
+      <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px; text-align:left;">
+        <!-- Dice -->
+        <div class="panel" style="background:#101116; border:2px solid #ffcd68; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h4 style="margin:0 0 4px 0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68;">STREET DICE</h4>
+            <div style="font-size:10px; color:#cbd5ed; font-family:'JetBrains Mono', monospace;">High-stakes alley dice rolling. Meet the DC target to double your wager.</div>
+          </div>
+          <button class="secondary" onclick="app.launchCatalogMinigame('street_dice')" style="font-size:8px; padding:6px 12px; min-width:100px;">[ PLAY ]</button>
+        </div>
+        <!-- Bodega -->
+        <div class="panel" style="background:#101116; border:2px solid #ffcd68; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h4 style="margin:0 0 4px 0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68;">BODEGA RUN</h4>
+            <div style="font-size:10px; color:#cbd5ed; font-family:'JetBrains Mono', monospace;">Side-scrolling grocery dash. Tap quick to evade neighborhood dogs and grab sandwiches.</div>
+          </div>
+          <button class="secondary" onclick="app.launchCatalogMinigame('bodega_run')" style="font-size:8px; padding:6px 12px; min-width:100px;">[ PLAY ]</button>
+        </div>
+        <!-- Haircut -->
+        <div class="panel" style="background:#101116; border:2px solid #ffcd68; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h4 style="margin:0 0 4px 0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68;">HAIRCUT CHALLENGE</h4>
+            <div style="font-size:10px; color:#cbd5ed; font-family:'JetBrains Mono', monospace;">Rhythm-action lineup trimming. Match the pattern exactly to keep the cut clean.</div>
+          </div>
+          <button class="secondary" onclick="app.launchCatalogMinigame('haircut_challenge')" style="font-size:8px; padding:6px 12px; min-width:100px;">[ PLAY ]</button>
+        </div>
+        <!-- Lockpicking -->
+        <div class="panel" style="background:#101116; border:2px solid #ffcd68; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h4 style="margin:0 0 4px 0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68;">LOCKPICKING</h4>
+            <div style="font-size:10px; color:#cbd5ed; font-family:'JetBrains Mono', monospace;">Alley gate tumbler picking. Keep pick sweet spot aligned under tension.</div>
+          </div>
+          <button class="secondary" onclick="app.launchCatalogMinigame('lockpicking')" style="font-size:8px; padding:6px 12px; min-width:100px;">[ PLAY ]</button>
+        </div>
+        <!-- Negotiation -->
+        <div class="panel" style="background:#101116; border:2px solid #ffcd68; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h4 style="margin:0 0 4px 0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68;">NEGOTIATION</h4>
+            <div style="font-size:10px; color:#cbd5ed; font-family:'JetBrains Mono', monospace;">High-stake trade/barter. Match cards synergy stats to split the pot fairly.</div>
+          </div>
+          <button class="secondary" onclick="app.launchCatalogMinigame('negotiation')" style="font-size:8px; padding:6px 12px; min-width:100px;">[ PLAY ]</button>
+        </div>
+      </div>
+      
+      <div>
+        <button class="secondary" onclick="app.showSetup()" style="font-size:9px; padding:8px 16px;">[ BACK TO MENU ]</button>
+      </div>
+    </div>
+  </section>
+
   <!-- GAME OVER -->
   <section id="gameOver" class="screen">
     <div class="panel winner-area">
@@ -1896,7 +1954,45 @@ const app = {
       }
     }
   },
-  showSetup() { this.show('setup'); },
+  showSetup() { this.showMainMenu(); },
+
+  showMainMenu() {
+    this.show('setup');
+    const main = document.getElementById('mainMenuView');
+    const creation = document.getElementById('characterCreationView');
+    if (main) main.style.display = '';
+    if (creation) creation.style.display = 'none';
+  },
+
+  showCharacterCreation() {
+    this.show('setup');
+    const main = document.getElementById('mainMenuView');
+    const creation = document.getElementById('characterCreationView');
+    if (main) main.style.display = 'none';
+    if (creation) creation.style.display = '';
+  },
+
+  showJourneyFromMenu() {
+    this.showCharacterCreation();
+    this.confirmCharacter();
+  },
+
+  showLexicon() {
+    this.showMainMenu();
+    const input = document.getElementById('lexiconSearchBox');
+    if (input) input.focus();
+  },
+
+  showMinigameCatalog() {
+    this.show('minigameCatalog');
+  },
+
+  launchCatalogMinigame(gameId) {
+    this.show('game');
+    if (this.miniGameManager && this.miniGameManager.start) {
+      this.miniGameManager.start(gameId);
+    }
+  },
 
   showGame() { this.show('game'); },
 
