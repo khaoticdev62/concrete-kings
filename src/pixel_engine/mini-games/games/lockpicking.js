@@ -3,16 +3,16 @@
  * Lockpicking Challenge - Timing & Skill Mini-Game
  */
 
-let BaseGameClass;
+let LockpickingBaseClass;
 if (typeof require !== 'undefined') {
-  BaseGameClass = require('../mini-game-state.js').MiniGame;
+  LockpickingBaseClass = require('../mini-game-state.js').MiniGame;
 } else if (typeof window !== 'undefined' && window.MiniGame) {
-  BaseGameClass = window.MiniGame;
+  LockpickingBaseClass = window.MiniGame;
 } else {
-  BaseGameClass = class {};
+  LockpickingBaseClass = class {};
 }
 
-class Lockpicking extends BaseGameClass {
+class Lockpicking extends LockpickingBaseClass {
   constructor(manager, canvas, ctx, gameState) {
     super(manager, canvas, ctx, gameState);
     this.id = 'lockpicking';

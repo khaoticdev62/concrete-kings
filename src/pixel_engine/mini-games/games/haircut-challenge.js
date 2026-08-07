@@ -3,16 +3,16 @@
  * Haircut Challenge - Timing Rhythm Mini-Game
  */
 
-let BaseGameClass;
+let HaircutChallengeBaseClass;
 if (typeof require !== 'undefined') {
-  BaseGameClass = require('../mini-game-state.js').MiniGame;
+  HaircutChallengeBaseClass = require('../mini-game-state.js').MiniGame;
 } else if (typeof window !== 'undefined' && window.MiniGame) {
-  BaseGameClass = window.MiniGame;
+  HaircutChallengeBaseClass = window.MiniGame;
 } else {
-  BaseGameClass = class {};
+  HaircutChallengeBaseClass = class {};
 }
 
-class HaircutChallenge extends BaseGameClass {
+class HaircutChallenge extends HaircutChallengeBaseClass {
   constructor(manager, canvas, ctx, gameState) {
     super(manager, canvas, ctx, gameState);
     this.id = 'haircut_challenge';

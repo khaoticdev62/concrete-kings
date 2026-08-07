@@ -3,17 +3,17 @@
  * Street Dice Mini-Game
  */
 
-let BaseGameClass;
+let StreetDiceBaseClass;
 if (typeof require !== 'undefined') {
-  BaseGameClass = require('../mini-game-state.js').MiniGame;
+  StreetDiceBaseClass = require('../mini-game-state.js').MiniGame;
 } else if (typeof window !== 'undefined' && window.MiniGame) {
-  BaseGameClass = window.MiniGame;
+  StreetDiceBaseClass = window.MiniGame;
 } else {
   // Safe mock fallback for class declaration parsing
-  BaseGameClass = class {};
+  StreetDiceBaseClass = class {};
 }
 
-class StreetDice extends BaseGameClass {
+class StreetDice extends StreetDiceBaseClass {
   constructor(manager, canvas, ctx, gameState) {
     super(manager, canvas, ctx, gameState);
     this.id = 'street_dice';

@@ -3,16 +3,16 @@
  * Negotiation Challenge - Social Argument Selection Mini-Game
  */
 
-let BaseGameClass;
+let NegotiationBaseClass;
 if (typeof require !== 'undefined') {
-  BaseGameClass = require('../mini-game-state.js').MiniGame;
+  NegotiationBaseClass = require('../mini-game-state.js').MiniGame;
 } else if (typeof window !== 'undefined' && window.MiniGame) {
-  BaseGameClass = window.MiniGame;
+  NegotiationBaseClass = window.MiniGame;
 } else {
-  BaseGameClass = class {};
+  NegotiationBaseClass = class {};
 }
 
-class Negotiation extends BaseGameClass {
+class Negotiation extends NegotiationBaseClass {
   constructor(manager, canvas, ctx, gameState) {
     super(manager, canvas, ctx, gameState);
     this.id = 'negotiation';

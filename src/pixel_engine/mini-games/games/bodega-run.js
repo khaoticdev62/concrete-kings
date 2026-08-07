@@ -3,16 +3,16 @@
  * Bodega Run - Grid Stealth Mini-Game
  */
 
-let BaseGameClass;
+let BodegaRunBaseClass;
 if (typeof require !== 'undefined') {
-  BaseGameClass = require('../mini-game-state.js').MiniGame;
+  BodegaRunBaseClass = require('../mini-game-state.js').MiniGame;
 } else if (typeof window !== 'undefined' && window.MiniGame) {
-  BaseGameClass = window.MiniGame;
+  BodegaRunBaseClass = window.MiniGame;
 } else {
-  BaseGameClass = class {};
+  BodegaRunBaseClass = class {};
 }
 
-class BodegaRun extends BaseGameClass {
+class BodegaRun extends BodegaRunBaseClass {
   constructor(manager, canvas, ctx, gameState) {
     super(manager, canvas, ctx, gameState);
     this.id = 'bodega_run';
