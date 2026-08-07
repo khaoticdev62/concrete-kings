@@ -497,80 +497,186 @@
   </div>
 
   <!-- SETUP -->
+  <!-- SETUP (CHARACTER CREATION) -->
   <section id="setup" class="screen active">
     <div class="setup-grid">
-      <!-- Left Column: New Game Settings -->
-      <div class="panel">
-        <h2 style="margin-top:0;">NEW CHRONICLE</h2>
-        
-        <div style="margin-bottom:12px;">
-          <label style="font-weight:600; display:block; margin-bottom:4px; font-size:10px; font-family:'Press Start 2P', monospace;">PLAYER NAME</label>
-          <input id="hostName" value="Host" />
-        </div>
-        
-        <div style="margin-bottom:12px;">
-          <label style="font-weight:600; display:block; margin-bottom:4px; font-size:10px; font-family:'Press Start 2P', monospace;">CHARACTER CLASS</label>
-          <select id="characterOriginSelect" style="width:100%;">
-            <option value="BARBER">MASTER BARBER (Apron + Scissors)</option>
-            <option value="STREET_SCHOLAR">STREET SCHOLAR (Book + Hoodie)</option>
-            <option value="LOCAL_LEGEND">LOCAL LEGEND (Leather Jacket)</option>
-            <option value="CORNER_MERCHANT">CORNER MERCHANT (Utility Vest)</option>
-            <option value="COMMUNITY_ORGANIZER">COMMUNITY ORGANIZER (Denim Jacket)</option>
-            <option value="UNDERGROUND_DJ">UNDERGROUND DJ (Varsity Violet)</option>
-            <option value="BLOCK_ARCHITECT">BLOCK ARCHITECT (High-Vis Gold)</option>
-            <option value="HUSTLE_VETERAN">HUSTLE VETERAN (Green Tracksuit)</option>
-          </select>
-          <div style="display:flex; align-items:center; gap:12px; margin-top:8px;">
-            <canvas id="setup-character-preview" width="32" height="32" style="width:64px; height:64px; border:3px solid #474d5e; background:#101116; image-rendering:pixelated;"></canvas>
-            <span class="muted" style="line-height:1.3;">Each class has a distinct 16-bit avatar layout. Watch them bob in the preview!</span>
+      <!-- Left Column: Origin Select & Attributes -->
+      <div class="panel" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <h2 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68; border-bottom:1px solid #2d313d; padding-bottom:6px;">ORIGIN SELECT</h2>
+          <div id="originCardsContainer" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; max-height: 250px; overflow-y: auto; padding-right: 4px;">
+            <!-- Populated dynamically in JS -->
           </div>
         </div>
         
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label style="font-weight:600; display:block; margin-bottom:4px; font-size:10px; font-family:'Press Start 2P', monospace;">PLAYERS (3-12)</label>
-            <input id="playerCount" type="number" min="3" max="12" value="4" />
+        <!-- ATTRIBUTES -->
+        <div id="attributesPanel" style="border: 2px solid #2d313d; background: #101116; padding: 10px; border-radius: 4px;">
+          <div style="font-family:'Press Start 2P', monospace; font-size: 8px; color: #339488; margin-bottom: 8px;">ATTRIBUTES</div>
+          <div style="display: grid; grid-template-columns: 1fr; gap: 6px; font-family:'Press Start 2P', monospace; font-size: 7px; color: #f4f7ff;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span>STR</span>
+              <span id="attrBarStr" style="color: #ff7a45; font-family: monospace;">[          ]</span>
+              <span id="attrValStr" style="width: 12px; text-align: right;">0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span>WIT</span>
+              <span id="attrBarWit" style="color: #6fe8d8; font-family: monospace;">[          ]</span>
+              <span id="attrValWit" style="width: 12px; text-align: right;">0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span>SOUL</span>
+              <span id="attrBarSoul" style="color: #eb8e52; font-family: monospace;">[          ]</span>
+              <span id="attrValSoul" style="width: 12px; text-align: right;">0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span>CASH</span>
+              <span id="attrBarCash" style="color: #10b981; font-family: monospace;">[          ]</span>
+              <span id="attrValCash" style="width: 12px; text-align: right;">0</span>
+            </div>
           </div>
-          <div>
-            <label style="font-weight:600; display:block; margin-bottom:4px; font-size:10px; font-family:'Press Start 2P', monospace;">PTS TO WIN</label>
-            <input id="pointsToWin" type="number" min="1" max="50" value="7" />
-          </div>
-        </div>
-        
-        <div style="display:flex; flex-direction:column; gap:8px; margin-top:16px;">
-          <div class="grid-2">
-            <button onclick="app.startLocalGame()">PLAY LOCAL</button>
-            <button class="secondary" onclick="app.openOnlineLobby()">ONLINE LOBBY</button>
-          </div>
-          <div class="grid-2">
-            <button class="secondary" onclick="app.showDeckBuilder()">🗂️ DECK BUILDER</button>
-            <button class="secondary" onclick="app.showBoosterShop()">📦 BOOSTER SHOP</button>
-          </div>
-        </div>
-        <div class="muted" style="margin-top:10px;">
-          Offline mode = same device, pass & play.
         </div>
       </div>
       
-      <!-- Right Column: Campaign acts -->
-      <div class="panel">
-        <h2 style="margin-top:0; color:#f0ab43;">STORY CAMPAIGN</h2>
-        <p class="muted" style="margin-top:0; font-size:11px;">Complete acts to defeat regional O.G. bosses, gain reputation, and unlock new classes.</p>
-        <button class="primary" style="width:100%; background:#d9382e; border-color:#d9382e; color:#ffffff; font-family:'Press Start 2P', monospace; font-size:8px; margin-bottom:12px; height:36px; padding:0;" onclick="app.startNoirPrototype()">PLAY NOIR PROTOTYPE</button>
-        <button class="primary" style="width:100%; background:#c9822b; border-color:#c9822b; color:#ffffff; font-family:'Press Start 2P', monospace; font-size:8px; margin-bottom:12px; height:36px; padding:0;" onclick="app.startStreetDiceSandbox()">🎲 PLAY STREET DICE</button>
-        <button class="primary" style="width:100%; background:#339488; border-color:#339488; color:#ffffff; font-family:'Press Start 2P', monospace; font-size:8px; margin-bottom:12px; height:36px; padding:0;" onclick="app.startBodegaRunSandbox()">🏪 PLAY BODEGA RUN</button>
-        <button class="primary" style="width:100%; background:#274f80; border-color:#274f80; color:#ffffff; font-family:'Press Start 2P', monospace; font-size:8px; margin-bottom:12px; height:36px; padding:0;" onclick="app.startHaircutChallengeSandbox()">💈 PLAY HAIRCUT CHALLENGE</button>
-        <button class="primary" style="width:100%; background:#9c7a3c; border-color:#9c7a3c; color:#ffffff; font-family:'Press Start 2P', monospace; font-size:8px; margin-bottom:12px; height:36px; padding:0;" onclick="app.startLockpickingSandbox()">🔑 PLAY LOCKPICKING</button>
-        <button class="primary" style="width:100%; background:#eb8e52; border-color:#eb8e52; color:#ffffff; font-family:'Press Start 2P', monospace; font-size:8px; margin-bottom:12px; height:36px; padding:0;" onclick="app.startNegotiationSandbox()">🤝 PLAY NEGOTIATION</button>
-        <div id="campaignActList" class="campaign-list"></div>
-        <div id="campaignActDetails" class="campaign-details-box"></div>
+      <!-- Right Column: Appearance & Backstory -->
+      <div class="panel" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <h2 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68; border-bottom:1px solid #2d313d; padding-bottom:6px;">APPEARANCE & BACKSTORY</h2>
+          
+          <div style="margin-bottom:8px;">
+            <label style="font-weight:600; display:block; margin-bottom:2px; font-size:8px; font-family:'Press Start 2P', monospace;">PLAYER NAME</label>
+            <input id="hostName" value="Host" style="width: 100%; box-sizing: border-box; font-size: 10px; padding: 4px;" />
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
+            <div>
+              <label style="font-weight:600; display:block; margin-bottom:2px; font-size:7px; font-family:'Press Start 2P', monospace;">PLAYERS (3-12)</label>
+              <input id="playerCount" type="number" min="3" max="12" value="4" style="width: 100%; box-sizing: border-box; font-size: 10px; padding: 4px;" />
+            </div>
+            <div>
+              <label style="font-weight:600; display:block; margin-bottom:2px; font-size:7px; font-family:'Press Start 2P', monospace;">PTS TO WIN</label>
+              <input id="pointsToWin" type="number" min="1" max="50" value="7" style="width: 100%; box-sizing: border-box; font-size: 10px; padding: 4px;" />
+            </div>
+          </div>
+
+          <!-- Appearance Pickers -->
+          <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
+            <div>
+              <label style="font-weight:600; display:block; margin-bottom:2px; font-size:7px; font-family:'Press Start 2P', monospace;">HAIR STYLE</label>
+              <div style="display: flex; gap: 4px;">
+                <button class="secondary appearance-btn" id="hair-fade" style="font-size: 6px; padding: 3px 6px;" onclick="app.selectAppearance('hair', 'fade')">FADE</button>
+                <button class="secondary appearance-btn" id="hair-waves" style="font-size: 6px; padding: 3px 6px;" onclick="app.selectAppearance('hair', 'waves')">WAVES</button>
+                <button class="secondary appearance-btn" id="hair-bald" style="font-size: 6px; padding: 3px 6px;" onclick="app.selectAppearance('hair', 'bald')">BALD</button>
+              </div>
+            </div>
+            <div>
+              <label style="font-weight:600; display:block; margin-bottom:2px; font-size:7px; font-family:'Press Start 2P', monospace;">FIT STYLE</label>
+              <div style="display: flex; gap: 4px;">
+                <button class="secondary appearance-btn" id="fit-slim" style="font-size: 6px; padding: 3px 6px;" onclick="app.selectAppearance('fit', 'slim')">SLIM</button>
+                <button class="secondary appearance-btn" id="fit-bulky" style="font-size: 6px; padding: 3px 6px;" onclick="app.selectAppearance('fit', 'bulky')">BULKY</button>
+                <button class="secondary appearance-btn" id="fit-tight" style="font-size: 6px; padding: 3px 6px;" onclick="app.selectAppearance('fit', 'tight')">TIGHT</button>
+              </div>
+            </div>
+            <div>
+              <label style="font-weight:600; display:block; margin-bottom:2px; font-size:7px; font-family:'Press Start 2P', monospace;">PROP</label>
+              <div style="display: flex; gap: 4px;">
+                <button class="secondary appearance-btn" id="prop-clippers" style="font-size: 6px; padding: 3px 6px;" onclick="app.selectAppearance('prop', 'clippers')">CLIPPERS</button>
+                <button class="secondary appearance-btn" id="prop-chain" style="font-size: 6px; padding: 3px 6px;" onclick="app.selectAppearance('prop', 'chain')">CHAIN</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Secret backstory picker -->
+          <div style="margin-bottom: 8px;">
+            <label style="font-weight:600; display:block; margin-bottom:2px; font-size:7px; font-family:'Press Start 2P', monospace;">SECRET / BACKSTORY</label>
+            <select id="characterSecretSelect" style="width:100%; font-size:8px; padding:2px;">
+              <option value="">[ Choose one starting secret ]</option>
+              <option value="police_scanner">Stolen police scanner buzzing with codes (Street)</option>
+              <option value="security_warning">Cousin's neighborhood security warning (Family)</option>
+              <option value="pastor_program">Sunday service program signed by the pastor (Church)</option>
+              <option value="bodega_ledger">Bodega ledger with names you shouldn't know (Food)</option>
+              <option value="panther_uncle">Uncle claiming he used to run with the Panthers (Humor)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top: 1px solid #2d313d; padding-top: 6px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <canvas id="setup-character-preview" width="32" height="32" style="width:48px; height:48px; border:2px solid #474d5e; background:#101116; image-rendering:pixelated;"></canvas>
+            <span class="muted" style="line-height:1.2; font-size: 8px;">Watch character preview bob!</span>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="secondary" style="font-size: 6px; padding: 4px;" onclick="app.showDeckBuilder()">🗂️ DECK</button>
+            <button class="secondary" style="font-size: 6px; padding: 4px;" onclick="app.showBoosterShop()">📦 SHOP</button>
+          </div>
+        </div>
       </div>
     </div>
-    
+
+    <!-- Hidden Backing Select for legacy bindings -->
+    <select id="characterOriginSelect" style="display: none;">
+      <option value="BARBER">MASTER BARBER</option>
+      <option value="STREET_SCHOLAR">STREET SCHOLAR</option>
+      <option value="LOCAL_LEGEND">LOCAL LEGEND</option>
+      <option value="CORNER_MERCHANT">CORNER MERCHANT</option>
+      <option value="COMMUNITY_ORGANIZER">COMMUNITY ORGANIZER</option>
+      <option value="UNDERGROUND_DJ">UNDERGROUND DJ</option>
+      <option value="BLOCK_ARCHITECT">BLOCK ARCHITECT</option>
+      <option value="HUSTLE_VETERAN">HUSTLE VETERAN</option>
+    </select>
+
+    <!-- Bottom Confirmation Bar -->
+    <div class="panel" style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 12px;">
+      <button class="secondary" style="font-family:'Press Start 2P', monospace; font-size: 7px;" onclick="app.showReviewModal()">[ REVIEW ]</button>
+      <button class="primary" style="font-family:'Press Start 2P', monospace; font-size: 8px; background: #ffcd68; border-color: #ffcd68; color: #101116;" onclick="app.confirmCharacter()">[ CONFIRM ]</button>
+      <button class="secondary" style="font-family:'Press Start 2P', monospace; font-size: 7px;" onclick="app.randomizeCharacter()">[ RANDOMIZE ]</button>
+    </div>
+
+    <!-- Review Modal Overlay -->
+    <div id="reviewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(16, 17, 22, 0.9); z-index:10000; align-items:center; justify-content:center;">
+      <div class="panel" style="width:400px; border:3px solid #ffcd68; background:#101116; padding:16px; text-align:left; box-shadow:0 0 16px rgba(0,0,0,0.8);">
+        <h2 style="margin-top:0; color:#ffcd68; font-family:'Press Start 2P', monospace; font-size:10px;">CHARACTER DOSSIER</h2>
+        <div id="reviewContent" style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; line-height:1.5; margin-bottom:16px;">
+          <!-- Populated in JS -->
+        </div>
+        <button class="secondary" onclick="document.getElementById('reviewModal').style.display='none'" style="width:100%; font-family:'Press Start 2P', monospace; font-size:8px;">CLOSE</button>
+      </div>
+    </div>
+
+    <!-- Confirm / Journey Select Modal Overlay -->
+    <div id="journeyModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(16, 17, 22, 0.95); z-index:10000; align-items:center; justify-content:center;">
+      <div class="panel" style="width:420px; border:3px solid #ffcd68; background:#101116; padding:16px; text-align:center; box-shadow:0 0 16px rgba(0,0,0,0.8);">
+        <h2 style="margin-top:0; color:#ffcd68; font-family:'Press Start 2P', monospace; font-size:10px; margin-bottom:12px;">CHOOSE YOUR JOURNEY</h2>
+        <p style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; margin-bottom:16px; text-align:left;">Your character is locked in. Select a game mode to begin.</p>
+        
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
+          <button onclick="app.startJourneyLocal()" style="font-family:'Press Start 2P', monospace; font-size:8px; background:#d9382e; border-color:#d9382e; color:#ffffff; padding:8px;">PLAY LOCAL (PASS & PLAY)</button>
+          <button onclick="app.startJourneyOnline()" style="font-family:'Press Start 2P', monospace; font-size:8px; background:#c9822b; border-color:#c9822b; color:#ffffff; padding:8px;">ONLINE MULTIPLAYER</button>
+          <button onclick="app.startJourneyCampaign()" style="font-family:'Press Start 2P', monospace; font-size:8px; background:#339488; border-color:#339488; color:#ffffff; padding:8px;">STORY CAMPAIGN (NOIR PROTOTYPE)</button>
+        </div>
+        
+        <div style="border-top:1px solid #2d313d; padding-top:10px; text-align:left;">
+          <div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#ffcd68; margin-bottom:8px;">SANDBOX MINI-GAMES</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+            <button class="secondary" style="font-size:7px; padding:4px;" onclick="app.startJourneySandbox('street_dice')">STREET DICE</button>
+            <button class="secondary" style="font-size:7px; padding:4px;" onclick="app.startJourneySandbox('bodega_run')">BODEGA RUN</button>
+            <button class="secondary" style="font-size:7px; padding:4px;" onclick="app.startJourneySandbox('haircut')">HAIRCUT</button>
+            <button class="secondary" style="font-size:7px; padding:4px;" onclick="app.startJourneySandbox('lockpick')">LOCKPICKING</button>
+            <button class="secondary" style="font-size:7px; padding:4px;" onclick="app.startJourneySandbox('negotiate')">NEGOTIATION</button>
+          </div>
+        </div>
+        
+        <button class="secondary" onclick="document.getElementById('journeyModal').style.display='none'" style="width:100%; font-family:'Press Start 2P', monospace; font-size:8px; margin-top:12px;">BACK TO CREATION</button>
+      </div>
+    </div>
+
+    <!-- Hidden Backing Div for Campaign List acts to avoid ReferenceErrors during init -->
+    <div id="campaignActList" style="display: none;"></div>
+    <div id="campaignActDetails" style="display: none;"></div>
+
     <!-- Glossary HUD Block at bottom of setup screen -->
     <div class="panel" style="margin-top:16px;">
-      <h2 style="margin-top:0; color:#339488;">BLOCK LEXICON HUD</h2>
-      <p class="muted" style="margin-top:0; margin-bottom:10px;">Search definitions and cultural origins of terminology used in the game.</p>
+      <h2 style="margin-top:0; color:#339488; font-family:'Press Start 2P', monospace; font-size:10px;">BLOCK LEXICON HUD</h2>
+      <p class="muted" style="margin-top:0; margin-bottom:10px; font-size:9px;">Search definitions and cultural origins of terminology used in the game.</p>
       <input id="lexiconSearchBox" type="text" placeholder="Search dictionary terms (e.g. Cookout, Receipts, O.G.)..." />
       <div id="lexiconResults" class="lexicon-grid" style="margin-top:10px;"></div>
     </div>
@@ -1214,6 +1320,7 @@ class Game {
     this.players.push({
       name, hand: [], points: 0,
       stats: { streetCred: 0, reputation: 0 },
+      attributes: { str: 0, wit: 0, soul: 0 },
       receipts: []
     });
   }
@@ -1704,7 +1811,205 @@ const app = {
     this.renderSetupGlossary();
     this.renderCharacterPreview();
     this.startGlobalAnimationLoop();
+    this.initCharacterCreation();
     this.initAccessibility();
+  },
+
+  /* ---------- CHARACTER CREATION & ATTRIBUTES ---------- */
+  appearance: { hair: '', fit: '', prop: '' },
+
+  initCharacterCreation() {
+    this.renderOriginCards();
+    this.selectOriginCard('BARBER');
+  },
+
+  renderOriginCards() {
+    const container = document.getElementById('originCardsContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    Object.keys(CHARACTER_ORIGINS).forEach(key => {
+      const origin = CHARACTER_ORIGINS[key];
+      const card = document.createElement('div');
+      card.className = 'origin-card';
+      card.id = `origin-card-${key}`;
+      card.style.cssText = 'border:2px solid #2d313d; background:#101116; padding:8px; border-radius:4px; cursor:pointer; font-size:9px; text-align:left; transition: all 0.2s; position:relative;';
+      card.onclick = () => this.selectOriginCard(key);
+      
+      card.innerHTML = `
+        <div class="origin-card-title" style="font-weight:bold; color:#ffcd68; margin-bottom:4px; font-family:'Press Start 2P', monospace; font-size:7px;">${origin.name.toUpperCase()}</div>
+        <div style="color:#a0aac2; line-height:1.2; font-size:8px; margin-bottom:4px;">${origin.flavor}</div>
+      `;
+      container.appendChild(card);
+    });
+  },
+
+  selectOriginCard(key) {
+    document.querySelectorAll('.origin-card').forEach(c => {
+      c.style.borderColor = '#2d313d';
+      c.style.boxShadow = 'none';
+    });
+    const selectedCard = document.getElementById(`origin-card-${key}`);
+    if (selectedCard) {
+      selectedCard.style.borderColor = '#ffcd68';
+      selectedCard.style.boxShadow = '0 0 8px rgba(255, 205, 104, 0.4)';
+    }
+
+    const select = document.getElementById('characterOriginSelect');
+    if (select) {
+      select.value = key;
+      select.dispatchEvent(new Event('change'));
+    }
+
+    this.updateAttributeBars(key);
+  },
+
+  updateAttributeBars(originKey) {
+    const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
+    const attrs = origin.attributes || { str: 0, wit: 0, soul: 0 };
+    const cash = origin.startingStats.streetCred || 0;
+    
+    const drawBar = (val, max = 10) => {
+      const filled = '='.repeat(val);
+      const empty = ' '.repeat(Math.max(0, max - val));
+      return `[${filled}${empty}]`;
+    };
+    
+    document.getElementById('attrBarStr').textContent = drawBar(attrs.str);
+    document.getElementById('attrValStr').textContent = attrs.str;
+    
+    document.getElementById('attrBarWit').textContent = drawBar(attrs.wit);
+    document.getElementById('attrValWit').textContent = attrs.wit;
+    
+    document.getElementById('attrBarSoul').textContent = drawBar(attrs.soul);
+    document.getElementById('attrValSoul').textContent = attrs.soul;
+    
+    document.getElementById('attrBarCash').textContent = drawBar(cash);
+    document.getElementById('attrValCash').textContent = cash;
+  },
+
+  selectAppearance(category, value) {
+    this.appearance = this.appearance || { hair: '', fit: '', prop: '' };
+    this.appearance[category] = value;
+    
+    document.querySelectorAll(`.appearance-btn`).forEach(btn => {
+      if (btn.id.startsWith(`${category}-`)) {
+        btn.classList.add('secondary');
+        btn.style.borderColor = '';
+        btn.style.color = '';
+      }
+    });
+    
+    const btn = document.getElementById(`${category}-${value}`);
+    if (btn) {
+      btn.classList.remove('secondary');
+      btn.style.borderColor = '#ffcd68';
+      btn.style.color = '#ffcd68';
+    }
+  },
+
+  validateCharacter() {
+    const originKey = document.getElementById('characterOriginSelect').value;
+    const secret = document.getElementById('characterSecretSelect').value;
+    const hair = this.appearance ? this.appearance.hair : '';
+    const fit = this.appearance ? this.appearance.fit : '';
+    const prop = this.appearance ? this.appearance.prop : '';
+    
+    if (!originKey) return { success: false, msg: 'Please select a Character Origin.' };
+    if (!hair) return { success: false, msg: 'Please select a Hair Style.' };
+    if (!fit) return { success: false, msg: 'Please select a Fit Style.' };
+    if (!prop) return { success: false, msg: 'Please select a Prop.' };
+    if (!secret) return { success: false, msg: 'Please choose a starting Secret/Backstory.' };
+    
+    return { success: true };
+  },
+
+  showReviewModal() {
+    const originKey = document.getElementById('characterOriginSelect').value;
+    const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
+    const secret = document.getElementById('characterSecretSelect').value;
+    const hair = this.appearance ? this.appearance.hair : '[ None ]';
+    const fit = this.appearance ? this.appearance.fit : '[ None ]';
+    const prop = this.appearance ? this.appearance.prop : '[ None ]';
+    const name = document.getElementById('hostName').value.trim() || 'You';
+    
+    let secretText = '';
+    const secretSelect = document.getElementById('characterSecretSelect');
+    if (secretSelect && secretSelect.selectedIndex > 0) {
+      secretText = secretSelect.options[secretSelect.selectedIndex].text;
+    } else {
+      secretText = '[ None Chosen ]';
+    }
+    
+    const content = `
+      <strong>NAME:</strong> ${name.toUpperCase()}<br/>
+      <strong>ORIGIN:</strong> ${origin.name.toUpperCase()}<br/>
+      <strong>FLAVOR:</strong> "${origin.flavor}"<br/><br/>
+      <strong>ATTRIBUTES:</strong><br/>
+      - STR: ${origin.attributes.str} | WIT: ${origin.attributes.wit} | SOUL: ${origin.attributes.soul} | CASH: ${origin.startingStats.streetCred}<br/><br/>
+      <strong>COSMETICS:</strong><br/>
+      - HAIR: ${hair.toUpperCase()}<br/>
+      - FIT: ${fit.toUpperCase()}<br/>
+      - PROP: ${prop.toUpperCase()}<br/><br/>
+      <strong>BACKSTORY SECRET:</strong><br/>
+      ${secretText}
+    `;
+    
+    document.getElementById('reviewContent').innerHTML = content;
+    document.getElementById('reviewModal').style.display = 'flex';
+  },
+
+  confirmCharacter() {
+    const val = this.validateCharacter();
+    if (!val.success) {
+      alert(val.msg);
+      return;
+    }
+    document.getElementById('journeyModal').style.display = 'flex';
+  },
+
+  randomizeCharacter() {
+    const originKeys = Object.keys(CHARACTER_ORIGINS);
+    const randOrigin = originKeys[Math.floor(Math.random() * originKeys.length)];
+    this.selectOriginCard(randOrigin);
+
+    const hairStyles = ['fade', 'waves', 'bald'];
+    const fitStyles = ['slim', 'bulky', 'tight'];
+    const props = ['clippers', 'chain'];
+    
+    this.selectAppearance('hair', hairStyles[Math.floor(Math.random() * hairStyles.length)]);
+    this.selectAppearance('fit', fitStyles[Math.floor(Math.random() * fitStyles.length)]);
+    this.selectAppearance('prop', props[Math.floor(Math.random() * props.length)]);
+
+    const secretSelect = document.getElementById('characterSecretSelect');
+    if (secretSelect && secretSelect.options.length > 1) {
+      const idx = 1 + Math.floor(Math.random() * (secretSelect.options.length - 1));
+      secretSelect.selectedIndex = idx;
+    }
+  },
+
+  startJourneyLocal() {
+    document.getElementById('journeyModal').style.display = 'none';
+    this.startLocalGame();
+  },
+  
+  startJourneyOnline() {
+    document.getElementById('journeyModal').style.display = 'none';
+    this.openOnlineLobby();
+  },
+  
+  startJourneyCampaign() {
+    document.getElementById('journeyModal').style.display = 'none';
+    this.startNoirPrototype();
+  },
+  
+  startJourneySandbox(gameId) {
+    document.getElementById('journeyModal').style.display = 'none';
+    if (gameId === 'street_dice') this.startStreetDiceSandbox();
+    else if (gameId === 'bodega_run') this.startBodegaRunSandbox();
+    else if (gameId === 'haircut') this.startHaircutChallengeSandbox();
+    else if (gameId === 'lockpick') this.startLockpickingSandbox();
+    else if (gameId === 'negotiate') this.startNegotiationSandbox();
   },
 
   /* ---------- ACCESSIBILITY SYSTEMS ---------- */
@@ -2150,9 +2455,15 @@ const app = {
     const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
     this.game.players[0].stats.streetCred += origin.startingStats.streetCred;
     this.game.players[0].stats.reputation += origin.startingStats.reputation;
+    this.game.players[0].attributes = { ...origin.attributes };
     const origins = Object.keys(CHARACTER_ORIGINS);
     for (let i = 1; i < count; i++) {
-      this.game.players[i].origin = origins[i % origins.length];
+      const botOriginKey = origins[i % origins.length];
+      this.game.players[i].origin = botOriginKey;
+      const botOrigin = CHARACTER_ORIGINS[botOriginKey];
+      if (botOrigin) {
+        this.game.players[i].attributes = { ...botOrigin.attributes };
+      }
     }
     
     this.game.dealAll();
@@ -3704,7 +4015,7 @@ const app = {
     if (msg.type === 'joined') {
       this.game.players = msg.players.map(p => ({
         name: p.name, hand: [], points: p.points || 0,
-        stats: { streetCred: 0, reputation: 0 }, receipts: [],
+        stats: { streetCred: 0, reputation: 0 }, attributes: { str: 0, wit: 0, soul: 0 }, receipts: [],
         ready: !!p.ready
       }));
       this.humanIndex = this.game.players.findIndex(p => p.name === msg.playerName);
@@ -3713,6 +4024,7 @@ const app = {
         const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
         this.game.players[this.humanIndex].stats.streetCred += origin.startingStats.streetCred;
         this.game.players[this.humanIndex].stats.reputation += origin.startingStats.reputation;
+        this.game.players[this.humanIndex].attributes = { ...origin.attributes };
       }
       this.game.pointsToWin = msg.pointsToWin || 7;
       
@@ -3730,7 +4042,7 @@ const app = {
     if (msg.type === 'room_players') {
       this.game.players = msg.players.map(p => ({
         name: p.name, hand: [], points: p.points || 0,
-        stats: { streetCred: 0, reputation: 0 }, receipts: [],
+        stats: { streetCred: 0, reputation: 0 }, attributes: { str: 0, wit: 0, soul: 0 }, receipts: [],
         ready: !!p.ready
       }));
       const myName = document.getElementById('joinName').value.trim() || document.getElementById('hostName').value.trim() || 'Player';
@@ -3740,6 +4052,7 @@ const app = {
       const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
       this.game.players[this.humanIndex].stats.streetCred += origin.startingStats.streetCred;
       this.game.players[this.humanIndex].stats.reputation += origin.startingStats.reputation;
+      this.game.players[this.humanIndex].attributes = { ...origin.attributes };
 
       msg.players.forEach(p => {
         if (p.name !== myName) {
@@ -3932,6 +4245,17 @@ const app = {
     this.game.players[1].origin = 'BARBER';
     this.game.players[2].origin = 'LOCAL_LEGEND';
     this.game.players[3].origin = 'CORNER_MERCHANT';
+
+    const assignOriginAttrs = (player, originK) => {
+      const orig = CHARACTER_ORIGINS[originK];
+      if (orig) {
+        player.attributes = { ...orig.attributes };
+      }
+    };
+    assignOriginAttrs(this.game.players[0], originKey);
+    assignOriginAttrs(this.game.players[1], 'BARBER');
+    assignOriginAttrs(this.game.players[2], 'LOCAL_LEGEND');
+    assignOriginAttrs(this.game.players[3], 'CORNER_MERCHANT');
     
     this.humanIndex = 0;
     
@@ -3991,6 +4315,7 @@ const app = {
     const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
     this.game.players[0].stats.streetCred += origin.startingStats.streetCred;
     this.game.players[0].stats.reputation += origin.startingStats.reputation;
+    this.game.players[0].attributes = { ...origin.attributes };
     
     // Move canvas to game view and switch screen
     this.show('game');
@@ -4021,6 +4346,7 @@ const app = {
     const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
     this.game.players[0].stats.streetCred += origin.startingStats.streetCred;
     this.game.players[0].stats.reputation += origin.startingStats.reputation;
+    this.game.players[0].attributes = { ...origin.attributes };
     
     // Move canvas to game view and switch screen
     this.show('game');
@@ -4051,6 +4377,7 @@ const app = {
     const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
     this.game.players[0].stats.streetCred += origin.startingStats.streetCred;
     this.game.players[0].stats.reputation += origin.startingStats.reputation;
+    this.game.players[0].attributes = { ...origin.attributes };
     
     // Move canvas to game view and switch screen
     this.show('game');
@@ -4081,6 +4408,7 @@ const app = {
     const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
     this.game.players[0].stats.streetCred += origin.startingStats.streetCred;
     this.game.players[0].stats.reputation += origin.startingStats.reputation;
+    this.game.players[0].attributes = { ...origin.attributes };
     
     // Move canvas to game view and switch screen
     this.show('game');
@@ -4111,6 +4439,7 @@ const app = {
     const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
     this.game.players[0].stats.streetCred += origin.startingStats.streetCred;
     this.game.players[0].stats.reputation += origin.startingStats.reputation;
+    this.game.players[0].attributes = { ...origin.attributes };
     
     // Move canvas to game view and switch screen
     this.show('game');

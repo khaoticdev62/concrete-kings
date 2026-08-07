@@ -14,7 +14,8 @@ const CHARACTER_ORIGINS = {
     apronColor: '#f4f7ff', // Crisp White Apron
     pantsColor: '#274f80', // Slate Denim (#274F80)
     flavor: "Everybody's business runs through your chair. You hear it first, you know it best.",
-    startingStats: { streetCred: 0, reputation: 2 }
+    startingStats: { streetCred: 0, reputation: 2 },
+    attributes: { str: 4, wit: 7, soul: 7 }
   },
   STREET_SCHOLAR: {
     id: 'STREET_SCHOLAR',
@@ -25,7 +26,8 @@ const CHARACTER_ORIGINS = {
     apronColor: null,
     pantsColor: '#181920', // Dark Charcoal
     flavor: "Books over corners, but you still know every angle the block's got.",
-    startingStats: { streetCred: 1, reputation: 0 }
+    startingStats: { streetCred: 1, reputation: 0 },
+    attributes: { str: 3, wit: 8, soul: 4 }
   },
   LOCAL_LEGEND: {
     id: 'LOCAL_LEGEND',
@@ -36,7 +38,8 @@ const CHARACTER_ORIGINS = {
     apronColor: null,
     pantsColor: '#101116',
     flavor: "They wrote songs about you. Reputation walks in the room before you do.",
-    startingStats: { streetCred: 0, reputation: 2 }
+    startingStats: { streetCred: 0, reputation: 2 },
+    attributes: { str: 6, wit: 3, soul: 8 }
   },
   CORNER_MERCHANT: {
     id: 'CORNER_MERCHANT',
@@ -47,7 +50,8 @@ const CHARACTER_ORIGINS = {
     apronColor: null,
     pantsColor: '#474d5e',
     flavor: "Bodega counter's your throne. You see everything, you say nothing — for now.",
-    startingStats: { streetCred: 2, reputation: 0 }
+    startingStats: { streetCred: 2, reputation: 0 },
+    attributes: { str: 4, wit: 7, soul: 5 }
   },
   COMMUNITY_ORGANIZER: {
     id: 'COMMUNITY_ORGANIZER',
@@ -58,7 +62,8 @@ const CHARACTER_ORIGINS = {
     apronColor: null,
     pantsColor: '#22252e',
     flavor: "You rally the block before the block even knows it needs rallying.",
-    startingStats: { streetCred: 0, reputation: 2 }
+    startingStats: { streetCred: 0, reputation: 2 },
+    attributes: { str: 3, wit: 6, soul: 8 }
   },
   UNDERGROUND_DJ: {
     id: 'UNDERGROUND_DJ',
@@ -69,7 +74,8 @@ const CHARACTER_ORIGINS = {
     apronColor: null,
     pantsColor: '#101116',
     flavor: "You keep the party alive till sunrise. Nobody forgets who kept it moving.",
-    startingStats: { streetCred: 1, reputation: 1 }
+    startingStats: { streetCred: 1, reputation: 1 },
+    attributes: { str: 4, wit: 5, soul: 6 }
   },
   BLOCK_ARCHITECT: {
     id: 'BLOCK_ARCHITECT',
@@ -80,7 +86,8 @@ const CHARACTER_ORIGINS = {
     apronColor: null,
     pantsColor: '#274f80',
     flavor: "Still earning your stripes — building trust takes longer than building blueprints.",
-    startingStats: { streetCred: 1, reputation: -1 }
+    startingStats: { streetCred: 1, reputation: -1 },
+    attributes: { str: 7, wit: 6, soul: 3 }
   },
   HUSTLE_VETERAN: {
     id: 'HUSTLE_VETERAN',
@@ -91,7 +98,8 @@ const CHARACTER_ORIGINS = {
     apronColor: null,
     pantsColor: '#174540',
     flavor: "Old scars, older respect. You've been out here longer than most been alive.",
-    startingStats: { streetCred: 2, reputation: 1 }
+    startingStats: { streetCred: 2, reputation: 1 },
+    attributes: { str: 8, wit: 4, soul: 5 }
   }
 };
 

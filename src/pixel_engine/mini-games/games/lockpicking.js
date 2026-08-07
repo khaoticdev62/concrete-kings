@@ -90,6 +90,9 @@ class Lockpicking extends LockpickingBaseClass {
       this.durationSeconds = 30;
     }
     
+    // Apply STR bonus to tolerance
+    this.tolerance += Math.floor(((this.gameState && this.gameState.str) || 0) / 2);
+    
     this.setupPins();
   }
 

@@ -278,8 +278,8 @@ class Negotiation extends NegotiationBaseClass {
     if (this.gameState) {
       if (opt.type === 'LOGIC' && this.gameState.wit) {
         checkBonus = Math.floor(this.gameState.wit * 2.5);
-      } else if (opt.type === 'CHARM' && this.gameState.reputation) {
-        checkBonus = Math.floor(this.gameState.reputation * 1.5);
+      } else if (opt.type === 'CHARM' && ((this.gameState.reputation || 0) + (this.gameState.soul || 0) > 0)) {
+        checkBonus = Math.floor(((this.gameState.reputation || 0) + (this.gameState.soul || 0)) * 1.5);
       }
     }
 

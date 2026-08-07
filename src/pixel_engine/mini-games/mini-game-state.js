@@ -140,9 +140,13 @@ class MiniGameState {
     this.trust = {};
     this.cash = 0;
     this.reputation = 0;
+    this.wit = 0;
+    this.soul = 0;
+    this.str = 0;
     this.secrets = [];
     this.inventory = [];
     this.history = [];
+    this.origin = '';
   }
 
   /**
@@ -155,9 +159,17 @@ class MiniGameState {
       // Sync flat storyEngine trust
       this.trust['general'] = storyEngine.trust || 0;
     }
-    if (player && player.stats) {
-      this.cash = player.stats.streetCred || 0;
-      this.reputation = player.stats.reputation || 0;
+    if (player) {
+      if (player.stats) {
+        this.cash = player.stats.streetCred || 0;
+        this.reputation = player.stats.reputation || 0;
+      }
+      if (player.attributes) {
+        this.wit = player.attributes.wit || 0;
+        this.soul = player.attributes.soul || 0;
+        this.str = player.attributes.str || 0;
+      }
+      this.origin = player.origin || '';
     }
   }
 }

@@ -49,21 +49,7 @@ class StreetDice extends StreetDiceBaseClass {
     this.dc = params.dc || 12;
 
     // Retrieve WIT stat from player origin if available
-    const originKey = (this.gameState && this.gameState.origin) || '';
-    const witMap = {
-      'BARBER': 7,
-      'STREET_SCHOLAR': 8,
-      'LOCAL_LEGEND': 3,
-      'CORNER_MERCHANT': 7,
-      'COMMUNITY_ORGANIZER': 6,
-      'UNDERGROUND_DJ': 5,
-      'BLOCK_ARCHITECT': 6,
-      'HUSTLE_VETERAN': 4
-    };
-    
-    if (witMap[originKey]) {
-      this.witModifier = witMap[originKey];
-    }
+    this.witModifier = (this.gameState && this.gameState.wit) || 0;
   }
 
   start() {
