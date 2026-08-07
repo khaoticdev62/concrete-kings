@@ -1149,17 +1149,64 @@
 
   <!-- BLOCK MAP -->
   <section id="blockMap" class="screen">
-    <div class="panel">
+    <div class="panel" style="position:relative;">
       <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px;">
-        <h2>BLOCK TRAVEL MAP</h2>
+        <h2>CITY / BLOCK OVERWORLD MAP</h2>
         <span class="status-pill">Reputation: <b id="mapRep" style="color:#ffcd68;">0</b> · Weather: <b id="mapWeather" style="color:#ff7a45;">CLEAR</b></span>
       </div>
-      <p class="muted">Walk to your new block location. Traveling resets the block weather to Clear.</p>
+      <p class="muted" style="margin-top:0; margin-bottom:12px;">Use Fast Travel or click a cleared block tile to navigate. Active heat prevents fast travel.</p>
       
-      <!-- Canvas moves here when screen is active -->
-      <div class="canvas-mount-point crt-screen" style="margin-bottom:12px;"></div>
+      <div style="display:flex; gap:16px; align-items:stretch; flex-wrap:wrap;">
+        <!-- Left: Quest Filter + Legend Side Panel -->
+        <div class="panel" style="flex:0 0 240px; display:flex; flex-direction:column; justify-content:space-between; background:#101116; border:2px solid #2d313d; padding:12px; min-width:200px;">
+          <div>
+            <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68; border-bottom:1px solid #2d313d; padding-bottom:6px;">QUEST FILTER</h3>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <button class="secondary" id="qFilterAll" onclick="app.setQuestFilter('ALL')" style="font-size:8px; width:100%; text-align:left;">[ ALL QUESTS ]</button>
+              <button class="secondary" id="qFilterActive" onclick="app.setQuestFilter('ACTIVE')" style="font-size:8px; width:100%; text-align:left;">* [ ACTIVE ]</button>
+              <button class="secondary" id="qFilterHidden" onclick="app.setQuestFilter('HIDDEN')" style="font-size:8px; width:100%; text-align:left;">? [ HIDDEN ]</button>
+              <button class="secondary" id="qFilterUrgent" onclick="app.setQuestFilter('URGENT')" style="font-size:8px; width:100%; text-align:left;">! [ URGENT ]</button>
+            </div>
+          </div>
+          
+          <div style="margin-top:16px; border-top:1px dashed #2d313d; padding-top:10px;">
+            <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68;">LEGEND</h3>
+            <div style="font-family:'JetBrains Mono', monospace; font-size:10px; color:#cbd5ed; line-height:1.4;">
+              <b>@</b> : Player Position<br/>
+              <b>R, J, M, K</b> : NPCs<br/>
+              <b>*</b> : Active Quest<br/>
+              <b>?</b> : Hidden Quest<br/>
+              <b>!</b> : Urgent Quest<br/>
+              <b>#</b> : Fog / Unexplored
+            </div>
+          </div>
+        </div>
+        
+        <!-- Center: Grid Canvas View -->
+        <div style="flex:1; display:flex; flex-direction:column; position:relative; min-width:320px;">
+          <div class="crt-screen" style="border:3px solid #ffcd68; background:#08080a;">
+            <canvas id="strategicMapCanvas" width="640" height="352" class="pixel-canvas" style="width:100%; height:auto; display:block; image-rendering:pixelated;"></canvas>
+          </div>
+          <div style="margin-top:8px; display:flex; gap:8px; justify-content:space-between; align-items:center;">
+            <div style="font-size:9px; font-family:'Press Start 2P', monospace; color:#cbd5ed;">
+              COORDS: <span id="mapCoords" style="color:#ffcd68;">(0, 0)</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="secondary" onclick="app.zoomMap(1.2)" style="font-size:8px; padding:4px 8px;">ZOOM IN</button>
+              <button class="secondary" onclick="app.zoomMap(0.8)" style="font-size:8px; padding:4px 8px;">ZOOM OUT</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Fast Travel List Panel -->
+        <div class="panel" style="flex:0 0 280px; display:flex; flex-direction:column; background:#101116; border:2px solid #2d313d; padding:12px; min-width:240px;">
+          <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68; border-bottom:1px solid #2d313d; padding-bottom:6px;">FAST TRAVEL</h3>
+          <div id="locationList" style="flex:1; display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto;">
+            <!-- Rendered in JS -->
+          </div>
+        </div>
+      </div>
       
-      <div id="locationList" style="margin-top:12px; display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:10px;"></div>
       <div style="margin-top:16px; display:flex; gap:10px;">
         <button class="secondary" onclick="app.showGame()">BACK TO TABLE</button>
         <button onclick="app.showSetup()">EXIT TO MENU</button>
@@ -5063,10 +5110,171 @@ const app = {
   },
 
   /* ---------- BLOCK MAP ---------- */
-  showBlockMap() {
-    this.renderBlockMap();
-    this.show('blockMap');
+  /* ---------- BLOCK MAP ---------- */
+  locationHeat: {
+    'Harlem': 0,
+    'Detroit': 3,
+    'Chicago': 0,
+    'Miami': 2,
+    'Baltimore': 0,
+    'Atlanta': 1,
+    'Oakland': 0,
+    'NOLA': 0
   },
+  activeQuestFilter: 'ALL',
+  mapScale: 1.0,
+
+  isLocationFastTravelable(city) {
+    if (!this.locationHeat) return true;
+    return this.locationHeat[city] === 0;
+  },
+
+  shouldRenderQuestSymbol(symbol) {
+    if (this.activeQuestFilter === 'ALL') return true;
+    if (this.activeQuestFilter === 'ACTIVE' && symbol === '*') return true;
+    if (this.activeQuestFilter === 'HIDDEN' && symbol === '?') return true;
+    if (this.activeQuestFilter === 'URGENT' && symbol === '!') return true;
+    return false;
+  },
+
+  setQuestFilter(filter) {
+    this.activeQuestFilter = filter;
+    
+    ['All', 'Active', 'Hidden', 'Urgent'].forEach(f => {
+      const el = document.getElementById('qFilter' + f);
+      if (el) {
+        if (f.toUpperCase() === filter) {
+          el.style.borderColor = '#ffcd68';
+          el.style.color = '#ffcd68';
+        } else {
+          el.style.borderColor = '';
+          el.style.color = '';
+        }
+      }
+    });
+
+    this.renderStrategicMap();
+  },
+
+  zoomMap(scale) {
+    this.mapScale = Math.max(0.5, Math.min(2.0, this.mapScale * scale));
+    this.renderStrategicMap();
+  },
+
+  showBlockMap() {
+    this.show('blockMap');
+    this.renderBlockMap();
+    this.renderStrategicMap();
+  },
+
+  renderStrategicMap() {
+    const canvas = document.getElementById('strategicMapCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.fillStyle = '#08080a';
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.save();
+    ctx.translate(w/2, h/2);
+    ctx.scale(this.mapScale, this.mapScale);
+    ctx.translate(-w/2, -h/2);
+
+    const cols = 20;
+    const rows = 11;
+    const cellSize = 32;
+
+    ctx.fillStyle = '#1c2030';
+    ctx.fillRect(0, 5 * cellSize, cols * cellSize, cellSize);
+    ctx.fillRect(10 * cellSize, 0, cellSize, rows * cellSize);
+
+    ctx.strokeStyle = '#2d313d';
+    ctx.lineWidth = 1;
+    for (let c = 0; c <= cols; c++) {
+      ctx.beginPath();
+      ctx.moveTo(c * cellSize, 0);
+      ctx.lineTo(c * cellSize, rows * cellSize);
+      ctx.stroke();
+    }
+    for (let r = 0; r <= rows; r++) {
+      ctx.beginPath();
+      ctx.moveTo(0, r * cellSize);
+      ctx.lineTo(cols * cellSize, r * cellSize);
+      ctx.stroke();
+    }
+
+    canvas.onmousemove = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor((e.clientX - rect.left) / (rect.width / cols));
+      const y = Math.floor((e.clientY - rect.top) / (rect.height / rows));
+      const coords = document.getElementById('mapCoords');
+      if (coords) coords.textContent = `(${x}, ${y})`;
+    };
+
+    ctx.fillStyle = '#101116';
+    for (let c = 0; c < cols; c++) {
+      for (let r = 0; r < rows; r++) {
+        if (r !== 5 && c !== 10) {
+          ctx.fillRect(c * cellSize + 2, r * cellSize + 2, cellSize - 4, cellSize - 4);
+          if ((c+r) % 5 === 0) {
+            ctx.fillStyle = '#ffcd68';
+            ctx.fillRect(c * cellSize + 8, r * cellSize + 8, 4, 4);
+            ctx.fillRect(c * cellSize + 20, r * cellSize + 8, 4, 4);
+            ctx.fillStyle = '#101116';
+          }
+        }
+      }
+    }
+
+    const px = 10;
+    const py = 5;
+
+    ctx.font = "14px 'Press Start 2P', monospace";
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    for (let c = 0; c < cols; c++) {
+      for (let r = 0; r < rows; r++) {
+        const dist = Math.abs(c - px) + Math.abs(r - py);
+        const isLandmark = (c === 4 && r === 3) || (c === 16 && r === 3) || (c === 16 && r === 8) || (c === 4 && r === 8);
+        if (dist > 6 && !isLandmark) {
+          ctx.fillStyle = '#22252e';
+          ctx.fillText('#', c * cellSize + cellSize/2, r * cellSize + cellSize/2);
+        }
+      }
+    }
+
+    ctx.font = "16px 'Press Start 2P', monospace";
+    if (this.shouldRenderQuestSymbol('*')) {
+      ctx.fillStyle = '#ffcd68';
+      ctx.fillText('*', 4 * cellSize + cellSize/2, 3 * cellSize + cellSize/2 - 6);
+    }
+    if (this.shouldRenderQuestSymbol('?')) {
+      ctx.fillStyle = '#8b95ab';
+      ctx.fillText('?', 16 * cellSize + cellSize/2, 3 * cellSize + cellSize/2 - 6);
+    }
+    if (this.shouldRenderQuestSymbol('!')) {
+      ctx.fillStyle = '#f25438';
+      ctx.fillText('!', 16 * cellSize + cellSize/2, 8 * cellSize + cellSize/2 - 6);
+    }
+
+    ctx.fillStyle = '#47e589';
+    ctx.fillText('R', 4 * cellSize + cellSize/2, 3 * cellSize + cellSize/2 + 8);
+    ctx.fillText('J', 16 * cellSize + cellSize/2, 3 * cellSize + cellSize/2 + 8);
+    ctx.fillText('K', 4 * cellSize + cellSize/2, 8 * cellSize + cellSize/2 + 8);
+    
+    ctx.fillStyle = '#f25438';
+    ctx.fillText('M', 16 * cellSize + cellSize/2, 8 * cellSize + cellSize/2 + 8);
+
+    ctx.fillStyle = '#ffcd68';
+    ctx.fillText('@', px * cellSize + cellSize/2, py * cellSize + cellSize/2);
+
+    ctx.restore();
+  },
+
   renderBlockMap() {
     const list = document.getElementById('locationList');
     const rep = document.getElementById('mapRep');
@@ -5087,25 +5295,57 @@ const app = {
     if (rep) rep.textContent = reputation;
     if (weather) weather.textContent = this.game.weatherMode || 'CLEAR';
     list.innerHTML = '';
+    
     locations.forEach(loc => {
+      const container = document.createElement('div');
+      container.style.display = 'flex';
+      container.style.flexDirection = 'column';
+      container.style.gap = '2px';
+      
       const btn = document.createElement('button');
-      btn.className = 'secondary';
+      btn.style.fontSize = '8px';
+      btn.style.width = '100%';
+      btn.style.padding = '8px 4px';
       btn.textContent = loc.name;
-      btn.onclick = () => {
-        this.setWeather('CLEAR');
-        this.game.activeCity = loc.city;
-        if (this.pixelEngine) {
-          this.pixelEngine.setCityTheme(loc.city);
-        }
-        if (this.audioEngine && this.audioEngine.isPlayingBGM) {
-          this.audioEngine.startBGM(loc.city);
-        }
-        alert('Traveled to ' + loc.name + ' (' + loc.city + '). Weather reset to Clear.');
-        this.show('game');
-        this.showPassDevice();
-        this.renderGame();
-      };
-      list.appendChild(btn);
+      
+      const travelable = this.isLocationFastTravelable(loc.city);
+      const heatVal = this.locationHeat[loc.city];
+      
+      const label = document.createElement('span');
+      label.style.fontSize = '7px';
+      label.style.fontFamily = "'Press Start 2P', monospace";
+      label.style.textAlign = 'center';
+      
+      if (travelable) {
+        btn.className = 'secondary';
+        label.style.color = '#47e589';
+        label.textContent = 'CLEAR';
+        
+        btn.onclick = () => {
+          this.setWeather('CLEAR');
+          this.game.activeCity = loc.city;
+          if (this.pixelEngine) {
+            this.pixelEngine.setCityTheme(loc.city);
+          }
+          if (this.audioEngine && this.audioEngine.isPlayingBGM) {
+            this.audioEngine.startBGM(loc.city);
+          }
+          alert('Traveled to ' + loc.name + ' (' + loc.city + '). Weather reset to Clear.');
+          this.show('game');
+          this.showPassDevice();
+          this.renderGame();
+        };
+      } else {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+        label.style.color = '#f25438';
+        label.textContent = `HEAT ${heatVal}`;
+      }
+      
+      container.appendChild(btn);
+      container.appendChild(label);
+      list.appendChild(container);
     });
   }
 };
