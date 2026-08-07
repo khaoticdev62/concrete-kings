@@ -38,6 +38,24 @@ test('Block Map Navigation: every origin has a flavor line and a starting stat b
   }
 });
 
+test('Block Map Navigation: every origin has STR/WIT/SOUL attributes', () => {
+  const expectedAttributes = {
+    BARBER: { str: 4, wit: 7, soul: 7 },
+    STREET_SCHOLAR: { str: 3, wit: 8, soul: 4 },
+    LOCAL_LEGEND: { str: 6, wit: 3, soul: 8 },
+    CORNER_MERCHANT: { str: 4, wit: 7, soul: 5 },
+    COMMUNITY_ORGANIZER: { str: 3, wit: 6, soul: 8 },
+    UNDERGROUND_DJ: { str: 4, wit: 5, soul: 6 },
+    BLOCK_ARCHITECT: { str: 7, wit: 6, soul: 3 },
+    HUSTLE_VETERAN: { str: 8, wit: 4, soul: 5 }
+  };
+  for (const [key, attrs] of Object.entries(expectedAttributes)) {
+    const origin = CHARACTER_ORIGINS[key];
+    assert.ok(origin, `expected origin ${key} to exist`);
+    assert.deepEqual(origin.attributes, attrs, `expected ${key} attributes to match design spec`);
+  }
+});
+
 test('Block Map Navigation: BlockMapController adheres to 4-frame animation budget and canvas bounds', () => {
   const controller = new BlockMapController({ startX: 300, startY: 500 });
   assert.equal(controller.x, 300);

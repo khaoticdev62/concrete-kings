@@ -62,7 +62,11 @@ class MockCanvasContext {
 
 test('Mini-Game State: correct loading from storyEngine and player stats', () => {
   const state = new MiniGameState();
-  
+
+  assert.equal(state.wit, 0);
+  assert.equal(state.soul, 0);
+  assert.equal(state.str, 0);
+
   const mockStoryEngine = {
     heat: 3,
     trust: 4,
@@ -73,6 +77,11 @@ test('Mini-Game State: correct loading from storyEngine and player stats', () =>
     stats: {
       streetCred: 100,
       reputation: 5
+    },
+    attributes: {
+      str: 6,
+      wit: 8,
+      soul: 3
     }
   };
 
@@ -83,6 +92,9 @@ test('Mini-Game State: correct loading from storyEngine and player stats', () =>
   assert.deepEqual(state.secrets, ['secret_stash']);
   assert.equal(state.cash, 100);
   assert.equal(state.reputation, 5);
+  assert.equal(state.wit, 8);
+  assert.equal(state.soul, 3);
+  assert.equal(state.str, 6);
 });
 
 test('Mini-Game State: standard Base MiniGame states and flow transitions', () => {
@@ -188,20 +200,20 @@ test('Street Dice: WIT modifier mapping and win/loss verification rules', () => 
   const ctx = canvas.getContext('2d');
   const state = new MiniGameState();
   
-  // Verify Barber WIT modifiers load correctly
-  state.origin = 'BARBER';
+  // Verify WIT modifier loads from the shared MiniGameState attribute
+  state.wit = 7; // e.g. Barber's WIT
   const game = new StreetDice(null, canvas, ctx, state);
   game.init({ stake: 50, dc: 12 });
 
-  assert.equal(game.witModifier, 7); // Barber has WIT 7
+  assert.equal(game.witModifier, 7);
   assert.equal(game.stake, 50);
   assert.equal(game.dc, 12);
 
-  // Verify Scholar WIT modifiers load correctly
-  state.origin = 'STREET_SCHOLAR';
+  // Verify a different WIT value loads correctly
+  state.wit = 8; // e.g. Street Scholar's WIT
   const game2 = new StreetDice(null, canvas, ctx, state);
   game2.init({});
-  assert.equal(game2.witModifier, 8); // Scholar has WIT 8
+  assert.equal(game2.witModifier, 8);
 
   // Verify Roll win/loss criteria
   game.start();
@@ -549,6 +561,23 @@ test('Lockpicking: setup, difficulty parameters mapping and pick navigation', ()
   assert.equal(game.selectedPinIdx, 0);
 });
 
+test('Lockpicking: STR attribute widens the pin-alignment tolerance', () => {
+  const canvas = new MockCanvas();
+  const ctx = canvas.getContext('2d');
+
+  const state = new MiniGameState();
+  state.str = 8;
+
+  const game = new Lockpicking(null, canvas, ctx, state);
+  game.init({ difficulty: 'hard' }); // base tolerance 10
+  assert.equal(game.tolerance, 14); // 10 + floor(8/2) = 14
+
+  const stateNoStr = new MiniGameState();
+  const gameNoStr = new Lockpicking(null, canvas, ctx, stateNoStr);
+  gameNoStr.init({ difficulty: 'hard' });
+  assert.equal(gameNoStr.tolerance, 10); // str defaults to 0, no change
+});
+
 test('Lockpicking: pin lifting, torque decay, and alignment click success', () => {
   const canvas = new MockCanvas();
   const ctx = canvas.getContext('2d');
@@ -703,6 +732,27 @@ test('Negotiation: weakness matching damage, stat bonuses, and rounds advancemen
   gameAdvance.executeArgument();
   assert.equal(gameAdvance.resistance, 80);
   assert.equal(gameAdvance.currentRound, 1, 'Should advance to Round 1 after argument selection');
+});
+
+test('Negotiation: SOUL attribute adds to the CHARM argument bonus alongside reputation', () => {
+  const canvas = new MockCanvas();
+  const ctx = canvas.getContext('2d');
+
+  const state = new MiniGameState();
+  state.reputation = 6;
+  state.soul = 4;
+
+  const game = new Negotiation(null, canvas, ctx, state);
+  game.start();
+
+  // Option 1 type: CHARM, damage: 25.
+  // Check bonus: (reputation + soul) * 1.5 = (6 + 4) * 1.5 = 15.
+  // Total base damage: 40.
+  // Weakness is LOGIC, so non-matching: 40 * 0.6 = 24.
+  // Resistance becomes 100 - 24 = 76
+  game.selectedOptionIdx = 1;
+  game.executeArgument();
+  assert.equal(game.resistance, 76);
 });
 
 test('Negotiation: failure outcomes on rounds exhaustion', () => {
