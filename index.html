@@ -3646,6 +3646,7 @@ const app = {
   },
 
   nextRound() {
+    this.clearResolutionAutoAdvance();
     if (this.storyEngine && this.storyEngine.active) {
       const beat = this.storyEngine.getCurrentBeat();
       
@@ -4604,6 +4605,7 @@ const app = {
   },
   
   endNarrativeGame() {
+    this.clearResolutionAutoAdvance();
     this.storyEngine = null;
     document.getElementById('narrativeTextBox').style.display = 'none';
     document.getElementById('stage-canvas').style.display = 'block';

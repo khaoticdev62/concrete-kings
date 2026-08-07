@@ -18,7 +18,28 @@ function loadGameModule() {
     throw new Error(`index.html: could not find test boundary marker "${BOUNDARY}.addEventListener"`);
   }
   const testable = script.slice(0, boundaryIndex);
-  const context = { console, Math };
+  const context = { 
+    console, 
+    Math,
+    document: typeof global.document !== 'undefined' ? global.document : undefined,
+    window: typeof global.window !== 'undefined' ? global.window : undefined,
+    setInterval: typeof global.setInterval !== 'undefined' ? global.setInterval : undefined,
+    clearInterval: typeof global.clearInterval !== 'undefined' ? global.clearInterval : undefined,
+    setTimeout: typeof global.setTimeout !== 'undefined' ? global.setTimeout : undefined,
+    clearTimeout: typeof global.clearTimeout !== 'undefined' ? global.clearTimeout : undefined,
+    Event: typeof global.Event !== 'undefined' ? global.Event : undefined
+  };
+  
+  // Keep VM context's globals dynamically linked to Node's global object in tests
+  Object.defineProperty(context, 'document', {
+    get() { return global.document; },
+    set(v) { global.document = v; }
+  });
+  Object.defineProperty(context, 'window', {
+    get() { return global.window; },
+    set(v) { global.window = v; }
+  });
+
   vm.createContext(context);
   const wrapped = `${cardsScript}\n${storyScript}\n${testable}\n({ Deck, Game, ReceiptSystem, AllianceSystem, RECEIPT_POOL, BLACK_CARDS, WHITE_CARDS, DICE_EFFECTS, app, NarrativeStoryEngine, NARRATIVE_BEATS, ENDINGS });`;
   return vm.runInContext(wrapped, context);
