@@ -201,9 +201,10 @@
     box-shadow: 5px 9px 0px #08080a;
   }
   .pixel-card-canvas.selected {
-    transform: translateY(2px);
-    box-shadow: 1px 1px 0px #08080a;
-    outline: 4px solid #f0ab43;
+    transform: scale(1.08);
+    box-shadow: 0 0 12px rgba(255, 205, 104, 0.6);
+    border: 2px solid #ffcd68;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
   
   .dice { display: inline-flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
@@ -899,6 +900,7 @@
                   <div id="playerLabel" class="muted" style="font-family:'Press Start 2P', monospace; font-size:9px;">Player: -</div>
                 </div>
                 <div id="hand" class="hand"></div>
+                <div id="handSelectionHint" style="font-size:9px; color:#ffcd68; margin-top:6px; min-height:12px;"></div>
               </div>
 
               <div id="alliancePrompt" style="display:none; margin-bottom:8px;">
@@ -1048,6 +1050,7 @@
         <span class="status-pill" id="judgeBadge">Judge: -</span>
       </div>
       <p class="muted" style="margin-top:0;">All submissions are in. Pick the winning card from the cipher below.</p>
+      <div id="judgingTimerDisplay" style="font-family:'Press Start 2P', monospace; font-size:14px; color:#ffcd68; text-align:center; margin-bottom:8px;"></div>
       
       <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; margin-top: 10px;">
         <!-- Black Card View -->
@@ -1092,6 +1095,7 @@
       </div>
       
       <div id="winnerMeta" style="font-size:12px; margin-bottom:14px; color:#a0aac2; display:none;"></div>
+      <div id="roundResultTimerDisplay" style="font-family:'Press Start 2P', monospace; font-size:12px; color:#ffcd68; text-align:center; margin-bottom:8px; display:none;"></div>
       <div style="margin-top:14px; display:flex; gap:10px; justify-content:center;">
         <button onclick="app.nextRound()">NEXT ROUND</button>
         <button class="secondary" onclick="app.showGame()">BACK TO TABLE</button>
@@ -1735,6 +1739,50 @@ const app = {
     }
   },
   showSetup() { this.show('setup'); },
+
+  showGame() { this.show('game'); },
+
+  startResolutionAutoAdvance() {
+    this.clearResolutionAutoAdvance();
+    const timerEl = document.getElementById('roundResultTimerDisplay');
+    if (timerEl) {
+      timerEl.style.display = 'block';
+      timerEl.textContent = 'AUTO: 05';
+    }
+
+    this.resolutionTimerHandle = setInterval(() => {
+      this.resolutionTimeLeft = (this.resolutionTimeLeft || 5) - 1;
+      const display = document.getElementById('roundResultTimerDisplay');
+      if (display) {
+        display.textContent = `AUTO: ${String(Math.max(0, this.resolutionTimeLeft)).padStart(2, '0')}`;
+      }
+
+      if ((this.resolutionTimeLeft || 0) <= 0) {
+        this.clearResolutionAutoAdvance();
+        const nextBtn = document.querySelector('#roundResult button');
+        if (nextBtn && typeof nextBtn.onclick === 'function') {
+          nextBtn.onclick();
+        } else if (nextBtn && nextBtn.getAttribute && nextBtn.getAttribute('onclick') === 'app.endNarrativeGame()') {
+          this.endNarrativeGame();
+        } else {
+          this.nextRound();
+        }
+      }
+    }, 1000);
+  },
+
+  clearResolutionAutoAdvance() {
+    if (this.resolutionTimerHandle) {
+      clearInterval(this.resolutionTimerHandle);
+      this.resolutionTimerHandle = null;
+    }
+    this.resolutionTimeLeft = null;
+    const timerEl = document.getElementById('roundResultTimerDisplay');
+    if (timerEl) {
+      timerEl.style.display = 'none';
+      timerEl.textContent = '';
+    }
+  },
 
   updateTopHud() {
     const strip = document.getElementById('topHudStrip');
@@ -3267,6 +3315,13 @@ const app = {
     
     this.updateCanvasCards();
     document.getElementById('submitBtn').disabled = this.game.selected.size === 0 || this.isJudge();
+
+    const hintEl = document.getElementById('handSelectionHint');
+    if (hintEl) {
+      hintEl.textContent = this.game.selected.size > 0
+        ? 'Selected — press SUBMIT to play, or click the card again to deselect.'
+        : '';
+    }
   },
 
   renderScoreboard() {
@@ -3443,6 +3498,41 @@ const app = {
       ${this.isJudge() ? '<b>Judge time.</b> Tap a submission to crown it.' : 'Judge is picking...'}<br/>
       <span class="muted">Weather: ${this.game.weatherMode}${this.game.currentAlliance ? ' | Alliance active' : ''}</span>
     `;
+
+    this.startJudgingCountdown();
+  },
+
+  startJudgingCountdown() {
+    this.clearJudgingCountdown();
+    this.judgingTimeLeft = 12;
+    const timerEl = document.getElementById('judgingTimerDisplay');
+    if (timerEl) {
+      timerEl.style.display = 'block';
+      timerEl.textContent = `00:${String(this.judgingTimeLeft).padStart(2, '0')}`;
+    }
+
+    this.judgingTimerHandle = setInterval(() => {
+      this.judgingTimeLeft--;
+      const el = document.getElementById('judgingTimerDisplay');
+      if (el) el.textContent = `00:${String(Math.max(0, this.judgingTimeLeft)).padStart(2, '0')}`;
+
+      if (this.judgingTimeLeft <= 0) {
+        this.clearJudgingCountdown();
+        if (this.game.submissions.length > 0) {
+          const randomIndex = Math.floor(Math.random() * this.game.submissions.length);
+          this.chooseWinner(randomIndex);
+        }
+      }
+    }, 1000);
+  },
+
+  clearJudgingCountdown() {
+    if (this.judgingTimerHandle) {
+      clearInterval(this.judgingTimerHandle);
+      this.judgingTimerHandle = null;
+    }
+    const timerEl = document.getElementById('judgingTimerDisplay');
+    if (timerEl) timerEl.style.display = 'none';
   },
 
   forceRedoSubmission(index) {
@@ -3473,6 +3563,7 @@ const app = {
   },
 
   chooseWinner(index) {
+    this.clearJudgingCountdown();
     if (this.storyEngine && this.storyEngine.active) {
       const win = this.game.submissions[index];
       const result = this.storyEngine.applyWinnerCard(win.card);
@@ -3508,6 +3599,7 @@ const app = {
         }
       }
       this.show('roundResult');
+      this.startResolutionAutoAdvance();
       return;
     }
 
@@ -3546,6 +3638,7 @@ const app = {
     
     this.show('roundResult');
     this.updateCanvasCards();
+    this.startResolutionAutoAdvance();
     
     if (winner.points >= this.game.pointsToWin) {
       setTimeout(() => this.endGame(winner), 1200);
