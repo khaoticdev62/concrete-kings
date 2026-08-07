@@ -4,6 +4,15 @@
  * Version: 1.0.0
  */
 
+// NOTE: these coordinates are authored in true native 1280x720 space. The
+// background art drawn via hdRect()/hdScaleX()/hdScaleY() in index.html
+// currently renders 1:1 into only the top-left 320x180 corner of that space
+// — a pre-existing, out-of-scope scale bug affecting roughly 35 hdRect call
+// sites, not something introduced by this module. Until that bug is fixed,
+// these light pools sit over background art that isn't actually positioned
+// there on screen. Do not re-author these positions to visually match the
+// current (buggy) 320x180 rendering — they are correct for the intended
+// native-resolution background, and matching them to the bug would lock it in.
 const STREETLAMP_POSITIONS = {
   Harlem:    [{ x: 160, y: 520 }, { x: 1120, y: 520 }],
   Chicago:   [{ x: 140, y: 500 }, { x: 900, y: 500 }, { x: 1150, y: 500 }],
@@ -70,7 +79,8 @@ function generateLightmapCanvas(W, H, city, heat) {
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d", { willReadFrequently: false });
+  ctx.imageSmoothingEnabled = false;
   renderLightmap(ctx, W, H, city, heat);
   return canvas;
 }

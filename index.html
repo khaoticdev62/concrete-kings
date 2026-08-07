@@ -1446,17 +1446,11 @@ function drawSkyAndFarLayer(ctx, city, frame) {
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-  if (city === 'Chicago' || city === 'Oakland') {
-    ctx.fillStyle = '#8b95ab';
-    ctx.fillRect(...hdRect(ctx, 40 + (frame % 4) * 2, 15, 20, 2));
-    ctx.fillRect(...hdRect(ctx, 180 - (frame % 4) * 2, 25, 30, 2));
-  } else {
-    ctx.fillStyle = '#f4f7ff';
-    [[30,10],[110,20],[220,12],[280,25]].forEach(([x,y]) => {
-      const r = hdRect(ctx, x, y, 1, 1);
-      ctx.fillRect(r[0], r[1], r[2], r[3]);
-    });
-  }
+  ctx.fillStyle = '#f4f7ff';
+  [[30,10],[110,20],[220,12],[280,25]].forEach(([x,y]) => {
+    const r = hdRect(ctx, x, y, 1, 1);
+    ctx.fillRect(r[0], r[1], r[2], r[3]);
+  });
 
   ctx.fillStyle = '#1c375c';
   if (city === 'Detroit') {
@@ -1484,6 +1478,34 @@ function drawSkyAndFarLayer(ctx, city, frame) {
     ctx.fillRect(...hdRect(ctx, 220, 45, 60, 15));
   }
 
+  ctx.fillStyle = trimColor;
+  ctx.fillRect(...hdRect(ctx, 0, 120, 320, 20));
+
+  ctx.fillStyle = '#2d313d';
+  for (let sx = 0; sx < 320; sx += 40) {
+    ctx.fillRect(...hdRect(ctx, sx, 120, 1, 20));
+  }
+
+  ctx.fillStyle = '#101116';
+  ctx.fillRect(...hdRect(ctx, 0, 140, 320, 40));
+
+  ctx.fillStyle = '#ffcd68';
+  for (let rx = 10; rx < 320; rx += 40) {
+    ctx.fillRect(...hdRect(ctx, rx, 158, 20, 4));
+  }
+}
+
+function drawNearLayer(ctx, city, frame) {
+  const colorMap = CITY_THEME_OVERRIDES[city] || {};
+  const brickColor = colorMap["7a1d1c"] ? "#" + colorMap["7a1d1c"] : "#7a1d1c";
+  const trimColor = colorMap["474d5e"] ? "#" + colorMap["474d5e"] : "#474d5e";
+
+  if (city === 'Chicago' || city === 'Oakland') {
+    ctx.fillStyle = '#8b95ab';
+    ctx.fillRect(...hdRect(ctx, 40 + (frame % 4) * 2, 15, 20, 2));
+    ctx.fillRect(...hdRect(ctx, 180 - (frame % 4) * 2, 25, 30, 2));
+  }
+
   const lightColor = city === 'Miami' ? '#6fe8d8' : '#ffc475';
   ctx.fillStyle = lightColor;
   ctx.fillRect(...hdRect(ctx, 40, 70 - (frame % 2), 4, 4));
@@ -1492,12 +1514,6 @@ function drawSkyAndFarLayer(ctx, city, frame) {
   ctx.fillStyle = '#666e82';
   ctx.fillRect(...hdRect(ctx, 41, 74, 2, 46));
   ctx.fillRect(...hdRect(ctx, 271, 74, 2, 46));
-}
-
-function drawNearLayer(ctx, city, frame) {
-  const colorMap = CITY_THEME_OVERRIDES[city] || {};
-  const brickColor = colorMap["7a1d1c"] ? "#" + colorMap["7a1d1c"] : "#7a1d1c";
-  const trimColor = colorMap["474d5e"] ? "#" + colorMap["474d5e"] : "#474d5e";
 
   ctx.fillStyle = brickColor;
   if (city === 'Harlem' || city === 'Baltimore') {
@@ -1553,21 +1569,6 @@ function drawNearLayer(ctx, city, frame) {
   ctx.fillRect(...hdRect(ctx, 135, 114, 50, 4));
   ctx.fillRect(...hdRect(ctx, 130, 118, 60, 3));
 
-  ctx.fillStyle = trimColor;
-  ctx.fillRect(...hdRect(ctx, 0, 120, 320, 20));
-
-  ctx.fillStyle = '#2d313d';
-  for (let sx = 0; sx < 320; sx += 40) {
-    ctx.fillRect(...hdRect(ctx, sx, 120, 1, 20));
-  }
-
-  ctx.fillStyle = '#101116';
-  ctx.fillRect(...hdRect(ctx, 0, 140, 320, 40));
-
-  ctx.fillStyle = '#ffcd68';
-  for (let rx = 10; rx < 320; rx += 40) {
-    ctx.fillRect(...hdRect(ctx, rx, 158, 20, 4));
-  }
 }
 
 function drawCharacterPreview(ctx, origin, frame) {
