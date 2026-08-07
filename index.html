@@ -1099,9 +1099,21 @@
       <div style="margin-top:14px; display:flex; gap:10px; justify-content:center;">
         <button onclick="app.nextRound()">NEXT ROUND</button>
         <button class="secondary" onclick="app.showGame()">BACK TO TABLE</button>
+        <button id="reviewLogBtn" class="secondary" onclick="app.showReviewLog()" style="display:none;">REVIEW LOG</button>
       </div>
     </div>
   </section>
+
+  <!-- Review Log Modal Overlay -->
+  <div id="reviewLogModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(16, 17, 22, 0.9); z-index:10000; align-items:center; justify-content:center;">
+    <div class="panel" style="width:480px; max-height:70vh; overflow-y:auto; border:3px solid #ffcd68; background:#101116; padding:16px; text-align:left; box-shadow:0 0 16px rgba(0,0,0,0.8);">
+      <h2 style="margin-top:0; color:#ffcd68; font-family:'Press Start 2P', monospace; font-size:10px;">REVIEW LOG</h2>
+      <div id="reviewLogContent" style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; line-height:1.5; margin-bottom:16px;">
+        <!-- Populated in JS -->
+      </div>
+      <button class="secondary" onclick="document.getElementById('reviewLogModal').style.display='none'" style="width:100%; font-family:'Press Start 2P', monospace; font-size:8px;">CLOSE</button>
+    </div>
+  </div>
 
   <!-- BLOCK MAP -->
   <section id="blockMap" class="screen">
@@ -3576,15 +3588,21 @@ const app = {
         const secretsLine = this.storyEngine.secrets.length > 0
           ? ` | SECRETS: ${this.storyEngine.secrets.join('; ')}`
           : '';
+        const me = this.game.players[this.humanIndex];
+        const rep = me && me.stats ? me.stats.reputation : 0;
+        const cash = me && me.stats ? me.stats.streetCred : 0;
         const metaEl = document.getElementById('winnerMeta');
         metaEl.style.display = 'block';
-        metaEl.textContent = `FINAL STATS: HEAT ${this.storyEngine.heat} | TRUST ${this.storyEngine.trust}${secretsLine}`;
+        metaEl.textContent = `FINAL STATS: HEAT ${this.storyEngine.heat} | TRUST ${this.storyEngine.trust} | REP ${rep} | CASH ${cash}${secretsLine}`;
 
         const nextBtn = document.querySelector('#roundResult button');
         if (nextBtn) {
           nextBtn.setAttribute('onclick', 'app.endNarrativeGame()');
           nextBtn.textContent = 'BACK TO STOOP';
         }
+        
+        const reviewLogBtn = document.getElementById('reviewLogBtn');
+        if (reviewLogBtn) reviewLogBtn.style.display = 'inline-block';
       } else {
         document.getElementById('winnerName').textContent = `BEAT WINNER: ${win.player.toUpperCase()}`;
         document.getElementById('winnerCard').textContent = `"${win.card}"`;
@@ -4615,8 +4633,19 @@ const app = {
       nextBtn.setAttribute('onclick', 'app.nextRound()');
       nextBtn.textContent = 'NEXT ROUND';
     }
+    const reviewLogBtn = document.getElementById('reviewLogBtn');
+    if (reviewLogBtn) reviewLogBtn.style.display = 'none';
     
     this.show('setup');
+  },
+
+  showReviewLog() {
+    if (!this.storyEngine) return;
+    const content = this.storyEngine.history.map(entry =>
+      `<strong>BEAT ${entry.beat}:</strong> "${entry.card}"<br/><span class="muted">${entry.consequenceText}</span>`
+    ).join('<br/><br/>');
+    document.getElementById('reviewLogContent').innerHTML = content || '<span class="muted">No beats recorded.</span>';
+    document.getElementById('reviewLogModal').style.display = 'flex';
   },
 
   renderLobbyBrowserList(rooms) {
