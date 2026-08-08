@@ -589,6 +589,10 @@
 </style>
 </head>
 <body>
+<!-- FPS readout for the accessibility panel's SHOW FPS COUNTER toggle. The
+     toggle and the animation loop both wrote to #fpsOverlay, which existed
+     nowhere, so the setting silently did nothing. -->
+<div id="fpsOverlay" style="display:none; position:fixed; top:4px; left:4px; z-index:10002; font-family:'Press Start 2P', monospace; font-size:9px; color:#6fe8d8; background:rgba(8,8,10,0.8); padding:3px 6px; border:1px solid #2d313d; pointer-events:none;">FPS: --</div>
 <div class="wrap">
   <header>
     <h1>CONCRETE KINGS</h1>
@@ -630,6 +634,40 @@
           <button class="secondary" style="font-size:7px; padding:6px 10px;" onclick="app.toggleBGM()">MUSIC</button>
           <button class="secondary" style="font-size:7px; padding:6px 10px;" onclick="app.toggleSFX()">SOUND</button>
           <button class="secondary" style="font-size:7px; padding:6px 10px;" onclick="app.toggleAccessModal()">ACCESSIBILITY</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lexicon / Rulebook. The panel was removed from character creation during
+         the Main Menu restructure and never given a new home, so the LEXICON
+         menu button did nothing: renderSetupGlossary() bails at `if (!box)
+         return;` and setGlossaryTab() at `if (!lexPanel || !rulePanel) return;`.
+         The data (10 AAVE terms), the AAVELexiconHUD search engine and the
+         .lexicon-* CSS all already existed. -->
+    <div id="lexiconView" style="display:none;">
+      <div class="panel" style="max-width:820px; margin:0 auto; padding:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #2d313d; padding-bottom:8px;">
+          <h2 style="margin:0; font-family:'Press Start 2P', monospace; font-size:11px; color:#ffcd68;">LEXICON &amp; RULEBOOK</h2>
+          <button class="secondary" onclick="app.showMainMenu()" style="font-size:8px;">BACK TO MENU</button>
+        </div>
+
+        <div style="display:flex; gap:6px; margin-bottom:10px;">
+          <button id="tabLexiconBtn" class="active" onclick="app.setGlossaryTab('lexicon')" style="font-size:8px; padding:6px 12px;">LEXICON</button>
+          <button id="tabRulebookBtn" class="secondary" onclick="app.setGlossaryTab('rulebook')" style="font-size:8px; padding:6px 12px;">RULEBOOK</button>
+        </div>
+
+        <div id="lexiconTabPanel" style="display:flex; flex-direction:column;">
+          <input id="lexiconSearchBox" type="text" placeholder="Search the block's language..." style="font-size:11px; margin-bottom:10px;" />
+          <div id="lexiconResults" class="lexicon-grid" style="max-height:44vh; overflow-y:auto;"></div>
+        </div>
+
+        <div id="rulebookTabPanel" style="display:none; max-height:44vh; overflow-y:auto; font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; line-height:1.6;">
+          <p style="margin-top:0;"><b style="color:#ffcd68;">GOAL.</b> First to the points target wins the block.</p>
+          <p><b style="color:#ffcd68;">THE ROUND.</b> The O.G. judge reveals a black card. Everyone else submits one white card from hand. The judge picks the winner, who takes the point.</p>
+          <p><b style="color:#ffcd68;">RECEIPTS.</b> Win rounds to collect receipts — debts held over other players that resolve later. Check the RECEIPTS tab at the table.</p>
+          <p><b style="color:#ffcd68;">HEAT.</b> Heat rises with risky play. A district with active heat cannot be fast-travelled to until it cools.</p>
+          <p><b style="color:#ffcd68;">CASH.</b> Earned in play and at mini-games. Spend it in the STREET SHOP on prep items for your next hustle.</p>
+          <p><b style="color:#ffcd68;">THE BLOCK.</b> Walk your district from the MAP. Barbershop, bodega, chess park and the alley gate each open a scene.</p>
         </div>
       </div>
     </div>
@@ -864,17 +902,39 @@
           <button onclick="app.saveCustomDeck()" style="width:100%; margin-top:12px;" id="deckSaveBtn">SAVE & APPLY DECK</button>
         </div>
         
-        <!-- Right Side: Collection Browser -->
+        <!-- Right Side: Collection Browser.
+             The COLLECTION / SHOP tab wrappers below are required by
+             setDeckBuilderTab(), which begins `if (!colPanel || !shopPanel)
+             return;`. Without them it bailed before ever calling
+             renderCollectionGrid(), so the deck builder showed an empty grid and
+             no deck could be built at all. renderShopGrid/buyCardBack/
+             equipCardBack were likewise unreachable, leaving the Receipt Dust
+             cosmetics shop with no UI. -->
         <div style="flex:1; display:flex; flex-direction:column; min-width:300px; height:100%; overflow:hidden; box-sizing:border-box;">
+          <div style="display:flex; align-items:center; margin-bottom:8px; gap:6px;">
+            <button id="tabCollectionBtn" class="active" onclick="app.setDeckBuilderTab('collection')" style="font-size:8px; padding:6px 10px;">COLLECTION</button>
+            <button id="tabShopBtn" class="secondary" onclick="app.setDeckBuilderTab('shop')" style="font-size:8px; padding:6px 10px;">SHOP</button>
+            <span style="margin-left:auto; font-family:'Press Start 2P', monospace; font-size:8px; color:#6fe8d8;">DUST: <span id="dustBalanceVal">0</span></span>
+          </div>
+
+          <div id="collectionPanel" style="flex:1; display:flex; flex-direction:column; min-height:0;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:6px;">
             <input id="collectionSearchInput" type="text" placeholder="Search cards..." style="font-size:11px; flex:1;" oninput="app.filterCollectionGrid()"/>
             <button class="secondary" style="font-size:9px; padding:6px 10px;" onclick="app.toggleAllCollection(true)">SELECT ALL</button>
             <button class="secondary" style="font-size:9px; padding:6px 10px;" onclick="app.toggleAllCollection(false)">CLEAR ALL</button>
           </div>
-          
+
           <!-- Card Grid list -->
           <div id="collectionGrid" style="flex:1; overflow-y:auto; display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:8px; padding-right:4px;">
             <!-- Rendered cards go here dynamically -->
+          </div>
+          </div>
+
+          <div id="shopPanel" style="flex:1; display:none; flex-direction:column; min-height:0;">
+            <p class="muted" style="margin-top:0; margin-bottom:8px; font-size:10px;">Spend Receipt Dust on card-back cosmetics. Grind unwanted cards in the Collection tab to earn Dust.</p>
+            <div id="shopGrid" style="flex:1; overflow-y:auto; display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:8px; padding-right:4px;">
+              <!-- Rendered by renderShopGrid() -->
+            </div>
           </div>
         </div>
       </div>
@@ -2177,20 +2237,26 @@ const app = {
   },
   showSetup() { this.showMainMenu(); },
 
-  showMainMenu() {
+  /**
+   * The setup screen hosts three mutually exclusive views. Switching is routed
+   * through one helper so adding a fourth cannot leave two visible at once —
+   * the earlier two-view version grew a third with no handling.
+   */
+  showSetupView(which) {
+    const views = { menu: 'mainMenuView', creation: 'characterCreationView', lexicon: 'lexiconView' };
     this.show('setup');
-    const main = document.getElementById('mainMenuView');
-    const creation = document.getElementById('characterCreationView');
-    if (main) main.style.display = '';
-    if (creation) creation.style.display = 'none';
+    Object.entries(views).forEach(([key, id]) => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = (key === which) ? '' : 'none';
+    });
+  },
+
+  showMainMenu() {
+    this.showSetupView('menu');
   },
 
   showCharacterCreation() {
-    this.show('setup');
-    const main = document.getElementById('mainMenuView');
-    const creation = document.getElementById('characterCreationView');
-    if (main) main.style.display = 'none';
-    if (creation) creation.style.display = '';
+    this.showSetupView('creation');
     this.creationStep = this.creationStep || 1;
     this.updateCreationStep();
   },
@@ -2268,7 +2334,9 @@ const app = {
   },
 
   showLexicon() {
-    this.showMainMenu();
+    this.showSetupView('lexicon');
+    this.setGlossaryTab('lexicon');
+    this.renderSetupGlossary();
     const input = document.getElementById('lexiconSearchBox');
     if (input) input.focus();
   },
@@ -3709,15 +3777,9 @@ const app = {
       document.getElementById('statusText').textContent = 'Your turn: pick a card to play.';
     }
 
-    const viewCity = document.getElementById('viewportCity');
-    if (viewCity) {
-      viewCity.textContent = (this.game.activeCity || 'Harlem').toUpperCase();
-    }
-    
-    const weatherBadge = document.getElementById('viewportWeatherBadge');
-    if (weatherBadge) {
-      weatherBadge.textContent = (this.game.weatherMode || 'CLEAR').replace(/_/g, ' ');
-    }
+    // #viewportCity and #viewportWeatherBadge belonged to the side-on block
+    // viewport, removed with the top-down map migration. City and weather are
+    // shown on the top HUD strip and the map screen now.
 
     if (this.weatherSystem) {
       this.weatherSystem.setMode(this.game.weatherMode);
