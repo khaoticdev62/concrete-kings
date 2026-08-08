@@ -44,3 +44,61 @@ test('CASH Shop: Game.addPlayer gives every player a zeroed prepItems map', () =
     delete global.document;
   }
 });
+
+test('CASH Shop: buyPrepItem deducts CASH and increments the matching prepItems counter', () => {
+  global.document = fakeDocument();
+  try {
+    const { app, Game } = loadGameModule();
+    app.game = new Game();
+    app.game.addPlayer('Test');
+    app.humanIndex = 0;
+    app.game.players[0].stats.streetCred = 100;
+
+    const result = app.buyPrepItem('street_dice');
+
+    assert.equal(result, true);
+    assert.equal(app.game.players[0].stats.streetCred, 70, '100 - 30 cost');
+    assert.equal(app.game.players[0].prepItems.street_dice, 1);
+  } finally {
+    delete global.document;
+  }
+});
+
+test('CASH Shop: buyPrepItem refuses a purchase without enough CASH', () => {
+  global.document = fakeDocument();
+  try {
+    const { app, Game } = loadGameModule();
+    app.game = new Game();
+    app.game.addPlayer('Test');
+    app.humanIndex = 0;
+    app.game.players[0].stats.streetCred = 10;
+
+    const result = app.buyPrepItem('street_dice');
+
+    assert.equal(result, false);
+    assert.equal(app.game.players[0].stats.streetCred, 10, 'CASH must be untouched on a refused purchase');
+    assert.equal(app.game.players[0].prepItems.street_dice, 0);
+  } finally {
+    delete global.document;
+  }
+});
+
+test('CASH Shop: buyPrepItem refuses a purchase at the owned-item cap', () => {
+  global.document = fakeDocument();
+  try {
+    const { app, Game } = loadGameModule();
+    app.game = new Game();
+    app.game.addPlayer('Test');
+    app.humanIndex = 0;
+    app.game.players[0].stats.streetCred = 1000;
+    app.game.players[0].prepItems.street_dice = 3;
+
+    const result = app.buyPrepItem('street_dice');
+
+    assert.equal(result, false);
+    assert.equal(app.game.players[0].stats.streetCred, 1000, 'CASH must be untouched on a refused purchase');
+    assert.equal(app.game.players[0].prepItems.street_dice, 3, 'must not exceed the cap');
+  } finally {
+    delete global.document;
+  }
+});

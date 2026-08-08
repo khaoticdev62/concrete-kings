@@ -2026,6 +2026,14 @@ function drawCharacterPreview(ctx, origin, frame) {
 /* ==================================
    UI / STATE / ENGINE BINDINGS
    ================================== */
+const SHOP_ITEMS = [
+  { gameId: 'street_dice', name: 'Loaded Dice', desc: '+3 WIT bonus on your next Street Dice roll.', cost: 30 },
+  { gameId: 'bodega_run', name: 'Rubber Soles', desc: 'Alertness builds slower on your next Bodega Run.', cost: 30 },
+  { gameId: 'haircut_challenge', name: 'Steady Hand', desc: 'Wider GOOD/PERFECT timing zones on your next Haircut Challenge.', cost: 30 },
+  { gameId: 'lockpicking', name: 'Master Pick', desc: '+6px pin alignment tolerance on your next Lockpicking job.', cost: 30 },
+  { gameId: 'negotiation', name: 'Insider Info', desc: 'Start your next Negotiation with 20 less resistance to break.', cost: 30 }
+];
+
 const app = {
   game: new Game(),
   humanIndex: 0,
@@ -3695,6 +3703,22 @@ const app = {
     const useStory = !!(this.storyEngine && this.storyEngine.active);
     if (trustEl) trustEl.textContent = useStory ? this.storyEngine.trust : 0;
     if (heatEl) heatEl.textContent = useStory ? this.storyEngine.heat : 0;
+  },
+
+  PREP_ITEM_CAP: 3,
+
+  buyPrepItem(gameId) {
+    const item = SHOP_ITEMS.find(i => i.gameId === gameId);
+    if (!item) return false;
+    const me = this.game.players[this.humanIndex];
+    if (!me || !me.prepItems) return false;
+    if ((me.prepItems[gameId] || 0) >= this.PREP_ITEM_CAP) return false;
+    if ((me.stats.streetCred || 0) < item.cost) return false;
+
+    me.stats.streetCred -= item.cost;
+    me.prepItems[gameId] = (me.prepItems[gameId] || 0) + 1;
+    this.updateStatHud();
+    return true;
   },
 
   renderHand() {
