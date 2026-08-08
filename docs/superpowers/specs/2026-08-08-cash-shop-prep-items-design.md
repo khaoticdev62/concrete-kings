@@ -39,7 +39,7 @@ Five items, one per mini-game, each costing 30 CASH, each stackable up to 3 owne
 
 | Mini-game | Item name | Effect | Applied in |
 |---|---|---|---|
-| Street Dice | Loaded Dice | `dc` −3 | `street-dice.js` `init()` |
+| Street Dice | Loaded Dice | `witModifier` +3 | `street-dice.js` `init()` |
 | Bodega Run | Rubber Soles | `alertnessRate` −30 | `bodega-run.js` `init()` |
 | Haircut Challenge | Steady Hand | `goodWidth` +0.06, `perfectWidth` +0.03 | `haircut-challenge.js` `init()` |
 | Lockpicking | Master Pick | `tolerance` +6 | `lockpicking.js` `init()` |
@@ -72,7 +72,7 @@ This hook is a no-op whenever `app.game` doesn't exist (the Mini-Game Catalog's 
 ## Testing
 
 - Unit tests (new `test/cash-shop.test.js`, following the `loadGameModule()` VM-sandbox pattern used by other suites): buying an item deducts the correct CASH and increments `prepItems`; buying is blocked below cost; buying is blocked at the 3-owned cap; the modal's owned/cost/afford state reflects `stats.streetCred` and `prepItems` correctly.
-- Extend `test/mini-game-system.test.js`: for each of the five games, construct with `params.prepItemBonus = true` and assert the specific field changes by its exact delta (e.g., `dc` is 3 lower than the same difficulty without the flag); construct without the flag and assert unchanged behavior (regression guard against the bonus leaking into free play).
+- Extend `test/mini-game-system.test.js`: for each of the five games, construct with `params.prepItemBonus = true` and assert the specific field changes by its exact delta (e.g., `witModifier` is 3 higher than the same call without the flag); construct without the flag and assert unchanged behavior (regression guard against the bonus leaking into free play).
 - New test for `MiniGameManager.start()`: with a player holding `prepItems.street_dice = 1`, `start('street_dice', {})` decrements it to 0 and passes `prepItemBonus: true` into `init()`; with `app.game` unset, `start()` behaves identically to before this change (no `prepItemBonus`, no throw).
 - The Shop modal's live DOM (button disabled states, HUD CASH refresh after purchase) is UI-only and gets manual browser verification, matching the pattern used for the character-creation wizard's DOM interactions — `node --test` cannot exercise real click/disabled-attribute behavior in the VM sandbox.
 
