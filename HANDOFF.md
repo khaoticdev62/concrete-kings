@@ -16,7 +16,7 @@ node server/server.js        # serves index.html + WS relay on port 3001
 
 Open `http://localhost:3001`. **Port is 3001, not 3000.**
 
-Current state: **218 tests, all passing**, 44 test files, clean tree, pushed.
+Current state: **223 tests, all passing**, 45 test files, clean tree, pushed.
 
 Always run `npm test` and not just `node --test` — the npm script also
 syntax-checks `index.html`'s inline `<script>`, `cards.js` and `server/server.js`,
@@ -55,20 +55,26 @@ that test's `ALLOWED_UNDEFINED` set with a reason.
 
 ### 2.3 JS referencing element ids that do not exist in the markup
 
-Same class of bug, one layer deeper. `switchRightTab`, `renderReceiptsTab` and
-four element ids existed in JS with **no markup at all**, so the tab switcher did
-nothing and the Receipt system — fully implemented and tested — had never had any
-UI. Fixed, but assume more of these exist.
+**The worst bug class in this codebase.** A full scan found **15** such ids, and
+they had silently broken three entire features:
 
-Cheap check before trusting any feature is wired:
+- **Deck Builder was completely unusable** — `setDeckBuilderTab` begins
+  `if (!colPanel || !shopPanel) return;` and bailed before `renderCollectionGrid`
+  ever ran. Empty grid, deck count 0, SAVE disabled. No deck could be built.
+  The Receipt Dust cosmetics shop was unreachable for the same reason.
+- **The LEXICON menu button did nothing** — `renderSetupGlossary` bails at
+  `if (!box) return;`. Ten AAVE terms, a search engine and the CSS all existed
+  with nowhere to render.
+- **The Receipt system had no UI** despite being fully implemented and tested.
+- **SHOW FPS COUNTER did nothing** — it wrote to an overlay that did not exist.
 
-```bash
-for id in someId anotherId; do
-  echo "$id: $(grep -c "id=\"$id\"" index.html) markup / $(grep -c "getElementById('$id')" index.html) js"
-done
-```
+Every call site guarded correctly with `if (!el) return;`. That is good
+defensive code, and precisely why the failure is invisible.
 
-A `0 markup / N js` result means dead code.
+All 15 are fixed and **`test/dead-references.test.js` now scans every
+`getElementById` call against the markup** and fails naming any that are dead.
+Run `npm test` and this class cannot come back. If you legitimately create an
+element at runtime, add it to that test's `RUNTIME_CREATED` set with a reason.
 
 ### 2.4 Node's module scope hides browser-only collisions
 
@@ -244,6 +250,9 @@ NPC scene backdrops, card table fitting 720p, accessibility panel restored.
 5. **`narrativeTextBox` is dead** — never shown, only ever hidden. Either wire it
    to story mode or delete it. `syncStagePanel()` currently assumes it stays
    hidden, and a test guards that assumption.
+
+The 15 dead element references are fixed; Deck Builder, the dust shop, the
+Lexicon and the FPS counter all work now. See section 2.3.
 
 **Known approximation:** T-Bone's NPC backdrop is an outdoor street scene because
 no chess-park art exists. Recorded in the mapping comment.
