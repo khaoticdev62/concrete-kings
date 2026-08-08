@@ -205,3 +205,57 @@ test('CASH Shop: openShopModal shows the modal, closeShopModal hides it', () => 
     delete global.document;
   }
 });
+
+test('CASH Shop: the Main Menu showBoosterShop() no longer throws, and opens an explainer instead', () => {
+  global.document = fakeDocument();
+  try {
+    const { app } = loadGameModule();
+
+    assert.doesNotThrow(() => app.showBoosterShop());
+
+    const modal = global.document.getElementById('shopUnavailableModal');
+    assert.equal(modal.style.display, 'flex');
+  } finally {
+    delete global.document;
+  }
+});
+
+test('CASH Shop: closeShopUnavailableModal hides the explainer', () => {
+  global.document = fakeDocument();
+  try {
+    const { app } = loadGameModule();
+
+    app.showBoosterShop();
+    app.closeShopUnavailableModal();
+
+    const modal = global.document.getElementById('shopUnavailableModal');
+    assert.equal(modal.style.display, 'none');
+  } finally {
+    delete global.document;
+  }
+});
+
+test('CASH Shop: every Main Menu onclick handler resolves to a real app method', () => {
+  // The SHOP button shipped for months calling a method that never existed.
+  // This catches the next such stub at test time instead of on a user's click.
+  const fs = require('fs');
+  const path = require('path');
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+
+  const menuStart = html.indexOf('id="mainMenuView"');
+  assert.ok(menuStart > -1, 'mainMenuView must exist');
+  const menuEnd = html.indexOf('id="characterCreationView"', menuStart);
+  const menuHtml = html.slice(menuStart, menuEnd);
+
+  const handlers = [...menuHtml.matchAll(/onclick="app\.([A-Za-z0-9_]+)\(/g)].map(m => m[1]);
+  assert.ok(handlers.length > 0, 'the Main Menu must have onclick handlers to check');
+
+  global.document = fakeDocument();
+  try {
+    const { app } = loadGameModule();
+    const missing = handlers.filter(name => typeof app[name] !== 'function');
+    assert.deepEqual(missing, [], `Main Menu buttons call undefined app methods: ${missing.join(', ')}`);
+  } finally {
+    delete global.document;
+  }
+});

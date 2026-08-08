@@ -1465,6 +1465,15 @@
   </div>
 </div>
 
+<div id="shopUnavailableModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(16, 17, 22, 0.9); z-index:10000; align-items:center; justify-content:center;">
+  <div class="panel" style="width:360px; max-width:92vw; border:3px solid #ffcd68; background:#101116; padding:16px; text-align:center; box-shadow:0 0 16px rgba(0,0,0,0.8); box-sizing:border-box;">
+    <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68;">SHOP LOCKED</h3>
+    <p style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; margin-bottom:16px;">The Shop opens once you're on a run. Start a Journey to earn CASH, then spend it from the STAT HUD.</p>
+    <button onclick="app.closeShopUnavailableModal(); app.showCharacterCreation();" style="width:100%; margin-bottom:8px; font-family:'Press Start 2P', monospace; font-size:8px;">PLAY / CREATE CHARACTER</button>
+    <button class="secondary" onclick="app.closeShopUnavailableModal()" style="width:100%; font-family:'Press Start 2P', monospace; font-size:8px;">CLOSE</button>
+  </div>
+</div>
+
 <script src="src/pixel_engine/pixel-engine.js"></script>
 <script src="src/pixel_engine/card-visual-system.js"></script>
 <script src="src/pixel_engine/weather-effects-system.js"></script>
@@ -2171,6 +2180,16 @@ const app = {
     this.showMainMenu();
     const input = document.getElementById('lexiconSearchBox');
     if (input) input.focus();
+  },
+
+  showBoosterShop() {
+    const modal = document.getElementById('shopUnavailableModal');
+    if (modal) modal.style.display = 'flex';
+  },
+
+  closeShopUnavailableModal() {
+    const modal = document.getElementById('shopUnavailableModal');
+    if (modal) modal.style.display = 'none';
   },
 
   showMinigameCatalog() {
