@@ -109,3 +109,29 @@ test('Resolution auto-advance: invokes the current roundResult button action on 
     delete global.document;
   }
 });
+
+test('Resolution auto-advance: never arms on a narrative ending, so it cannot race the Review Log', () => {
+  mock.timers.enable({ apis: ['setInterval'] });
+  try {
+    const { app, Game, NarrativeStoryEngine } = loadGameModule();
+    global.document = fakeDocument();
+
+    app.game = new Game();
+    app.game.addPlayer('Player');
+    app.humanIndex = 0;
+    app.storyEngine = new NarrativeStoryEngine();
+    app.storyEngine.reset('BARBER');
+    app.storyEngine.beat = 5; // this resolution ends the campaign
+    app.game.submissions = [{ player: 'Player', card: 'A stolen police scanner buzzing with codes' }];
+
+    app.chooseWinner(0);
+
+    assert.equal(app.resolutionTimerHandle, null, 'no auto-advance timer should be armed on the ending screen');
+
+    mock.timers.tick(10000); // well past 5s - nothing should happen if the timer was never armed
+    assert.equal(app.resolutionTimerHandle, null, 'still no timer after time passes');
+  } finally {
+    mock.timers.reset();
+    delete global.document;
+  }
+});

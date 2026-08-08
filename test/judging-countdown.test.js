@@ -16,6 +16,7 @@ function fakeDocument() {
     },
     setAttribute() {},
     appendChild() {},
+    querySelector() { return null; },
     querySelectorAll() { return []; },
     getContext() {
       return {
@@ -95,6 +96,38 @@ test('Judging countdown: does not fire if chooseWinner already ran', () => {
     app.chooseWinner(0); // simulate the judge resolving early
     mock.timers.tick(12000);
     assert.equal(callCount, 1, 'auto-pick must not also fire after an early resolution');
+  } finally {
+    mock.timers.reset();
+    delete global.document;
+  }
+});
+
+test('Judging countdown: is cleared when the app navigates away from #judging by any route', () => {
+  mock.timers.enable({ apis: ['setInterval'] });
+  try {
+    const { app, Game } = loadGameModule();
+    global.document = fakeDocument();
+
+    app.game = new Game();
+    app.game.addPlayer('Player');
+    app.game.addPlayer('Bot');
+    app.humanIndex = 0;
+    app.game.judgeIndex = 0;
+    app.game.submissions = [{ player: 'Bot', card: 'Some card' }];
+    app.storyEngine = null;
+    app.updateTopHud = () => {};
+
+    let winnerIndexUsed = null;
+    const originalChooseWinner = app.chooseWinner.bind(app);
+    app.chooseWinner = (index) => { winnerIndexUsed = index; };
+
+    app.enterJudging(); // real show('judging'), arms the countdown
+    app.showGame(); // leaves #judging via a route that never calls chooseWinner()
+
+    mock.timers.tick(12000);
+    assert.equal(winnerIndexUsed, null, 'auto-pick must not fire after navigating away from #judging');
+
+    app.chooseWinner = originalChooseWinner;
   } finally {
     mock.timers.reset();
     delete global.document;

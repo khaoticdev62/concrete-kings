@@ -1940,6 +1940,8 @@ const app = {
   remoteAvatars: new Map(),
 
   show(id) {
+    if (id !== 'judging') this.clearJudgingCountdown();
+    if (id !== 'roundResult') this.clearResolutionAutoAdvance();
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const targetScreen = document.getElementById(id);
     targetScreen.classList.add('active');
@@ -3829,7 +3831,9 @@ const app = {
         }
       }
       this.show('roundResult');
-      this.startResolutionAutoAdvance();
+      if (!result.ended) {
+        this.startResolutionAutoAdvance();
+      }
       return;
     }
 
@@ -4480,6 +4484,9 @@ const app = {
 
   matchmakingInterval: null,
   matchmakingSeconds: 0,
+  judgingTimerHandle: null,
+  judgingTimeLeft: 0,
+  resolutionTimerHandle: null,
   toggleQuickPlayQueue(enable) {
     const statusBox = document.getElementById('matchmakingStatus');
     const qpBtn = document.getElementById('quickPlayBtn');
