@@ -1121,6 +1121,52 @@
     </div>
   </section>
 
+  <!-- CAMPAIGN INTRO -->
+  <section id="campaignIntro" class="screen">
+    <div class="panel" style="max-width: 640px; margin: 0 auto; text-align: center; padding: 24px;">
+      <h2 id="campaignIntroTitle" style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:12px; color:#ffcd68;">FIRST MILES</h2>
+      <p id="campaignIntroBody" class="muted" style="font-family:'JetBrains Mono', monospace; font-size:11px; line-height:1.5;">13 beats. One origin. Every mile costs.</p>
+      <button id="campaignIntroStart" class="primary" style="font-family:'Press Start 2P', monospace; font-size:10px; background:#ffcd68; border-color:#ffcd68; color:#101116;">BEGIN</button>
+      <div style="margin-top:12px;">
+        <button class="secondary" onclick="app.showMainMenu()" style="font-size:8px; padding:8px 12px;">BACK TO MENU</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAMPAIGN BEAT -->
+  <section id="campaignBeat" class="screen">
+    <div class="panel" style="max-width: 880px; margin: 0 auto; padding: 16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; border-bottom:2px solid #2d313d; padding-bottom:8px; margin-bottom:12px;">
+        <h2 id="campaignBeatTitle" style="margin:0; font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68;">BEAT TITLE</h2>
+        <div style="font-family:'Press Start 2P', monospace; font-size:9px; color:#6fe8d8;">DAY <span id="campaignBeatDay">1</span></div>
+      </div>
+      <div style="background:#101116; border:2px solid #2d313d; padding:12px; margin-bottom:12px;">
+        <p id="campaignBeatNarrative" style="margin:0; font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; line-height:1.6;"></p>
+      </div>
+      <div style="background:#14151c; border:2px dashed #393e4d; padding:10px; margin-bottom:14px;">
+        <div style="font-family:'Press Start 2P', monospace; font-size:9px; color:#ff7a45; margin-bottom:4px;">PROMPT</div>
+        <div id="campaignBeatPrompt" style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#f4f7ff; line-height:1.5;"></div>
+      </div>
+      <div id="campaignChoiceBar" style="display:flex; flex-direction:column; gap:8px;"></div>
+      <div style="margin-top:14px;">
+        <button class="secondary" onclick="app.showMainMenu()" style="font-size:8px; padding:8px 10px;">EXIT CAMPAIGN</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAMPAIGN EPILOGUE -->
+  <section id="campaignEpilogue" class="screen">
+    <div class="panel" style="max-width: 640px; margin: 0 auto; text-align: center; padding: 24px;">
+      <h2 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68;">EPILOGUE</h2>
+      <div id="campaignEndingTitle" style="font-family:'Press Start 2P', monospace; font-size:12px; color:#ff7a45; margin-bottom:8px;"></div>
+      <p id="campaignEndingText" style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; line-height:1.5;"></p>
+      <div style="margin-top:14px; display:flex; gap:10px; justify-content:center;">
+        <button class="primary" onclick="app.startJourneyCampaign()" style="font-family:'Press Start 2P', monospace; font-size:8px; background:#ffcd68; border-color:#ffcd68; color:#101116;">NEW GAME+</button>
+        <button class="secondary" onclick="app.showMainMenu()" style="font-size:8px; padding:8px 12px;">MAIN MENU</button>
+      </div>
+    </div>
+  </section>
+
   <!-- ROUND RESULT -->
   <section id="roundResult" class="screen">
     <div class="panel winner-area">
@@ -1362,6 +1408,7 @@
 <script src="src/pixel_engine/block-map-navigation.js"></script>
 <script src="src/pixel_engine/aave-lexicon-hud.js"></script>
 <script src="src/pixel_engine/campaign-mode.js"></script>
+<script src="src/pixel_engine/first-miles-campaign.js"></script>
 <script src="src/pixel_engine/audio-sfx-engine.js"></script>
 <script src="src/pixel_engine/story-engine.js"></script>
 <script src="cards.js"></script>
@@ -4556,94 +4603,50 @@ const app = {
   },
 
   startNoirPrototype() {
-    const originKey = document.getElementById('characterOriginSelect').value;
+    const originKey = document.getElementById('characterOriginSelect').value || 'BARBER';
+    const secretSelectEl = document.getElementById('characterSecretSelect');
+    const secretKey = secretSelectEl ? secretSelectEl.value : '';
+    const campaign = window.FirstMilesCampaign ? new window.FirstMilesCampaign(this) : null;
+    if (!campaign) {
+      alert('First Miles campaign is not loaded yet.');
+      this.showMainMenu();
+      return;
+    }
     this.storyEngine = new NarrativeStoryEngine();
     this.storyEngine.reset(originKey);
-
-    const secretTextMap = {
-      police_scanner: 'A stolen police scanner buzzing with codes',
-      security_warning: "Your cousin's neighborhood security warning",
-      pastor_program: 'Sunday service program signed by the pastor',
-      bodega_ledger: "A bodega ledger with names you shouldn't know",
-      panther_uncle: 'An uncle claiming he used to run with the Panthers'
-    };
-    const secretSelectEl = document.getElementById('characterSecretSelect');
-    const chosenSecretKey = secretSelectEl ? secretSelectEl.value : '';
-    const chosenSecretText = secretTextMap[chosenSecretKey];
-    if (chosenSecretText && !this.storyEngine.secrets.includes(chosenSecretText)) {
-      this.storyEngine.secrets.push(chosenSecretText);
+    if (secretKey && !this.storyEngine.secrets.includes(secretKey)) {
+      this.storyEngine.secrets.push(secretKey);
     }
-
     this.game = new Game();
     this.game.mode = MODE.OFFLINE;
-    this.game.isCampaign = false;
+    this.game.isCampaign = true;
     this.game.pointsToWin = 99;
-
     const myName = document.getElementById('hostName').value.trim() || 'Player';
     this.game.players = [];
     this.game.addPlayer(myName);
-    this.game.addPlayer("O.G. Big Dave (Master Barber)");
-    this.game.addPlayer("Stoop Homie");
-    this.game.addPlayer("Bodega Clerk");
-
-    this.game.players[0].origin = originKey;
-    this.game.players[1].origin = 'BARBER';
-    this.game.players[2].origin = 'LOCAL_LEGEND';
-    this.game.players[3].origin = 'CORNER_MERCHANT';
-
-    const assignOriginAttrs = (player, originK) => {
-      const orig = CHARACTER_ORIGINS[originK];
-      if (orig) {
-        player.attributes = { ...orig.attributes };
-      }
-    };
-    assignOriginAttrs(this.game.players[0], originKey);
-    assignOriginAttrs(this.game.players[1], 'BARBER');
-    assignOriginAttrs(this.game.players[2], 'LOCAL_LEGEND');
-    assignOriginAttrs(this.game.players[3], 'CORNER_MERCHANT');
-    
     this.humanIndex = 0;
-    
-    const narrativeWhiteTexts = NARRATIVE_WHITE_DECK.map(c => c.text);
-    
-    this.game.dealAll = () => {
-      this.game.players.forEach(p => {
-        p.hand = [];
-        for (let i = 0; i < 7; i++) {
-          const cardText = narrativeWhiteTexts[Math.floor(Math.random() * narrativeWhiteTexts.length)];
-          p.hand.push(cardText);
-        }
-      });
-    };
-    
-    this.game.refillHand = (player) => {
-      while (player.hand.length < 7) {
-        const cardText = narrativeWhiteTexts[Math.floor(Math.random() * narrativeWhiteTexts.length)];
-        player.hand.push(cardText);
-      }
-    };
-    
-    this.game.dealAll();
-    
-    const beat = this.storyEngine.getCurrentBeat();
-    this.game.currentBlack = {
-      raw: beat.blackCard,
-      prompt: beat.blackCard,
-      hasDice: false,
-      effect: null
-    };
-    
-    this.game.judgeIndex = 0;
-    
-    document.getElementById('narrativeTextBox').style.display = 'block';
-    document.getElementById('stage-canvas').style.display = 'none';
-    
-    this.renderNarrativeBeat();
+    this.assignOriginAttrs(this.game.players[0], originKey);
+    campaign.start(originKey, secretKey);
+    this.firstMilesCampaign = campaign;
     this.show('game');
     this.renderGame();
-    this.runNarrativeBotTurns();
+    this.updateTopHud();
   },
-  
+
+  submitCampaignBeat(cardText) {
+    if (this.firstMilesCampaign && typeof this.firstMilesCampaign.choose === 'function') {
+      this.firstMilesCampaign.choose(cardText);
+    }
+  },
+
+  getNarrativeHand() {
+    const me = this.game && this.game.players && this.game.players[this.humanIndex];
+    if (me && Array.isArray(me.hand)) {
+      return me.hand.slice(0, 4).filter(Boolean);
+    }
+    return ['Walk the block', 'Ask around', 'Stay quiet', 'Make a call'];
+  },
+
   startStreetDiceSandbox() {
     const originKey = document.getElementById('characterOriginSelect').value;
     

@@ -1,0 +1,281 @@
+{
+  "storylets": [
+    {
+      "id": "storylet_barback_confession",
+      "title": "The Barback Confession",
+      "trigger": {
+        "location": "bar",
+        "heatRange": [2, 7],
+        "flags": ["jada_trust_3"],
+        "notFlags": ["jada_betrayed"],
+        "time": "any",
+        "act": [2, 3],
+        "probability": 0.6,
+        "cooldownDays": 3
+      },
+      "card": {
+        "blackCard": "The barback pulls you aside. \"Jada's been leaving early. Someone's calling her.\"",
+        "whiteOptions": [
+          {
+            "text": "Tell Jada",
+            "consequence": {
+              "trustDelta": { "jada": 1 },
+              "flags": ["jada_loyal"],
+              "heatDelta": 0,
+              "cashDelta": 0
+            }
+          },
+          {
+            "text": "Find the caller",
+            "consequence": {
+              "trustDelta": {},
+              "flags": ["jada_caller_investigated", "secret_flag"],
+              "heatDelta": 1,
+              "cashDelta": 0
+            }
+          },
+          {
+            "text": "Ignore it",
+            "consequence": {
+              "trustDelta": { "jada": -1 },
+              "flags": [],
+              "heatDelta": 0,
+              "cashDelta": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "storylet_street_preacher",
+      "title": "The Street Preacher",
+      "trigger": {
+        "location": "street",
+        "heatRange": [0, 4],
+        "flags": [],
+        "notFlags": [],
+        "time": "any",
+        "act": [1, 2],
+        "probability": 0.3,
+        "cooldownDays": 5
+      },
+      "card": {
+        "blackCard": "A preacher on the corner points at you. \"The block remembers what you did.\"",
+        "whiteOptions": [
+          {
+            "text": "Give $5",
+            "consequence": {
+              "trustDelta": {},
+              "flags": ["rep_elders"],
+              "heatDelta": 0,
+              "cashDelta": -5
+            }
+          },
+          {
+            "text": "Walk past",
+            "consequence": {
+              "trustDelta": {},
+              "flags": [],
+              "heatDelta": 0,
+              "cashDelta": 0
+            }
+          },
+          {
+            "text": "Argue",
+            "consequence": {
+              "trustDelta": {},
+              "flags": [],
+              "heatDelta": 1,
+              "cashDelta": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "storylet_lost_receipt",
+      "title": "The Lost Receipt",
+      "trigger": {
+        "location": "alley",
+        "heatRange": [0, 10],
+        "flags": ["has_receipt_5"],
+        "notFlags": ["receipt_mystery_deepened", "receipt_burned"],
+        "time": "any",
+        "act": [2, 3],
+        "probability": 0.4,
+        "cooldownDays": 999
+      },
+      "card": {
+        "blackCard": "Wind lifts a receipt from your pocket. It's dated three days before you arrived.",
+        "whiteOptions": [
+          {
+            "text": "Keep it",
+            "consequence": {
+              "trustDelta": {},
+              "flags": ["receipt_mystery_deepened"],
+              "heatDelta": 0,
+              "cashDelta": 0
+            }
+          },
+          {
+            "text": "Burn it",
+            "consequence": {
+              "trustDelta": {},
+              "flags": ["receipt_burned"],
+              "heatDelta": -1,
+              "cashDelta": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "storylet_rain_cut",
+      "title": "Rain Cut",
+      "trigger": {
+        "location": "barbershop",
+        "heatRange": [0, 10],
+        "flags": ["ray_trust_3"],
+        "notFlags": [],
+        "time": "any",
+        "act": [1, 2, 3],
+        "probability": 0.5,
+        "cooldownDays": 4
+      },
+      "card": {
+        "blackCard": "Rain hammers the shop window. Ray hands you a towel. \"You look like you need a cut.\"",
+        "whiteOptions": [
+          {
+            "text": "Take the cut",
+            "consequence": {
+              "trustDelta": { "ray": 1 },
+              "flags": ["ray_neat"],
+              "heatDelta": -1,
+              "cashDelta": 0
+            }
+          },
+          {
+            "text": "Decline",
+            "consequence": {
+              "trustDelta": { "ray": -1 },
+              "flags": [],
+              "heatDelta": 0,
+              "cashDelta": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "storylet_watch_cruiser",
+      "title": "Watch Cruiser",
+      "trigger": {
+        "location": "street",
+        "heatRange": [5, 10],
+        "flags": [],
+        "notFlags": [],
+        "time": "night",
+        "act": [2, 3],
+        "probability": 0.7,
+        "cooldownDays": 2
+      },
+      "card": {
+        "blackCard": "A cruiser idles at the corner. The window rolls down. Marquez nods at you.",
+        "whiteOptions": [
+          {
+            "text": "Wave back",
+            "consequence": {
+              "trustDelta": { "marquez": 1 },
+              "flags": ["marquez_watched"],
+              "heatDelta": 0,
+              "cashDelta": 0
+            }
+          },
+          {
+            "text": "Turn the corner",
+            "consequence": {
+              "trustDelta": { "marquez": -1 },
+              "flags": ["avoided_marquez"],
+              "heatDelta": 1,
+              "cashDelta": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "storylet_bodega_whisper",
+      "title": "Bodega Whisper",
+      "trigger": {
+        "location": "bodega",
+        "heatRange": [0, 6],
+        "flags": ["chen_trust_2"],
+        "notFlags": ["chen_gone"],
+        "time": "any",
+        "act": [1, 2, 3],
+        "probability": 0.4,
+        "cooldownDays": 3
+      },
+      "card": {
+        "blackCard": "Chen leans over the counter. \"The shipment box had a new sticker. Not mine.\"",
+        "whiteOptions": [
+          {
+            "text": "Investigate the sticker",
+            "consequence": {
+              "trustDelta": { "chen": 1 },
+              "flags": ["shipment_lead"],
+              "heatDelta": 1,
+              "cashDelta": 0
+            }
+          },
+          {
+            "text": "Tell him to leave it",
+            "consequence": {
+              "trustDelta": { "chen": -1 },
+              "flags": ["chen_warned"],
+              "heatDelta": 0,
+              "cashDelta": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "storylet_safehouse_radio",
+      "title": "Safehouse Radio",
+      "trigger": {
+        "location": "safehouse",
+        "heatRange": [0, 10],
+        "flags": ["jenkins_trust_2"],
+        "notFlags": ["safehouse_burned"],
+        "time": "night",
+        "act": [2, 3],
+        "probability": 0.35,
+        "cooldownDays": 5
+      },
+      "card": {
+        "blackCard": "The radio crackles. A numbers station. Jenkins says it only broadcasts at midnight.",
+        "whiteOptions": [
+          {
+            "text": "Record it",
+            "consequence": {
+              "trustDelta": { "jenkins": 1 },
+              "flags": ["numbers_station_recorded"],
+              "heatDelta": 0,
+              "cashDelta": 0
+            }
+          },
+          {
+            "text": "Turn it off",
+            "consequence": {
+              "trustDelta": { "jenkins": -1 },
+              "flags": [],
+              "heatDelta": 0,
+              "cashDelta": 0
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
