@@ -461,6 +461,54 @@
     color: #a0aac2;
   }
 
+  /* ---------- NPC SCENE BACKDROP ---------- */
+  /* The scene gets its own band rather than sitting behind the panels. Behind
+     them it was invisible: the portrait card, dialog box and quest log cover
+     roughly 85% of the panel, so no amount of scrim tuning would have shown
+     the art. A dedicated band gives it real estate, and keeps every piece of
+     text on solid backing instead of fighting neon signage for contrast. */
+  #npcSceneBackdrop {
+    display: none;
+    position: relative;
+    /* 138px is what fits: at 172px the band pushed the action bar past the
+       595px screen frame at 1280x720. */
+    height: 138px;
+    margin: -4px -4px 8px -4px;
+    border: 2px solid #2d313d;
+    border-radius: 3px;
+    background-size: cover;
+    background-position: center 45%;
+    image-rendering: pixelated;
+    overflow: hidden;
+  }
+  #npcSceneBackdrop.active { display: block; }
+  /* Bottom fade blends the band into the panel so it reads as one surface. */
+  #npcSceneBackdrop::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 62px;
+    background: linear-gradient(180deg, rgba(16,17,22,0) 0%, rgba(16,17,22,0.92) 100%);
+    pointer-events: none;
+  }
+  #npcSceneBackdropLabel {
+    position: absolute;
+    left: 10px; bottom: 8px;
+    z-index: 1;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: #ffcd68;
+    text-shadow: 2px 2px 0 #08080a;
+  }
+
+  /* High contrast strips the art entirely — a busy pixel-art scene behind UI is
+     precisely what that mode exists to remove. */
+  body.high-contrast #npcSceneBackdrop {
+    background-image: none !important;
+    background: #000000;
+    border-color: #ffffff;
+  }
+
   /* ---------- ACCESSIBILITY OVERRIDES ---------- */
   body.high-contrast {
     background: #000000 !important;
@@ -1237,8 +1285,9 @@
 
   <!-- NPC / POI SCENE -->
   <section id="npcPoiScene" class="screen">
-    <div class="panel">
-      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:12px; border-bottom:2px solid #2d313d; padding-bottom:6px;">
+    <div class="panel" id="npcScenePanel">
+      <div id="npcSceneBackdrop"><span id="npcSceneBackdropLabel"></span></div>
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:12px; border-bottom:2px solid #2d313d; padding-bottom:6px; position:relative;">
         <h2 style="margin:0; font-family:'Press Start 2P', monospace; font-size:12px;"><span id="npcSceneLocation">BARBERSHOP</span> — <span id="npcSceneTime" style="color:#ffcd68;">AFTERNOON</span></h2>
         <span class="status-pill" id="npcSceneHeatBadge" style="color:#f25438; font-weight:bold;">HEAT: 0/10</span>
       </div>
@@ -2020,6 +2069,45 @@ function drawCharacterPreview(ctx, origin, frame) {
 /* ==================================
    UI / STATE / ENGINE BINDINGS
    ================================== */
+/**
+ * Backdrop art for the NPC/POI scene, keyed by npcId with optional per-city
+ * overrides so travelling changes what you see. Files are the web-sized copies
+ * in assets/scenes/web/ (~150KB each); the multi-MB originals in
+ * assets/scenes/ are the source and must never be loaded in the browser.
+ *
+ * Known gap: there is no chess-park scene in the generated batch, so T-Bone
+ * gets the closest outdoor street scene. It reads as "outdoors in the
+ * neighbourhood" rather than "chess tables".
+ */
+const NPC_SCENE_BACKDROPS = {
+  ray: {
+    default: 'barber-shop-interior',
+    Harlem: 'midtown-liquor-barber-wall'
+  },
+  chen: {
+    default: 'corner-bodega-night',
+    Chicago: 'elsol-bodega-underpass',
+    Miami: 'elsol-bodega-taco-truck'
+  },
+  gate: {
+    default: 'bar-hotel-corner-steam',
+    NOLA: 'nola-swing-bar-door'
+  },
+  tbone: {
+    default: 'art-deco-crowd-day',
+    Baltimore: 'rowhouse-street'
+  }
+};
+
+const NPC_SCENE_BACKDROP_DIR = 'assets/scenes/web/';
+
+/** Resolve an npcId + city to a backdrop file name, or null if unmapped. */
+function resolveNpcBackdrop(npcId, city) {
+  const entry = NPC_SCENE_BACKDROPS[npcId];
+  if (!entry) return null;
+  return entry[city] || entry.default || null;
+}
+
 const SHOP_ITEMS = [
   { gameId: 'street_dice', name: 'Loaded Dice', desc: '+3 WIT bonus on your next Street Dice roll.', cost: 30 },
   { gameId: 'bodega_run', name: 'Rubber Soles', desc: 'Alertness builds slower on your next Bodega Run.', cost: 30 },
@@ -5577,6 +5665,40 @@ const app = {
     return modes[mood] || modes.friendly;
   },
 
+  /**
+   * Put the scene backdrop behind the NPC panel. A missing mapping or a file
+   * that fails to load leaves the flat panel exactly as it was — a backdrop is
+   * decoration, and decoration must never break the screen it decorates.
+   */
+  applyNpcSceneBackdrop(npcId) {
+    const band = document.getElementById('npcSceneBackdrop');
+    if (!band) return;
+
+    const city = (this.game && this.game.activeCity) || 'Harlem';
+    const file = resolveNpcBackdrop(npcId, city);
+    const label = document.getElementById('npcSceneBackdropLabel');
+
+    const clear = () => {
+      band.classList.remove('active');
+      band.style.backgroundImage = '';
+      if (label) label.textContent = '';
+    };
+
+    if (!file) { clear(); return; }
+
+    const path = NPC_SCENE_BACKDROP_DIR + file + '.png';
+    if (typeof Image === 'undefined') { clear(); return; }
+
+    const probe = new Image();
+    probe.onload = () => {
+      band.style.backgroundImage = `url("${path}")`;
+      band.classList.add('active');
+      if (label) label.textContent = city.toUpperCase();
+    };
+    probe.onerror = clear;
+    probe.src = path;
+  },
+
   enterNpcScene(npcId, npcName, mood = 'friendly', trustMax = 5, trustCur = 3) {
     const location = ((this.game && this.game.activeCity) || 'Harlem').toUpperCase();
     const heatVal = this.storyEngine ? this.storyEngine.heat : 0;
@@ -5604,6 +5726,7 @@ const app = {
       questMini.textContent = `* The Gossip — talk to ${npcName} to gather neighborhood intelligence.`;
     }
 
+    this.applyNpcSceneBackdrop(npcId);
     this.drawNpcScenePortrait();
 
     const choicesDiv = document.getElementById('npcSceneChoices');

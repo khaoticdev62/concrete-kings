@@ -50,7 +50,7 @@ function loadGameModule() {
   });
 
   vm.createContext(context);
-  const wrapped = `${cardsScript}\n${storyScript}\n${testable}\n({ Deck, Game, ReceiptSystem, AllianceSystem, RECEIPT_POOL, BLACK_CARDS, WHITE_CARDS, DICE_EFFECTS, app, NarrativeStoryEngine, NARRATIVE_BEATS, ENDINGS });`;
+  const wrapped = `${cardsScript}\n${storyScript}\n${testable}\n({ Deck, Game, ReceiptSystem, AllianceSystem, RECEIPT_POOL, BLACK_CARDS, WHITE_CARDS, DICE_EFFECTS, app, NarrativeStoryEngine, NARRATIVE_BEATS, ENDINGS, resolveNpcBackdrop, NPC_SCENE_BACKDROPS });`;
   return vm.runInContext(wrapped, context);
 }
 
