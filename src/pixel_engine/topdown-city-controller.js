@@ -6,18 +6,26 @@
  * this controller never draws.
  */
 
-let dataModule;
+/**
+ * Names here are prefixed because in the browser these files load as classic
+ * <script> tags sharing one global scope. A bare `const WORLD` would collide
+ * with the same declaration in the data and renderer modules and stop the
+ * later script parsing entirely — which node's per-module scope hides.
+ */
+let CTRL_DATA;
 if (typeof require !== 'undefined') {
-  dataModule = require('./topdown-city-data.js');
+  CTRL_DATA = require('./topdown-city-data.js');
 } else {
-  dataModule = {
+  CTRL_DATA = {
     WORLD: window.TOPDOWN_WORLD,
     VIEWPORT: window.TOPDOWN_VIEWPORT,
     getDistrict: window.getTopDownDistrict
   };
 }
 
-const { WORLD, VIEWPORT, getDistrict } = dataModule;
+const CTRL_WORLD = CTRL_DATA.WORLD;
+const CTRL_VIEWPORT = CTRL_DATA.VIEWPORT;
+const ctrlGetDistrict = CTRL_DATA.getDistrict;
 
 const PLAYER_BOX = { w: 16, h: 10 };
 const POI_RADIUS = 52;
@@ -33,7 +41,7 @@ function boxHitsRect(bx, by, bw, bh, r) {
 class TopDownCityController {
   constructor(options = {}) {
     this.districtKey = options.districtKey || 'HARLEM';
-    this.district = getDistrict(this.districtKey) || getDistrict('HARLEM');
+    this.district = ctrlGetDistrict(this.districtKey) || ctrlGetDistrict('HARLEM');
 
     this.speed = 4;
     this.facing = 'RIGHT';
@@ -51,17 +59,17 @@ class TopDownCityController {
 
   /** Place the player on the avenue centre, nudging along it until walkable. */
   spawn() {
-    const avenue = this.district.roads.find(r => r.dir === 'h') || { y: WORLD.height / 2, h: 100 };
+    const avenue = this.district.roads.find(r => r.dir === 'h') || { y: CTRL_WORLD.height / 2, h: 100 };
     const y = avenue.y + avenue.h / 2;
-    let x = WORLD.width / 2;
+    let x = CTRL_WORLD.width / 2;
     for (let i = 0; i < 200 && this.collidesAt(x, y); i++) x -= 16;
-    this.x = clamp(x, 0, WORLD.width);
-    this.y = clamp(y, 0, WORLD.height);
+    this.x = clamp(x, 0, CTRL_WORLD.width);
+    this.y = clamp(y, 0, CTRL_WORLD.height);
     this.updateCamera();
   }
 
   setDistrict(districtKey) {
-    const next = getDistrict(districtKey);
+    const next = ctrlGetDistrict(districtKey);
     if (!next) return false;
     this.districtKey = districtKey;
     this.district = next;
@@ -99,11 +107,11 @@ class TopDownCityController {
 
     // Resolve per-axis so the player slides along walls instead of sticking.
     if (dx !== 0) {
-      const nx = clamp(this.x + dx, 0, WORLD.width);
+      const nx = clamp(this.x + dx, 0, CTRL_WORLD.width);
       if (!this.collidesAt(nx, this.y)) this.x = nx;
     }
     if (dy !== 0) {
-      const ny = clamp(this.y + dy, 0, WORLD.height);
+      const ny = clamp(this.y + dy, 0, CTRL_WORLD.height);
       if (!this.collidesAt(this.x, ny)) this.y = ny;
     }
 
@@ -115,8 +123,8 @@ class TopDownCityController {
   }
 
   updateCamera() {
-    this.camera.x = Math.round(clamp(this.x - VIEWPORT.width / 2, 0, WORLD.width - VIEWPORT.width));
-    this.camera.y = Math.round(clamp(this.y - VIEWPORT.height / 2, 0, WORLD.height - VIEWPORT.height));
+    this.camera.x = Math.round(clamp(this.x - CTRL_VIEWPORT.width / 2, 0, CTRL_WORLD.width - CTRL_VIEWPORT.width));
+    this.camera.y = Math.round(clamp(this.y - CTRL_VIEWPORT.height / 2, 0, CTRL_WORLD.height - CTRL_VIEWPORT.height));
   }
 
   checkPois() {
