@@ -9,7 +9,10 @@
     "baltimore_tiles": "assets/sprite_packs/city_baltimore_tiles.png",
     "atlanta_tiles": "assets/sprite_packs/city_atlanta_tiles.png",
     "oakland_tiles": "assets/sprite_packs/city_oakland_tiles.png",
-    "nola_tiles": "assets/sprite_packs/city_nola_tiles.png"
+    "nola_tiles": "assets/sprite_packs/city_nola_tiles.png",
+    "prop_bodega_storefront": "assets/prop_bodega_storefront.jpg",
+    "prop_chess_table": "assets/prop_chess_table.jpg",
+    "prop_barbershop_pole": "assets/prop_barbershop_pole.jpg"
   },
   "sprites": {}
 }
