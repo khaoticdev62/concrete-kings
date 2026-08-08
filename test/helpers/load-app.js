@@ -28,7 +28,15 @@ function loadGameModule() {
     clearInterval: typeof global.clearInterval !== 'undefined' ? global.clearInterval : undefined,
     setTimeout: typeof global.setTimeout !== 'undefined' ? global.setTimeout : undefined,
     clearTimeout: typeof global.clearTimeout !== 'undefined' ? global.clearTimeout : undefined,
-    Event: typeof global.Event !== 'undefined' ? global.Event : undefined
+    Event: typeof global.Event !== 'undefined' ? global.Event : undefined,
+    AssetRegistry: typeof global.AssetRegistry !== 'undefined' ? global.AssetRegistry : undefined,
+    TopDownCityController: typeof global.TopDownCityController !== 'undefined' ? global.TopDownCityController : undefined,
+    TopDownCityRenderer: typeof global.TopDownCityRenderer !== 'undefined' ? global.TopDownCityRenderer : undefined,
+    getTopDownDistrict: typeof global.getTopDownDistrict !== 'undefined' ? global.getTopDownDistrict : undefined,
+    districtKeys: typeof global.districtKeys !== 'undefined' ? global.districtKeys : undefined,
+    CITY_TO_DISTRICT: typeof global.CITY_TO_DISTRICT !== 'undefined' ? global.CITY_TO_DISTRICT : undefined,
+    TOPDOWN_POI_LABELS: typeof global.TOPDOWN_POI_LABELS !== 'undefined' ? global.TOPDOWN_POI_LABELS : undefined,
+    fetch: typeof global.fetch !== 'undefined' ? global.fetch : undefined
   };
   
   // Keep VM context's globals dynamically linked to Node's global object in tests
