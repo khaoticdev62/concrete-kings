@@ -889,15 +889,9 @@
 
   <!-- GAME -->
   <section id="game" class="screen">
-    <!-- Viewport Panel (Main Focal Point) -->
-    <div class="panel stage-panel" style="margin-top:0;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <h3 style="margin:0; font-family:'Press Start 2P', monospace; font-size:10px;">BLOCK VIEWPORT: <span id="viewportCity" style="color:#f0ab43;">HARLEM</span></h3>
-        <span class="status-pill" id="viewportWeatherBadge" style="color:#85c4ff; font-weight:bold;">CLEAR</span>
-      </div>
-      
-      <div class="canvas-mount-point crt-screen" style="position: relative;">
-        <canvas id="stage-canvas" class="pixel-canvas" style="width: 100%; display: block; background: #08080a;"></canvas>
+    <!-- Narrative Text Box & Minigame Mount Point -->
+    <div class="panel" style="margin-top:0; padding:0; overflow:hidden; display:flex; flex-direction:column; height:300px;">
+      <div class="canvas-mount-point crt-screen" style="position: relative; flex:1; width:100%; overflow:hidden;">
         <canvas id="minigame-canvas" class="pixel-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: auto; display: none; background: transparent; image-rendering: pixelated;"></canvas>
         <div id="narrativeTextBox" style="display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:#08080a; padding:16px; box-sizing:border-box; color:#f4f7ff; font-family:'JetBrains Mono', monospace; font-size:12px; line-height:1.5; overflow-y:auto; border:3px solid #393e4d;">
           <h2 id="narrativeBeatTitle" style="font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68; margin-top:0; text-align:left;">THE DROPOFF</h2>
@@ -934,10 +928,6 @@
             <button class="secondary" onclick="document.getElementById('secretOverlay').style.display='none'" style="width:100%; font-family:'Press Start 2P', monospace; font-size:8px;">[ BACK ]</button>
           </div>
         </div>
-      </div>
-      
-      <div style="font-size:10px; margin-top:8px; text-align:center; color:#8b95ab;">
-        Walk with <b style="color:#ffcd68;">WASD / Arrows</b>. Enter hotspots (Barber, Bodega, Chess) with <b style="color:#ffcd68;">Enter</b>!
       </div>
     </div>
 
@@ -2049,15 +2039,6 @@ const app = {
     const targetScreen = document.getElementById(id);
     targetScreen.classList.add('active');
     this.updateTopHud();
-
-    const canvasContainer = targetScreen.querySelector('.canvas-mount-point');
-    const stageCanvas = document.getElementById('stage-canvas');
-    if (canvasContainer && stageCanvas) {
-      canvasContainer.appendChild(stageCanvas);
-      if (this.pixelEngine) {
-        setTimeout(() => this.pixelEngine.resize(), 50);
-      }
-    }
   },
   showSetup() { this.showMainMenu(); },
 
@@ -3415,70 +3396,7 @@ const app = {
           this.renderTopDownFrame();
         }
 
-        // 2. Active location viewport stage
-        const gameActive = document.getElementById('game').classList.contains('active');
-        const mapActive = document.getElementById('blockMap').classList.contains('active');
-        if (gameActive || mapActive) {
-          const stageCanvas = document.getElementById('stage-canvas');
-          if (stageCanvas) {
-            if (!this.pixelEngine) {
-              this.pixelEngine = new PixelCanvasEngine(stageCanvas, {
-                nativeWidth: 1280,
-                nativeHeight: 720,
-                highDetail: true,
-                cityTheme: this.game.activeCity || 'Harlem'
-              });
-            }
-            
-            this.mapController.update();
-            this.weatherSystem.advanceFrame();
-            
-            const vCtx = this.pixelEngine.virtualCtx;
-            this.pixelEngine.clearNative('#08080a');
-            
-            const city = this.game.activeCity || 'Harlem';
-            drawProceduralBackground(vCtx, city, this.shimmerFrame);
-            
-            this.weatherSystem.render(vCtx);
-            this.mapController.render(vCtx);
-            
-            // Draw remote characters if multiplayer
-            if (this.game.mode === MODE.ONLINE && this.remoteAvatars) {
-              this.remoteAvatars.forEach((p, name) => {
-                const px = Math.floor(p.x);
-                const py = Math.floor(p.y);
-                const origin = CHARACTER_ORIGINS[p.origin] || CHARACTER_ORIGINS.BARBER;
-                drawHighDetailCharacterSprite(vCtx, origin, px, py, p.frame, false, true, name);
-              });
-            }
-            
-            this.pixelEngine.present();
-            
-            // Proximity action checks
-            if (this.mapController.activeHotspot) {
-              if (this.mapController.keys['enter']) {
-                this.mapController.keys['enter'] = false;
-                this.triggerHotspot(this.mapController.activeHotspot);
-              }
-            }
-            
-            // Multiplayer positions synchronization
-            if (this.game.mode === MODE.ONLINE && this.ws && this.ws.readyState === 1) {
-              if (this.mapController.isMoving || (this.lastX !== this.mapController.x || this.lastY !== this.mapController.y)) {
-                this.ws.send(JSON.stringify({
-                  type: 'avatar_update',
-                  x: this.mapController.x,
-                  y: this.mapController.y,
-                  origin: this.mapController.origin.id,
-                  frame: this.mapController.animFrame,
-                  cityTheme: city
-                }));
-                this.lastX = this.mapController.x;
-                this.lastY = this.mapController.y;
-              }
-            }
-          }
-        }
+
         
         // 3. Shimmer cards update
         this.updateCanvasCards();
@@ -5202,7 +5120,6 @@ const app = {
     this.clearResolutionAutoAdvance();
     this.storyEngine = null;
     document.getElementById('narrativeTextBox').style.display = 'none';
-    document.getElementById('stage-canvas').style.display = 'block';
     
     const nextBtn = document.querySelector('#roundResult button');
     if (nextBtn) {
@@ -5581,6 +5498,26 @@ const app = {
     this.topDownController.update();
     this.topDownRenderer.render(ctx, this.topDownController);
 
+    // Weather composites over the city, in world space so it tracks the camera.
+    if (this.weatherSystem) {
+      this.weatherSystem.advanceFrame();
+      ctx.save();
+      ctx.translate(-this.topDownController.camera.x, -this.topDownController.camera.y);
+      this.weatherSystem.render(ctx);
+      ctx.restore();
+    }
+
+    // Remote players, drawn in world space alongside the local player.
+    if (this.game.mode === MODE.ONLINE && this.remoteAvatars) {
+      ctx.save();
+      ctx.translate(-this.topDownController.camera.x, -this.topDownController.camera.y);
+      this.remoteAvatars.forEach((p, name) => {
+        const origin = CHARACTER_ORIGINS[p.origin] || CHARACTER_ORIGINS.BARBER;
+        drawHighDetailCharacterSprite(ctx, origin, Math.floor(p.x), Math.floor(p.y), p.frame, false, true, name);
+      });
+      ctx.restore();
+    }
+
     const prompt = document.getElementById('mapPromptLine');
     const spot = this.topDownController.activePoi;
     if (prompt) {
@@ -5593,6 +5530,26 @@ const app = {
       this.topDownController.keys['enter'] = false;
       const hotspot = this.mapController.hotspots.find(h => h.id === spot.id);
       if (hotspot) this.triggerHotspot(hotspot);
+    }
+
+    // Broadcast top-down coordinates so remote avatars stay in sync.
+    if (this.game.mode === MODE.ONLINE && this.ws && this.ws.readyState === 1) {
+      const c = this.topDownController;
+      if (c.isMoving || this.lastX !== c.x || this.lastY !== c.y) {
+        this.ws.send(JSON.stringify({
+          type: 'avatar_update',
+          x: c.x,
+          y: c.y,
+          // Must stay a CHARACTER_ORIGINS key ('BARBER', 'STREET_SCHOLAR', ...):
+          // the receiver does CHARACTER_ORIGINS[p.origin]. Sending a city name
+          // here silently falls every remote avatar back to BARBER.
+          origin: this.mapController.origin.id,
+          frame: c.animFrame,
+          cityTheme: this.game.activeCity || 'Harlem'
+        }));
+        this.lastX = c.x;
+        this.lastY = c.y;
+      }
     }
   },
 
