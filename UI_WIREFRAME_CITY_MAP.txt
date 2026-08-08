@@ -1,93 +1,68 @@
-CONCRETE KINGS — UI WIREFRAME CITY / BLOCK MAP
-Full Detail / ASCII-Safe / Aligned to 1280x720
-================================================
+CONCRETE KINGS — UI WIREFRAME CITY / TOP-DOWN WALKABLE DISTRICT MAP
+Full Detail / Aligned to 1280x720
+==================================================================
 
 NATIVE RESOLUTION: 1280x720
-FORMAT: ASCII-safe borders only
+MAP CANVAS SIZE: 960x520
+WORLD SIZE: 2400x1300 (Walkable district grid)
 
-CITY / BLOCK MAP SCREEN
-- Top HUD repeats
-- Center: tile map grid with symbols
-- Bottom: legend and map controls
+TOP-DOWN DISTRICT EXPLORATION
+- Top-down / 3/4 hybrid walkable perspective.
+- Viewport of 960x520 pixels scales crisply to the 1280x720 frame using nearest-filter scaling.
+- Camera centers on the player avatar and clamps smoothly to the 2400x1300 world bounds.
 
-+--------------------------------------------------------------------+
-| CONCRETE KINGS — MAP    DAY 1    HEAT: 2/10                        |
-+--------------------------------------------------------------------+
-|                                                                    |
-|   +------------------------------------------------------------+   |
-|   |  [125TH ST] [BAR] [BODEGA] [ALLEY] [SAFE HOUSE]          |   |
-|   |  YOU = @                                                   |   |
-|   |  NPC  = R  J  M  K                                         |   |
-|   |  QUEST = *  ?  !                                           |   |
-|   |  FOG   = #                                                 |   |
-|   +------------------------------------------------------------+   |
-|                                                                    |
-|   +------------------------------------------------------------+   |
-|   | [ LEGEND ]  [ ZOOM IN ]  [ ZOOM OUT ]  [ FAST TRAVEL ]    |   |
-|   +------------------------------------------------------------+   |
-+--------------------------------------------------------------------+
+DISTRICT MAP LAYOUT
++-----------------------------------------------------------------------------+
+| CONCRETE KINGS — DISTRICT MAP    REPUTATION: 3    WEATHER: CLEAR            |
++-----------------------------------------------------------------------------+
+| DISTRICTS         | HARLEM STOOP                                            |
+| +---------------+ | +-----------------------------------------------------+ |
+| | [HARLEM]      | | | (Limestone rowhouses, roadways, sidewalks, trees)    | |
+| | [DETROIT]*    | | |                                                     | |
+| | [CHICAGO]     | | |        |                                            | |
+| | [MIAMI]       | | |        | (Street)                                   | |
+| | [BALTIMORE]   | | | -------+------- (Avenue)                            | |
+| | [ATLANTA]     | | |        |                                            | |
+| | [OAKLAND]     | | |        |                                            | |
+| | [NOLA]        | | |   @ (Player)                                        | |
+| |               | | |                  [ BODEGA ] (POI Marker)            | |
+| | * HEAT GATED  | | |                                                     | |
+| +---------------+ | +-----------------------------------------------------+ |
+|                   | Walk with WASD / Arrows. [ BODEGA ] — press ENTER       |
++-----------------------------------------------------------------------------+
+| [BACK TO TABLE]  [EXIT TO MENU]                                             |
++-----------------------------------------------------------------------------+
 
-MAP LEGEND
-  @  = player
-  R/J/M/K = NPCs
-  * = active quest
-  ? = hidden quest
-  ! = urgent quest
-  # = fog / unexplored
-  B = barbershop
-  D = bodega
-  A = alley
-  H = safe house
-  P = park
+DISTRICT RAIL & TRAVEL GATING
+- Left rail lists the eight districts by name: Harlem, Detroit, Chicago, Miami, Baltimore, Atlanta, Oakland, NOLA.
+- Fast travel is gated by Heat levels (`app.locationHeat`). If a city has active heat (> 0), its button in the rail is disabled, styled red, and labelled with the Heat level (e.g. "DETROIT · HEAT 3").
+- Travelling to a clean city updates `app.game.activeCity`, resets weather to Clear, and starts the district BGM and theme.
 
-TILE RULES
-- Grid aligned to 32x32 pixel units
-- Fog hides unexplored tiles and hidden quest tiles
-- Fast travel unlocks only after visited tile is cleared of active heat
-- NPC blink red if hostile, green if friendly
+WALKABILITY & COLLISION RULES
+- Double-axis movement handles horizontal and vertical inputs independently.
+- Per-axis collision checks player box (16x10 at player's feet) against solid parcels (buildings). This allows the player to slide smoothly along walls instead of sticking.
+- Ground, park grass, underpass, and roads are fully walkable.
+- Parcels defined as solid cannot be walked into.
 
-CONTROLS
-- D-pad / arrows: move cursor
-- Confirm: select tile / travel
-- Cancel: back to game
-- Zoom in/out: increases tile detail level
+CANONICAL POINTS OF INTEREST (POIs)
+Each of the eight districts has exactly the five canonical POIs placed at walkable world coordinates:
+1. BARBER_SHOP
+2. BODEGA
+3. SHOP_DEAL
+4. CHESS_PARK
+5. LOCKED_DOOR
+- Names are drawn on the map canvas at the POI coordinates.
+- Proximity check: approaching within 52 pixels of a POI updates the screen's prompt line to "[POI NAME] — press ENTER". Pressing Enter triggers the hotspot (enters Ray, Mr. Chen, or T-Bone's NPC interaction scene).
 
-ADDITIONAL VIEWS
+ASSET PACKS & PROCEDURAL FALLBACK
+- Asset Registry parses `assets/manifest.json`.
+- Sprites use category vocabulary: ground, road, building, furniture, flora, decal, prop, icon.
+- Tileset layout specifies 16x16 native tiles with 1-pixel gutters. Mid-rise/high-rise buildings use 32x32.
+- Procedural Fallback: if manifest loading, preloading, or an image file fails, the renderer automatically draws vector outlines and filled blocks using the district palette. A missing asset is never fatal.
+- Per-District Palettes: Restricted to the 64-colour master gamut (`concrete_kings_64.json`). Large fills (ground, asphalt, building roofs) stay under 120 relative luminance for noir-discipline. Green vegetation uses the cool_tones teal ramp (#0D2926 / #174540 / #246961).
 
-MAP — FAST TRAVEL
-+--------------------------------------------------------------------+
-| FAST TRAVEL                                                        |
-+--------------------------------------------------------------------+
-|                                                                    |
-|   +------------------------------------------------------------+   |
-|   | [125TH ST]  CLEAR     [ SELECT ]                           |   |
-|   | [BAR]       HEAT 3   [ SELECT ]                           |   |
-|   | [BODEGA]    CLEAR     [ SELECT ]                           |   |
-|   +------------------------------------------------------------+   |
-|                                                                    |
-|   +------------------------------------------------------------+   |
-|   | [ BACK ]                                                   |   |
-|   +------------------------------------------------------------+   |
-+--------------------------------------------------------------------+
-
-MAP — QUEST FILTER
-+--------------------------------------------------------------------+
-| MAP — QUEST FILTER                                                 |
-+--------------------------------------------------------------------+
-|                                                                    |
-|   +------------------------------------------------------------+   |
-|   | SHOW: [ACTIVE] [HIDDEN] [URGENT] [ALL]                     |   |
-|   |                                                             |   |
-|   | * Active quest tile highlighted                             |   |
-|   | ! Urgent quest tile blinking                                |   |
-|   +------------------------------------------------------------+   |
-|                                                                    |
-|   +------------------------------------------------------------+   |
-|   | [ BACK ]                                                   |   |
-|   +------------------------------------------------------------+   |
-+--------------------------------------------------------------------+
-
-TRANSITION RULES
-- Tile select -> confirm travel -> loading -> new location
-- Cancel from any overlay -> back to map
-- Map overlay from other screens -> back returns to prior screen
+REMOVED AND WHY
+- Quest Filter: Removed. The strategic map filter had no data model behind it (quest glyphs were hardcoded at grid cells 4,3 / 16,3 / 16,8 and did not map to actual active quests), so it was purely decorative.
+- Fog of War: Removed. There was no explored/visited coordinate tracking in memory, making the visual fog overlay superficial.
+- Zoom Controls: Removed. Visual zooming is obsolete under the camera-follow top-down camera system.
+- ASCII Map Grid: Removed. Replaced by the 2.5D walkable top-down graphical canvas.
