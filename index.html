@@ -218,8 +218,8 @@
   .topbar { display:flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .muted { font-size: 12px; color: #8b95ab; }
   .pass-banner {
-    margin-top: 12px; font-size: 12px; font-weight: 700;
-    background: #2b0d0d; border: 2px solid #d9382e; padding: 12px;
+    margin-top: 6px; font-size: 12px; font-weight: 700;
+    background: #2b0d0d; border: 2px solid #d9382e; padding: 6px 10px;
     text-align: center;
   }
   
@@ -439,6 +439,35 @@
     line-height: 1.3;
   }
   
+  /* This class was referenced in the #game markup and defined nowhere, so it
+     fell back to display:block and stacked the hand column on top of the status
+     rail — 312px of the 1386px overflow, with no error to show for it.
+     minmax(0, 1fr) rather than 1fr so the hand strip can shrink below its
+     content width and scroll internally instead of widening the grid. */
+  .game-bottom-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 12px;
+    align-items: start;
+  }
+  @media (max-width: 1000px) {
+    /* A 300px rail beside a hand strip stops being usable this narrow. */
+    .game-bottom-grid { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  .save-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 12px;
+  }
+
+  .hud-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
   .rpg-hud-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -938,7 +967,10 @@
   <!-- GAME -->
   <section id="game" class="screen">
     <!-- Narrative Text Box & Minigame Mount Point -->
-    <div class="panel" style="margin-top:0; padding:0; overflow:hidden; display:flex; flex-direction:column; height:300px;">
+    <!-- 130px, not 300px: the hard-coded 300 was 300 of the 1386px overflow.
+         Long story beats scroll inside #narrativeTextBox instead of pushing the
+         table off-screen. -->
+    <div class="panel" id="stagePanel" style="margin-top:0; padding:0; overflow:hidden; display:none; flex-direction:column; height:116px;">
       <div class="canvas-mount-point crt-screen" style="position: relative; flex:1; width:100%; overflow:hidden;">
         <canvas id="minigame-canvas" class="pixel-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: auto; display: none; background: transparent; image-rendering: pixelated;"></canvas>
         <div id="narrativeTextBox" style="display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:#08080a; padding:16px; box-sizing:border-box; color:#f4f7ff; font-family:'JetBrains Mono', monospace; font-size:12px; line-height:1.5; overflow-y:auto; border:3px solid #393e4d;">
@@ -980,7 +1012,7 @@
     </div>
 
     <!-- Status readouts bar / ticker -->
-    <div class="panel" style="margin-top:12px; padding: 10px 16px;">
+    <div class="panel" style="margin-top:8px; padding: 6px 12px;">
       <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center;">
         <span class="status-pill">Round <b id="roundNum" style="color:#ffcd68;">1</b> · Judge: <b id="judgeName" style="color:#ff7a45;">-</b></span>
         <span id="statusText" style="font-size:12px; font-weight:bold; color:#ffcd68;">Your turn: pick a card to play.</span>
@@ -1036,17 +1068,20 @@
                 <button onclick="app.proposeAllianceFromUI()" style="font-size:8px;">PROPOSE COOKOUT ALLIANCE</button>
               </div>
 
-              <div class="save-bar" style="margin-top:12px; display:flex; gap:8px;">
+              <div class="save-bar">
                 <button id="submitBtn" onclick="app.submitSelection()" disabled style="flex:1;">SUBMIT SELECTION</button>
                 <button class="secondary" onclick="app.passTurn()">PASS / END TURN</button>
+                <button class="secondary" onclick="app.showBlockMap()" style="font-size:9px; white-space:nowrap;">[ MAP ]</button>
               </div>
             </div>
           </div>
         </div>
       </div>
       
-      <!-- Right Column: Status HUD, Scoreboard, Chat, Dev Controls -->
-      <div style="display:flex; flex-direction:column; gap:16px;">
+      <!-- Right Column: Status HUD, tabbed rail, Dev Controls.
+           gap is 8px not 16px — the rail governs the row height, so its
+           internal spacing is what the whole screen pays for. -->
+      <div style="display:flex; flex-direction:column; gap:8px;">
         <!-- RPG Stats Panel -->
         <div class="panel">
           <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:10px; color:#339488;">RPG STAT HUD</h3>
@@ -1059,24 +1094,38 @@
           <button class="secondary" style="width:100%; margin-top:8px; font-size:8px;" onclick="app.openShopModal()">SHOP</button>
         </div>
 
-        <!-- Scoreboard & Saves -->
-        <div class="panel">
-          <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:10px;">SCOREBOARD</h3>
-          <div id="scoreboard" class="retro-table"></div>
-          <div class="save-bar" style="margin-top:12px; display:flex; gap:8px; align-items:center;">
-            <button class="secondary" onclick="app.saveGame()" style="padding: 6px 10px; font-size:8px; flex:1;">SAVE STATE</button>
-            <button class="secondary" onclick="app.loadGame()" style="padding: 6px 10px; font-size:8px; flex:1;">LOAD STATE</button>
-            <span id="saveStatus" class="muted" style="font-size:9px;"></span>
+        <!-- Tabbed rail: three stacked panels (scoreboard 219px, chat 114px,
+             plus a receipts panel that never existed) collapse into one fixed
+             height panel. switchRightTab, renderReceiptsTab and six element ids
+             were already in the JS with no markup to drive — this supplies it,
+             which also gives the Receipt system its first player-facing UI. -->
+        <div class="panel" id="railTabPanel">
+          <div style="display:flex; gap:4px; margin-bottom:8px;">
+            <button id="tabScoreboardBtn" class="active" onclick="app.switchRightTab('scoreboard')" style="flex:1; font-size:7px; padding:5px 2px;">SCORE</button>
+            <button id="tabReceiptsBtn" class="secondary" onclick="app.switchRightTab('receipts')" style="flex:1; font-size:7px; padding:5px 2px;">RECEIPTS</button>
+            <button id="tabChatBtn" class="secondary" onclick="app.switchRightTab('chat')" style="flex:1; font-size:7px; padding:5px 2px;">CHAT</button>
           </div>
-        </div>
 
-        <!-- Chat Panel -->
-        <div class="panel">
-          <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:10px;">COMMUNITY CHAT</h3>
-          <div id="chatLog" class="retro-chat-log"></div>
-          <div style="display:flex; gap:8px; margin-top:8px;">
-            <input id="chatInput" type="text" placeholder="Say something in the cipher..." style="font-size:11px;" />
-            <button onclick="app.sendChat()" style="padding:10px; font-size:8px;">SEND</button>
+          <div id="rightTabScoreboard">
+            <div id="scoreboard" class="retro-table" style="max-height:112px; overflow-y:auto;"></div>
+            <div class="save-bar">
+              <button class="secondary" onclick="app.saveGame()" style="padding: 5px 8px; font-size:8px; flex:1;">SAVE</button>
+              <button class="secondary" onclick="app.loadGame()" style="padding: 5px 8px; font-size:8px; flex:1;">LOAD</button>
+              <span id="saveStatus" class="muted" style="font-size:9px;"></span>
+            </div>
+          </div>
+
+          <div id="rightTabReceipts" style="display:none;">
+            <div id="allianceStatusText" style="font-size:10px; color:#cbd5ed; margin-bottom:6px;">No active alliances.</div>
+            <div id="receiptsList" style="max-height:130px; overflow-y:auto;"></div>
+          </div>
+
+          <div id="rightTabChat" style="display:none;">
+            <div id="chatLog" class="retro-chat-log" style="max-height:100px;"></div>
+            <div style="display:flex; gap:6px; margin-top:6px;">
+              <input id="chatInput" type="text" placeholder="Say something..." style="font-size:11px; min-width:0;" />
+              <button onclick="app.sendChat()" style="padding:8px; font-size:8px;">SEND</button>
+            </div>
           </div>
         </div>
 
@@ -1121,11 +1170,6 @@
           </div>
         </details>
       </div>
-    </div>
-    
-    <!-- Action Bar -->
-    <div class="panel" style="margin-top:12px; padding:10px 16px; display:flex; justify-content:center;">
-      <button class="secondary" onclick="app.showBlockMap()" style="padding:8px 24px; font-size:9px;">[ MAP ]</button>
     </div>
   </section>
 
@@ -3063,12 +3107,16 @@ const app = {
     banner.style.display = 'block';
     banner.style.visibility = 'visible';
     banner.style.opacity = '1';
+    // One row rather than three stacked blocks: as a stack this banner was
+    // 103px, the largest single item keeping the submit button off-screen.
     banner.innerHTML = `
-      <div style="font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68; margin-bottom:8px;">
-        PASS DEVICE TO: <span style="color:#f4f7ff;">${current.toUpperCase()}</span>
+      <div style="display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;">
+        <span style="font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68;">
+          PASS TO: <span style="color:#f4f7ff;">${current.toUpperCase()}</span>
+        </span>
+        <button onclick="app.localPlayer(${(this.humanIndex + 1) % this.game.players.length})" style="padding:6px 12px; font-size:8px;">I AM ${next.toUpperCase()}</button>
+        <span style="font-size:11px; opacity:.85;">${reason}</span>
       </div>
-      <button onclick="app.localPlayer(${(this.humanIndex + 1) % this.game.players.length})">I AM ${next.toUpperCase()}</button>
-      <div style="margin-top:8px; font-size:11px; opacity:.85;">${reason}</div>
     `;
   },
 
@@ -3487,6 +3535,12 @@ const app = {
           this.renderTopDownFrame();
         }
 
+        // Keep the stage panel in step with the mini-game. Driven from the loop
+        // rather than each launch site because mini-games start from many paths
+        // (catalog, sandbox, campaign, hotspots); the write is guarded so this
+        // only touches the DOM when the state actually changes.
+        this.syncStagePanel();
+
 
         
         // 3. Shimmer cards update
@@ -3828,27 +3882,45 @@ const app = {
     this.renderReceiptsTab();
   },
 
+  /**
+   * Three tabs share one rail panel. Driven by a table rather than branches so
+   * adding a fourth cannot leave a panel visible — the previous two-branch
+   * version showed exactly one of two, but grew a third id with no home.
+   */
+  /**
+   * The stage panel exists only to host the mini-game canvas. Its other
+   * occupant, #narrativeTextBox, is never shown anywhere in the codebase — it
+   * is only ever set to display:none — so with no mini-game running the panel
+   * was a 116px empty frame on the card table. Visibility follows
+   * app.miniGameActive, which MiniGameManager already maintains.
+   */
+  syncStagePanel() {
+    const panel = document.getElementById('stagePanel');
+    if (!panel) return;
+    const want = this.miniGameActive ? 'flex' : 'none';
+    if (panel.style.display !== want) panel.style.display = want;
+  },
+
   switchRightTab(tabId) {
-    if (tabId === 'scoreboard') {
-      const sbTab = document.getElementById('rightTabScoreboard');
-      const rcTab = document.getElementById('rightTabReceipts');
-      if (sbTab) sbTab.style.display = 'block';
-      if (rcTab) rcTab.style.display = 'none';
-      const sbBtn = document.getElementById('tabScoreboardBtn');
-      const rcBtn = document.getElementById('tabReceiptsBtn');
-      if (sbBtn) { sbBtn.classList.add('active'); sbBtn.classList.remove('secondary'); }
-      if (rcBtn) { rcBtn.classList.remove('active'); rcBtn.classList.add('secondary'); }
-    } else {
-      const sbTab = document.getElementById('rightTabScoreboard');
-      const rcTab = document.getElementById('rightTabReceipts');
-      if (sbTab) sbTab.style.display = 'none';
-      if (rcTab) rcTab.style.display = 'block';
-      const sbBtn = document.getElementById('tabScoreboardBtn');
-      const rcBtn = document.getElementById('tabReceiptsBtn');
-      if (sbBtn) { sbBtn.classList.remove('active'); sbBtn.classList.add('secondary'); }
-      if (rcBtn) { rcBtn.classList.add('active'); rcBtn.classList.remove('secondary'); }
-      this.renderReceiptsTab();
-    }
+    const TABS = {
+      scoreboard: { panel: 'rightTabScoreboard', btn: 'tabScoreboardBtn' },
+      receipts: { panel: 'rightTabReceipts', btn: 'tabReceiptsBtn' },
+      chat: { panel: 'rightTabChat', btn: 'tabChatBtn' }
+    };
+    const active = TABS[tabId] ? tabId : 'scoreboard';
+
+    Object.entries(TABS).forEach(([key, ids]) => {
+      const panel = document.getElementById(ids.panel);
+      const btn = document.getElementById(ids.btn);
+      const on = (key === active);
+      if (panel) panel.style.display = on ? 'block' : 'none';
+      if (btn) {
+        btn.classList.toggle('active', on);
+        btn.classList.toggle('secondary', !on);
+      }
+    });
+
+    if (active === 'receipts') this.renderReceiptsTab();
     if (this.audioEngine) this.audioEngine.playCardFlip();
   },
 
