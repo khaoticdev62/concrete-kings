@@ -164,10 +164,12 @@ test('CASH Shop: renderShopModal disables a capped item even with plenty of CASH
   }
 });
 
-test('CASH Shop: shopModal markup lives outside every .screen section and the dev-console <details>', () => {
-  // Regression guard: the modal was first placed inside the #game screen's
-  // DEVELOPER_CONSOLE.LOG <details>. A closed <details> does not render its
-  // descendants at all, so display:flex produced a 0-height invisible modal.
+test('Modals: every full-screen modal lives outside .screen sections and the dev-console <details>', () => {
+  // Regression guard for a bug class, not one modal. shopModal was first placed
+  // inside the #game screen's DEVELOPER_CONSOLE.LOG <details>, and accessModal
+  // shipped that way for real: a closed <details> renders no descendants, so the
+  // modal computed display:block yet measured 0x0 and was unreachable. A modal
+  // nested in a .screen section is likewise dead on every other screen.
   const fs = require('fs');
   const path = require('path');
   // Strip HTML comments first: prose mentioning tag names would otherwise be
@@ -175,17 +177,80 @@ test('CASH Shop: shopModal markup lives outside every .screen section and the de
   const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8')
     .replace(/<!--[\s\S]*?-->/g, '');
 
-  const modalIndex = html.indexOf('id="shopModal"');
-  assert.ok(modalIndex > -1, 'shopModal must exist in index.html');
+  const modalIds = ['shopModal', 'shopUnavailableModal', 'accessModal'];
 
-  const before = html.slice(0, modalIndex);
-  const openDetails = (before.match(/<details/g) || []).length;
-  const closeDetails = (before.match(/<\/details>/g) || []).length;
-  assert.equal(openDetails, closeDetails, 'shopModal must not be nested inside a <details> element');
+  for (const id of modalIds) {
+    const modalIndex = html.indexOf(`id="${id}"`);
+    assert.ok(modalIndex > -1, `${id} must exist in index.html`);
 
-  const openSections = (before.match(/<section/g) || []).length;
-  const closeSections = (before.match(/<\/section>/g) || []).length;
-  assert.equal(openSections, closeSections, 'shopModal must not be nested inside a .screen <section>');
+    const before = html.slice(0, modalIndex);
+    const openDetails = (before.match(/<details/g) || []).length;
+    const closeDetails = (before.match(/<\/details>/g) || []).length;
+    assert.equal(openDetails, closeDetails, `${id} must not be nested inside a <details> element`);
+
+    const openSections = (before.match(/<section/g) || []).length;
+    const closeSections = (before.match(/<\/section>/g) || []).length;
+    assert.equal(openSections, closeSections, `${id} must not be nested inside a .screen <section>`);
+  }
+});
+
+test('Stylesheet: the inline <style> block has balanced braces', () => {
+  // A single missing "}" after .retro-chat-log silently swallowed every
+  // accessibility rule that followed. With CSS nesting, the browser reparented
+  // them under .retro-chat-log instead of erroring, so high-contrast, all text
+  // scaling, and reduced motion applied to nothing while looking correct in
+  // source. 16 rules were lost this way.
+  const fs = require('fs');
+  const path = require('path');
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+
+  const match = html.match(/<style>([\s\S]*?)<\/style>/);
+  assert.ok(match, 'index.html must have an inline <style> block');
+
+  // Drop comments and quoted strings so braces inside them are not counted.
+  const css = match[1]
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/"(?:[^"\\]|\\.)*"/g, '""')
+    .replace(/'(?:[^'\\]|\\.)*'/g, "''");
+
+  const open = (css.match(/\{/g) || []).length;
+  const close = (css.match(/\}/g) || []).length;
+  assert.equal(open, close, `unbalanced braces in the inline <style> block: ${open} "{" vs ${close} "}"`);
+});
+
+test('Stylesheet: accessibility rules are top-level, not nested inside another rule', () => {
+  // Complements the brace-balance check: proves these specific selectors sit at
+  // nesting depth 0, where they can actually match <body>.
+  const fs = require('fs');
+  const path = require('path');
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  const css = html.match(/<style>([\s\S]*?)<\/style>/)[1].replace(/\/\*[\s\S]*?\*\//g, '');
+
+  const required = ['body.high-contrast', 'body.text-scale-125', 'body.text-scale-150', 'body.text-scale-175', 'body.reduced-motion'];
+
+  for (const selector of required) {
+    const idx = css.indexOf(selector);
+    assert.ok(idx > -1, `${selector} must exist in the stylesheet`);
+    const before = css.slice(0, idx);
+    const depth = (before.match(/\{/g) || []).length - (before.match(/\}/g) || []).length;
+    assert.equal(depth, 0, `${selector} must be a top-level rule, but sits at nesting depth ${depth}`);
+  }
+});
+
+test('Accessibility modal: every control has a label associated by id', () => {
+  // The panel's checkboxes were bare <span> text with no for/id association,
+  // so screen readers could not announce them and clicking the text did nothing.
+  const fs = require('fs');
+  const path = require('path');
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+
+  const start = html.indexOf('id="accessModal"');
+  const end = html.indexOf('</div>', html.indexOf('SAVE &amp; CLOSE'));
+  const modalHtml = html.slice(start, end);
+
+  const controlIds = ['accessColorblind', 'accessTextScale', 'accessHighContrast', 'accessReducedMotion', 'accessShowFps'];
+  const unlabeled = controlIds.filter(id => !modalHtml.includes(`for="${id}"`));
+  assert.deepEqual(unlabeled, [], `accessibility controls missing an associated <label for>: ${unlabeled.join(', ')}`);
 });
 
 test('CASH Shop: openShopModal shows the modal, closeShopModal hides it', () => {

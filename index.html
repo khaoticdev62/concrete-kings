@@ -459,6 +459,8 @@
     padding: 8px;
     font-size: 12px;
     color: #a0aac2;
+  }
+
   /* ---------- ACCESSIBILITY OVERRIDES ---------- */
   body.high-contrast {
     background: #000000 !important;
@@ -1051,53 +1053,6 @@
               <option value="POLICE_SIRENS">WEATHER: SIREN FLASH</option>
               <option value="NEON_FLICKER">WEATHER: NEON FLICKER</option>
             </select>
-            <!-- ACCESSIBILITY SETTINGS MODAL -->
-  <div id="accessModal" class="panel" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:9999; width:300px; box-shadow: 0 0 20px rgba(0,0,0,0.85); border: 2px solid #ffcd68; background:#151821; padding: 12px; box-sizing:border-box;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #2d313d; padding-bottom:6px;">
-      <h3 style="margin-top:0; margin-bottom:0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68;">ACCESSIBILITY</h3>
-      <button class="secondary" onclick="app.toggleAccessModal()" style="font-size:9px; padding:2px 6px;">X</button>
-    </div>
-    
-    <div style="display:flex; flex-direction:column; gap:10px; font-size:11px;">
-      <div>
-        <label style="font-weight:bold; display:block; margin-bottom:4px; font-size:9px; color:#339488;">COLORBLIND MODE</label>
-        <select id="accessColorblind" style="width:100%;" onchange="app.setAccessColorblind(this.value)">
-          <option value="none">Normal Color</option>
-          <option value="protanopia">Protanopia (Red-Blind)</option>
-          <option value="deuteranopia">Deuteranopia (Green-Blind)</option>
-          <option value="tritanopia">Tritanopia (Blue-Blind)</option>
-          <option value="monochrome">Monochrome (Grayscale)</option>
-        </select>
-      </div>
-      
-      <div>
-        <label style="font-weight:bold; display:block; margin-bottom:4px; font-size:9px; color:#339488;">TEXT SIZE SCALING</label>
-        <select id="accessTextScale" style="width:100%;" onchange="app.setAccessTextScale(this.value)">
-          <option value="100">100% (Default)</option>
-          <option value="125">125% (Large)</option>
-          <option value="150">150% (X-Large)</option>
-          <option value="175">175% (Maximum)</option>
-        </select>
-      </div>
-      
-      <div style="display:flex; justify-content:space-between; align-items:center; background:#101116; padding:6px; border:1px solid #2d313d;">
-        <span style="font-weight:bold; font-size:9px; color:#a0aac2;">HIGH CONTRAST BORDERS</span>
-        <input type="checkbox" id="accessHighContrast" onchange="app.setAccessHighContrast(this.checked)" style="margin:0;"/>
-      </div>
-      
-      <div style="display:flex; justify-content:space-between; align-items:center; background:#101116; padding:6px; border:1px solid #2d313d;">
-        <span style="font-weight:bold; font-size:9px; color:#a0aac2;">REDUCED MOTION</span>
-        <input type="checkbox" id="accessReducedMotion" onchange="app.setAccessReducedMotion(this.checked)" style="margin:0;"/>
-      </div>
-      
-      <div style="display:flex; justify-content:space-between; align-items:center; background:#101116; padding:6px; border:1px solid #2d313d;">
-        <span style="font-weight:bold; font-size:9px; color:#a0aac2;">SHOW FPS COUNTER</span>
-        <input type="checkbox" id="accessShowFps" onchange="app.setAccessShowFps(this.checked)" style="margin:0;"/>
-      </div>
-    </div>
-    
-    <button onclick="app.toggleAccessModal()" style="width:100%; margin-top:14px;">SAVE & CLOSE</button>
-  </div>
 
   <!-- Inline Colorblind SVG Filters -->
   <svg style="display:none; width:0; height:0;">
@@ -1472,6 +1427,57 @@
     <button onclick="app.closeShopUnavailableModal(); app.showCharacterCreation();" style="width:100%; margin-bottom:8px; font-family:'Press Start 2P', monospace; font-size:8px;">PLAY / CREATE CHARACTER</button>
     <button class="secondary" onclick="app.closeShopUnavailableModal()" style="width:100%; font-family:'Press Start 2P', monospace; font-size:8px;">CLOSE</button>
   </div>
+</div>
+
+<!-- ACCESSIBILITY SETTINGS MODAL: top level, so the header's Accessibility
+     button reaches it from any screen. It previously sat inside the #game
+     screen's dev-console details element, which rendered it 0x0 and made
+     every setting below unreachable. -->
+<div id="accessModal" class="panel" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:10001; width:300px; max-width:92vw; box-shadow: 0 0 20px rgba(0,0,0,0.85); border: 2px solid #ffcd68; background:#151821; padding: 12px; box-sizing:border-box;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #2d313d; padding-bottom:6px;">
+    <h3 style="margin-top:0; margin-bottom:0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68;">ACCESSIBILITY</h3>
+    <button class="secondary" onclick="app.toggleAccessModal()" style="font-size:9px; padding:2px 6px;">X</button>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:10px; font-size:11px;">
+    <div>
+      <label for="accessColorblind" style="font-weight:bold; display:block; margin-bottom:4px; font-size:9px; color:#339488;">COLORBLIND MODE</label>
+      <select id="accessColorblind" style="width:100%;" onchange="app.setAccessColorblind(this.value)">
+        <option value="none">Normal Color</option>
+        <option value="protanopia">Protanopia (Red-Blind)</option>
+        <option value="deuteranopia">Deuteranopia (Green-Blind)</option>
+        <option value="tritanopia">Tritanopia (Blue-Blind)</option>
+        <option value="monochrome">Monochrome (Grayscale)</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="accessTextScale" style="font-weight:bold; display:block; margin-bottom:4px; font-size:9px; color:#339488;">TEXT SIZE SCALING</label>
+      <select id="accessTextScale" style="width:100%;" onchange="app.setAccessTextScale(this.value)">
+        <option value="100">100% (Default)</option>
+        <option value="125">125% (Large)</option>
+        <option value="150">150% (X-Large)</option>
+        <option value="175">175% (Maximum)</option>
+      </select>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; background:#101116; padding:6px; border:1px solid #2d313d;">
+      <label for="accessHighContrast" style="font-weight:bold; font-size:9px; color:#a0aac2;">HIGH CONTRAST BORDERS</label>
+      <input type="checkbox" id="accessHighContrast" onchange="app.setAccessHighContrast(this.checked)" style="margin:0;"/>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; background:#101116; padding:6px; border:1px solid #2d313d;">
+      <label for="accessReducedMotion" style="font-weight:bold; font-size:9px; color:#a0aac2;">REDUCED MOTION</label>
+      <input type="checkbox" id="accessReducedMotion" onchange="app.setAccessReducedMotion(this.checked)" style="margin:0;"/>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; background:#101116; padding:6px; border:1px solid #2d313d;">
+      <label for="accessShowFps" style="font-weight:bold; font-size:9px; color:#a0aac2;">SHOW FPS COUNTER</label>
+      <input type="checkbox" id="accessShowFps" onchange="app.setAccessShowFps(this.checked)" style="margin:0;"/>
+    </div>
+  </div>
+
+  <button onclick="app.toggleAccessModal()" style="width:100%; margin-top:14px;">SAVE &amp; CLOSE</button>
 </div>
 
 <script src="src/pixel_engine/pixel-engine.js"></script>
