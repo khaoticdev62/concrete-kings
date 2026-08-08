@@ -870,7 +870,56 @@ When requesting changes, specify:
 
 ---
 
-## 6. Usage and Versioning
+## 6. Retro Pixel Top-Down Map Prompt Pack
+
+### 6.1 Purpose
+Use this section when generating walkable city tilesets, map tiles, and district atlases for noir urban gameplay.
+
+### 6.2 Tile Categories
+- Ground plane
+- Roads and connections
+- Buildings and blocks
+- Street furniture
+- Flora and weather layers
+- Decals and overlays
+- Props and interaction points
+- Mini-map and icons
+
+### 6.3 Gemini Pro Generation Recipe
+Base prompt formula:
+Subject: [tile subject].
+View: [straight down / high angle 3/4 top-down].
+Format: single tile, seamless edges, [16x16 or 32x32] native pixels.
+Style: high-detail retro pixel art, noir urban [district/city], nearest-filter scaling, no anti-aliasing.
+Palette: [3-4 hex codes].
+Details: [2-4 must-have details].
+Background: solid black for tile extraction.
+Negative: realistic photo, 3D render, blurry, watermark, text, people, animals, extra objects outside tile bounds.
+
+### 6.4 Style Lock Prompt
+Style lock: high-detail retro pixel art, noir urban top-down tileset, [city/district].
+Rules: 16x16 or 32x32 native pixels, nearest-filter scaling, no anti-aliasing, clean tile edges, solid black background, no text, no people, no animals.
+Palette: [3-5 hex codes].
+Output: tiles only, no UI, no borders, no sample layout.
+
+### 6.5 Review Checklist
+- [ ] Reads at native tile size on 320x180 canvas.
+- [ ] Reads at 4x upscale on 1280x720 canvas.
+- [ ] Edges are clean and tileable on all sides.
+- [ ] Walkability is clear from value alone.
+- [ ] Palette matches district profile.
+- [ ] No text, people, or animals.
+- [ ] No anti-aliasing or soft shadows.
+- [ ] No tile bleed or sampler artifacts.
+- [ ] Noir tone preserved: dark dominant, neon accents sparingly used.
+- [ ] Minimap icon legible at quarter resolution.
+
+### 6.6 Full Reference
+See RETRO_PIXEL_TOPDOWN_MAP_PROMPT_PACK.md for the complete tileset prompt system, including city-specific tilesets, batch workflow, atlas layout, and Gemini Pro recipes.
+
+---
+
+## 7. Usage and Versioning
 
 ### 6.1 Version Rules
 - Major version: structural change to style, color bible, or animation budget.
