@@ -286,6 +286,76 @@ test('Mini-Game Manager: registration and game activation lifecycle', () => {
   delete global.app;
 });
 
+test('Mini-Game Manager: consumes one owned prep item and flags the bonus', () => {
+  const canvas = new MockCanvas();
+  const manager = new MiniGameManager(canvas);
+  manager.registerGame('street_dice', StreetDice);
+
+  global.app = {
+    game: {
+      players: [{
+        stats: { streetCred: 100, reputation: 5 },
+        prepItems: { street_dice: 2, bodega_run: 0, haircut_challenge: 0, lockpicking: 0, negotiation: 0 }
+      }]
+    },
+    humanIndex: 0,
+    storyEngine: { heat: 0, trust: 0, secrets: [] }
+  };
+
+  try {
+    manager.start('street_dice', { stake: 30 });
+
+    assert.equal(global.app.game.players[0].prepItems.street_dice, 1, 'one item should be consumed');
+    assert.equal(manager.activeGame.stake, 30, 'unrelated params must still pass through');
+  } finally {
+    // stop() must run even when an assertion throws: start() leaves a live
+    // setTimeout render loop that otherwise keeps the test runner alive forever.
+    manager.stop();
+    delete global.app;
+  }
+});
+
+test('Mini-Game Manager: does not flag a bonus when no prep item is owned', () => {
+  const canvas = new MockCanvas();
+  const manager = new MiniGameManager(canvas);
+  manager.registerGame('street_dice', StreetDice);
+
+  global.app = {
+    game: {
+      players: [{
+        stats: { streetCred: 100, reputation: 5 },
+        prepItems: { street_dice: 0, bodega_run: 0, haircut_challenge: 0, lockpicking: 0, negotiation: 0 }
+      }]
+    },
+    humanIndex: 0,
+    storyEngine: { heat: 0, trust: 0, secrets: [] }
+  };
+
+  try {
+    manager.start('street_dice', {});
+
+    assert.equal(global.app.game.players[0].prepItems.street_dice, 0, 'nothing to consume, stays at 0');
+  } finally {
+    manager.stop();
+    delete global.app;
+  }
+});
+
+test('Mini-Game Manager: works with no app.game at all (free-play catalog entry point)', () => {
+  const canvas = new MockCanvas();
+  const manager = new MiniGameManager(canvas);
+  manager.registerGame('street_dice', StreetDice);
+
+  try {
+    const started = manager.start('street_dice', { stake: 10 });
+
+    assert.equal(started, true, 'must not throw or fail when app.game is undefined');
+    assert.equal(manager.activeGame.stake, 10);
+  } finally {
+    manager.stop();
+  }
+});
+
 test('Bodega Run: map setup, grid constraints and items coordinates', () => {
   const canvas = new MockCanvas();
   const ctx = canvas.getContext('2d');

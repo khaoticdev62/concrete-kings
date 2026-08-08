@@ -49,9 +49,16 @@ class MiniGameManager {
 
     this.gameState = new MiniGameStateClass();
     // Copy active variables from narrative engine and human player
+    let me = null;
     if (typeof app !== 'undefined') {
-      const me = app.game ? app.game.players[app.humanIndex] : null;
+      me = app.game ? app.game.players[app.humanIndex] : null;
       this.gameState.loadFromEngine(app.storyEngine, me);
+    }
+
+    // Consume one owned prep item for this specific mini-game, if any
+    if (me && me.prepItems && me.prepItems[gameId] > 0) {
+      me.prepItems[gameId] -= 1;
+      params = { ...params, prepItemBonus: true };
     }
 
     const GameClass = this.registry[gameId];
