@@ -163,6 +163,32 @@ test('Character creation: review dossier populates from current selections', () 
   }
 });
 
+test('Character creation: review dossier populates via step navigation, not just a direct call', () => {
+  const doc = fakeDocument();
+  global.document = doc;
+  global.window = { addEventListener() {}, dispatchEvent() {} };
+  global.alert = () => {};
+  try {
+    const { app } = loadGameModule();
+    app.creationStep = 1;
+    doc.getElementById('characterOriginSelect').value = 'BARBER';
+    doc.getElementById('hostName').value = 'TestHero';
+
+    app.nextCreationStep();
+    app.nextCreationStep();
+    app.nextCreationStep();
+
+    assert.equal(app.creationStep, 4, 'should land on the review step');
+    const html = doc.getElementById('reviewContent').innerHTML || '';
+    assert.ok(html.includes('TESTHERO'), 'dossier must be populated by arriving at step 4, not only by a direct updateReviewDossier() call');
+    assert.ok(html.includes('BARBER'));
+  } finally {
+    delete global.document;
+    delete global.window;
+    delete global.alert;
+  }
+});
+
 test('Character creation: confirm opens journey modal when valid', () => {
   const doc = fakeDocument();
   global.document = doc;

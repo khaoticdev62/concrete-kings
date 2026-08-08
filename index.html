@@ -2083,6 +2083,7 @@ const app = {
         return `<div class="step-segment ${cls}">${label}</div>`;
       }).join('');
     }
+    if (this.creationStep === 4) this.updateReviewDossier();
   },
 
   nextCreationStep() {
