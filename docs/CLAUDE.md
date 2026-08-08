@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **Read `HANDOFF.md` in the repo root first.** It documents five failure modes in
+> this codebase that fail *silently* — including two that the test suite cannot
+> catch by construction (browser-only global collisions, and layout that always
+> measures as a perfect fit). It also records current state, asset rules, and
+> what is deliberately unbuilt. This file describes the project; HANDOFF.md
+> describes the traps.
+
 ## What this is
 
 Concrete Kings is a Cards-Against-Humanity-style party game with Black-culture-focused, AAVE-voiced content. There is a large gap between what's **built** and what's **designed**:
