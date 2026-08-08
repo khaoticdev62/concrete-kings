@@ -11,6 +11,11 @@
 ## Global Constraints
 
 - Native target is 1280x720 with **no vertical scrolling** on the map screen. Map canvas is 960x520; district world is 2400x1300 (2.5x the viewport in both axes).
+- Asset conventions come from `RETRO_PIXEL_TOPDOWN_MAP_PROMPT_PACK.md` and are binding: **16x16 native tiles**, 32x32 for buildings and props; atlases are power-of-2 with a 1-pixel gutter; sprite keys use that pack's category vocabulary — `ground`, `road`, `building`, `furniture`, `flora`, `decal`, `prop`, `icon`.
+- Draw order follows the pack's §6.3 layers exactly: ground and roads (0), props and furniture (1), flora and weather (2), decals on buildings (3), roof details (4).
+- Noir palette discipline from the pack: **dark dominant, neon accents used sparingly**. Neon hues are for small accents — signage, car bodies, active POI outlines — never large fills such as roofs or ground.
+- The pack's "road = walk with speed modifier" (§6.2) is **out of scope**. Movement speed is uniform; roads are plain walkable. Revisit only as a separate change.
+- The pack's §9 names `block-map-navigation.js` as the tilemap/collision home. This plan deliberately diverges: that file is the side-on system being replaced, and separating data/render/state into new modules is what makes collision and camera unit-testable. `BlockMapController` is retained only as the source of the five hotspot definitions.
 - The five POIs are identical in every district and are the only POIs: `BARBER_SHOP`, `BODEGA`, `SHOP_DEAL`, `CHESS_PARK`, `LOCKED_DOOR`. Do not invent per-district POIs — new markers without new mechanics is fake UI.
 - Every district colour must come from `assets/palettes/concrete_kings_64.json`. The four groups are `blacks_grays`, `warm_tones`, `cool_tones`, `skin_tones`, 16 entries each, uppercase hex.
 - Quest filter chips and fog of war are **removed, not ported**. Neither has a data model: quest glyphs are hardcoded at grid cells 4,3 / 16,3 / 16,8 and there is no explored/visited tracking anywhere.
@@ -48,15 +53,15 @@ const { AssetRegistry } = require('../src/pixel_engine/asset-registry.js');
 
 const MANIFEST = {
   version: 1,
-  tileSize: 32,
+  tileSize: 16,
   sources: {
     harlem_tiles: 'assets/sprite_packs/city_harlem_tiles.png',
     missing_pack: 'assets/sprite_packs/does_not_exist.png'
   },
   sprites: {
-    'harlem.road_h':     { source: 'harlem_tiles', x: 0,  y: 0, w: 32, h: 32 },
-    'harlem.roof_brick': { source: 'harlem_tiles', x: 32, y: 0, w: 32, h: 32 },
-    'harlem.ghost':      { source: 'missing_pack', x: 0,  y: 0, w: 32, h: 32 }
+    'harlem.road_h':        { source: 'harlem_tiles', x: 0,  y: 0, w: 16, h: 16 },
+    'harlem.building_roofA': { source: 'harlem_tiles', x: 32, y: 0, w: 32, h: 32 },
+    'harlem.ghost':         { source: 'missing_pack', x: 0,  y: 0, w: 16, h: 16 }
   }
 };
 
@@ -69,14 +74,14 @@ test('AssetRegistry: resolves a known key to a slice descriptor after preload', 
   assert.equal(r.loadManifest(MANIFEST), true);
   await r.preload();
 
-  const slice = r.get('harlem.roof_brick');
+  const slice = r.get('harlem.building_roofA');
   assert.ok(slice, 'known key must resolve');
   assert.equal(slice.x, 32);
   assert.equal(slice.y, 0);
   assert.equal(slice.w, 32);
   assert.equal(slice.h, 32);
   assert.equal(slice.image.fakeImage, 'assets/sprite_packs/city_harlem_tiles.png');
-  assert.equal(r.tileSize, 32);
+  assert.equal(r.tileSize, 16, 'pack mandates 16x16 native tiles');
 });
 
 test('AssetRegistry: unknown key returns null', async () => {
@@ -98,7 +103,7 @@ test('AssetRegistry: a key on a missing source returns null without throwing', a
 test('AssetRegistry: keys return null before preload runs', () => {
   const r = new AssetRegistry({ loadImage: fakeLoader() });
   r.loadManifest(MANIFEST);
-  assert.equal(r.get('harlem.roof_brick'), null, 'no image yet, so no slice');
+  assert.equal(r.get('harlem.building_roofA'), null, 'no image yet, so no slice');
 });
 
 test('AssetRegistry: a malformed manifest yields an empty registry rather than throwing', () => {
@@ -112,7 +117,7 @@ test('AssetRegistry: a malformed manifest yields an empty registry rather than t
 test('AssetRegistry: a sprite naming an undeclared source is rejected at manifest load', () => {
   const r = new AssetRegistry({ loadImage: fakeLoader() });
   r.loadManifest({
-    version: 1, tileSize: 32,
+    version: 1, tileSize: 16,
     sources: { a: 'assets/a.png' },
     sprites: { 'x.y': { source: 'nonexistent', x: 0, y: 0, w: 32, h: 32 } }
   });
@@ -241,7 +246,7 @@ Create `assets/manifest.json`. It declares all eight city packs so generated art
 ```json
 {
   "version": 1,
-  "tileSize": 32,
+  "tileSize": 16,
   "sources": {
     "harlem_tiles": "assets/sprite_packs/city_harlem_tiles.png",
     "detroit_tiles": "assets/sprite_packs/city_detroit_tiles.png",
@@ -256,7 +261,17 @@ Create `assets/manifest.json`. It declares all eight city packs so generated art
 }
 ```
 
-`sprites` is intentionally empty: declaring keys that point at placeholder bands would make the map look worse than procedural rendering. As real art lands, add entries such as `"harlem.roof_brick": { "source": "harlem_tiles", "x": 0, "y": 0, "w": 32, "h": 32 }` with no code change required.
+`sprites` is intentionally empty: declaring keys that point at placeholder bands would make the map look worse than procedural rendering. As real art lands, add entries with no code change required. Keys must use the prompt pack's category vocabulary — `ground`, `road`, `building`, `furniture`, `flora`, `decal`, `prop`, `icon`:
+
+```json
+"harlem.road_h":         { "source": "harlem_tiles", "x": 0,  "y": 0,  "w": 16, "h": 16 },
+"harlem.ground_walk":    { "source": "harlem_tiles", "x": 16, "y": 0,  "w": 16, "h": 16 },
+"harlem.building_roofA": { "source": "harlem_tiles", "x": 0,  "y": 32, "w": 32, "h": 32 },
+"harlem.flora_tree":     { "source": "harlem_tiles", "x": 32, "y": 0,  "w": 16, "h": 16 },
+"harlem.prop_car_h":     { "source": "harlem_tiles", "x": 48, "y": 0,  "w": 32, "h": 16 }
+```
+
+Buildings and props use 32x32 (or 32x16 for cars); everything else is 16x16, per the pack. Atlases keep a 1-pixel gutter between tiles, so slice coordinates step by `tile + 1` when reading a gutter-spaced atlas.
 
 - [ ] **Step 5: Run test to verify it passes**
 
@@ -351,6 +366,42 @@ test('District data: palettes are complete and use uppercase hex', () => {
   });
 });
 
+test('District data: every colour is a verbatim master-palette entry', () => {
+  // The master palette is the shared gamut. Inventing colours is how eight
+  // districts stop looking like one world.
+  const fs = require('fs');
+  const path = require('path');
+  const master = JSON.parse(fs.readFileSync(
+    path.join(__dirname, '..', 'assets', 'palettes', 'concrete_kings_64.json'), 'utf8'));
+  const allowed = new Set(Object.values(master.groups).flat().map(c => c.toUpperCase()));
+
+  districtKeys().forEach(k => {
+    Object.entries(DISTRICTS[k].palette).forEach(([pk, val]) => {
+      if (pk === 'shadow') return;
+      assert.ok(allowed.has(val.toUpperCase()),
+        `${k}.palette.${pk} = ${val} is not in concrete_kings_64.json`);
+    });
+  });
+});
+
+test('District data: large fills stay dark, per the noir discipline rule', () => {
+  // Prompt pack: dark dominant, neon accents sparingly. Bright hues belong in
+  // lane/zebra/accent (thin marks), never in area fills like roofs or ground.
+  const luminance = (hex) => {
+    const n = parseInt(hex.slice(1), 16);
+    return 0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255);
+  };
+  const AREA_FILLS = ['ground', 'asphalt', 'roofA', 'roofB', 'roofC'];
+
+  districtKeys().forEach(k => {
+    AREA_FILLS.forEach(pk => {
+      const val = DISTRICTS[k].palette[pk];
+      assert.ok(luminance(val) < 120,
+        `${k}.palette.${pk} = ${val} is too bright (${Math.round(luminance(val))}) for a large fill`);
+    });
+  });
+});
+
 test('District data: every district has roads, sidewalks, and at least one solid parcel', () => {
   districtKeys().forEach(k => {
     const d = DISTRICTS[k];
@@ -434,76 +485,92 @@ const POI_IDS = ['BARBER_SHOP', 'BODEGA', 'SHOP_DEAL', 'CHESS_PARK', 'LOCKED_DOO
 
 const SHADOW = 'rgba(0,0,0,0.45)';
 
+/**
+ * Every colour below is a verbatim entry from concrete_kings_64.json.
+ *
+ * Two constraints shape these, and a validation test enforces both:
+ *  1. Large fills (ground, asphalt, roofA/B/C) stay dark — relative luminance
+ *     under 120 — per the prompt pack's "dark dominant" rule. Bright hues are
+ *     confined to `lane`, `zebra` and `accent`, which are thin marks and
+ *     highlights, never area fills.
+ *  2. The master palette contains no true greens. Foliage therefore uses the
+ *     dark teal-green ramp hiding in cool_tones (#0D2926 / #174540 / #246961),
+ *     which reads correctly as noir vegetation. Do not invent greens.
+ */
+
 // Harlem — brick, sodium amber, fire escapes, stoop culture
 const PAL_HARLEM = {
-  ground:'#101116', asphalt:'#22252E', lane:'#C9A227', zebra:'#CBD5ED',
+  ground:'#101116', asphalt:'#22252E', lane:'#C9822B', zebra:'#CBD5ED',
   walk:'#474D5E', walkHi:'#565E70', roofA:'#7A1D1C', roofADk:'#4D1414',
-  roofB:'#854224', roofBDk:'#522717', roofC:'#393E4D', roofCDk:'#2D313D',
-  face:'#181920', accent:'#F2A93B', tree:'#2E6B3A', treeDk:'#1C4526',
-  grass:'#2E6B3A', shadow:SHADOW
+  roofB:'#6B341D', roofBDk:'#3B1C11', roofC:'#393E4D', roofCDk:'#2D313D',
+  face:'#181920', accent:'#FFCD68', tree:'#246961', treeDk:'#174540',
+  grass:'#246961', shadow:SHADOW
 };
 
 // Detroit — post-industrial, corrugated metal, half-empty lots
 const PAL_DETROIT = {
-  ground:'#08080A', asphalt:'#181920', lane:'#C9A227', zebra:'#A0AAC2',
+  ground:'#08080A', asphalt:'#181920', lane:'#9C5C1D', zebra:'#A0AAC2',
   walk:'#393E4D', walkHi:'#474D5E', roofA:'#AA2724', roofADk:'#7A1D1C',
-  roofB:'#566070', roofBDk:'#393E4D', roofC:'#3B1C11', roofCDk:'#26120B',
-  face:'#101116', accent:'#F2A93B', tree:'#3B5C33', treeDk:'#22361E',
-  grass:'#3B5C33', shadow:SHADOW
+  roofB:'#565E70', roofBDk:'#393E4D', roofC:'#3B1C11', roofCDk:'#26120B',
+  face:'#101116', accent:'#F0AB43', tree:'#174540', treeDk:'#0D2926',
+  grass:'#174540', shadow:SHADOW
 };
 
-// Chicago — limestone, cold cyan lake light, el-track steel
+// Chicago — limestone, cold lake light, el-track steel.
+// Cyan is an accent only; roofs are lake blue, steel and dark brick.
 const PAL_CHICAGO = {
-  ground:'#0A1526', asphalt:'#22252E', lane:'#C9A227', zebra:'#E2E8F7',
-  walk:'#474D5E', walkHi:'#666E82', roofA:'#274F80', roofADk:'#1C375C',
-  roofB:'#788196', roofBDk:'#565E70', roofC:'#7A1D1C', roofCDk:'#4D1414',
-  face:'#11233F', accent:'#48BBD9', tree:'#2A5E3A', treeDk:'#1A3D25',
-  grass:'#2A5E3A', shadow:SHADOW
+  ground:'#0A1526', asphalt:'#22252E', lane:'#C9822B', zebra:'#E2E8F7',
+  walk:'#474D5E', walkHi:'#666E82', roofA:'#1C375C', roofADk:'#11233F',
+  roofB:'#565E70', roofBDk:'#393E4D', roofC:'#4D1414', roofCDk:'#2B0D0D',
+  face:'#11233F', accent:'#6FE8D8', tree:'#246961', treeDk:'#174540',
+  grass:'#246961', shadow:SHADOW
 };
 
-// Miami — pastel stucco, Art Deco neon, terrazzo
+// Miami — muted stucco and terrazzo. The Art Deco neon lives in `accent`
+// only: signage, car bodies, the active POI outline. Hot pink and cyan roof
+// fills would break the pack's "dark dominant, neon sparingly" rule outright.
 const PAL_MIAMI = {
-  ground:'#11233F', asphalt:'#2D313D', lane:'#E2E8F7', zebra:'#F4F7FF',
-  walk:'#788196', walkHi:'#A0AAC2', roofA:'#D9558E', roofADk:'#A62F6B',
-  roofB:'#48BBD9', roofBDk:'#2E7FA6', roofC:'#F2C14E', roofCDk:'#C9A227',
-  face:'#1C375C', accent:'#48BBD9', tree:'#2E7F52', treeDk:'#1A5233',
-  grass:'#2E7F52', shadow:SHADOW
+  ground:'#11233F', asphalt:'#2D313D', lane:'#B6C0D8', zebra:'#E2E8F7',
+  walk:'#666E82', walkHi:'#8B95AB', roofA:'#7A1D1C', roofADk:'#4D1414',
+  roofB:'#1C375C', roofBDk:'#11233F', roofC:'#6B341D', roofCDk:'#3B1C11',
+  face:'#0A1526', accent:'#6FE8D8', tree:'#174540', treeDk:'#0D2926',
+  grass:'#174540', shadow:SHADOW
 };
 
 // Baltimore — formstone, marble steps, harbour blue
 const PAL_BALTIMORE = {
-  ground:'#0A1526', asphalt:'#22252E', lane:'#C9A227', zebra:'#E2E8F7',
-  walk:'#666E82', walkHi:'#8B95AB', roofA:'#854224', roofADk:'#522717',
-  roofB:'#274F80', roofBDk:'#1C375C', roofC:'#B6C0D8', roofCDk:'#788196',
-  face:'#181920', accent:'#F2A93B', tree:'#2E6B3A', treeDk:'#1C4526',
-  grass:'#2E6B3A', shadow:SHADOW
+  ground:'#0A1526', asphalt:'#22252E', lane:'#C9822B', zebra:'#E2E8F7',
+  walk:'#666E82', walkHi:'#8B95AB', roofA:'#6B341D', roofADk:'#3B1C11',
+  roofB:'#274F80', roofBDk:'#1C375C', roofC:'#565E70', roofCDk:'#393E4D',
+  face:'#181920', accent:'#F0AB43', tree:'#246961', treeDk:'#174540',
+  grass:'#246961', shadow:SHADOW
 };
 
-// Atlanta — red clay, porch wood, humid green
+// Atlanta — red clay, porch wood, humid canopy
 const PAL_ATLANTA = {
-  ground:'#140A07', asphalt:'#26120B', lane:'#C9A227', zebra:'#CBD5ED',
+  ground:'#140A07', asphalt:'#26120B', lane:'#C9822B', zebra:'#CBD5ED',
   walk:'#522717', walkHi:'#6B341D', roofA:'#AA2724', roofADk:'#7A1D1C',
   roofB:'#854224', roofBDk:'#522717', roofC:'#393E4D', roofCDk:'#2D313D',
-  face:'#140A07', accent:'#F2C14E', tree:'#3B7F3B', treeDk:'#225222',
-  grass:'#3B7F3B', shadow:SHADOW
+  face:'#140A07', accent:'#FFCD68', tree:'#246961', treeDk:'#174540',
+  grass:'#246961', shadow:SHADOW
 };
 
 // Oakland — bay fog grey, mural colour, shipping steel
 const PAL_OAKLAND = {
-  ground:'#101116', asphalt:'#2D313D', lane:'#C9A227', zebra:'#CBD5ED',
-  walk:'#565E70', walkHi:'#788196', roofA:'#2E7F52', roofADk:'#1A5233',
-  roofB:'#366BA6', roofBDk:'#1C375C', roofC:'#AA2724', roofCDk:'#7A1D1C',
-  face:'#181920', accent:'#F2C14E', tree:'#2E7F52', treeDk:'#1A5233',
-  grass:'#2E7F52', shadow:SHADOW
+  ground:'#101116', asphalt:'#2D313D', lane:'#C9822B', zebra:'#CBD5ED',
+  walk:'#565E70', walkHi:'#788196', roofA:'#174540', roofADk:'#0D2926',
+  roofB:'#274F80', roofBDk:'#1C375C', roofC:'#AA2724', roofCDk:'#7A1D1C',
+  face:'#181920', accent:'#F0AB43', tree:'#246961', treeDk:'#174540',
+  grass:'#246961', shadow:SHADOW
 };
 
 // NOLA — cast iron, gas lamp, cypress and slate
 const PAL_NOLA = {
-  ground:'#140A07', asphalt:'#22252E', lane:'#C9A227', zebra:'#CBD5ED',
-  walk:'#6B341D', walkHi:'#854224', roofA:'#2E6B3A', roofADk:'#1C4526',
-  roofB:'#7A1D1C', roofBDk:'#4D1414', roofC:'#F2C14E', roofCDk:'#C9A227',
-  face:'#26120B', accent:'#F2C14E', tree:'#2E6B3A', treeDk:'#1C4526',
-  grass:'#2E6B3A', shadow:SHADOW
+  ground:'#140A07', asphalt:'#22252E', lane:'#C9822B', zebra:'#CBD5ED',
+  walk:'#6B341D', walkHi:'#854224', roofA:'#174540', roofADk:'#0D2926',
+  roofB:'#7A1D1C', roofBDk:'#4D1414', roofC:'#6E3E14', roofCDk:'#2B0D0D',
+  face:'#26120B', accent:'#FFCD68', tree:'#246961', treeDk:'#174540',
+  grass:'#246961', shadow:SHADOW
 };
 ```
 
@@ -662,7 +729,7 @@ if (typeof window !== 'undefined') {
 - [ ] **Step 6: Run test to verify it passes**
 
 Run: `node --test test/topdown-city-data.test.js`
-Expected: PASS (9 tests).
+Expected: PASS (11 tests).
 
 - [ ] **Step 7: Run the full suite**
 
@@ -1009,7 +1076,7 @@ git commit -m "feat: add top-down city controller with per-axis collision and ca
 - Produces:
   - `class TopDownCityRenderer`, constructed as `new TopDownCityRenderer({ registry })`. `registry` is optional; when absent every element draws procedurally.
   - `renderer.render(ctx, controller)` — draws one frame into `ctx`, translated by the controller's camera.
-  - `renderer.spriteKey(districtKey, element)` — returns the lookup key, lowercase district plus element, e.g. `('HARLEM','roof_brick') => 'harlem.roof_brick'`.
+  - `renderer.spriteKey(districtKey, element)` — returns the lookup key, lowercase district plus element, e.g. `('HARLEM','building_roofA') => 'harlem.building_roofA'`. `element` must use the prompt pack's category vocabulary: `ground_*`, `road_*`, `building_*`, `furniture_*`, `flora_*`, `decal_*`, `prop_*`, `icon_*`.
   - `renderer.stats` — `{ assetDraws, proceduralDraws }`, reset each `render()` call, used by tests to prove fallback behaviour.
 
 - [ ] **Step 1: Write the failing test**
@@ -1061,7 +1128,7 @@ test('Renderer: draws a frame with no registry at all, fully procedurally', () =
 
 test('Renderer: an empty registry still yields procedural output', () => {
   const registry = new AssetRegistry({ loadImage: async () => null });
-  registry.loadManifest({ version: 1, tileSize: 32, sources: {}, sprites: {} });
+  registry.loadManifest({ version: 1, tileSize: 16, sources: {}, sprites: {} });
 
   const r = new TopDownCityRenderer({ registry });
   const ctx = recordingCtx();
@@ -1074,9 +1141,9 @@ test('Renderer: an empty registry still yields procedural output', () => {
 test('Renderer: uses an asset when one is registered for that element', async () => {
   const registry = new AssetRegistry({ loadImage: async () => ({ fake: true }) });
   registry.loadManifest({
-    version: 1, tileSize: 32,
+    version: 1, tileSize: 16,
     sources: { harlem_tiles: 'assets/sprite_packs/city_harlem_tiles.png' },
-    sprites: { 'harlem.roof_roofA': { source: 'harlem_tiles', x: 0, y: 0, w: 32, h: 32 } }
+    sprites: { 'harlem.building_roofA': { source: 'harlem_tiles', x: 0, y: 0, w: 32, h: 32 } }
   });
   await registry.preload();
 
@@ -1090,8 +1157,26 @@ test('Renderer: uses an asset when one is registered for that element', async ()
 
 test('Renderer: spriteKey lowercases the district and joins with a dot', () => {
   const r = new TopDownCityRenderer({});
-  assert.equal(r.spriteKey('HARLEM', 'roof_roofA'), 'harlem.roof_roofA');
+  assert.equal(r.spriteKey('HARLEM', 'building_roofA'), 'harlem.building_roofA');
   assert.equal(r.spriteKey('NOLA', 'road_h'), 'nola.road_h');
+});
+
+test('Renderer: draws in the prompt pack layer order — ground before flora before player', () => {
+  // Pack section 6.3: ground/roads 0, props/furniture 1, flora/weather 2,
+  // building decals 3, roof details 4. Order matters: flora drawn under a
+  // building roof would look wrong, and the player must never be occluded.
+  const order = [];
+  const ctx = recordingCtx();
+  ctx.fillRect = () => { order.push('rect'); };
+  ctx.arc = () => { order.push('arc'); };
+
+  const r = new TopDownCityRenderer({});
+  r.render(ctx, controller());
+
+  assert.equal(order[0], 'rect', 'ground fill must be the first draw of the frame');
+  assert.ok(order.includes('arc'), 'flora (circles) must be drawn');
+  assert.ok(order.lastIndexOf('arc') > order.indexOf('rect'),
+    'flora must come after ground');
 });
 
 test('Renderer: stats reset between frames', () => {
@@ -1189,7 +1274,7 @@ class TopDownCityRenderer {
     // Ground
     this.fill(ctx, 0, 0, WORLD.width, WORLD.height, p.ground);
 
-    // Roads, then lane dashes
+    // ---- Layer 0: ground and roads (prompt pack section 6.3) ----
     d.roads.forEach(r => {
       if (!this.tryAsset(ctx, key, `road_${r.dir}`, r.x, r.y, r.w, r.h)) {
         this.fill(ctx, r.x, r.y, r.w, r.h, p.asphalt);
@@ -1225,16 +1310,20 @@ class TopDownCityRenderer {
       }
     }
 
-    // Parcels
+    // ---- Layers 0-4: parcels carry their own roof detail (layer 4) internally ----
     d.parcels.forEach(parcel => this.drawParcel(ctx, key, parcel, p));
 
-    // Decoration
-    d.decor.forEach(item => {
-      if (item.type === 'tree') this.drawTree(ctx, key, item.x, item.y, p);
-      else if (item.type === 'car') this.drawCar(ctx, key, item.x, item.y, item.dir, p);
+    // ---- Layer 1: props and furniture ----
+    d.decor.filter(i => i.type === 'car').forEach(item => {
+      this.drawCar(ctx, key, item.x, item.y, item.dir, p);
     });
 
-    // POIs, then the player on top
+    // ---- Layer 2: flora and weather (weather composites in renderTopDownFrame) ----
+    d.decor.filter(i => i.type === 'tree').forEach(item => {
+      this.drawTree(ctx, key, item.x, item.y, p);
+    });
+
+    // POIs, then the player on top — never occluded
     d.pois.forEach(poi => {
       const active = controller.activePoi && controller.activePoi.id === poi.id;
       this.drawPoi(ctx, poi, active, p);
@@ -1270,7 +1359,7 @@ class TopDownCityRenderer {
 
     // Building: visible front face, then roof, then clutter
     this.fill(ctx, parcel.x, parcel.y + parcel.h, parcel.w, FACE_HEIGHT, p.face);
-    if (!this.tryAsset(ctx, key, `roof_${parcel.roof}`, parcel.x, parcel.y, parcel.w, parcel.h)) {
+    if (!this.tryAsset(ctx, key, `building_${parcel.roof}`, parcel.x, parcel.y, parcel.w, parcel.h)) {
       this.fill(ctx, parcel.x, parcel.y, parcel.w, parcel.h, roofCol);
       this.fill(ctx, parcel.x, parcel.y, parcel.w, 3, roofDk);
       this.fill(ctx, parcel.x, parcel.y + parcel.h - 3, parcel.w, 3, roofDk);
@@ -1295,7 +1384,7 @@ class TopDownCityRenderer {
   }
 
   drawTree(ctx, key, x, y, p) {
-    if (this.tryAsset(ctx, key, 'tree', x - 12, y - 12, 24, 24)) return;
+    if (this.tryAsset(ctx, key, 'flora_tree', x - 12, y - 12, 24, 24)) return;
     ctx.fillStyle = p.shadow;
     ctx.beginPath(); ctx.arc(x + SHADOW_OFFSET, y + SHADOW_OFFSET, 12, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = p.treeDk;
@@ -1308,7 +1397,7 @@ class TopDownCityRenderer {
   drawCar(ctx, key, x, y, dir, p) {
     const w = dir === 'v' ? 16 : 30;
     const h = dir === 'v' ? 30 : 16;
-    if (this.tryAsset(ctx, key, `car_${dir}`, x, y, w, h)) return;
+    if (this.tryAsset(ctx, key, `prop_car_${dir}`, x, y, w, h)) return;
     this.fill(ctx, x + SHADOW_OFFSET, y + SHADOW_OFFSET, w, h, p.shadow);
     this.fill(ctx, x, y, w, h, p.accent);
     if (dir === 'v') {
@@ -1376,7 +1465,7 @@ if (typeof window !== 'undefined') {
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `node --test test/topdown-city-renderer.test.js`
-Expected: PASS (6 tests).
+Expected: PASS (7 tests).
 
 - [ ] **Step 5: Run the full suite**
 
@@ -1961,7 +2050,7 @@ git commit -m "docs: rewrite the city map wireframe for the top-down walkable de
 
 **Placeholder scan.** No TBD/TODO. Task 2 Step 5 asks for seven districts of creative layout data rather than printing all seven arrays; this is deliberate and bounded — the schema is fully specified, one complete worked example (Harlem) is given, all eight palettes are given verbatim, the specific levers to vary are enumerated, and Step 1's tests enforce every hard invariant. That is guidance, not a placeholder.
 
-**Type consistency.** `districtKey` is the uppercase key everywhere (`'HARLEM'`), `city` is the display/heat-table string (`'Harlem'`), and `CITY_TO_DISTRICT` is the only bridge between them. `POI_IDS` in the data module matches the five `id` values in `BlockMapController.hotspots` exactly, which is what lets Task 5's `hotspots.find(h => h.id === spot.id)` resolve. `registry.get()` returns `{image, x, y, w, h}` in Task 1 and is destructured the same way in Task 4. `WORLD`/`VIEWPORT` are imported from the data module by both the controller and the renderer rather than redeclared. `spriteKey` builds `roof_${parcel.roof}`, and Task 4's asset test registers `harlem.roof_roofA`, matching the `roof: 'roofA'` value in Harlem's parcel data.
+**Type consistency.** `districtKey` is the uppercase key everywhere (`'HARLEM'`), `city` is the display/heat-table string (`'Harlem'`), and `CITY_TO_DISTRICT` is the only bridge between them. `POI_IDS` in the data module matches the five `id` values in `BlockMapController.hotspots` exactly, which is what lets Task 5's `hotspots.find(h => h.id === spot.id)` resolve. `registry.get()` returns `{image, x, y, w, h}` in Task 1 and is destructured the same way in Task 4. `WORLD`/`VIEWPORT` are imported from the data module by both the controller and the renderer rather than redeclared. `spriteKey` builds `building_${parcel.roof}`, and Task 4's asset test registers `harlem.building_roofA`, matching the `roof: 'roofA'` value in Harlem's parcel data. All element names follow the prompt pack categories.
 
 **One known rough edge, flagged deliberately.** `renderTopDownFrame()` is written in Task 5 and rewritten wholesale in Task 6. That duplication is intentional: it keeps Task 5 independently verifiable in the browser with the side-on view still present as a fallback, so the risky removal in Task 6 happens against a known-good map.
 
