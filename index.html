@@ -376,6 +376,36 @@
     font-size: 10px;
     color: #8b95ab;
   }
+  .creation-step { display: none; }
+  .creation-step.active { display: block; }
+  .creation-tile { min-height: 42px; }
+  .creation-tile.selected {
+    border-color: #ffcd68;
+    color: #ffcd68;
+    box-shadow: 0 0 10px rgba(255, 205, 104, 0.35);
+  }
+  .origin-card { transition: all 0.15s; }
+  .origin-card.selected {
+    border-color: #ffcd68;
+    box-shadow: 0 0 10px rgba(255, 205, 104, 0.35);
+  }
+  .step-segment {
+    flex: 1;
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: #8b95ab;
+    padding: 6px 0;
+    border-bottom: 3px solid #2d313d;
+  }
+  .step-segment.active {
+    color: #ffcd68;
+    border-bottom-color: #ffcd68;
+  }
+  .step-segment.done {
+    color: #339488;
+    border-bottom-color: #339488;
+  }
   .campaign-details-box {
     margin-top: 10px;
     padding: 10px;
@@ -526,174 +556,190 @@
     </div>
 
     <div id="characterCreationView" style="display:none;">
-      <div class="setup-grid">
-        <!-- Left Column: Origin Select & Attributes -->
-        <div class="panel" style="display: flex; flex-direction: column; justify-content: space-between;">
-          <div>
-            <h2 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68; border-bottom:1px solid #2d313d; padding-bottom:6px;">ORIGIN SELECT</h2>
-            <div id="originCardsContainer" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; max-height: 250px; overflow-y: auto; padding-right: 4px;">
-              <!-- Populated dynamically in JS -->
-            </div>
-          </div>
-          
-          <!-- ATTRIBUTES -->
-          <div id="attributesPanel" style="border: 2px solid #2d313d; background: #101116; padding: 10px; border-radius: 4px;">
-            <div style="font-family:'Press Start 2P', monospace; font-size: 8px; color: #339488; margin-bottom: 8px;">ATTRIBUTES</div>
-            <div style="display: grid; grid-template-columns: 1fr; gap: 6px; font-family:'Press Start 2P', monospace; font-size: 7px; color: #f4f7ff;">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span>STR</span>
-                <span id="attrBarStr" style="color: #ff7a45; font-family: monospace;">[          ]</span>
-                <span id="attrValStr" style="width: 12px; text-align: right;">0</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span>WIT</span>
-                <span id="attrBarWit" style="color: #6fe8d8; font-family: monospace;">[          ]</span>
-                <span id="attrValWit" style="width: 12px; text-align: right;">0</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span>SOUL</span>
-                <span id="attrBarSoul" style="color: #eb8e52; font-family: monospace;">[          ]</span>
-                <span id="attrValSoul" style="width: 12px; text-align: right;">0</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span>CASH</span>
-                <span id="attrBarCash" style="color: #10b981; font-family: monospace;">[          ]</span>
-                <span id="attrValCash" style="width: 12px; text-align: right;">0</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Right Column: Appearance & Backstory -->
-        <div class="panel" style="display: flex; flex-direction: column; justify-content: space-between;">
-          <div>
-            <h2 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68; border-bottom:1px solid #2d313d; padding-bottom:6px;">APPEARANCE & BACKSTORY</h2>
-            
-            <div style="margin-bottom:8px;">
-              <label style="font-weight:600; display:block; margin-bottom:2px; font-size:8px; font-family:'Press Start 2P', monospace;">PLAYER NAME</label>
-              <input id="hostName" value="Host" style="width: 100%; box-sizing: border-box; font-size: 10px; padding: 4px;" />
-            </div>
+      <div class="panel" style="max-width:1100px; margin:0 auto; padding:12px;">
+        <div id="creationStepIndicator" style="display:flex; gap:8px; margin-bottom:10px;"></div>
 
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
-              <div>
-                <label style="font-weight:600; display:block; margin-bottom:2px; font-size:7px; font-family:'Press Start 2P', monospace;">PLAYERS (3-12)</label>
-                <input id="playerCount" type="number" min="3" max="12" value="4" style="width: 100%; box-sizing: border-box; font-size: 10px; padding: 4px;" />
-              </div>
-              <div>
-                <label style="font-weight:600; display:block; margin-bottom:2px; font-size:7px; font-family:'Press Start 2P', monospace;">PTS TO WIN</label>
-                <input id="pointsToWin" type="number" min="1" max="50" value="7" style="width: 100%; box-sizing: border-box; font-size: 10px; padding: 4px;" />
-              </div>
-            </div>
-
-            <!-- Appearance Pickers -->
-            <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
-              <div>
-                <label style="font-weight:600; display:block; margin-bottom:2px; font-size:7px; font-family:'Press Start 2P', monospace;">HAIR STYLE</label>
-                <div style="display: flex; gap: 4px;">
-                  <button class="secondary appearance-btn" id="hair-fade" style="font-size: 6px; padding: 3px 6px;" onclick="app.selectAppearance('hair', 'fade')">FADE</button>
-                  <button class="secondary appearance-btn" id="hair-waves" style="font-size: 6px; padding: 3px 6px;" onclick="app.selectAppearance('hair', 'waves')">WAVES</button>
-                  <button class="secondary appearance-btn" id="hair-bald" style="font-size: 6px; padding: 3px 6px;" onclick="app.selectAppearance('hair', 'bald')">BALD</button>
-                </div>
-              </div>
-              <div>
-                <label style="font-weight:600; display:block; margin-bottom:2px; font-size:7px; font-family:'Press Start 2P', monospace;">FIT STYLE</label>
-                <div style="display: flex; gap: 4px;">
-                  <button class="secondary appearance-btn" id="fit-slim" style="font-size: 6px; padding: 3px 6px;" onclick="app.selectAppearance('fit', 'slim')">SLIM</button>
-                  <button class="secondary appearance-btn" id="fit-bulky" style="font-size: 6px; padding: 3px 6px;" onclick="app.selectAppearance('fit', 'bulky')">BULKY</button>
-                  <button class="secondary appearance-btn" id="fit-tight" style="font-size: 6px; padding: 3px 6px;" onclick="app.selectAppearance('fit', 'tight')">TIGHT</button>
-                </div>
-              </div>
-              <div>
-                <label style="font-weight:600; display:block; margin-bottom:2px; font-size:7px; font-family:'Press Start 2P', monospace;">PROP</label>
-                <div style="display: flex; gap: 4px;">
-                  <button class="secondary appearance-btn" id="prop-clippers" style="font-size: 6px; padding: 3px 6px;" onclick="app.selectAppearance('prop', 'clippers')">CLIPPERS</button>
-                  <button class="secondary appearance-btn" id="prop-chain" style="font-size: 6px; padding: 3px 6px;" onclick="app.selectAppearance('prop', 'chain')">CHAIN</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Secret backstory picker -->
-            <div style="margin-bottom: 8px;">
-              <label style="font-weight:600; display:block; margin-bottom:2px; font-size:7px; font-family:'Press Start 2P', monospace;">SECRET / BACKSTORY</label>
-              <select id="characterSecretSelect" style="width:100%; font-size:8px; padding:2px;">
-                <option value="">[ Choose one starting secret ]</option>
-                <option value="police_scanner">Stolen police scanner buzzing with codes (Street)</option>
-                <option value="security_warning">Cousin's neighborhood security warning (Family)</option>
-                <option value="pastor_program">Sunday service program signed by the pastor (Church)</option>
-                <option value="bodega_ledger">Bodega ledger with names you shouldn't know (Food)</option>
-                <option value="panther_uncle">Uncle claiming he used to run with the Panthers (Humor)</option>
+        <!-- STEP 1: ORIGIN -->
+        <div id="creationStepOrigin" class="creation-step">
+          <div style="display:grid; grid-template-columns: 1fr 260px; gap:12px;">
+            <div>
+              <h2 style="margin:0 0 8px; font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68;">ORIGIN</h2>
+              <select id="characterOriginSelect" style="display:none;">
+                <option value="BARBER">MASTER BARBER</option>
+                <option value="STREET_SCHOLAR">STREET SCHOLAR</option>
+                <option value="LOCAL_LEGEND">LOCAL LEGEND</option>
+                <option value="CORNER_MERCHANT">CORNER MERCHANT</option>
+                <option value="COMMUNITY_ORGANIZER">COMMUNITY ORGANIZER</option>
+                <option value="UNDERGROUND_DJ">UNDERGROUND DJ</option>
+                <option value="BLOCK_ARCHITECT">BLOCK ARCHITECT</option>
+                <option value="HUSTLE_VETERAN">HUSTLE VETERAN</option>
               </select>
+              <div id="originCardsContainer" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px;"></div>
+            </div>
+            <div>
+              <div id="attributesPanel" style="border:2px solid #2d313d; background:#101116; padding:10px; border-radius:4px;">
+                <div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#339488; margin-bottom:8px;">ATTRIBUTES</div>
+                <div style="display:grid; grid-template-columns:1fr; gap:6px; font-family:'Press Start 2P', monospace; font-size:7px; color:#f4f7ff;">
+                  <div style="display:flex; justify-content:space-between; align-items:center;"><span>STR</span><span id="attrBarStr" style="color:#ff7a45; font-family:monospace;">[          ]</span><span id="attrValStr" style="width:12px; text-align:right;">0</span></div>
+                  <div style="display:flex; justify-content:space-between; align-items:center;"><span>WIT</span><span id="attrBarWit" style="color:#6fe8d8; font-family:monospace;">[          ]</span><span id="attrValWit" style="width:12px; text-align:right;">0</span></div>
+                  <div style="display:flex; justify-content:space-between; align-items:center;"><span>SOUL</span><span id="attrBarSoul" style="color:#eb8e52; font-family:monospace;">[          ]</span><span id="attrValSoul" style="width:12px; text-align:right;">0</span></div>
+                  <div style="display:flex; justify-content:space-between; align-items:center;"><span>CASH</span><span id="attrBarCash" style="color:#10b981; font-family:monospace;">[          ]</span><span id="attrValCash" style="width:12px; text-align:right;">0</span></div>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top: 1px solid #2d313d; padding-top: 6px;">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <canvas id="setup-character-preview" width="32" height="32" style="width:48px; height:48px; border:2px solid #474d5e; background:#101116; image-rendering:pixelated;"></canvas>
-              <span class="muted" style="line-height:1.2; font-size: 8px;">Watch character preview bob!</span>
-            </div>
-            <div style="display:flex; gap:6px;">
-              <button class="secondary" style="font-size: 6px; padding: 4px;" onclick="app.showDeckBuilder()">DECK</button>
-              <button class="secondary" style="font-size: 6px; padding: 4px;" onclick="app.showBoosterShop()">SHOP</button>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px;">
+            <button class="secondary" style="font-family:'Press Start 2P', monospace; font-size:7px;" onclick="app.showMainMenu()">BACK</button>
+            <div>
+              <button class="secondary" style="font-family:'Press Start 2P', monospace; font-size:7px; margin-right:8px;" onclick="app.randomizeCharacter()">RANDOMIZE</button>
+              <button class="primary" style="font-family:'Press Start 2P', monospace; font-size:8px; background:#ffcd68; border-color:#ffcd68; color:#101116;" onclick="app.nextCreationStep()">NEXT</button>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Bottom Confirmation Bar -->
-      <div class="panel" style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 12px; max-width: 960px; margin-left: auto; margin-right: auto;">
-        <button class="secondary" style="font-family:'Press Start 2P', monospace; font-size: 7px;" onclick="app.showMainMenu()">BACK TO MENU</button>
-        <button class="primary" style="font-family:'Press Start 2P', monospace; font-size: 8px; background: #ffcd68; border-color: #ffcd68; color: #101116;" onclick="app.confirmCharacter()">[ CONFIRM ]</button>
-        <button class="secondary" style="font-family:'Press Start 2P', monospace; font-size: 7px;" onclick="app.randomizeCharacter()">[ RANDOMIZE ]</button>
-      </div>
-
-      <!-- Review Modal Overlay -->
-      <div id="reviewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(16, 17, 22, 0.9); z-index:10000; align-items:center; justify-content:center;">
-        <div class="panel" style="width:400px; border:3px solid #ffcd68; background:#101116; padding:16px; text-align:left; box-shadow:0 0 16px rgba(0,0,0,0.8);">
-          <h2 style="margin-top:0; color:#ffcd68; font-family:'Press Start 2P', monospace; font-size:10px;">CHARACTER DOSSIER</h2>
-          <div id="reviewContent" style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; line-height:1.5; margin-bottom:16px;">
-            <!-- Populated in JS -->
-          </div>
-          <button class="secondary" onclick="document.getElementById('reviewModal').style.display='none'" style="width:100%; font-family:'Press Start 2P', monospace; font-size:8px;">CLOSE</button>
-        </div>
-      </div>
-
-      <!-- Confirm / Journey Select Modal Overlay -->
-      <div id="journeyModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(16, 17, 22, 0.95); z-index:10000; align-items:center; justify-content:center;">
-        <div class="panel" style="width:420px; border:3px solid #ffcd68; background:#101116; padding:16px; text-align:center; box-shadow:0 0 16px rgba(0,0,0,0.8);">
-          <h2 style="margin-top:0; color:#ffcd68; font-family:'Press Start 2P', monospace; font-size:10px; margin-bottom:12px;">CHOOSE YOUR JOURNEY</h2>
-          <p style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; margin-bottom:16px; text-align:left;">Your character is locked in. Select a game mode to begin.</p>
-          
-          <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
-            <button onclick="app.startJourneyLocal()" style="font-family:'Press Start 2P', monospace; font-size:8px; background:#d9382e; border-color:#d9382e; color:#ffffff; padding:8px;">PLAY LOCAL (PASS & PLAY)</button>
-            <button onclick="app.startJourneyOnline()" style="font-family:'Press Start 2P', monospace; font-size:8px; background:#c9822b; border-color:#c9822b; color:#ffffff; padding:8px;">ONLINE MULTIPLAYER</button>
-            <button onclick="app.startJourneyCampaign()" style="font-family:'Press Start 2P', monospace; font-size:8px; background:#339488; border-color:#339488; color:#ffffff; padding:8px;">STORY CAMPAIGN (NOIR PROTOTYPE)</button>
-          </div>
-          
-          <div style="border-top:1px solid #2d313d; padding-top:10px; text-align:left;">
-            <div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#ffcd68; margin-bottom:8px;">SANDBOX MINI-GAMES</div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-              <button class="secondary" style="font-size:7px; padding:4px;" onclick="app.startJourneySandbox('street_dice')">STREET DICE</button>
-              <button class="secondary" style="font-size:7px; padding:4px;" onclick="app.startJourneySandbox('bodega_run')">BODEGA RUN</button>
-              <button class="secondary" style="font-size:7px; padding:4px;" onclick="app.startJourneySandbox('haircut')">HAIRCUT</button>
-              <button class="secondary" style="font-size:7px; padding:4px;" onclick="app.startJourneySandbox('lockpick')">LOCKPICKING</button>
-              <button class="secondary" style="font-size:7px; padding:4px;" onclick="app.startJourneySandbox('negotiate')">NEGOTIATION</button>
+        <!-- STEP 2: APPEARANCE -->
+        <div id="creationStepAppearance" class="creation-step">
+          <h2 style="margin:0 0 8px; font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68;">APPEARANCE</h2>
+          <div style="display:grid; grid-template-columns: 220px 1fr; gap:12px;">
+            <div>
+              <canvas id="setup-character-preview" width="32" height="32" style="width:220px; height:220px; border:2px solid #474d5e; background:#101116; image-rendering:pixelated;"></canvas>
+              <div class="muted" style="font-size:9px; margin-top:6px;">Preview updates with your choices.</div>
+            </div>
+            <div>
+              <div style="margin-bottom:10px;">
+                <div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#cbd5ed; margin-bottom:6px;">HAIR</div>
+                <div style="display:flex; gap:8px;">
+                  <button class="secondary appearance-btn creation-tile" id="hair-fade" style="font-size:8px; padding:10px;" onclick="app.selectAppearance('hair', 'fade')">FADE</button>
+                  <button class="secondary appearance-btn creation-tile" id="hair-waves" style="font-size:8px; padding:10px;" onclick="app.selectAppearance('hair', 'waves')">WAVES</button>
+                  <button class="secondary appearance-btn creation-tile" id="hair-bald" style="font-size:8px; padding:10px;" onclick="app.selectAppearance('hair', 'bald')">BALD</button>
+                </div>
+              </div>
+              <div style="margin-bottom:10px;">
+                <div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#cbd5ed; margin-bottom:6px;">FIT</div>
+                <div style="display:flex; gap:8px;">
+                  <button class="secondary appearance-btn creation-tile" id="fit-slim" style="font-size:8px; padding:10px;" onclick="app.selectAppearance('fit', 'slim')">SLIM</button>
+                  <button class="secondary appearance-btn creation-tile" id="fit-bulky" style="font-size:8px; padding:10px;" onclick="app.selectAppearance('fit', 'bulky')">BULKY</button>
+                  <button class="secondary appearance-btn creation-tile" id="fit-tight" style="font-size:8px; padding:10px;" onclick="app.selectAppearance('fit', 'tight')">TIGHT</button>
+                </div>
+              </div>
+              <div>
+                <div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#cbd5ed; margin-bottom:6px;">PROP</div>
+                <div style="display:flex; gap:8px;">
+                  <button class="secondary appearance-btn creation-tile" id="prop-clippers" style="font-size:8px; padding:10px;" onclick="app.selectAppearance('prop', 'clippers')">CLIPPERS</button>
+                  <button class="secondary appearance-btn creation-tile" id="prop-chain" style="font-size:8px; padding:10px;" onclick="app.selectAppearance('prop', 'chain')">CHAIN</button>
+                </div>
+              </div>
             </div>
           </div>
-          
-          <button class="secondary" onclick="document.getElementById('journeyModal').style.display='none'" style="width:100%; font-family:'Press Start 2P', monospace; font-size:8px; margin-top:12px;">BACK TO CREATION</button>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px;">
+            <button class="secondary" style="font-family:'Press Start 2P', monospace; font-size:7px;" onclick="app.prevCreationStep()">BACK</button>
+            <div>
+              <button class="secondary" style="font-family:'Press Start 2P', monospace; font-size:7px; margin-right:8px;" onclick="app.randomizeCharacter()">RANDOMIZE</button>
+              <button class="primary" style="font-family:'Press Start 2P', monospace; font-size:8px; background:#ffcd68; border-color:#ffcd68; color:#101116;" onclick="app.nextCreationStep()">NEXT</button>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <!-- Hidden Backing Div for Campaign List acts to avoid ReferenceErrors during init -->
-      <div id="campaignActList" style="display: none;"></div>
-      <div id="campaignActDetails" style="display: none;"></div>
+        <!-- STEP 3: BACKSTORY -->
+        <div id="creationStepBackstory" class="creation-step">
+          <h2 style="margin:0 0 8px; font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68;">BACKSTORY</h2>
+          <div style="display:grid; grid-template-columns: 1fr 260px; gap:12px;">
+            <div>
+              <div style="margin-bottom:10px;">
+                <label style="font-weight:700; display:block; margin-bottom:4px; font-size:9px; font-family:'Press Start 2P', monospace;">SECRET</label>
+                <select id="characterSecretSelect" style="width:100%; font-size:9px; padding:6px;">
+                  <option value="">[ Choose one starting secret ]</option>
+                  <option value="police_scanner">Stolen police scanner buzzing with codes (Street)</option>
+                  <option value="security_warning">Cousin's neighborhood security warning (Family)</option>
+                  <option value="pastor_program">Sunday service program signed by the pastor (Church)</option>
+                  <option value="bodega_ledger">Bodega ledger with names you shouldn't know (Food)</option>
+                  <option value="panther_uncle">Uncle claiming he used to run with the Panthers (Humor)</option>
+                </select>
+                <div id="secretHint" class="muted" style="font-size:9px; margin-top:6px; line-height:1.4;">This secret can open later paths—or close them.</div>
+              </div>
+            </div>
+            <div>
+              <div style="border:2px solid #2d313d; background:#101116; padding:10px; border-radius:4px;">
+                <div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#339488; margin-bottom:8px;">LOBBY</div>
+                <div style="display:grid; grid-template-columns:1fr; gap:8px; font-family:'Press Start 2P', monospace; font-size:8px; color:#f4f7ff;">
+                  <div>
+                    <label style="display:block; margin-bottom:2px; font-size:8px;">NAME</label>
+                    <input id="hostName" value="Host" style="width:100%; font-size:9px; padding:4px;" />
+                  </div>
+                  <div>
+                    <label style="display:block; margin-bottom:2px; font-size:8px;">PLAYERS</label>
+                    <input id="playerCount" type="number" min="3" max="12" value="4" style="width:100%; font-size:9px; padding:4px;" />
+                  </div>
+                  <div>
+                    <label style="display:block; margin-bottom:2px; font-size:8px;">PTS TO WIN</label>
+                    <input id="pointsToWin" type="number" min="1" max="50" value="7" style="width:100%; font-size:9px; padding:4px;" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px;">
+            <button class="secondary" style="font-family:'Press Start 2P', monospace; font-size:7px;" onclick="app.prevCreationStep()">BACK</button>
+            <div>
+              <button class="secondary" style="font-family:'Press Start 2P', monospace; font-size:7px; margin-right:8px;" onclick="app.randomizeCharacter()">RANDOMIZE</button>
+              <button class="primary" style="font-family:'Press Start 2P', monospace; font-size:8px; background:#ffcd68; border-color:#ffcd68; color:#101116;" onclick="app.nextCreationStep()">NEXT</button>
+            </div>
+          </div>
+        </div>
 
-      <!-- Glossary HUD Block at bottom of setup screen -->
-      <div class="panel" style="margin-top:16px; max-width:960px; margin-left:auto; margin-right:auto;">
-        <h2 style="margin-top:0; color:#339488; font-family:'Press Start 2P', monospace; font-size:10px;">BLOCK LEXICON HUD</h2>
-        <p class="muted" style="margin-top:0; margin-bottom:10px; font-size:9px;">Search definitions and cultural origins of terminology used in the game.</p>
-        <input id="lexiconSearchBox" type="text" placeholder="Search dictionary terms (e.g. Cookout, Receipts, O.G.)..." />
-        <div id="lexiconResults" class="lexicon-grid" style="margin-top:10px;"></div>
+        <!-- STEP 4: REVIEW -->
+        <div id="creationStepReview" class="creation-step">
+          <h2 style="margin:0 0 8px; font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68;">DOSSIER</h2>
+          <div class="panel" style="border:2px solid #2d313d; background:#101116; padding:12px;">
+            <div id="reviewContent" style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; line-height:1.6;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px;">
+            <button class="secondary" style="font-family:'Press Start 2P', monospace; font-size:7px;" onclick="app.prevCreationStep()">BACK</button>
+            <div>
+              <button class="secondary" style="font-family:'Press Start 2P', monospace; font-size:7px; margin-right:8px;" onclick="app.randomizeCharacter(); app.updateReviewDossier();">RANDOMIZE</button>
+              <button class="primary" style="font-family:'Press Start 2P', monospace; font-size:8px; background:#ffcd68; border-color:#ffcd68; color:#101116;" onclick="app.confirmCharacter()">CONFIRM</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modals -->
+        <div id="reviewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(16, 17, 22, 0.9); z-index:10000; align-items:center; justify-content:center;">
+          <div class="panel" style="width:400px; border:3px solid #ffcd68; background:#101116; padding:16px; text-align:left; box-shadow:0 0 16px rgba(0,0,0,0.8);">
+            <h2 style="margin-top:0; color:#ffcd68; font-family:'Press Start 2P', monospace; font-size:10px;">CHARACTER DOSSIER</h2>
+            <div id="reviewContent" style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; line-height:1.5; margin-bottom:16px;"></div>
+            <button class="secondary" onclick="document.getElementById('reviewModal').style.display='none'" style="width:100%; font-family:'Press Start 2P', monospace; font-size:8px;">CLOSE</button>
+          </div>
+        </div>
+
+        <div id="journeyModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(16, 17, 22, 0.95); z-index:10000; align-items:center; justify-content:center;">
+          <div class="panel" style="width:420px; border:3px solid #ffcd68; background:#101116; padding:16px; text-align:center; box-shadow:0 0 16px rgba(0,0,0,0.8);">
+            <h2 style="margin-top:0; color:#ffcd68; font-family:'Press Start 2P', monospace; font-size:10px; margin-bottom:12px;">CHOOSE YOUR JOURNEY</h2>
+            <p style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; margin-bottom:16px; text-align:left;">Your character is locked in. Select a game mode to begin.</p>
+            
+            <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
+              <button onclick="app.startJourneyLocal()" style="font-family:'Press Start 2P', monospace; font-size:8px; background:#d9382e; border-color:#d9382e; color:#ffffff; padding:8px;">PLAY LOCAL (PASS & PLAY)</button>
+              <button onclick="app.startJourneyOnline()" style="font-family:'Press Start 2P', monospace; font-size:8px; background:#c9822b; border-color:#c9822b; color:#ffffff; padding:8px;">ONLINE MULTIPLAYER</button>
+              <button onclick="app.startJourneyCampaign()" style="font-family:'Press Start 2P', monospace; font-size:8px; background:#339488; border-color:#339488; color:#ffffff; padding:8px;">STORY CAMPAIGN (NOIR PROTOTYPE)</button>
+            </div>
+            
+            <div style="border-top:1px solid #2d313d; padding-top:10px; text-align:left;">
+              <div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#ffcd68; margin-bottom:8px;">SANDBOX MINI-GAMES</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                <button class="secondary" style="font-size:7px; padding:4px;" onclick="app.startJourneySandbox('street_dice')">STREET DICE</button>
+                <button class="secondary" style="font-size:7px; padding:4px;" onclick="app.startJourneySandbox('bodega_run')">BODEGA RUN</button>
+                <button class="secondary" style="font-size:7px; padding:4px;" onclick="app.startJourneySandbox('haircut')">HAIRCUT</button>
+                <button class="secondary" style="font-size:7px; padding:4px;" onclick="app.startJourneySandbox('lockpick')">LOCKPICKING</button>
+                <button class="secondary" style="font-size:7px; padding:4px;" onclick="app.startJourneySandbox('negotiate')">NEGOTIATION</button>
+              </div>
+            </div>
+            
+            <button class="secondary" onclick="document.getElementById('journeyModal').style.display='none'" style="width:100%; font-family:'Press Start 2P', monospace; font-size:8px; margin-top:12px;">BACK TO CREATION</button>
+          </div>
+        </div>
+
+        <!-- Hidden Backing Divs -->
+        <div id="campaignActList" style="display: none;"></div>
+        <div id="campaignActDetails" style="display: none;"></div>
       </div>
     </div>
   </section>
@@ -2019,6 +2065,74 @@ const app = {
     const creation = document.getElementById('characterCreationView');
     if (main) main.style.display = 'none';
     if (creation) creation.style.display = '';
+    this.creationStep = this.creationStep || 1;
+    this.updateCreationStep();
+  },
+
+  updateCreationStep() {
+    const steps = [1,2,3,4];
+    steps.forEach(s => {
+      const el = document.getElementById(`creationStep${['Origin','Appearance','Backstory','Review'][s-1]}`);
+      if (el) el.classList.toggle('active', s === this.creationStep);
+    });
+    const indicator = document.getElementById('creationStepIndicator');
+    if (indicator) {
+      const labels = ['ORIGIN','APPEARANCE','BACKSTORY','REVIEW'];
+      indicator.innerHTML = labels.map((label, idx) => {
+        const cls = idx + 1 === this.creationStep ? 'active' : (idx + 1 < this.creationStep ? 'done' : '');
+        return `<div class="step-segment ${cls}">${label}</div>`;
+      }).join('');
+    }
+  },
+
+  nextCreationStep() {
+    if (this.creationStep >= 4) return;
+    this.creationStep += 1;
+    this.updateCreationStep();
+  },
+
+  prevCreationStep() {
+    if (this.creationStep <= 1) return;
+    this.creationStep -= 1;
+    this.updateCreationStep();
+  },
+
+  updateOriginCards() {
+    this.renderOriginCards();
+    const originKey = document.getElementById('characterOriginSelect').value;
+    if (originKey) this.selectOriginCard(originKey);
+  },
+
+  updatePreview() {
+    if (typeof this.renderCharacterPreview === 'function') {
+      this.renderCharacterPreview();
+    }
+  },
+
+  updateReviewDossier() {
+    const originKey = document.getElementById('characterOriginSelect').value;
+    const origin = CHARACTER_ORIGINS[originKey] || CHARACTER_ORIGINS.BARBER;
+    const secretSelect = document.getElementById('characterSecretSelect');
+    const secretText = secretSelect && secretSelect.selectedIndex > 0 ? secretSelect.options[secretSelect.selectedIndex].text : '[ None Chosen ]';
+    const hair = this.appearance && this.appearance.hair ? this.appearance.hair.toUpperCase() : '[ NONE ]';
+    const fit = this.appearance && this.appearance.fit ? this.appearance.fit.toUpperCase() : '[ NONE ]';
+    const prop = this.appearance && this.appearance.prop ? this.appearance.prop.toUpperCase() : '[ NONE ]';
+    const name = document.getElementById('hostName').value.trim() || 'You';
+    const content = `
+      <strong>NAME:</strong> ${name.toUpperCase()}<br/>
+      <strong>ORIGIN:</strong> ${origin.name.toUpperCase()}<br/>
+      <strong>FLAVOR:</strong> "${origin.flavor}"<br/><br/>
+      <strong>ATTRIBUTES:</strong><br/>
+      - STR: ${origin.attributes.str} | WIT: ${origin.attributes.wit} | SOUL: ${origin.attributes.soul} | CASH: ${origin.startingStats.streetCred}<br/><br/>
+      <strong>COSMETICS:</strong><br/>
+      - HAIR: ${hair}<br/>
+      - FIT: ${fit}<br/>
+      - PROP: ${prop}<br/><br/>
+      <strong>BACKSTORY SECRET:</strong><br/>
+      ${secretText}
+    `;
+    const reviewContent = document.getElementById('reviewContent');
+    if (reviewContent) reviewContent.innerHTML = content;
   },
 
   showJourneyFromMenu() {
@@ -2170,6 +2284,8 @@ const app = {
   appearance: { hair: '', fit: '', prop: '' },
 
   initCharacterCreation() {
+    this.creationStep = 1;
+    this.updateCreationStep();
     this.renderOriginCards();
     this.selectOriginCard('BARBER');
   },
@@ -2199,9 +2315,11 @@ const app = {
     document.querySelectorAll('.origin-card').forEach(c => {
       c.style.borderColor = '#2d313d';
       c.style.boxShadow = 'none';
+      c.classList.remove('selected');
     });
     const selectedCard = document.getElementById(`origin-card-${key}`);
     if (selectedCard) {
+      selectedCard.classList.add('selected');
       selectedCard.style.borderColor = '#ffcd68';
       selectedCard.style.boxShadow = '0 0 8px rgba(255, 205, 104, 0.4)';
     }
@@ -2213,6 +2331,13 @@ const app = {
     }
 
     this.updateAttributeBars(key);
+  },
+
+  assignOriginAttrs(player, originKey) {
+    const origin = CHARACTER_ORIGINS[originKey];
+    if (origin && player) {
+      player.attributes = { ...origin.attributes };
+    }
   },
 
   updateAttributeBars(originKey) {
@@ -2246,6 +2371,7 @@ const app = {
     document.querySelectorAll(`.appearance-btn`).forEach(btn => {
       if (btn.id.startsWith(`${category}-`)) {
         btn.classList.add('secondary');
+        btn.classList.remove('selected');
         btn.style.borderColor = '';
         btn.style.color = '';
       }
@@ -2254,6 +2380,7 @@ const app = {
     const btn = document.getElementById(`${category}-${value}`);
     if (btn) {
       btn.classList.remove('secondary');
+      btn.classList.add('selected');
       btn.style.borderColor = '#ffcd68';
       btn.style.color = '#ffcd68';
     }

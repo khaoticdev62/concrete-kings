@@ -21,6 +21,7 @@ function loadGameModule() {
   const context = { 
     console, 
     Math,
+    CHARACTER_ORIGINS: typeof global.CHARACTER_ORIGINS !== 'undefined' ? global.CHARACTER_ORIGINS : undefined,
     document: typeof global.document !== 'undefined' ? global.document : undefined,
     window: typeof global.window !== 'undefined' ? global.window : undefined,
     setInterval: typeof global.setInterval !== 'undefined' ? global.setInterval : undefined,
