@@ -1634,7 +1634,8 @@ class Game {
       name, hand: [], points: 0,
       stats: { streetCred: 0, reputation: 0 },
       attributes: { str: 0, wit: 0, soul: 0 },
-      receipts: []
+      receipts: [],
+      prepItems: { street_dice: 0, bodega_run: 0, haircut_challenge: 0, lockpicking: 0, negotiation: 0 }
     });
   }
 
@@ -4519,6 +4520,7 @@ const app = {
       this.game.players = msg.players.map(p => ({
         name: p.name, hand: [], points: p.points || 0,
         stats: { streetCred: 0, reputation: 0 }, attributes: { str: 0, wit: 0, soul: 0 }, receipts: [],
+        prepItems: { street_dice: 0, bodega_run: 0, haircut_challenge: 0, lockpicking: 0, negotiation: 0 },
         ready: !!p.ready
       }));
       this.humanIndex = this.game.players.findIndex(p => p.name === msg.playerName);
@@ -4546,6 +4548,7 @@ const app = {
       this.game.players = msg.players.map(p => ({
         name: p.name, hand: [], points: p.points || 0,
         stats: { streetCred: 0, reputation: 0 }, attributes: { str: 0, wit: 0, soul: 0 }, receipts: [],
+        prepItems: { street_dice: 0, bodega_run: 0, haircut_challenge: 0, lockpicking: 0, negotiation: 0 },
         ready: !!p.ready
       }));
       const myName = document.getElementById('joinName').value.trim() || document.getElementById('hostName').value.trim() || 'Player';
