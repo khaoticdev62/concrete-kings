@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "tileSize": 16,
+  "sources": {
+    "harlem_tiles": "assets/sprite_packs/city_harlem_tiles.png",
+    "detroit_tiles": "assets/sprite_packs/city_detroit_tiles.png",
+    "chicago_tiles": "assets/sprite_packs/city_chicago_tiles.png",
+    "miami_tiles": "assets/sprite_packs/city_miami_tiles.png",
+    "baltimore_tiles": "assets/sprite_packs/city_baltimore_tiles.png",
+    "atlanta_tiles": "assets/sprite_packs/city_atlanta_tiles.png",
+    "oakland_tiles": "assets/sprite_packs/city_oakland_tiles.png",
+    "nola_tiles": "assets/sprite_packs/city_nola_tiles.png"
+  },
+  "sprites": {}
+}
