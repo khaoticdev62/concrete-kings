@@ -50,6 +50,8 @@ class StreetDice extends StreetDiceBaseClass {
 
     // Retrieve WIT stat from player origin if available
     this.witModifier = (this.gameState && this.gameState.wit) || 0;
+
+    if (params.prepItemBonus) this.witModifier += 3;
   }
 
   start() {

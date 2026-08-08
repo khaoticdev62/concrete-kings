@@ -101,6 +101,8 @@ class BodegaRun extends BodegaRunBaseClass {
       this.clerkSweepTime = 1500;
       this.alertnessRate = 80;
     }
+
+    if (params.prepItemBonus) this.alertnessRate -= 30;
   }
 
   start() {

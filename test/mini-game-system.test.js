@@ -250,6 +250,87 @@ test('Street Dice: WIT modifier mapping and win/loss verification rules', () => 
   assert.equal(gameLoss.result.reputationDelta, -1);
 });
 
+test('Street Dice: prep item bonus adds +3 to witModifier, only when flagged', () => {
+  const canvas = new MockCanvas();
+  const ctx = canvas.getContext('2d');
+  const state = new MiniGameState();
+  state.wit = 7;
+
+  const withBonus = new StreetDice(null, canvas, ctx, state);
+  withBonus.init({ prepItemBonus: true });
+  assert.equal(withBonus.witModifier, 10, 'base WIT (7) + prep item bonus (3)');
+
+  const withoutBonus = new StreetDice(null, canvas, ctx, state);
+  withoutBonus.init({});
+  assert.equal(withoutBonus.witModifier, 7, 'unchanged when no bonus is flagged');
+});
+
+test('Bodega Run: prep item bonus reduces alertnessRate by 30, only when flagged', () => {
+  const canvas = new MockCanvas();
+  const ctx = canvas.getContext('2d');
+  const state = new MiniGameState();
+
+  const withBonus = new BodegaRun(null, canvas, ctx, state);
+  withBonus.init({ difficulty: 'medium', prepItemBonus: true });
+  assert.equal(withBonus.alertnessRate, 50, 'base medium (80) - prep item bonus (30)');
+
+  const withoutBonus = new BodegaRun(null, canvas, ctx, state);
+  withoutBonus.init({ difficulty: 'medium' });
+  assert.equal(withoutBonus.alertnessRate, 80, 'unchanged when no bonus is flagged');
+});
+
+test('Haircut Challenge: prep item bonus widens GOOD/PERFECT zones, only when flagged', () => {
+  const canvas = new MockCanvas();
+  const ctx = canvas.getContext('2d');
+  const state = new MiniGameState();
+
+  const withBonus = new HaircutChallenge(null, canvas, ctx, state);
+  withBonus.init({ difficulty: 'medium', prepItemBonus: true });
+  assert.ok(Math.abs(withBonus.goodWidth - 0.36) < 1e-9, 'base medium goodWidth (0.3) + 0.06');
+  assert.ok(Math.abs(withBonus.perfectWidth - 0.11) < 1e-9, 'base medium perfectWidth (0.08) + 0.03');
+
+  const withoutBonus = new HaircutChallenge(null, canvas, ctx, state);
+  withoutBonus.init({ difficulty: 'medium' });
+  assert.equal(withoutBonus.goodWidth, 0.3, 'unchanged when no bonus is flagged');
+  assert.equal(withoutBonus.perfectWidth, 0.08, 'unchanged when no bonus is flagged');
+});
+
+test('Lockpicking: prep item bonus adds 6px tolerance, only when flagged', () => {
+  const canvas = new MockCanvas();
+  const ctx = canvas.getContext('2d');
+  const state = new MiniGameState();
+
+  const withBonus = new Lockpicking(null, canvas, ctx, state);
+  withBonus.init({ difficulty: 'hard', prepItemBonus: true });
+  assert.equal(withBonus.tolerance, 16, 'base hard tolerance (10) + prep item bonus (6), STR bonus is 0 here');
+
+  const withoutBonus = new Lockpicking(null, canvas, ctx, state);
+  withoutBonus.init({ difficulty: 'hard' });
+  assert.equal(withoutBonus.tolerance, 10, 'unchanged when no bonus is flagged');
+});
+
+test('Negotiation: prep item bonus reduces resistance and maxResistance by 20, only when flagged', () => {
+  const canvas = new MockCanvas();
+  const ctx = canvas.getContext('2d');
+  const state = new MiniGameState();
+
+  const withBonus = new Negotiation(null, canvas, ctx, state);
+  withBonus.init({ difficulty: 'medium', prepItemBonus: true });
+  assert.equal(withBonus.resistance, 80, 'base medium resistance (100) - prep item bonus (20)');
+  assert.equal(withBonus.maxResistance, 80);
+
+  // start() reassigns resistance = maxResistance, so the bonus only reaches live
+  // play because BOTH fields are reduced. Reducing resistance alone would be
+  // silently voided here, making the purchased item do nothing.
+  withBonus.start();
+  assert.equal(withBonus.resistance, 80, 'bonus must survive start() into actual play');
+
+  const withoutBonus = new Negotiation(null, canvas, ctx, state);
+  withoutBonus.init({ difficulty: 'medium' });
+  assert.equal(withoutBonus.resistance, 100, 'unchanged when no bonus is flagged');
+  assert.equal(withoutBonus.maxResistance, 100);
+});
+
 test('Mini-Game Manager: registration and game activation lifecycle', () => {
   const canvas = new MockCanvas();
   const manager = new MiniGameManager(canvas);

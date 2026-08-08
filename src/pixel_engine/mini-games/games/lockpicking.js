@@ -92,6 +92,8 @@ class Lockpicking extends LockpickingBaseClass {
     
     // Apply STR bonus to tolerance
     this.tolerance += Math.floor(((this.gameState && this.gameState.str) || 0) / 2);
+
+    if (params.prepItemBonus) this.tolerance += 6;
     
     this.setupPins();
   }

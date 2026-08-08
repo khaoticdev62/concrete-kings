@@ -98,6 +98,11 @@ class Negotiation extends NegotiationBaseClass {
       this.maxResistance = 100;
       this.durationSeconds = 40;
     }
+
+    if (params.prepItemBonus) {
+      this.resistance -= 20;
+      this.maxResistance -= 20;
+    }
   }
 
   start() {

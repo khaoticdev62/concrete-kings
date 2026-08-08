@@ -82,6 +82,11 @@ class HaircutChallenge extends HaircutChallengeBaseClass {
       this.goodWidth = 0.3;
       this.perfectWidth = 0.08;
     }
+
+    if (params.prepItemBonus) {
+      this.goodWidth += 0.06;
+      this.perfectWidth += 0.03;
+    }
   }
 
   start() {
