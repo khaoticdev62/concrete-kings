@@ -1207,7 +1207,7 @@
         <h2 id="mapDistrictTitle" style="margin:0; font-family:'Press Start 2P', monospace; font-size:12px;">HARLEM STOOP</h2>
         <span class="status-pill">Reputation: <b id="mapRep" style="color:#ffcd68;">0</b> · Weather: <b id="mapWeather" style="color:#ff7a45;">CLEAR</b></span>
       </div>
-      <p class="muted" style="margin-top:0; margin-bottom:12px;">Use Fast Travel or click a cleared block tile to navigate. Active heat prevents fast travel.</p>
+      <p class="muted" style="margin-top:0; margin-bottom:8px; font-size:10px;">Walk the block with WASD or arrows. Pick a district on the left to travel — active heat locks a district.</p>
 
       <div style="display:flex; gap:12px; align-items:flex-start;">
         <!-- Left: district rail (this is fast travel) -->
@@ -1218,8 +1218,11 @@
 
         <!-- Centre: the walkable map -->
         <div style="flex:1; min-width:0;">
-          <div class="crt-screen" style="border:3px solid #ffcd68; background:#08080a;">
-            <canvas id="topDownMapCanvas" width="960" height="520" class="pixel-canvas" style="width:100%; height:auto; display:block; image-rendering:pixelated;"></canvas>
+          <!-- max-height keeps the whole screen inside 720px: without it the
+               canvas scales to ~520px tall and pushes the exit buttons past the
+               viewport bottom, where the clipped body makes them unreachable. -->
+          <div class="crt-screen" style="border:3px solid #ffcd68; background:#08080a; display:flex; justify-content:center;">
+            <canvas id="topDownMapCanvas" width="960" height="520" class="pixel-canvas" style="max-width:100%; max-height:calc(100vh - 290px); width:auto; height:auto; display:block; image-rendering:pixelated;"></canvas>
           </div>
           <div id="mapPromptLine" style="margin-top:6px; min-height:16px; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68; text-align:center;">Walk with WASD / Arrows.</div>
         </div>
