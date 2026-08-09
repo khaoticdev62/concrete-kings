@@ -15,10 +15,10 @@
     "poi_chess": "assets/props/web/chess_table.png",
     "poi_gate": "assets/props/web/locked_door.png",
     "poi_deal": "assets/props/web/shop_deal.png",
-    "prop_car": "assets/prop_car.jpg",
-    "prop_street_lamp": "assets/prop_street_lamp.jpg",
-    "prop_phone_booth": "assets/prop_phone_booth.jpg",
-    "prop_dumpster": "assets/prop_dumpster.jpg"
+    "prop_car": "assets/props/web/car_prop.png",
+    "prop_street_lamp": "assets/props/web/street_lamp_prop.png",
+    "prop_phone_booth": "assets/props/web/phone_booth_prop.png",
+    "prop_dumpster": "assets/props/web/dumpster_prop.png"
   },
   "sprites": {
     "prop_poi_barber_shop": {
@@ -55,6 +55,34 @@
       "y": 0,
       "w": 82,
       "h": 96
+    },
+    "prop_car": {
+      "source": "prop_car",
+      "x": 0,
+      "y": 0,
+      "w": 96,
+      "h": 96
+    },
+    "prop_street_lamp": {
+      "source": "prop_street_lamp",
+      "x": 0,
+      "y": 0,
+      "w": 96,
+      "h": 96
+    },
+    "prop_phone_booth": {
+      "source": "prop_phone_booth",
+      "x": 0,
+      "y": 0,
+      "w": 50,
+      "h": 96
+    },
+    "prop_dumpster": {
+      "source": "prop_dumpster",
+      "x": 0,
+      "y": 0,
+      "w": 96,
+      "h": 94
     }
   }
 }
