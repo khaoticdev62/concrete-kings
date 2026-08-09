@@ -2251,13 +2251,19 @@ function resolveNpcBackdrop(npcId, city) {
  *
  * Keyed by district key rather than city because arrival is per district. Chosen
  * on what each image SHOWS, not on its filename — three filenames are actively
- * misleading, and the picks for Detroit, Baltimore and NOLA all come from files
- * named after something else. See
+ * misleading, and the picks for Detroit and NOLA both come from files named after
+ * something else. See
  * docs/superpowers/specs/2026-08-08-district-arrival-art-design.md.
  *
- * ATLANTA is deliberately absent. No Southern porch art exists, and a wrong-city
- * establishing shot is worse than none — the same call made for the generated
- * lamp, the car prop and Miami's tile atlas. It needs one generation.
+ * Baltimore used to borrow `nola-balcony-interior`, chosen because it happens to show
+ * a rowhouse street with steps. It now has its own: marble front steps, formstone
+ * rowhouses, the Maryland flag and the harbour cranes behind. That also releases the
+ * NOLA balcony image, which is what its filename always said it was.
+ *
+ * ATLANTA is still deliberately absent. The scene batch this Baltimore image came
+ * from contains no Southern porch — I checked all 32 of them — and a wrong-city
+ * establishing shot is worse than none. Same call as the generated lamp, the car prop
+ * and Miami's tile atlas. It needs one generation.
  *
  * Nothing here may also appear in NPC_SCENE_BACKDROPS; a test enforces that, so
  * an image cannot be silently double-booked across two screens.
@@ -2267,7 +2273,7 @@ const DISTRICT_ARRIVAL_SCENES = {
   DETROIT:   'midtown-liquor-barber-wall',   // vacant lot, chain-link, RESIST graffiti
   CHICAGO:   'chicago-el-platform',          // elevated track underpass, LAKEFRONT
   MIAMI:     'art-deco-hotel-neon',          // deco neon and palms, wet street
-  BALTIMORE: 'nola-balcony-interior',        // rowhouse street, stoops and steps
+  BALTIMORE: 'baltimore-marble-steps',       // marble steps, Maryland flag, harbour cranes
   OAKLAND:   'elsol-bodega-street-truck',    // bodega, food truck, overpass
   NOLA:      'corner-bodega-night'           // French Quarter corner, iron balcony
 };

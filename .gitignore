@@ -5,3 +5,7 @@ node_modules/
 assets/*_raw.*
 assets/ui-mockups/
 assets/unusable/
+# Unprocessed generator dumps, same rule as *_raw.*: 484MB of 2048px and 2816px
+# originals. Anything worth keeping gets trimmed, named and moved into assets/scenes/
+# or assets/props/ first — see assets/ASSET_INVENTORY.md.
+assets/Gemini_Generated_Image_*
