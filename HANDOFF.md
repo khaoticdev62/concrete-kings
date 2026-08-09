@@ -16,7 +16,7 @@ node server/server.js        # serves index.html + WS relay on port 3001
 
 Open `http://localhost:3001`. **Port is 3001, not 3000.**
 
-Current state: **223 tests, all passing**, 45 test files, clean tree, pushed.
+Current state: **229 tests, all passing**, 47 test files, clean tree, pushed.
 
 Always run `npm test` and not just `node --test` — the npm script also
 syntax-checks `index.html`'s inline `<script>`, `cards.js` and `server/server.js`,
@@ -165,6 +165,7 @@ accessibility setting was unreachable. `test/cash-shop.test.js` guards placement
 | `scenes/` (24) | Excellent 3/4 street-level art. **Cannot tile** — fixed perspective |
 | `scenes/web/` (9) | 960px PNG8 web copies, ~150KB. **These** are what the game loads |
 | `topdown-recolor/` (12) | Right shapes, wrong palette. Recolourable via `SpriteRenderer` |
+| `props/web/` (5) | POI prop sprites, transparent PNG32, 80KB total. **Wired and drawing** |
 | `decals/` (4) | Usable |
 | `ui-mockups/` (5) | HUD explorations, **not** game art |
 | `*_raw.png` (8) | Failed tile generations, neon on black. Not sliceable |
@@ -181,9 +182,15 @@ accessibility setting was unreachable. `test/cash-shop.test.js` guards placement
   colour not in the master palette.
 - Large fills (ground, asphalt, roofs) must stay under luminance 120. Bright hues
   belong in `lane`, `zebra` and `accent` only. Tested.
-- `assets/manifest.json` declares 8 city sources with an **empty** `sprites`
-  map, so the map renders fully procedurally. Add keys as real art lands; no
-  code change needed. Keys use the prompt pack's vocabulary:
+- `assets/manifest.json` declares the 8 city sources plus 5 POI props. City
+  tiles have no sprite keys yet so terrain stays procedural; the POI props are
+  live. `test/manifest-integrity.test.js` verifies every source exists, is under
+  400KB, and that declared sprite sizes match the real PNG header.
+- **Never point the manifest at a raw asset.** JPEG has no transparency (a raw
+  prop draws as a black box) and the raws are 0.4-14MB. Process first:
+  `magick in.jpg -fuzz 6% -transparent black -trim +repage -resize 96x96 -strip PNG32:out.png`
+- POI prop lookups are district-agnostic (`prop_poi_<id>`) because the same five
+  POIs appear in all eight districts. Every other element prefixes the district. Keys use the prompt pack's vocabulary:
   `ground_* road_* building_* furniture_* flora_* decal_* prop_* icon_*`.
 
 **Why the tile generations failed** (avoid repeating): palette placeholders like
