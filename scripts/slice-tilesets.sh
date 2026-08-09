@@ -53,6 +53,28 @@ CELL=256
 # The row-0 surface cells were tried as occasional ground patches and cut: they
 # are illustrated scenes, not patches. Harlem's is a two-tone wall/floor boundary
 # and Detroit's a bright orange dirt square, and both read as a pasted tile.
+# CELLS ASSESSED BY EYE. Every cell below was composited on its district's own
+# pavement colour and looked at. These read WRONG and should not be selected —
+# recorded here because each was in use at some point:
+#   chicago 2,0  side-on street lamp with a light cone; wrong projection
+#   chicago 2,1  theatre marquee with prompt text baked into the art
+#   chicago 2,2  hot dog cart with a vendor figure, side-on
+#   oakland 2,0  side-on wall lamp and cone
+#   oakland 2,1  wall graffiti text sharing the cell with an oil puddle
+#   oakland 2,2  BODEGA sign on posts, side-on, lighter than any pavement
+#   miami   0,3  near-white terrazzo drain
+#   miami   2,0  side-on pole and awning
+#   miami   2,1  planter box, side-on
+#   nola    2,0  wrought-iron fence, side-on
+#
+# Miami as a whole failed three separate attempts. Its atlas is a pastel art-deco
+# set in a different visual language, and its cells carry saturated orange and
+# dark brown fields. Matching luminance AND hue toward the grey-blue pavement
+# still leaves obvious coloured squares: a 20% colorize cannot neutralise a
+# saturated orange without washing out the object on top of it. It needs
+# regenerating on palette, not reprocessing. Removing its captions did not address
+# this, because captions were never the problem.
+#
 TILESETS="
 harlem:2,0:2,1:2,2
 detroit:2,0:2,1:2,2:2,3
@@ -125,7 +147,12 @@ for entry in $TILESETS; do
 
     # Tone the field to the district's pavement. The corner pixel is the field,
     # since the object sits centred in every one of these cells.
-    field=$(magick "$out" -alpha off -colorspace gray -format '%[fx:int(255*p{1,1})]' info:)
+    # Field luminance from the tile MEAN, not a corner pixel. The corner lands on
+    # the cell's dark border in several of these atlases, so a bright field read as
+    # dark and the correction then brightened it further — Miami's near-white
+    # terrazzo drain came out lighter instead of darker. The field dominates every
+    # one of these cells by area, so the mean tracks it with no such edge case.
+    field=$(magick "$out" -alpha off -colorspace gray -format '%[fx:int(255*mean)]' info:)
     if [ "$field" -gt 0 ]; then
       factor=$(( target * 100 / field ))
       [ "$factor" -lt 30 ] && factor=30
