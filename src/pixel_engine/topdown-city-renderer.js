@@ -212,12 +212,10 @@ class TopDownCityRenderer {
 
       case 'decal_stain':
       default:
-        ctx.globalAlpha = 0.5;
-        ctx.fillStyle = p.shadow;
+        ctx.fillStyle = this.withAlpha(p.shadow, 0.5);
         ctx.beginPath();
         ctx.ellipse(cx, cy, s * 0.34, s * 0.24, 0, 0, Math.PI * 2);
         ctx.fill();
-        ctx.globalAlpha = 1;
         this.stats.proceduralDraws++;
         break;
     }
@@ -235,6 +233,33 @@ class TopDownCityRenderer {
     ctx.drawImage(slice.image, slice.x, slice.y, slice.w, slice.h, x, y, w, h);
     this.stats.assetDraws++;
     return true;
+  }
+
+  /**
+   * Combines a palette colour with an alpha multiplier into one rgba() string.
+   *
+   * Exists so gameplay draws never touch ctx.globalAlpha. globalAlpha is global
+   * state: any early return, exception or nested draw between setting it and
+   * resetting it leaks a translucent context into everything drawn afterwards.
+   * Alpha baked into fillStyle cannot leak.
+   *
+   * Handles both palette forms. Most keys are hex, but `shadow` is already an
+   * rgba() string, so its own alpha is multiplied rather than discarded —
+   * replacing it would make every shadow darker than the palette intends.
+   */
+  withAlpha(colour, mult) {
+    const str = String(colour);
+    const rgba = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)$/i.exec(str);
+    if (rgba) {
+      const base = rgba[4] === undefined ? 1 : parseFloat(rgba[4]);
+      return `rgba(${rgba[1]},${rgba[2]},${rgba[3]},${(base * mult).toFixed(3)})`;
+    }
+    const hex = /^#([0-9a-f]{6})$/i.exec(str);
+    if (hex) {
+      const n = parseInt(hex[1], 16);
+      return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${mult.toFixed(3)})`;
+    }
+    return str;   // unknown format: pass through rather than drawing nothing
   }
 
   fill(ctx, x, y, w, h, col) {
@@ -449,12 +474,10 @@ class TopDownCityRenderer {
 
   /** Soft contact shadow. A boxy offset rect looks wrong under an irregular sprite. */
   contactShadow(ctx, cx, cy, rx, ry, p) {
-    ctx.globalAlpha = 0.35;
-    ctx.fillStyle = p.shadow;
+    ctx.fillStyle = this.withAlpha(p.shadow, 0.35);
     ctx.beginPath();
     ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
     ctx.fill();
-    ctx.globalAlpha = 1;
   }
 
   /**
@@ -516,15 +539,10 @@ class TopDownCityRenderer {
     }
 
     if (kind === 'street_lamp') {
-      // Seen from directly above, a lamp is mostly its light: a warm pool on the
-      // pavement with the head at the centre. A tall pole drawn upward would be
-      // a side-on read and fights the projection.
-      ctx.globalAlpha = 0.16;
-      ctx.fillStyle = p.accent;
-      ctx.beginPath();
-      ctx.ellipse(x, y, 12, 9, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
+      // Seen from directly above a lamp is mostly its light — but the pool is
+      // drawn by lightmap.js now, one layer earlier, so overlapping pools
+      // brighten each other and furniture sits IN the light. Drawing a pool
+      // here too stacked two glows on every lamp. Only the fitting remains.
       this.fill(ctx, x - 3, y - 3, 6, 6, p.roofADk);   // lamp head
       this.fill(ctx, x - 1, y - 1, 2, 2, p.accent);    // bulb
       return;
@@ -555,12 +573,10 @@ class TopDownCityRenderer {
       const x = poi.x - w / 2;
       const y = poi.y - h + 10;
 
-      ctx.globalAlpha = 0.4;
-      ctx.fillStyle = p.shadow;
+      ctx.fillStyle = this.withAlpha(p.shadow, 0.4);
       ctx.beginPath();
       ctx.ellipse(poi.x, poi.y + 4, w * 0.42, 7, 0, 0, Math.PI * 2);
       ctx.fill();
-      ctx.globalAlpha = 1;
 
       ctx.drawImage(slice.image, slice.x, slice.y, slice.w, slice.h, x, y, w, h);
       this.stats.assetDraws++;
