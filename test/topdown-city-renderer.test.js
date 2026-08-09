@@ -143,3 +143,97 @@ test('Renderer: renders every district without throwing', () => {
     assert.ok(ctx.calls.fillRect > 50, `${key} must draw a populated city`);
   });
 });
+
+/** Registry stub that resolves exactly the sprite keys it is given. */
+function registryWith(keys) {
+  const set = new Set(keys);
+  return { get: (key) => (set.has(key) ? { image: { key }, x: 0, y: 0, w: 32, h: 32 } : null) };
+}
+
+test('Renderer: ground decals are placed deterministically, so litter does not crawl', () => {
+  // Placement is seeded from the district key rather than Math.random, because
+  // re-rolling per frame would animate the decals and put them in different
+  // spots on each player's screen in online mode.
+  const keys = ['harlem_decal_drain', 'harlem_decal_manhole', 'harlem_decal_litter'];
+  const a = new TopDownCityRenderer({ registry: registryWith(keys) });
+  const b = new TopDownCityRenderer({ registry: registryWith(keys) });
+  const { getDistrict } = require('../src/pixel_engine/topdown-city-data.js');
+  const d = getDistrict('HARLEM');
+
+  const planA = a.decalPlan('HARLEM', d);
+  const planB = b.decalPlan('HARLEM', d);
+
+  assert.ok(planA.length > 0, 'declared decals must actually get placed');
+  assert.deepEqual(
+    planA.map(s => `${s.key}@${s.x},${s.y}`),
+    planB.map(s => `${s.key}@${s.x},${s.y}`),
+    'two renderers must agree on placement'
+  );
+
+  // And stable across repeated frames on the same instance.
+  assert.equal(a.decalPlan('HARLEM', d), planA, 'the plan must be cached, not recomputed');
+});
+
+test('Renderer: each district scatters decals differently', () => {
+  const { getDistrict } = require('../src/pixel_engine/topdown-city-data.js');
+  const r = new TopDownCityRenderer({
+    registry: registryWith(['harlem_decal_drain', 'detroit_decal_drain'])
+  });
+  const h = r.decalPlan('HARLEM', getDistrict('HARLEM')).map(s => `${s.x},${s.y}`).join('|');
+  const d = r.decalPlan('DETROIT', getDistrict('DETROIT')).map(s => `${s.x},${s.y}`).join('|');
+  assert.notEqual(h, d, 'the seed must vary by district, or every block looks identical');
+});
+
+test('Renderer: every decal lands wholly inside a sidewalk band', () => {
+  // A decal half on the road shows its baked-in pavement field against asphalt,
+  // which reads as a misplaced tile. The slicer tones each decal to the
+  // district's walk colour, so the pavement is the only surface it matches.
+  const { districtKeys, getDistrict } = require('../src/pixel_engine/topdown-city-data.js');
+  const allKeys = districtKeys().flatMap(k =>
+    ['decal_drain', 'decal_manhole', 'decal_vent', 'decal_litter', 'decal_stain']
+      .map(n => `${k.toLowerCase()}_${n}`));
+  const r = new TopDownCityRenderer({ registry: registryWith(allKeys) });
+
+  districtKeys().forEach(key => {
+    const d = getDistrict(key);
+    const plan = r.decalPlan(key, d);
+    assert.ok(plan.length > 0, `${key} should place decals when all are declared`);
+    plan.forEach(spot => {
+      const inside = d.sidewalks.some(b =>
+        spot.x >= b.x && spot.x + spot.size <= b.x + b.w &&
+        spot.y >= b.y && spot.y + spot.size <= b.y + b.h);
+      assert.ok(inside, `${key}: decal at ${spot.x},${spot.y} is not fully on a sidewalk`);
+    });
+  });
+});
+
+test('Renderer: a district with no declared decals draws none, keeping the pre-asset look', () => {
+  const { getDistrict } = require('../src/pixel_engine/topdown-city-data.js');
+  const r = new TopDownCityRenderer({ registry: registryWith([]) });
+  assert.deepEqual(r.decalPlan('NOLA', getDistrict('NOLA')), []);
+
+  const ctx = recordingCtx();
+  r.render(ctx, new TopDownCityController({ districtKey: 'NOLA', attachInput: false }));
+  assert.equal(ctx.calls.drawImage, 0, 'no declared sprites must mean no drawImage');
+});
+
+test('Renderer: decals appear once assets finish loading, not only if they were ready on frame one', () => {
+  // Assets preload asynchronously and the map renders immediately, so the first
+  // decalPlan call routinely runs against an empty registry. Caching that empty
+  // result kept decals off the map permanently even though the sprites resolved
+  // moments later — every test passed and the browser showed nothing.
+  const { getDistrict } = require('../src/pixel_engine/topdown-city-data.js');
+  const d = getDistrict('HARLEM');
+
+  let loaded = false;
+  const r = new TopDownCityRenderer({
+    registry: {
+      get: (key) => (loaded && key === 'harlem_decal_drain'
+        ? { image: { key }, x: 0, y: 0, w: 32, h: 32 } : null)
+    }
+  });
+
+  assert.deepEqual(r.decalPlan('HARLEM', d), [], 'nothing to place before the strip decodes');
+  loaded = true;
+  assert.ok(r.decalPlan('HARLEM', d).length > 0, 'decals must appear after assets resolve');
+});

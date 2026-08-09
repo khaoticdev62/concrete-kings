@@ -50,18 +50,29 @@ test('Manifest: sprite dimensions match the real image, so nothing draws stretch
     return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
   };
 
+  // How many sprites share each source. A source with several sprites is an
+  // atlas or strip, so its first slice legitimately sits at 0,0 while being
+  // smaller than the file. Treating x=0,y=0 as "must be the whole image"
+  // mis-declared the first decal of each strip as the full strip width, which
+  // squashed three decals into one draw.
+  const spriteCount = {};
+  Object.values(manifest.sprites).forEach(def => {
+    spriteCount[def.source] = (spriteCount[def.source] || 0) + 1;
+  });
+
   const wrong = [];
   for (const [key, def] of Object.entries(manifest.sprites)) {
     const file = path.join(ROOT, manifest.sources[def.source]);
     const real = pngSize(file);
     if (!real) continue;                     // non-PNG sources are not checked here
-    if (def.x === 0 && def.y === 0) {
-      // Full-image sprite: its declared size must match the file exactly.
-      if (def.w !== real.w || def.h !== real.h) {
-        wrong.push(`${key} declares ${def.w}x${def.h} but image is ${real.w}x${real.h}`);
-      }
-    } else if (def.x + def.w > real.w || def.y + def.h > real.h) {
+
+    if (def.x + def.w > real.w || def.y + def.h > real.h) {
       wrong.push(`${key} slice runs outside its ${real.w}x${real.h} source`);
+    } else if (spriteCount[def.source] === 1 && def.x === 0 && def.y === 0 &&
+               (def.w !== real.w || def.h !== real.h)) {
+      // Sole sprite for its source, anchored at the origin: it is meant to be
+      // the whole image, so a mismatch means it will draw stretched.
+      wrong.push(`${key} is the only sprite in its source and declares ${def.w}x${def.h}, but the image is ${real.w}x${real.h}`);
     }
   }
   assert.deepEqual(wrong, [], wrong.join('; '));

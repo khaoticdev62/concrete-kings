@@ -16,7 +16,7 @@ node server/server.js        # serves index.html + WS relay on port 3001
 
 Open `http://localhost:3001`. **Port is 3001, not 3000.**
 
-Current state: **234 tests, all passing**, 46 test files.
+Current state: **248 tests, all passing**.
 
 Always run `npm test` and not just `node --test` — the npm script also
 syntax-checks `index.html`'s inline `<script>`, `cards.js` and `server/server.js`,
@@ -24,7 +24,7 @@ which catches parse errors the test runner never sees.
 
 ---
 
-## 2. Six traps that will cost you hours
+## 2. Eight traps that will cost you hours
 
 ### 2.1 You cannot measure layout with `documentElement.scrollHeight`
 
@@ -124,6 +124,31 @@ Two related failures, both now guarded by `test/manifest-integrity.test.js`:
 - **Size drift** between the PNG on disk and the size the renderer draws it at.
 
 Neither dimensions, file size, nor resolution catch either one.
+
+### 2.7 Anything cached on the first frame is cached before assets exist
+
+`AssetRegistry.preload()` is async and the map renders immediately, so the first
+frame runs against an empty registry. Ground decal placement is computed once
+and cached — and caching the empty result it produced on frame one kept decals
+off the map permanently, because the sprites resolved a moment later and nothing
+ever recomputed. Every test passed; the browser showed nothing.
+
+`decalPlan` therefore treats an empty sprite pool as "not ready yet" and returns
+without caching. If you cache anything else derived from the registry, do the
+same. `test/topdown-city-renderer.test.js` covers this with a registry that
+starts empty and resolves later.
+
+### 2.8 A sprite at x=0,y=0 is not necessarily the whole image
+
+Sprite packs are strips: `city_harlem_tiles.png` is three 32px decals side by
+side, so its first slice is legitimately at `0,0` with `w:32` on a 96px file. An
+earlier version of `test/manifest-integrity.test.js` asserted that any sprite at
+the origin must match its file's full dimensions, and the manifest was
+"corrected" to `w:96` to satisfy it — which squashed all three decals into one
+draw.
+
+The rule now only applies when a source has exactly one sprite. When adding an
+atlas, declare explicit `x`/`w` per slice and check the count.
 
 ---
 

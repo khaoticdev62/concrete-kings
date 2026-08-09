@@ -44,6 +44,33 @@ const FURNITURE_DISPLAY = {
 };
 const FACE_HEIGHT = 6;     // visible building front face
 
+/**
+ * Ground decal vocabulary, looked up as `<district>_<name>`.
+ *
+ * These come from the generated 4x4 city tile atlases. The atlases were first
+ * tried as a tiled ground texture and that fails: the cells are individually
+ * illustrated, each with a dark border and one dominant motif, so repeating one
+ * stamps the same crack across the whole map in a visible grid. The flat
+ * procedural surfaces read better. What the atlases genuinely got right is
+ * discrete detail, so it is scattered over the pavement instead.
+ *
+ * A district with none of these declared draws no decals, which is the
+ * pre-asset look. Six of the eight are in that state — see
+ * assets/ASSET_INVENTORY.md.
+ */
+const DECAL_KEYS = ['decal_drain', 'decal_manhole', 'decal_vent', 'decal_litter', 'decal_stain'];
+const DECAL_COUNT = 18;    // per district, across every sidewalk band
+
+/**
+ * Decals are drawn at the width of the sidewalk they sit on, not at a fixed
+ * size. Sidewalk bands here are 20px, so a 32px decal cannot fit inside one at
+ * all — and a decal spanning the pavement is the correct read anyway, which is
+ * how a real drain or manhole sits. Clamped so an unusually wide band does not
+ * produce a giant manhole.
+ */
+const DECAL_MIN = 14;
+const DECAL_MAX = 26;
+
 const POI_LABELS = {
   BARBER_SHOP: 'BARBER',
   BODEGA: 'BODEGA',
@@ -56,6 +83,71 @@ class TopDownCityRenderer {
   constructor(options = {}) {
     this.registry = options.registry || null;
     this.stats = { assetDraws: 0, proceduralDraws: 0 };
+    // Decal placement is computed once per district and reused. Re-rolling it
+    // every frame would make the litter crawl around the pavement.
+    this.decalCache = new Map();
+  }
+
+  /**
+   * Deterministic decal placement for a district.
+   *
+   * Seeded from the district key so the same block always looks the same across
+   * frames, reloads and both players' screens in online mode. Positions are
+   * sampled inside sidewalk bands only, which is both where this kind of detail
+   * belongs and where the decals' baked-in field colour matches — the slicer
+   * tones each one to the district's `walk` colour.
+   */
+  decalPlan(districtKey, d) {
+    const cached = this.decalCache.get(districtKey);
+    if (cached) return cached;
+
+    const pool = DECAL_KEYS
+      .map(name => `${String(districtKey).toLowerCase()}_${name}`)
+      .filter(key => this.sharedSlice(key));
+
+    // Assets preload asynchronously, so the first frame can land before the
+    // strip has decoded. Caching the empty plan that produces would keep the
+    // decals off permanently — the registry resolves them a moment later and
+    // nothing ever asks again. So only a plan built from a real pool is cached;
+    // an empty pool is treated as "not ready yet" and retried next frame.
+    if (!pool.length) return [];
+
+    const spots = [];
+    if (d.sidewalks.length) {
+      // Small deterministic LCG. Seeded from the key's characters so each
+      // district gets its own arrangement without storing one.
+      let seed = 0;
+      for (const ch of String(districtKey)) seed = (seed * 31 + ch.charCodeAt(0)) % 2147483647;
+      seed = seed || 1;
+      const rand = () => (seed = (seed * 48271) % 2147483647) / 2147483647;
+
+      for (let i = 0; i < DECAL_COUNT; i++) {
+        const band = d.sidewalks[Math.floor(rand() * d.sidewalks.length)];
+        // Span the band's narrow axis and slide along its long one, so the whole
+        // decal stays on the pavement instead of bleeding onto the road.
+        const size = Math.max(DECAL_MIN, Math.min(DECAL_MAX, Math.min(band.w, band.h)));
+        if (band.w < size || band.h < size) continue;
+        spots.push({
+          key: pool[Math.floor(rand() * pool.length)],
+          size,
+          x: Math.round(band.x + rand() * (band.w - size)),
+          y: Math.round(band.y + rand() * (band.h - size))
+        });
+      }
+    }
+
+    this.decalCache.set(districtKey, spots);
+    return spots;
+  }
+
+  drawDecals(ctx, districtKey, d) {
+    this.decalPlan(districtKey, d).forEach(spot => {
+      const slice = this.sharedSlice(spot.key);
+      if (!slice) return;
+      ctx.drawImage(slice.image, slice.x, slice.y, slice.w, slice.h,
+        spot.x, spot.y, spot.size, spot.size);
+      this.stats.assetDraws++;
+    });
   }
 
   spriteKey(districtKey, element) {
@@ -131,6 +223,10 @@ class TopDownCityRenderer {
         this.fill(ctx, street.x + street.w + 10, avenue.y + 10 + i * 16, 30, 9, p.zebra);
       }
     }
+
+    // ---- Layer 0: ground decals, drawn onto the pavement before anything
+    //      stands on it, so furniture and the player occlude them correctly ----
+    this.drawDecals(ctx, key, d);
 
     // ---- Parcels: each carries its own roof detail (layer 4) internally ----
     d.parcels.forEach(parcel => this.drawParcel(ctx, key, parcel, p));

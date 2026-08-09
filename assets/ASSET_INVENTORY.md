@@ -98,6 +98,45 @@ Same palette failure as above; `harlem_raw` is abstract parking-stall striping,
 `miami_raw` is a single framed AC unit. Not sliceable as tilesets. Left in place
 pending regeneration rather than sorted, since they are the current working set.
 
+## `*_tileset_raw.jpg` — 4x4 city tile atlases. Use them as decals, not tiles.
+
+Two exist so far, `harlem` and `detroit`, and unlike the earlier `*_raw.png`
+generations these worked: 1024x1024, four rows of four 256px cells, on-palette
+and coherent. Run them through `scripts/slice-tilesets.sh`.
+
+Row by row, what each is good for:
+
+| Row | Content | Verdict |
+|---|---|---|
+| 0 | Surface textures — asphalt, concrete, brick, gravel, dirt | Not usable as a tiled ground fill (see below) |
+| 1 | Road markings — zebra, centre line, dashes, parking box | Redundant; the renderer draws these procedurally and crisply |
+| 2 | **Detail — drains, manholes, vents, litter, oil slicks** | **In use as ground decals** |
+| 3 | Building facades | Side-on, so unusable on a top-down map |
+
+**Do not pattern-fill the ground with row 0.** It was tried. These cells are
+individually illustrated, each with a dark border and one dominant motif, so
+repeating one stamps the same crack star across the whole map in an obvious
+grid. A 64px tile made it worse, because the motif became more legible. The row-0
+cells were also tried as occasional surface patches and cut: Harlem's is a
+two-tone wall/floor boundary and Detroit's a bright orange square, and both read
+as a pasted tile. Detroit's asphalt cell additionally has a dashed lane line
+baked into it, which tiles lane markings across every road.
+
+The flat procedural surfaces read cleaner than any of this. Row 2 is where these
+generations are genuinely strong, so that is what ships.
+
+Two things the slicer handles that are easy to miss. Each decal carries its own
+field colour baked in, so it draws as a square patch with the object on top —
+the slicer measures that field and tones the tile to the district's `walk`
+colour, matching both luminance and hue. Matching luminance alone still left
+warm-grey squares sitting on cool blue-grey pavement.
+
+Decals are drawn at the width of the sidewalk they sit on, not a fixed size:
+sidewalk bands are 20px, so a 32px decal cannot fit inside one at all.
+
+Six districts still have no atlas. They draw no decals, which is the pre-asset
+look — `DECAL_KEYS` in `topdown-city-renderer.js` is the vocabulary to fill.
+
 ## `props/web/` — street furniture. Two of four are the wrong projection.
 
 Run every new prop through `scripts/process-props.sh`. It trims the transparent

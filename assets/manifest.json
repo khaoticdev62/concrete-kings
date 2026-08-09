@@ -54,6 +54,15 @@
       "w": 82,
       "h": 96
     },
+    "harlem_decal_drain":   { "source": "harlem_tiles",  "x": 0,  "y": 0, "w": 32, "h": 32 },
+    "harlem_decal_manhole": { "source": "harlem_tiles",  "x": 32, "y": 0, "w": 32, "h": 32 },
+    "harlem_decal_litter":  { "source": "harlem_tiles",  "x": 64, "y": 0, "w": 32, "h": 32 },
+    "detroit_decal_drain":  { "source": "detroit_tiles", "x": 0,  "y": 0, "w": 32, "h": 32 },
+    "detroit_decal_vent":   { "source": "detroit_tiles", "x": 32, "y": 0, "w": 32, "h": 32 },
+    "detroit_decal_litter": { "source": "detroit_tiles", "x": 64, "y": 0, "w": 32, "h": 32 },
+    "detroit_decal_stain":  { "source": "detroit_tiles", "x": 96, "y": 0, "w": 32, "h": 32 },
+    "nola_decal_litter":    { "source": "nola_tiles",    "x": 0,  "y": 0, "w": 32, "h": 32 },
+    "nola_decal_stain":     { "source": "nola_tiles",    "x": 32, "y": 0, "w": 32, "h": 32 },
     "prop_phone_booth": {
       "source": "prop_phone_booth",
       "x": 0,
