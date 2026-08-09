@@ -32,7 +32,7 @@ node server/server.js        # serves index.html + WS relay on port 3001
 
 Open `http://localhost:3001`. **Port is 3001, not 3000.**
 
-Current state: **363 tests across 58 files, all passing. Zero console errors on
+Current state: **369 tests across 59 files, all passing. Zero console errors on
 load** — check the browser console, not just the suite; see trap 2.5.
 
 Always run `npm test` and not just `node --test` — the npm script also

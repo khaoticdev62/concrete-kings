@@ -59,8 +59,7 @@ node scripts/generate-palette-json.js   # regenerate assets/palettes/concrete_ki
 node scripts/generate-cards.js          # regenerate cards.js from the card database
 ```
 
-No build step, bundler, transpiler or lint config. Current state: **363 tests across 58
-files, all passing**. Always run `npm test` rather than `node --test` — the npm script also
+No build step, bundler, transpiler or lint config. Current state: **369 tests across 59 files, all passing**. Always run `npm test` rather than `node --test` — the npm script also
 syntax-checks `index.html`'s inline `<script>`, which the test runner never sees.
 
 ## Architecture
