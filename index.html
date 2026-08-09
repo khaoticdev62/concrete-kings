@@ -1474,8 +1474,19 @@
         <button class="secondary" data-crew-diff="NIGHTMARE" style="font-size:7px; padding:5px 7px;" onclick="app.setCrewDifficulty('NIGHTMARE')">NIGHTMARE</button>
       </div>
 
-      <div id="crewList" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; max-height:250px; overflow-y:auto;"></div>
-      <div id="crewRecap" style="margin-top:12px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; line-height:1.7;"></div>
+      <div id="crewList" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; max-height:196px; overflow-y:auto;"></div>
+      <div id="crewNews" style="margin-top:10px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#f0ab43; line-height:1.6;"></div>
+      <!-- Side by side, not stacked. Stacked, this screen ran 78px past the 595px frame at
+           seven companions and pushed RUN A JOB WITH THEM out of reach. Shaving the caps
+           further would have made each list too short to read; the sections are simply
+           narrower than they are tall. -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px;">
+        <div>
+          <div style="font-family:'Press Start 2P', monospace; font-size:9px; color:#ff7a45; margin-bottom:6px;">WHAT THEY WANT TO DO</div>
+          <div id="crewProposals" style="display:flex; flex-direction:column; gap:6px; max-height:150px; overflow-y:auto;"></div>
+        </div>
+        <div id="crewRecap" style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; line-height:1.7; max-height:176px; overflow-y:auto;"></div>
+      </div>
 
       <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
         <button onclick="app.newScenario()">RUN A JOB WITH THEM</button>
@@ -1829,6 +1840,7 @@
 <script src="src/pixel_engine/scenario-engine.js"></script>
 <script src="src/pixel_engine/ai-party.js"></script>
 <script src="src/pixel_engine/crew-dialogue.js"></script>
+<script src="src/pixel_engine/crew-jobs.js"></script>
 <script src="src/pixel_engine/aave-lexicon-hud.js"></script>
 <script src="src/pixel_engine/campaign-mode.js"></script>
 <script src="src/pixel_engine/first-miles-campaign.js"></script>
@@ -4795,6 +4807,35 @@ const app = {
       b.style.borderColor = b.dataset.crewDiff === party.difficulty ? '#6fe8d8' : '';
     });
 
+    // What the crew want to do (section 33), and any party news (section 32). Both read
+    // existing state only, and both render nothing when there is nothing true to report —
+    // an empty list on a quiet night is the correct answer, not a gap to fill.
+    const legends = this.game.ledger ? this.game.ledger.legends('LEGEND').map(l => l.motif) : [];
+    const heat = (this.firstMilesCampaign && this.firstMilesCampaign.state)
+      ? this.firstMilesCampaign.state.heat : 0;
+    this.crewJobOffers = (typeof crewProposals === 'function')
+      ? crewProposals(party, { legends, heat })
+      : [];
+
+    const propEl = document.getElementById('crewProposals');
+    if (propEl) {
+      propEl.innerHTML = this.crewJobOffers.length
+        ? this.crewJobOffers.map((p, i) =>
+          `<button class="secondary" style="font-size:9px; padding:7px 8px; text-align:left; white-space:normal;"`
+          + ` onclick="app.takeCrewJob(${i})">`
+          + `<span style="color:#ffcd68;">${p.template.title}</span>`
+          + `<span style="color:#788196;"> — ${p.reason}</span></button>`).join('')
+        : '<span class="muted" style="font-size:10px;">Nobody is pushing for anything tonight.</span>';
+    }
+
+    const newsEl = document.getElementById('crewNews');
+    if (newsEl) {
+      const news = (typeof crewPartyEvent === 'function')
+        ? crewPartyEvent(party, { humanName: me.name, seed: 'news' + party.members.length })
+        : null;
+      newsEl.innerHTML = news ? `${news.text} <span style="color:#4a4f63;">(${news.cause})</span>` : '';
+    }
+
     // Previously... (section 41), built only from recorded memories.
     const recapEl = document.getElementById('crewRecap');
     if (recapEl) {
@@ -4803,6 +4844,18 @@ const app = {
         + recap.events.map(e => `<div>${e}</div>`).join('')
         + `<div style="margin-top:6px; color:#788196;">${recap.standing.join(' ')}</div>`;
     }
+  },
+
+  /**
+   * Takes a job a companion put on the table (section 33).
+   *
+   * Runs the generated template through exactly the same newScenario path as a built-in one —
+   * the only difference is who gets the credit for suggesting it.
+   */
+  takeCrewJob(index) {
+    const offer = (this.crewJobOffers || [])[index];
+    if (!offer) return;
+    this.newScenario({ template: offer.template, proposal: offer });
   },
 
   showCrew() {
@@ -4855,8 +4908,9 @@ const app = {
    * sequence a player sees is reproducible — the same reason nothing else in this feature
    * calls Math.random.
    */
-  newScenario() {
+  newScenario(options) {
     if (typeof ScenarioRun === 'undefined') return;
+    const opts = options || {};
     if (!this.game.players.length) {
       this.game.addPlayer('You');
       this.game.dealAll();
@@ -4865,12 +4919,16 @@ const app = {
     if (me.hand.length < SCN_SLOTS.length) this.game.refillHand(me);
 
     const n = this.game.ledger ? this.game.ledger.events.length : 0;
-    const template = SCN_TEMPLATES[n % SCN_TEMPLATES.length];
+    // A crew-proposed template is used verbatim; otherwise the rota picks one.
+    const template = opts.template || SCN_TEMPLATES[n % SCN_TEMPLATES.length];
+    this.scenarioProposal = opts.proposal || null;
     this.scenarioRun = new ScenarioRun(template, { district: this.game.activeCity });
     this.scenarioResult = null;
 
     document.getElementById('scnTitle').textContent = template.title;
-    document.getElementById('scnSetup').textContent = template.setup;
+    document.getElementById('scnSetup').textContent = this.scenarioProposal
+      ? `${this.scenarioProposal.proposer} put this on the table — ${this.scenarioProposal.reason}. ${template.setup}`
+      : template.setup;
     document.getElementById('scnStage').style.display = 'none';
     document.getElementById('scnOutcome').style.display = 'none';
     document.getElementById('scnMicroBtn').style.display = 'none';

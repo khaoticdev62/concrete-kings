@@ -44,7 +44,9 @@ test('Crew layout: every growing list is capped and scrollable', () => {
     ['scnPlans', 'one row per competing plan, up to 8'],
     ['scnVotes', 'one line per ballot plus vote commentary'],
     ['scnReactions', 'one row per companion'],
-    ['crewList', 'one card per companion, up to 7']
+    ['crewList', 'one card per companion, up to 7'],
+    ['crewProposals', 'one row per companion who wants something'],
+    ['crewRecap', 'one standing line per companion']
   ].forEach(([id, why]) => {
     const tag = between('id="' + id + '"', '</div>');
     assert.ok(tag.includes('max-height:'), `#${id} must be capped — ${why}`);
@@ -67,7 +69,9 @@ test('Crew layout: the scenario screen shows one phase at a time', () => {
     'the reveal must collapse to the plan that actually ran, not keep all eight');
 
   // And restored, or the second job starts with no picker and no brief.
-  const fresh = between('newScenario() {', 'renderScenario() {');
+  // `newScenario(options)` since crew-proposed jobs pass a template in, so the marker stops
+  // at the paren rather than assuming the signature.
+  const fresh = between('newScenario(', 'renderScenario() {');
   ['scnSetup', 'scnSlots', 'scnPickerWrap'].forEach(id => {
     assert.ok(fresh.includes(shown(id, 'block')) || fresh.includes(shown(id, 'grid')),
       `#${id} must be restored for the next job`);
