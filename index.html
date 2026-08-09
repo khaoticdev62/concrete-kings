@@ -1177,6 +1177,10 @@
         </div>
       </div>
       <div id="turnBanner" class="pass-banner" style="display:none;"></div>
+      <!-- Live when this prompt names something the block has started repeating. Shown
+           BEFORE cards are played, because a callback the player only learns about
+           afterwards is a lottery rather than a decision. -->
+      <div id="callbackBanner" class="weather-alert" style="display:none; margin-top:6px; color:#6fe8d8; border-color:#339488;"></div>
     </div>
 
     <!-- Game Bottom Layout Grid (Card system UI under the Viewport) -->
@@ -1434,10 +1438,32 @@
       <div id="winnerMeta" style="font-size:12px; margin-bottom:14px; color:#a0aac2; display:none;"></div>
       <div id="roundResultTimerDisplay" style="font-family:'Press Start 2P', monospace; font-size:12px; color:#ffcd68; text-align:center; margin-bottom:8px; display:none;"></div>
       <div id="campaignResultMeta" style="font-size:11px; margin-bottom:14px; color:#cbd5ed; display:none; font-family:'JetBrains Mono', monospace; line-height:1.5;"></div>
-      <div style="margin-top:14px; display:flex; gap:10px; justify-content:center;">
+      <div id="canonResultMeta" style="font-size:10px; margin-bottom:14px; color:#6fe8d8; display:none; font-family:'Press Start 2P', monospace; line-height:1.8;"></div>
+      <div style="margin-top:14px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
         <button onclick="app.nextRound()">NEXT ROUND</button>
         <button class="secondary" onclick="app.showGame()">BACK TO TABLE</button>
+        <button class="secondary" onclick="app.showChronicle()">THE BLOCK REMEMBERS</button>
         <button id="reviewLogBtn" class="secondary" onclick="app.showReviewLog()" style="display:none;">REVIEW LOG</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE BLOCK REMEMBERS — the campaign chronicle -->
+  <section id="chronicle" class="screen">
+    <div class="panel" style="max-width:760px; margin:0 auto; padding:16px; text-align:left;">
+      <h2 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:11px; color:#ffcd68;">THE BLOCK REMEMBERS</h2>
+      <p class="muted" style="font-size:10px; margin-top:0;">Every card you crown goes on the record. Say a thing often enough and the block starts saying it back.</p>
+
+      <div style="font-family:'Press Start 2P', monospace; font-size:9px; color:#ff7a45; margin:14px 0 6px;">BLOCK LEGENDS</div>
+      <div id="chronicleLegends" style="display:flex; flex-wrap:wrap; gap:4px; font-size:10px;"></div>
+
+      <div style="font-family:'Press Start 2P', monospace; font-size:9px; color:#ff7a45; margin:16px 0 6px;">THE RECORD</div>
+      <div id="chronicleList" style="max-height:260px; overflow-y:auto; font-family:'JetBrains Mono', monospace; font-size:11px; background:#0b0c10; border:2px solid #22252e; padding:8px;"></div>
+
+      <div id="chronicleStanding" style="margin-top:14px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#ffcd68; line-height:1.6;"></div>
+
+      <div style="margin-top:16px; display:flex; gap:10px;">
+        <button class="secondary" onclick="app.showGame()">BACK TO TABLE</button>
       </div>
     </div>
   </section>
@@ -1709,6 +1735,7 @@
 <script src="src/pixel_engine/topdown-city-controller.js"></script>
 <script src="src/pixel_engine/lightmap.js"></script>
 <script src="src/pixel_engine/topdown-city-renderer.js"></script>
+<script src="src/pixel_engine/canon-engine.js"></script>
 <script src="src/pixel_engine/aave-lexicon-hud.js"></script>
 <script src="src/pixel_engine/campaign-mode.js"></script>
 <script src="src/pixel_engine/first-miles-campaign.js"></script>
@@ -1884,6 +1911,12 @@ class Game {
     this.weatherMode = 'CLEAR';
     this.activeCity = 'Harlem';
     this.isCampaign = false;
+
+    // The block's memory. Every crowned card is recorded here, motifs accumulate into
+    // block legends, and prompts that name an established legend pay a callback bonus.
+    // Optional by construction: without the module the round loop behaves exactly as it
+    // did before, which is what keeps the engine unit-testable without a DOM.
+    this.ledger = typeof BlockLedger !== 'undefined' ? new BlockLedger() : null;
   }
 
   addPlayer(name) {
@@ -1932,6 +1965,12 @@ class Game {
     this.diceEffect = effect;
     this.submissions = [];
     this.selected = new Set();
+
+    // Arm a callback if this prompt happens to name something the block has started
+    // repeating. Matching the prompt's own words rather than injecting a motif into it
+    // keeps the writing intact — the card still reads as authored, it just now carries
+    // a history the players gave it.
+    if (this.ledger) this.currentBlack.callback = this.ledger.armCallback(prompt);
   }
 
   rollDice() {
@@ -3855,6 +3894,15 @@ const app = {
     document.getElementById('pointsTarget').textContent = this.game.pointsToWin;
     document.getElementById('playerLabel').textContent = 'Player: ' + this.game.players[this.humanIndex].name;
 
+    const cbEl = document.getElementById('callbackBanner');
+    const armed = this.game.currentBlack && this.game.currentBlack.callback;
+    if (cbEl) {
+      cbEl.style.display = armed ? 'block' : 'none';
+      cbEl.textContent = armed
+        ? `THE BLOCK REMEMBERS: ${armed.motif.toUpperCase()} — play into it for +${(typeof CANON_CALLBACK_REP !== 'undefined' ? CANON_CALLBACK_REP : 2)} REP`
+        : '';
+    }
+
     const bc = this.game.currentBlack;
     const canvas = document.getElementById('blackCard');
     if (canvas && bc) {
@@ -4430,12 +4478,23 @@ const app = {
       this.game.doubleDownActive = false;
     }
     
+    // The block remembers. Recorded before the result screen renders so the promotion
+    // and callback lines can be shown alongside the win.
+    const canon = this.recordCanon(winner, win.card);
+
     document.getElementById('winnerName').textContent = winner.name;
     document.getElementById('winnerCard').textContent = win.card;
     const classicMetaEl = document.getElementById('winnerMeta');
     classicMetaEl.style.display = 'block';
     classicMetaEl.textContent = `${this.game.currentBlack.prompt}`;
-    
+
+    const canonEl = document.getElementById('canonResultMeta');
+    if (canonEl) {
+      const lines = this.canonResultLines(canon);
+      canonEl.style.display = lines.length ? 'block' : 'none';
+      canonEl.textContent = lines.join('  ·  ');
+    }
+
     this.show('roundResult');
     this.updateCanvasCards();
     this.startResolutionAutoAdvance();
@@ -4443,6 +4502,87 @@ const app = {
     if (winner.points >= this.game.pointsToWin) {
       setTimeout(() => this.endGame(winner), 1200);
     }
+  },
+
+  /**
+   * Records a crowned card in the block's ledger and applies its consequences.
+   *
+   * The consequences come back from the engine rather than being applied inside it —
+   * canon-engine.js has no business reaching into a player object, and keeping the
+   * arithmetic here is what lets the engine be tested with no DOM and no Game.
+   *
+   * Maps the engine's four axes onto the stats this game actually displays: `heat` and
+   * `trust` belong to the campaign state when a campaign is running (there is nowhere
+   * else to put them in a classic match), `cash` is streetCred, `reputation` is rep.
+   */
+  recordCanon(winner, cardText) {
+    if (!this.game.ledger) return null;
+    const event = this.game.ledger.record({
+      player: winner.name,
+      card: cardText,
+      round: this.game.round,
+      district: this.game.activeCity
+    });
+
+    const fx = event.effects;
+    if (fx.cash) winner.stats.streetCred = Math.max(0, (winner.stats.streetCred || 0) + fx.cash);
+    if (fx.reputation) winner.stats.reputation = (winner.stats.reputation || 0) + fx.reputation;
+
+    // Heat and trust only exist while a campaign is tracking them. In a classic match
+    // they are recorded in the ledger but have nowhere to land, which is honest: the
+    // classic scoreboard has no room for them and inventing a second HUD for one stat
+    // would be worse than dropping it.
+    const campaign = this.firstMilesCampaign;
+    if (campaign && campaign.state) {
+      if (fx.heat) campaign.state.heat = Math.max(0, campaign.state.heat + fx.heat);
+    }
+
+    this.updateTopHud();
+    return event;
+  },
+
+  /** Short result-screen lines for what the block made of the winning card. */
+  canonResultLines(event) {
+    if (!event) return [];
+    const lines = [];
+    if (event.calledBack) lines.push(`THE BLOCK REMEMBERS: +${event.effects.reputation} REP`);
+    event.promotions.forEach(p => lines.push(`${p.motif.toUpperCase()} ${p.label}`));
+    const fx = event.effects;
+    const deltas = [];
+    if (fx.heat) deltas.push(`HEAT +${fx.heat}`);
+    if (fx.cash) deltas.push(`CASH +${fx.cash}`);
+    if (fx.trust) deltas.push(`TRUST +${fx.trust}`);
+    if (fx.reputation && !event.calledBack) {
+      deltas.push(`REP ${fx.reputation > 0 ? '+' : ''}${fx.reputation}`);
+    }
+    if (deltas.length) lines.push(deltas.join(' '));
+    return lines;
+  },
+
+  /** THE BLOCK REMEMBERS screen — the campaign chronicle. */
+  showChronicle() {
+    const ledger = this.game.ledger;
+    const listEl = document.getElementById('chronicleList');
+    const legendEl = document.getElementById('chronicleLegends');
+    const standingEl = document.getElementById('chronicleStanding');
+    if (!listEl) return;
+
+    const lines = ledger ? ledger.chronicle() : [];
+    listEl.innerHTML = lines.length
+      ? lines.map(l => `<div style="display:flex; gap:8px; padding:4px 0; border-bottom:1px solid #22252e;">`
+        + `<span style="color:#6fe8d8; min-width:64px;">R${l.round}</span>`
+        + `<span style="color:#f0ab43; min-width:96px;">${l.kind}</span>`
+        + `<span style="color:#cbd5ed;">${l.text}</span></div>`).join('')
+      : '<div class="muted">Nothing yet. Crown some cards and the block starts talking.</div>';
+
+    const legends = ledger ? ledger.legends('KNOWN') : [];
+    legendEl.innerHTML = legends.length
+      ? legends.map(l => `<span class="status-pill" style="margin:2px;">`
+        + `${l.motif.toUpperCase()} <b style="color:#ffcd68;">${l.tier}</b></span>`).join('')
+      : '<span class="muted">No block legends yet.</span>';
+
+    standingEl.textContent = ledger ? ledger.standing() : '';
+    this.show('chronicle');
   },
 
   nextRound() {
