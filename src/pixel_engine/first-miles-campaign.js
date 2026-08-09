@@ -326,6 +326,12 @@ class FirstMilesCampaign {
     const heatDelta = originBonus ? Math.max(0, consequence.heat - 1) : consequence.heat;
     const trustDelta = originBonus ? consequence.trust + 1 : consequence.trust;
     this.state.heat = Math.max(0, Math.min(10, this.state.heat + heatDelta));
+    if (trustDelta) {
+      const npc = beat.trustNpc || this.highestTrustNpcKey();
+      if (npc && this.state.trust.hasOwnProperty(npc)) {
+        this.state.trust[npc] = Math.min(5, Math.max(0, this.state.trust[npc] + trustDelta));
+      }
+    }
     this.state.currentBeat++;
     this.recordHistory(beat, cardText, category, consequence.text);
     if (beat.sideQuest && !this.state.sideQuestsCompleted.includes(beat.sideQuest)) {
@@ -398,6 +404,50 @@ class FirstMilesCampaign {
     if (quest.rewardFlag) this.state.flags.push(quest.rewardFlag);
   }
 
+  toJSON() {
+    return {
+      version: 1,
+      active: this.active,
+      currentScreen: this.currentScreen,
+      state: JSON.parse(JSON.stringify(this.state || {}))
+    };
+  }
+
+  fromJSON(data) {
+    if (!data || typeof data !== 'object') return;
+    this.active = !!data.active;
+    this.currentScreen = data.currentScreen || this.currentScreen;
+    if (data.state && typeof data.state === 'object') {
+      this.state = Object.assign({}, this.state, data.state);
+    }
+  }
+
+  saveCampaign() {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.setItem('ck-first-miles-campaign', JSON.stringify(this.toJSON()));
+      }
+    } catch (e) {
+      // non-fatal save failure
+    }
+  }
+
+  loadCampaign() {
+    try {
+      if (typeof window === 'undefined' || !window.localStorage) return false;
+      const raw = window.localStorage.getItem('ck-first-miles-campaign');
+      if (!raw) return false;
+      const data = JSON.parse(raw);
+      if (data && data.version === 1) {
+        this.fromJSON(data);
+        return true;
+      }
+    } catch (e) {
+      // non-fatal load failure
+    }
+    return false;
+  }
+
   recordHistory(beat, cardText, category, text) {
     if (!this.state) return;
     if (!Array.isArray(this.state.beatHistory)) this.state.beatHistory = [];
@@ -419,8 +469,13 @@ class FirstMilesCampaign {
     if ((this.state.trust[highestTrustNpc[0]] || 0) >= 5 && this.state.heat >= 8) return { ending: 'POWER', title: 'Power', text: 'You become the unspoken authority on 125th.' };
     if (this.state.flags.includes('origin_secret_used') && this.state.heat <= 3 && this.state.reputation <= 2) return { ending: 'GHOST', title: 'Ghost', text: 'You vanish with the receipts.' };
     if (this.state.receipts.length >= 6 && this.state.flags.includes('all_secrets') && this.trustBalanced()) return { ending: 'RECEIPT_KING', title: 'Receipt King', text: 'You break the block curse.' };
-    if (this.state.trust[highestTrustNpc[0]] >= 3 && this.state.heat < 7) return { ending: 'JUSTICE', title: 'Justice', text: 'You rebuild what was broken.' };
+    if ((this.state.trust[highestTrustNpc[0]] || 0) >= 3 && this.state.heat < 7) return { ending: 'JUSTICE', title: 'Justice', text: 'You rebuild what was broken.' };
     return { ending: 'HUSTLE', title: 'Hustle', text: 'The grind continues on 125th.' };
+  }
+
+  highestTrustNpcKey() {
+    const highestTrustNpc = Object.entries(this.state.trust).sort((a, b) => b[1] - a[1])[0];
+    return highestTrustNpc ? highestTrustNpc[0] : null;
   }
 
   trustBalanced() {
@@ -464,7 +519,10 @@ class FirstMilesCampaign {
     const body = document.getElementById('campaignIntroBody');
     const startBtn = document.getElementById('campaignIntroStart');
     if (title) title.textContent = 'FIRST MILES';
-    if (body) body.textContent = '13 beats. One origin. Every mile costs.';
+    const secretLine = this.getOriginSecretCallbackText();
+    if (body) body.textContent = secretLine
+      ? `13 beats. One origin. Every mile costs.\n\n${secretLine}`
+      : '13 beats. One origin. Every mile costs.';
     if (startBtn) startBtn.onclick = () => this.startBeat();
   }
 
@@ -482,11 +540,18 @@ class FirstMilesCampaign {
     const prompt = document.getElementById('campaignBeatPrompt');
     const dayLabel = document.getElementById('campaignBeatDay');
     if (title) title.textContent = `${beat.title}`;
-    if (narrative) narrative.textContent = beat.narrative;
+    if (narrative) narrative.textContent = `${beat.narrative}\n\n${this.getBeatActContext(beat.beat || this.state.currentBeat)}`;
     if (prompt) prompt.textContent = beat.blackCard;
     if (dayLabel) dayLabel.textContent = `DAY ${this.state.day}`;
     this.renderBeatChoices();
     if (typeof app !== 'undefined' && app.updateTopHud) app.updateTopHud();
+  }
+
+  getBeatActContext(beatNumber) {
+    const num = Number(beatNumber) || 0;
+    if (num <= 9) return 'Act 1 — The Setup';
+    if (num <= 16) return 'Act 2 — The Turn';
+    return 'Act 3 — The Reckoning';
   }
 
   renderBeatChoices() {
@@ -518,6 +583,8 @@ class FirstMilesCampaign {
     const result = this.resolveWinnerCard(cardText);
     if (result.ended) return this.renderEpilogue();
     if (this.state.currentBeat > 20) return this.renderEpilogue();
+    if (this.state.currentBeat === 10) return this.renderActBreak(2);
+    if (this.state.currentBeat === 17) return this.renderActBreak(3);
     this.renderBeat();
   }
 
@@ -533,6 +600,22 @@ class FirstMilesCampaign {
     const text = document.getElementById('campaignEndingText');
     if (title) title.textContent = result.title;
     if (text) text.textContent = result.text;
+    if (typeof app !== 'undefined' && app.updateTopHud) app.updateTopHud();
+  }
+
+  renderActBreak(act) {
+    this.currentScreen = 'actBreak';
+    const title = document.getElementById('campaignBeatTitle');
+    const narrative = document.getElementById('campaignBeatNarrative');
+    const prompt = document.getElementById('campaignBeatPrompt');
+    const dayLabel = document.getElementById('campaignBeatDay');
+    if (title) title.textContent = `ACT ${act}`;
+    if (narrative) narrative.textContent = act === 2
+      ? 'Act 1 is over. The block remembers what you did. Act 2 starts now.'
+      : 'Act 2 is over. The betrayer is known. Act 3 starts now.';
+    if (prompt) prompt.textContent = 'Prepare your next move.';
+    if (dayLabel) dayLabel.textContent = `DAY ${this.state.day}`;
+    this.renderBeatChoices();
     if (typeof app !== 'undefined' && app.updateTopHud) app.updateTopHud();
   }
 

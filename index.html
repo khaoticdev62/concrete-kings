@@ -1340,6 +1340,7 @@
       
       <div id="winnerMeta" style="font-size:12px; margin-bottom:14px; color:#a0aac2; display:none;"></div>
       <div id="roundResultTimerDisplay" style="font-family:'Press Start 2P', monospace; font-size:12px; color:#ffcd68; text-align:center; margin-bottom:8px; display:none;"></div>
+      <div id="campaignResultMeta" style="font-size:11px; margin-bottom:14px; color:#cbd5ed; display:none; font-family:'JetBrains Mono', monospace; line-height:1.5;"></div>
       <div style="margin-top:14px; display:flex; gap:10px; justify-content:center;">
         <button onclick="app.nextRound()">NEXT ROUND</button>
         <button class="secondary" onclick="app.showGame()">BACK TO TABLE</button>
@@ -2490,6 +2491,7 @@ const app = {
     this.startGlobalAnimationLoop();
     this.initCharacterCreation();
     this.initAccessibility();
+    this.restoreFirstMilesCampaign();
   },
 
   /* ---------- CHARACTER CREATION & ATTRIBUTES ---------- */
@@ -4225,8 +4227,20 @@ const app = {
         document.getElementById('winnerName').textContent = `BEAT WINNER: ${(win && win.player) ? win.player.toUpperCase() : 'YOU'}`;
         document.getElementById('winnerCard').textContent = `"${cardText}"`;
         const beatMetaEl = document.getElementById('winnerMeta');
-        beatMetaEl.style.display = 'block';
+        beatMetaEl.style.display = 'none';
         beatMetaEl.textContent = result.consequenceText || '';
+
+        const campEl = document.getElementById('campaignResultMeta');
+        if (campEl) {
+          campEl.style.display = 'block';
+          campEl.textContent = [
+            `HEAT: ${this.firstMilesCampaign.state.heat}`,
+            `TRUST: ${JSON.stringify(this.firstMilesCampaign.state.trust)}`,
+            `FLAGS: ${(this.firstMilesCampaign.state.flags || []).join(', ') || 'none'}`,
+            `RECEIPTS: ${this.firstMilesCampaign.state.receipts.length}`,
+            `SECRET: ${this.firstMilesCampaign.state.originSecret || 'none'}`
+          ].join(' · ');
+        }
 
         const nextBtn = document.querySelector('#roundResult button');
         if (nextBtn) {
@@ -5451,10 +5465,34 @@ const app = {
     if (!this.firstMilesCampaign) return;
     const state = this.firstMilesCampaign.state;
     const title = document.getElementById('campaignIntroTitle');
-    const body = document.getElementById('campaignIntroBody');
     if (title) title.textContent = 'FIRST MILES';
-    if (body) body.textContent = `Origin: ${state.origin || '?'} | Secret: ${state.originSecret || '?'}\nBeat progression is active.`;
     this.show('game');
+  },
+
+  restoreFirstMilesCampaign() {
+    try {
+      if (typeof window === 'undefined' || !window.localStorage) return;
+      const raw = window.localStorage.getItem('ck-first-miles-campaign');
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (!data || data.version !== 1 || !data.state) return;
+      this.firstMilesCampaign = new FirstMilesCampaign();
+      this.firstMilesCampaign.loadCampaign();
+      if (this.firstMilesCampaign.active) {
+        this.show('game');
+        if (this.firstMilesCampaign.currentScreen === 'beat') {
+          this.firstMilesCampaign.renderBeat();
+        } else if (this.firstMilesCampaign.currentScreen === 'intro') {
+          this.firstMilesCampaign.renderIntro();
+        } else if (this.firstMilesCampaign.currentScreen === 'actBreak') {
+          this.firstMilesCampaign.renderActBreak(this.firstMilesCampaign.state.currentBeat === 10 ? 2 : 3);
+        } else if (this.firstMilesCampaign.currentScreen === 'epilogue') {
+          this.firstMilesCampaign.renderEpilogue();
+        }
+      }
+    } catch (e) {
+      this.firstMilesCampaign = null;
+    }
   },
 
   renderCampaignBeat() {
@@ -5691,7 +5729,7 @@ const app = {
           points: p.points,
           hand: p.hand,
           streetCred: p.stats?.streetCred,
-          reputation: p.stats?.reputation,
+          reputation: p.reputation,
           receipts: p.receipts
         })),
         weatherMode: this.game.weatherMode,
@@ -5699,6 +5737,9 @@ const app = {
         submissions: this.game.submissions
       };
       localStorage.setItem('ck-save', JSON.stringify(state));
+      if (this.firstMilesCampaign && typeof this.firstMilesCampaign.saveCampaign === 'function') {
+        this.firstMilesCampaign.saveCampaign();
+      }
       const el = document.getElementById('saveStatus');
       if (el) el.textContent = 'State saved.';
       setTimeout(() => { if (el) el.textContent = ''; }, 1500);
@@ -5727,6 +5768,12 @@ const app = {
       }));
       this.game.currentBlack = state.currentBlack || null;
       this.game.submissions = state.submissions || [];
+      if (this.firstMilesCampaign && typeof this.firstMilesCampaign.loadCampaign === 'function') {
+        const loaded = this.firstMilesCampaign.loadCampaign();
+        if (loaded && typeof this.firstMilesCampaign.renderBeat === 'function') {
+          this.firstMilesCampaign.renderBeat();
+        }
+      }
       this.humanIndex = 0;
       this.show('game');
       this.showPassDevice();
