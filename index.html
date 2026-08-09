@@ -1474,7 +1474,7 @@
         <button class="secondary" data-crew-diff="NIGHTMARE" style="font-size:7px; padding:5px 7px;" onclick="app.setCrewDifficulty('NIGHTMARE')">NIGHTMARE</button>
       </div>
 
-      <div id="crewList" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"></div>
+      <div id="crewList" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; max-height:250px; overflow-y:auto;"></div>
       <div id="crewRecap" style="margin-top:12px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; line-height:1.7;"></div>
 
       <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
@@ -1508,8 +1508,8 @@
       <!-- REVEAL: the party's competing completions, and the vote -->
       <div id="scnReveal" style="display:none; margin-top:12px;">
         <div style="font-family:'Press Start 2P', monospace; font-size:9px; color:#ff7a45; margin-bottom:6px;">THE CREW HAD IDEAS TOO</div>
-        <div id="scnPlans" style="display:flex; flex-direction:column; gap:6px;"></div>
-        <div id="scnVotes" style="margin-top:8px; font-family:'JetBrains Mono', monospace; font-size:10px; color:#788196; line-height:1.6;"></div>
+        <div id="scnPlans" style="display:flex; flex-direction:column; gap:6px; max-height:190px; overflow-y:auto;"></div>
+        <div id="scnVotes" style="margin-top:8px; font-family:'JetBrains Mono', monospace; font-size:10px; color:#788196; line-height:1.6; max-height:96px; overflow-y:auto;"></div>
       </div>
 
       <!-- WATCH IT HAPPEN -->
@@ -1518,7 +1518,7 @@
       </div>
 
       <!-- AI REACTIONS (section 28) -->
-      <div id="scnReactions" style="display:none; margin-top:10px; font-family:'JetBrains Mono', monospace; font-size:11px; line-height:1.7;"></div>
+      <div id="scnReactions" style="display:none; margin-top:10px; font-family:'JetBrains Mono', monospace; font-size:11px; line-height:1.7; max-height:130px; overflow-y:auto;"></div>
 
       <!-- LIVE WITH IT -->
       <div id="scnOutcome" style="display:none; margin-top:12px;">
@@ -1828,6 +1828,7 @@
 <script src="src/pixel_engine/canon-engine.js"></script>
 <script src="src/pixel_engine/scenario-engine.js"></script>
 <script src="src/pixel_engine/ai-party.js"></script>
+<script src="src/pixel_engine/crew-dialogue.js"></script>
 <script src="src/pixel_engine/aave-lexicon-hud.js"></script>
 <script src="src/pixel_engine/campaign-mode.js"></script>
 <script src="src/pixel_engine/first-miles-campaign.js"></script>
@@ -4875,6 +4876,14 @@ const app = {
     document.getElementById('scnMicroBtn').style.display = 'none';
     document.getElementById('scnNextBtn').style.display = 'none';
     document.getElementById('scnPickerWrap').style.display = 'block';
+    document.getElementById('scnSetup').style.display = 'block';
+    document.getElementById('scnSlots').style.display = 'grid';
+    document.getElementById('scnReveal').style.display = 'none';
+    const plansReset = document.getElementById('scnPlans');
+    if (plansReset) plansReset.style.maxHeight = '190px';
+    const votesReset = document.getElementById('scnVotes');
+    if (votesReset) votesReset.style.display = 'block';
+    document.getElementById('scnReactions').style.display = 'none';
     this.renderScenario();
     this.show('scenario');
   },
@@ -4941,9 +4950,16 @@ const app = {
 
     this.scenarioResult = winning.run.resolve(winning.actor, world);
     this.scenarioResult.author = winning.author;
-    const beats = scnSceneBeats(this.scenarioResult);
+    // The crew react DURING the scene (section 28), not in a list afterwards. With no crew
+    // this returns the beats untouched, so solo scenario mode is unchanged.
+    const beats = (typeof crewBeats === 'function')
+      ? crewBeats(scnSceneBeats(this.scenarioResult), this.aiParty, this.scenarioResult,
+          { seed: winning.author + (this.game.ledger ? this.game.ledger.events.length : 0) })
+      : scnSceneBeats(this.scenarioResult);
 
     document.getElementById('scnPickerWrap').style.display = 'none';
+    document.getElementById('scnSetup').style.display = 'none';
+    document.getElementById('scnSlots').style.display = 'none';
     document.getElementById('scnRunBtn').disabled = true;
     document.getElementById('scnPhase').textContent = 'WATCH IT HAPPEN';
     const stage = document.getElementById('scnStage');
@@ -5017,10 +5033,16 @@ const app = {
           + `${p.author.toUpperCase()} · ${p.archetype}${won ? ' · RUNNING THIS' : ''} · ${tally[p.author] || 0} vote${(tally[p.author] || 0) === 1 ? '' : 's'}</div>`
           + `<div style="font-family:'JetBrains Mono', monospace; font-size:10px; color:#cbd5ed;">${p.summary}</div></div>`;
       }).join('');
+      const talk = (typeof crewVoteLines === 'function')
+        ? crewVoteLines(party, ballots.filter(b => b.voter !== me.name), { seed })
+        : [];
       document.getElementById('scnVotes').innerHTML =
-        ballots.map(b => `${b.voter} → ${b.votedFor}`).join(' · ');
+        ballots.map(b => `${b.voter} → ${b.votedFor}`).join(' · ')
+        + talk.map(l => `<div style="color:#cbd5ed; margin-top:3px;">${l.name}: "${l.text}"</div>`).join('');
     }
 
+    this.scenarioPlans = plans;
+    this.scenarioTally = tally;
     if (winnerName === me.name) {
       return { run: humanRun, actor: me, author: me.name, plans };
     }
@@ -5050,14 +5072,29 @@ const app = {
     });
     this.saveAiParty();
 
+    const seed = (result.author || '') + (this.game.ledger ? this.game.ledger.events.length : 0);
     el.style.display = 'block';
-    el.innerHTML = reactions.map(r => {
+
+    const rows = reactions.map(r => {
       const colour = r.betrayal ? '#f25438' : r.warning ? '#f0ab43' : '#788196';
-      const tail = r.betrayal
-        ? ` — DONE WITH YOU: ${r.betrayal.causes[0]}`
-        : r.warning ? ` — watching you: ${r.warning.causes[0]}` : '';
-      return `<div style="color:${colour};">${r.name}: ${r.emotion}${tail}</div>`;
-    }).join('');
+      const member = party.active().find(m => m.name === r.name);
+      // A grudge is spoken, not just coloured. The line comes from the same risk object the
+      // colour does, so the words and the mechanics cannot disagree.
+      const spoken = (typeof crewBetrayalLine === 'function')
+        ? crewBetrayalLine(member, r.betrayal || r.warning, { seed })
+        : null;
+      const said = spoken ? ` <span style="color:#cbd5ed;">"${spoken.text}"</span>` : '';
+      const cause = spoken && spoken.cause ? ` <span style="color:#4a4f63;">(${spoken.cause})</span>` : '';
+      return `<div style="color:${colour};">${r.name}: ${r.emotion}${said}${cause}</div>`;
+    });
+
+    // Something happened between two of them while you were busy (section 46).
+    const aside = (typeof crewAside === 'function') ? crewAside(party, { seed }) : null;
+    if (aside) {
+      rows.push(`<div style="margin-top:6px; color:#788196;">`
+        + aside.lines.map(l => `<div>${l}</div>`).join('') + `</div>`);
+    }
+    el.innerHTML = rows.join('');
   },
 
   clearScenarioPlayback() {
@@ -5098,6 +5135,18 @@ const app = {
       ? bill.map(b => `<div>${b}</div>`).join('')
       : '<div>Nothing changed hands.</div>';
     document.getElementById('scnChain').innerHTML = result.chain.map(c => `<div>${c}</div>`).join('');
+    document.getElementById('scnStage').style.display = 'none';
+    const ranPlan = (this.scenarioPlans || []).find(p => p.author === result.author);
+    const plansEl = document.getElementById('scnPlans');
+    if (ranPlan && plansEl) {
+      plansEl.style.maxHeight = 'none';
+      plansEl.innerHTML = `<div style="border:2px solid #6fe8d8; padding:6px 8px; background:#14151c;">`
+        + `<div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#6fe8d8; margin-bottom:3px;">`
+        + `${ranPlan.author.toUpperCase()} · ${ranPlan.archetype} · RAN THIS · ${(this.scenarioTally || {})[ranPlan.author] || 0} votes</div>`
+        + `<div style="font-family:'JetBrains Mono', monospace; font-size:10px; color:#cbd5ed;">${ranPlan.summary}</div></div>`;
+    }
+    const votesEl = document.getElementById('scnVotes');
+    if (votesEl) votesEl.style.display = 'none';
     document.getElementById('scnOutcome').style.display = 'block';
 
     // Apply to the character and the world. The ledger records the WHAT card, because that
