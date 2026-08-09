@@ -57,6 +57,11 @@ TILESETS="
 harlem:2,0:2,1:2,2
 detroit:2,0:2,1:2,2:2,3
 nola:2,2:2,3
+miami:0,3:2,2:2,3
+chicago:2,0:2,2:2,3
+oakland:2,2:2,3
+baltimore:2,0:2,2:2,3
+atlanta:2,2:2,3
 "
 
 # Some generations caption every cell with its name — "Wet Asphalt", "Street
