@@ -195,6 +195,9 @@ class StreetDice extends StreetDiceBaseClass {
   triggerRoll() {
     this.rollTimeElapsed = 1;
     this.displayMessage = 'Tumbling dice...';
+    if (this.animator && typeof this.animator.play === 'function') {
+      this.animator.play('roll');
+    }
     if (this.manager && this.manager.ui && typeof app !== 'undefined' && app.audioEngine) {
       app.audioEngine.playDiceRoll();
     }

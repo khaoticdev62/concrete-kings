@@ -2492,6 +2492,11 @@ const app = {
     this.mapController = new BlockMapController({ startX: 600, startY: 500 });
     this.campaignEngine = new CampaignModeEngine();
     this.lexiconHUD = new AAVELexiconHUD();
+    this.npcIdleAnimator = new Animator();
+    if (this.npcIdleAnimator.add) {
+      this.npcIdleAnimator.add('idle', { frames: [0, 1, 2, 3], frameDuration: 180 });
+      this.npcIdleAnimator.play('idle');
+    }
     
     // Initialize mini-game manager
     const minigameCanvas = document.getElementById('minigame-canvas');
@@ -3657,8 +3662,14 @@ const app = {
         // only touches the DOM when the state actually changes.
         this.syncStagePanel();
 
+        // Advance the NPC portrait idle cycle while that screen is visible.
+        if (this.npcIdleAnimator && typeof this.npcIdleAnimator.update === 'function') {
+          this.npcIdleAnimator.update(16);
+        }
+        if (document.getElementById('npcPoiScene')?.classList.contains('active')) {
+          this.drawNpcScenePortrait();
+        }
 
-        
         // 3. Shimmer cards update
         this.updateCanvasCards();
       }
@@ -6243,16 +6254,23 @@ const app = {
     ctx.fillStyle = '#08080a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
+    // Use the NPC idle animator for a subtle idle bob when available.
+    const bobOffsets = [0, 1, 0, -1];
+    let bob = 0;
+    if (this.npcIdleAnimator && typeof this.npcIdleAnimator.currentFrame === 'function') {
+      bob = bobOffsets[this.npcIdleAnimator.currentFrame() % 4];
+    }
+    
     // Draw simple pixel outline face
     ctx.fillStyle = '#3d2218'; // hair
-    ctx.fillRect(16, 10, 64, 64);
+    ctx.fillRect(16, 10 + bob, 64, 64);
     ctx.fillStyle = '#be6436'; // skin warm umber
-    ctx.fillRect(24, 20, 48, 48);
+    ctx.fillRect(24, 20 + bob, 48, 48);
     ctx.fillStyle = '#f4f7ff'; // apron crisp white
-    ctx.fillRect(16, 68, 64, 28);
+    ctx.fillRect(16, 68 + bob, 64, 28);
     ctx.fillStyle = '#22252e'; // eyes
-    ctx.fillRect(34, 34, 6, 6);
-    ctx.fillRect(56, 34, 6, 6);
+    ctx.fillRect(34, 34 + bob, 6, 6);
+    ctx.fillRect(56, 34 + bob, 6, 6);
   },
 
   clickNpcInteraction(npcId, type) {

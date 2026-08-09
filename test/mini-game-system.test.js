@@ -265,6 +265,23 @@ test('Street Dice: prep item bonus adds +3 to witModifier, only when flagged', (
   assert.equal(withoutBonus.witModifier, 7, 'unchanged when no bonus is flagged');
 });
 
+test('Street Dice: roll animation plays through the shared 4-frame animator', () => {
+  const canvas = new MockCanvas();
+  const ctx = canvas.getContext('2d');
+  const state = new MiniGameState();
+  const game = new StreetDice(null, canvas, ctx, state);
+  game.start();
+  assert.equal(game.animator.currentFrame(), 0);
+
+  game.animator.add('roll', { frames: [0, 1, 2, 3], frameDuration: 120 });
+  game.triggerRoll();
+  assert.equal(game.animator.currentName, 'roll');
+  game.update(120);
+  assert.ok(game.frameIndex >= 0 && game.frameIndex <= 3, 'frameIndex stays in 4-frame budget during roll');
+  game.update(120);
+  assert.ok(game.frameIndex >= 0 && game.frameIndex <= 3, 'frameIndex stays in 4-frame budget after second tick');
+});
+
 test('Bodega Run: prep item bonus reduces alertnessRate by 30, only when flagged', () => {
   const canvas = new MockCanvas();
   const ctx = canvas.getContext('2d');
