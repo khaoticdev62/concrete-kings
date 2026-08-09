@@ -7,24 +7,89 @@
 const NATIVE_WIDTH = 1280;
 const NATIVE_HEIGHT = 720;
 
-const MASTER_PALETTE_64 = {
-  blacks_grays: [
-    "#08080A", "#101116", "#181920", "#22252E", "#2D313D", "#393E4D", "#474D5E", "#565E70",
-    "#666E82", "#788196", "#8B95AB", "#A0AAC2", "#B6C0D8", "#CBD5ED", "#E2E8F7", "#F4F7FF"
-  ],
-  warm_tones: [
-    "#2B0D0D", "#4D1414", "#7A1D1C", "#AA2724", "#D9382E", "#F25438", "#FF7A45", "#FFA059",
-    "#FFC475", "#FFE299", "#6E3E14", "#9C5C1D", "#C9822B", "#F0AB43", "#FFCD68", "#FFF0AA"
-  ],
-  cool_tones: [
-    "#0A1526", "#11233F", "#1C375C", "#274F80", "#366BA6", "#488BD9", "#5EAAFF", "#85C4FF",
-    "#0D2926", "#174540", "#246961", "#339488", "#47C2B3", "#6FE8D8", "#2A1138", "#521C6E"
-  ],
-  skin_tones: [
-    "#140A07", "#26120B", "#3B1C11", "#522717", "#6B341D", "#854224", "#A1522C", "#BE6436",
-    "#D97843", "#EB8E52", "#F7A768", "#FFC085", "#FFD6A8", "#3D2218", "#5C3222", "#7D442C"
-  ]
+/**
+ * The master palette, authored as tone ramps.
+ *
+ * WHY THIS REPLACED THE 64-COLOUR PALETTE
+ *
+ * The old palette was 64 colours in four hue *groups*, and the groups held several
+ * unrelated ramps end to end. Measured in CIELAB, the perceptual step between
+ * neighbouring entries was wildly uneven:
+ *
+ *   greys   16 steps   dE  3.8 - 8.4     <- the only usable ramp
+ *   reds    10 steps   dE  9.8 - 19.9
+ *   browns   6 steps   dE 14.7 - 25.3
+ *   blues    8 steps   dE 10.1 - 17.7
+ *   teals    6 steps   dE 12.9 - 17.3
+ *   violets  2 steps   dE 27.4
+ *
+ * Every shading technique in this codebase — paletteShift(+/-1) for a highlight or
+ * shade, ordered dither between neighbours, grain one step off the base tone —
+ * assumes a small even step. That assumption only ever held for the greys, and the
+ * consequences were visible and were each individually chased as if they were bugs
+ * in the renderer:
+ *
+ *  - Roof grain went to red confetti, because one step up from Harlem's #7A1D1C
+ *    brick was #AA2724, a dE of 19: a hue change, not a shade. The grain density
+ *    had to be dropped to 0.05 to hide it.
+ *  - Parapet highlights at +2 landed on #D9382E, near signal red, and read as a
+ *    selection box drawn round every roof.
+ *  - paletteShift(#7A1D1C, -2) and -3 both clamped to #2B0D0D, because the ramp had
+ *    only three steps below brick. Wall and wall-shadow came out identical and unlit
+ *    windows were invisible against the wall they sat in.
+ *  - Parks were flat teal slabs. Six teal tones existed for all vegetation, and the
+ *    palette contained no greens at all.
+ *  - Park paths had no earth tone to use, so they were derived from the pavement
+ *    grey; the first attempt reached for a roof colour and painted blood-red paths
+ *    across NOLA's courtyard.
+ *
+ * So the palette is now nine ramps, ~100 colours, every step between dE 3.8 and
+ * 11.8 — the greys' own density, extended to every hue. All 64 original colours are
+ * still present and at their original positions: the new entries are Lab midpoints
+ * inserted only where a step exceeded dE 12. Nothing that referenced a hex before
+ * has moved, and test/pixel-engine.test.js pins all 64 explicitly so none can be
+ * dropped by a future edit.
+ *
+ * Ramps are authored rather than derived. The previous version recovered them by
+ * splitting groups wherever luminance dropped, which worked but meant the shading
+ * behaviour of every colour depended on an inferred boundary — and it could not
+ * express a ramp like `green` that has no natural group to hide in.
+ */
+const PALETTE_RAMPS = {
+  // Concrete, asphalt, sky and every neutral. 16 steps, dE 3.8-8.4.
+  greys: ["#08080A", "#101116", "#181920", "#22252E", "#2D313D", "#393E4D", "#474D5E",
+    "#565E70", "#666E82", "#788196", "#8B95AB", "#A0AAC2", "#B6C0D8", "#CBD5ED",
+    "#E2E8F7", "#F4F7FF"],
+  // Brick, tail lights, painted metal. 18 steps, dE 7.4-10.3.
+  brick: ["#2B0D0D", "#3C1111", "#4D1414", "#631918", "#7A1D1C", "#922220", "#AA2724",
+    "#C12F29", "#D9382E", "#F25438", "#F9683E", "#FF7A45", "#FF8E4F", "#FFA059",
+    "#FFB267", "#FFC475", "#FFD387", "#FFE299"],
+  // Sodium light, worn earth, unpaved ground. 12 steps, dE 7.3-9.6.
+  earth: ["#6E3E14", "#854D18", "#9C5C1D", "#B26F24", "#C9822B", "#DC9637", "#F0AB43",
+    "#F8BC56", "#FFCD68", "#FFD97E", "#FFE494", "#FFF0AA"],
+  // Night sky, glass, cold signage. 12 steps, dE 6.0-11.8.
+  azure: ["#0A1526", "#11233F", "#1C375C", "#21436E", "#274F80", "#2E5D93", "#366BA6",
+    "#3F7BBF", "#488BD9", "#5EAAFF", "#73B7FF", "#85C4FF"],
+  // Verdigris, cold accents, moonlit foliage. 11 steps, dE 6.3-8.7.
+  teal: ["#0D2926", "#123733", "#174540", "#1D5750", "#246961", "#2B7E74", "#339488",
+    "#3DAB9D", "#47C2B3", "#5BD5C5", "#6FE8D8"],
+  // Vegetation. NEW: the palette had no greens, which is the whole reason every
+  // park rendered as a teal slab and why "do not invent greens" had to be a rule.
+  // Desaturated on purpose — this is a night palette, not a meadow. 9 steps, dE ~10.
+  green: ["#0B1610", "#1C281D", "#2B3C29", "#3B5136", "#4C6843", "#5E7F51", "#70965F",
+    "#82AF6D", "#95C87C"],
+  // Neon and bruise. 4 steps, dE 8.9-9.5.
+  violet: ["#2A1138", "#371549", "#44195B", "#521C6E"],
+  // Skin, mid to light. 14 steps, dE 7.0-11.8.
+  skin: ["#140A07", "#26120B", "#3B1C11", "#522717", "#6B341D", "#854224", "#A1522C",
+    "#BE6436", "#D97843", "#EB8E52", "#F7A768", "#FFC085", "#FFCB96", "#FFD6A8"],
+  // Skin in shadow, kept as its own ramp so shading a shadowed tone stays shadowed.
+  // 5 steps, dE 6.1-6.5.
+  skinShade: ["#3D2218", "#4C2A1D", "#5C3222", "#6C3B27", "#7D442C"]
 };
+
+/** Every palette colour, flat. */
+const MASTER_PALETTE = Object.values(PALETTE_RAMPS).flat();
 
 const CITY_THEME_OVERRIDES = {
   Detroit:   { "7a1d1c": "4d1414", "474d5e": "2d313d" },
@@ -38,41 +103,6 @@ const CITY_THEME_OVERRIDES = {
 };
 
 /**
- * Tone ramps derived from MASTER_PALETTE_64, for deriving shadows and highlights.
- *
- * Deliberately NOT the four palette groups. Two of those groups hold several
- * unrelated ramps end to end: warm_tones runs dark red up to pale cream and then
- * restarts at dark brown, and cool_tones runs blues, then teals, then violets.
- * Shifting a colour one step within its *group* can therefore cross a boundary
- * and change hue instead of shade — #FFE299 + 1 would land on #6E3E14, pale cream
- * to dark brown.
- *
- * Ramps are found by splitting each group wherever luminance drops, which
- * recovers the real ramps exactly (warm splits at 10; cool at 8 and 14; skin at
- * 13; blacks_grays stays whole) without hand-maintaining a second table that
- * could drift from the palette.
- */
-const PALETTE_RAMPS = (() => {
-  const luminance = (hex) => {
-    const n = parseInt(hex.slice(1), 16);
-    return 0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255);
-  };
-  const ramps = [];
-  for (const group of Object.values(MASTER_PALETTE_64)) {
-    let current = [group[0]];
-    for (let i = 1; i < group.length; i++) {
-      if (luminance(group[i]) < luminance(group[i - 1])) {
-        ramps.push(current);
-        current = [];
-      }
-      current.push(group[i]);
-    }
-    ramps.push(current);
-  }
-  return ramps;
-})();
-
-/**
  * Shifts a hex colour `steps` positions along its tone ramp.
  *
  * Negative steps darken (shadow), positive lighten (highlight). Clamps at the
@@ -80,13 +110,13 @@ const PALETTE_RAMPS = (() => {
  * input untouched if it is not a palette colour — so a caller can shade
  * unconditionally without first checking.
  *
- * This is how shading stays inside the 64-colour palette. test/pixel-engine.test.js
- * asserts the palette is exactly 64 unique colours, so shadows and highlights
- * cannot be produced by darkening a hex value arithmetically.
+ * This is how shading stays inside the palette. test/pixel-engine.test.js pins the
+ * exact colour count and every ramp's contents, so shadows and highlights cannot be
+ * produced by darkening a hex value arithmetically.
  */
 function paletteShift(hex, steps) {
   const normalized = String(hex).toUpperCase();
-  for (const ramp of PALETTE_RAMPS) {
+  for (const ramp of Object.values(PALETTE_RAMPS)) {
     const index = ramp.indexOf(normalized);
     if (index !== -1) {
       const clamped = Math.max(0, Math.min(ramp.length - 1, index + steps));
@@ -428,13 +458,15 @@ class SpriteRenderer {
    window.drawHighDetailCharacterSprite = drawHighDetailCharacterSprite;
    window.paletteShift = paletteShift;
    window.snapToPixel = snapToPixel;
+   window.MASTER_PALETTE = MASTER_PALETTE;
+   window.PALETTE_RAMPS = PALETTE_RAMPS;
  }
  
  if (typeof module !== 'undefined' && module.exports) {
    module.exports = {
      NATIVE_WIDTH,
      NATIVE_HEIGHT,
-     MASTER_PALETTE_64,
+     MASTER_PALETTE,
      CITY_THEME_OVERRIDES,
      calculateIntegerScale,
      paletteShift,

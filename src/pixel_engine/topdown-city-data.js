@@ -2,9 +2,10 @@
  * Concrete Kings: The Block Chronicles
  * Top-down district layouts. Pure data — no canvas, no DOM.
  *
- * Colours are restricted to the 64-entry master palette
- * (assets/palettes/concrete_kings_64.json) so the eight districts read as
- * one world. Per-city intent follows the profiles in CITY_ART_PROMPTS.md.
+ * Colours are restricted to the master palette
+ * (assets/palettes/concrete_kings.json, generated from pixel-engine.js) so the
+ * eight districts read as one world. Per-city intent follows the profiles in
+ * CITY_ART_PROMPTS.md.
  */
 
 const WORLD = { width: 2400, height: 1300 };
@@ -15,16 +16,20 @@ const POI_IDS = ['BARBER_SHOP', 'BODEGA', 'SHOP_DEAL', 'CHESS_PARK', 'LOCKED_DOO
 const SHADOW = 'rgba(0,0,0,0.45)';
 
 /**
- * Every colour below is a verbatim entry from concrete_kings_64.json.
+ * Every colour below is a verbatim entry from concrete_kings.json.
  *
  * Two constraints shape these, and a validation test enforces both:
  *  1. Large fills (ground, asphalt, roofA/B/C) stay dark — relative luminance
  *     under 120 — per the prompt pack's "dark dominant" rule. Bright hues are
  *     confined to `lane`, `zebra` and `accent`, which are thin marks and
  *     highlights, never area fills.
- *  2. The master palette contains no true greens. Foliage therefore uses the
- *     dark teal-green ramp hiding in cool_tones (#0D2926 / #174540 / #246961),
- *     which reads correctly as noir vegetation. Do not invent greens.
+ *  2. Foliage uses the `green` ramp. It previously used the dark teal-green ramp,
+ *     because the 64-colour palette contained no greens at all and the rule was
+ *     "do not invent greens" — but that rule was a workaround for a gap in the
+ *     palette, and the gap has been filled. Teal foliage was also the reason parks
+ *     read as slabs: `grass` and `tree` were set to the SAME colour in every
+ *     district, so a canopy had zero contrast against the grass it stood on. Grass
+ *     is now two to three ramp steps below the canopy.
  */
 
 // Harlem — brick, sodium amber, fire escapes, stoop culture
@@ -32,8 +37,8 @@ const PAL_HARLEM = {
   ground:'#101116', asphalt:'#22252E', lane:'#C9822B', zebra:'#CBD5ED',
   walk:'#474D5E', walkHi:'#565E70', roofA:'#7A1D1C', roofADk:'#4D1414',
   roofB:'#6B341D', roofBDk:'#3B1C11', roofC:'#393E4D', roofCDk:'#2D313D',
-  face:'#181920', accent:'#FFCD68', tree:'#246961', treeDk:'#174540',
-  grass:'#246961', shadow:SHADOW
+  face:'#181920', accent:'#FFCD68', tree:'#5E7F51', treeDk:'#4C6843',
+  grass:'#2B3C29', shadow:SHADOW
 };
 
 // Detroit — post-industrial, corrugated metal, half-empty lots
@@ -41,8 +46,8 @@ const PAL_DETROIT = {
   ground:'#08080A', asphalt:'#181920', lane:'#9C5C1D', zebra:'#A0AAC2',
   walk:'#393E4D', walkHi:'#474D5E', roofA:'#AA2724', roofADk:'#7A1D1C',
   roofB:'#565E70', roofBDk:'#393E4D', roofC:'#3B1C11', roofCDk:'#26120B',
-  face:'#101116', accent:'#F0AB43', tree:'#174540', treeDk:'#0D2926',
-  grass:'#174540', shadow:SHADOW
+  face:'#101116', accent:'#F0AB43', tree:'#4C6843', treeDk:'#3B5136',
+  grass:'#2B3C29', shadow:SHADOW
 };
 
 // Chicago — limestone, cold lake light, el-track steel.
@@ -51,8 +56,8 @@ const PAL_CHICAGO = {
   ground:'#0A1526', asphalt:'#22252E', lane:'#C9822B', zebra:'#E2E8F7',
   walk:'#474D5E', walkHi:'#666E82', roofA:'#1C375C', roofADk:'#11233F',
   roofB:'#565E70', roofBDk:'#393E4D', roofC:'#4D1414', roofCDk:'#2B0D0D',
-  face:'#11233F', accent:'#6FE8D8', tree:'#246961', treeDk:'#174540',
-  grass:'#246961', shadow:SHADOW
+  face:'#11233F', accent:'#6FE8D8', tree:'#5E7F51', treeDk:'#4C6843',
+  grass:'#2B3C29', shadow:SHADOW
 };
 
 // Miami — muted stucco and terrazzo. The Art Deco neon lives in `accent`
@@ -62,8 +67,8 @@ const PAL_MIAMI = {
   ground:'#11233F', asphalt:'#2D313D', lane:'#B6C0D8', zebra:'#E2E8F7',
   walk:'#666E82', walkHi:'#8B95AB', roofA:'#7A1D1C', roofADk:'#4D1414',
   roofB:'#1C375C', roofBDk:'#11233F', roofC:'#6B341D', roofCDk:'#3B1C11',
-  face:'#0A1526', accent:'#6FE8D8', tree:'#174540', treeDk:'#0D2926',
-  grass:'#174540', shadow:SHADOW
+  face:'#0A1526', accent:'#6FE8D8', tree:'#4C6843', treeDk:'#3B5136',
+  grass:'#2B3C29', shadow:SHADOW
 };
 
 // Baltimore — formstone, marble steps, harbour blue
@@ -71,8 +76,8 @@ const PAL_BALTIMORE = {
   ground:'#0A1526', asphalt:'#22252E', lane:'#C9822B', zebra:'#E2E8F7',
   walk:'#666E82', walkHi:'#8B95AB', roofA:'#6B341D', roofADk:'#3B1C11',
   roofB:'#274F80', roofBDk:'#1C375C', roofC:'#565E70', roofCDk:'#393E4D',
-  face:'#181920', accent:'#F0AB43', tree:'#246961', treeDk:'#174540',
-  grass:'#246961', shadow:SHADOW
+  face:'#181920', accent:'#F0AB43', tree:'#5E7F51', treeDk:'#4C6843',
+  grass:'#2B3C29', shadow:SHADOW
 };
 
 // Atlanta — red clay, porch wood, humid canopy
@@ -80,8 +85,8 @@ const PAL_ATLANTA = {
   ground:'#140A07', asphalt:'#26120B', lane:'#C9822B', zebra:'#CBD5ED',
   walk:'#522717', walkHi:'#6B341D', roofA:'#AA2724', roofADk:'#7A1D1C',
   roofB:'#854224', roofBDk:'#522717', roofC:'#393E4D', roofCDk:'#2D313D',
-  face:'#140A07', accent:'#FFCD68', tree:'#246961', treeDk:'#174540',
-  grass:'#246961', shadow:SHADOW
+  face:'#140A07', accent:'#FFCD68', tree:'#5E7F51', treeDk:'#4C6843',
+  grass:'#2B3C29', shadow:SHADOW
 };
 
 // Oakland — bay fog grey, mural colour, shipping steel
@@ -89,8 +94,8 @@ const PAL_OAKLAND = {
   ground:'#101116', asphalt:'#2D313D', lane:'#C9822B', zebra:'#CBD5ED',
   walk:'#565E70', walkHi:'#788196', roofA:'#174540', roofADk:'#0D2926',
   roofB:'#274F80', roofBDk:'#1C375C', roofC:'#AA2724', roofCDk:'#7A1D1C',
-  face:'#181920', accent:'#F0AB43', tree:'#246961', treeDk:'#174540',
-  grass:'#246961', shadow:SHADOW
+  face:'#181920', accent:'#F0AB43', tree:'#5E7F51', treeDk:'#4C6843',
+  grass:'#2B3C29', shadow:SHADOW
 };
 
 // NOLA — cast iron, gas lamp, cypress and slate
@@ -98,8 +103,8 @@ const PAL_NOLA = {
   ground:'#140A07', asphalt:'#22252E', lane:'#C9822B', zebra:'#CBD5ED',
   walk:'#6B341D', walkHi:'#854224', roofA:'#174540', roofADk:'#0D2926',
   roofB:'#7A1D1C', roofBDk:'#4D1414', roofC:'#6E3E14', roofCDk:'#2B0D0D',
-  face:'#26120B', accent:'#FFCD68', tree:'#246961', treeDk:'#174540',
-  grass:'#246961', shadow:SHADOW
+  face:'#26120B', accent:'#FFCD68', tree:'#5E7F51', treeDk:'#4C6843',
+  grass:'#2B3C29', shadow:SHADOW
 };
 
 /**

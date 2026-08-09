@@ -35,10 +35,11 @@ if (typeof require !== 'undefined') {
 /**
  * paletteShift, for deriving shadows and highlights.
  *
- * Shading has to come from the palette: test/pixel-engine.test.js locks
- * MASTER_PALETTE_64 to exactly 64 colours, so a tone cannot be darkened
- * arithmetically. The identity fallback means a missing pixel-engine degrades to
- * flat shading rather than throwing.
+ * Shading has to come from the palette: test/pixel-engine.test.js pins the palette's
+ * exact contents, so a tone cannot be darkened arithmetically. Every ramp now steps
+ * at dE 4-12, which is what lets +/-1 mean "one shade" everywhere rather than only on
+ * the greys. The identity fallback means a missing pixel-engine degrades to flat
+ * shading rather than throwing.
  */
 let RND_paletteShift = null;
 if (typeof require !== 'undefined') {
@@ -901,12 +902,14 @@ class TopDownCityRenderer {
 
           // Worn desire-line across the park, and a spur if there is room for one.
           //
-          // Derived from `walk`, two steps down. The obvious-looking choice was
-          // `roofBDk` for an earthy brown, but roof colours are per-district and
-          // arbitrary: that key is a brown in Harlem, grey in Detroit, navy in Miami
-          // and #4D1414 in NOLA, where it painted blood-red paths across the
-          // courtyard. Stepping the pavement colour down is the only derivation that
-          // lands on a dark neutral in all eight palettes.
+          // Derived from `walk`, two steps down, which reads as beaten gravel. The
+          // obvious-looking choice was `roofBDk` for an earthy brown, but roof colours
+          // are per-district and arbitrary: that key is a brown in Harlem, grey in
+          // Detroit, navy in Miami and #4D1414 in NOLA, where it painted blood-red
+          // paths across the courtyard. A dark brown was considered for the palette's
+          // `earth` ramp and rejected — every candidate dark enough for a night path
+          // sat within dE 6 of the skin ramp, and two near-identical colours in
+          // different ramps shade in different directions.
           const dirt = RND_paletteShift(p.walk, -2);
           const pathY = parcel.y + Math.floor(parcel.h / 2) - 5;
           this.fill(ctx, parcel.x + 5, pathY, parcel.w - 10, 10, dirt);
@@ -954,12 +957,13 @@ class TopDownCityRenderer {
       // Roof surface: grain plus tar-seam courses, so a roof is a material rather
       // than a rectangle of one colour.
       //
-      // lightBias is very low on purpose. The warm ramp steps hard — one step up
-      // from Harlem's #7A1D1C brick is #AA2724 — so light flecks at any real
-      // frequency turn a roof into red confetti. They did, at 0.26. Roof texture
-      // wants to be almost entirely the darker step, light flecks rare accidents.
-      this.grain(ctx, parcel.x, parcel.y, parcel.w, roofH, roofCol, 0.05,
-        'roof' + parcel.x + parcel.y, { cluster: 2, lightBias: 0.05 });
+      // lightBias was pinned at 0.05 to hide a palette defect, not for artistic
+      // reasons: one step up from Harlem's #7A1D1C brick used to be #AA2724, a dE of
+      // 19, so light flecks read as red confetti at any real frequency. The brick
+      // ramp now steps at dE ~9, so a highlight fleck is a highlight, and the roof
+      // can carry real texture again.
+      this.grain(ctx, parcel.x, parcel.y, parcel.w, roofH, roofCol, 0.11,
+        'roof' + parcel.x + parcel.y, { cluster: 2, lightBias: 0.20 });
       this.seams(ctx, parcel.x, parcel.y, parcel.w, roofH,
         RND_paletteShift(roofCol, -1), 0, 34);
 
@@ -1108,10 +1112,12 @@ class TopDownCityRenderer {
     // real tenement frontages have — piers between the window bays.
     const bright = p.accent;
     const dim = RND_paletteShift(p.accent, -2);
-    // Unlit glass is a NEUTRAL near-black, not the wall colour stepped down. On a
-    // brick roof both -2 and -3 bottom out at the same #2B0D0D, so an unlit window
-    // was invisible and the wall showed only scattered lit ones with no grid behind
-    // them. A dark hole distinct from the brick is what lets you count the storeys.
+    // Unlit glass stays a NEUTRAL near-black rather than the wall colour stepped
+    // further down. It originally had to be: on the old palette brick -2 and -3 both
+    // bottomed out at #2B0D0D, so an unlit window was literally the same colour as
+    // the wall around it. The denser brick ramp has fixed that — but neutral is still
+    // the better read, because dark glass at night takes its colour from the sky, not
+    // from the brick it is set into.
     const glass = RND_paletteShift(p.face, -1);
     const frame = RND_paletteShift(roofCol, -1);
     const pier = (Math.floor(parcel.w / PITCH) % 3) + 5;   // 5-7 bays between piers

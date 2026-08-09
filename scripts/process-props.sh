@@ -13,7 +13,7 @@
 # Also trims transparent padding, since the generator centres a small subject on
 # a large canvas.
 #
-# Deliberately NOT remapped to assets/palettes/concrete_kings_64.json. That was
+# Deliberately NOT remapped to assets/palettes/concrete_kings.json. That was
 # tried: the master palette is thin on neutral mid-greys, so a car's grey body
 # snapped to the amber accent ramp and the props came out orange-framed. The
 # districts' procedural geometry is palette-bound; generated art is not.

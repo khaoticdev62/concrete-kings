@@ -49,7 +49,7 @@ test('Detroit Tiles: city_detroit_tiles.png exists and conforms to master palett
   const { colorType, paletteColors } = getPngUniqueColors(filePath);
   
   // Read master palette colors
-  const masterPath = path.join(__dirname, '..', 'assets', 'palettes', 'concrete_kings_64.json');
+  const masterPath = path.join(__dirname, '..', 'assets', 'palettes', 'concrete_kings.json');
   const master = JSON.parse(fs.readFileSync(masterPath, 'utf8'));
   const allowedColors = new Set(Object.values(master.groups).flat().map(c => c.toUpperCase()));
 

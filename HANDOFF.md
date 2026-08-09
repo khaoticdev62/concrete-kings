@@ -237,7 +237,7 @@ accessibility setting was unreachable. `test/cash-shop.test.js` guards placement
 | `decals/` (4) | Usable |
 | `ui-mockups/` (5) | HUD explorations, **not** game art |
 | `*_raw.png` (8) | Failed tile generations, neon on black. Not sliceable |
-| `palettes/concrete_kings_64.json` | The real deal. Canonical gamut |
+| `palettes/concrete_kings.json` | The real deal. Canonical gamut |
 
 **Rules:**
 

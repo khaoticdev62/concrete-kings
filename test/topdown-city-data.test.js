@@ -51,14 +51,14 @@ test('District data: every colour is a verbatim master-palette entry', () => {
   const fs = require('fs');
   const path = require('path');
   const master = JSON.parse(fs.readFileSync(
-    path.join(__dirname, '..', 'assets', 'palettes', 'concrete_kings_64.json'), 'utf8'));
+    path.join(__dirname, '..', 'assets', 'palettes', 'concrete_kings.json'), 'utf8'));
   const allowed = new Set(Object.values(master.groups).flat().map(c => c.toUpperCase()));
 
   districtKeys().forEach(k => {
     Object.entries(DISTRICTS[k].palette).forEach(([pk, val]) => {
       if (pk === 'shadow') return;
       assert.ok(allowed.has(val.toUpperCase()),
-        `${k}.palette.${pk} = ${val} is not in concrete_kings_64.json`);
+        `${k}.palette.${pk} = ${val} is not in concrete_kings.json`);
     });
   });
 });

@@ -3,7 +3,7 @@
 
 ![Concrete Kings Engine](assets/atlases/master_tiles_atlas.png)
 
-Welcome to the production repository for **Concrete Kings: The Block Chronicles** — a Black narrative RPG card game built with a 320x180 native pixel art engine, 64-color master palette, real-time city theme palette swapping, Web Audio chiptunes, and WebSocket multiplayer sync.
+Welcome to the production repository for **Concrete Kings: The Block Chronicles** — a Black narrative RPG card game built with a 320x180 native pixel art engine, 101-color master palette organised as nine tone ramps, real-time city theme palette swapping, Web Audio chiptunes, and WebSocket multiplayer sync.
 
 ---
 
@@ -12,7 +12,7 @@ Welcome to the production repository for **Concrete Kings: The Block Chronicles*
 - **Master Native Resolution:** `320 × 180` pixels (Aspect Ratio: `16:9`).
 - **Tile Grid Standard:** `16 × 16` pixels.
 - **Character Grid Standard:** `32 × 32` pixels (`32 × 48` for tall hero variants).
-- **Master Palette:** Exactly 64 colors locked across 4 groups (Blacks/Grays, Warm Tones, Cool Tones, Melanin Skin Spectrum).
+- **Master Palette:** 101 colors as nine tone ramps (greys, brick, earth, azure, teal, green, violet, skin, skinShade). Every adjacent pair is within CIELAB dE 12, so `paletteShift(colour, +/-1)` is always one shade rather than a change of hue. Generated to JSON by `scripts/generate-palette-json.js`; all 64 colors of the original palette are still present at their original ramp positions.
 - **Animation Budget:** Maximum 4 frames per animation (`00`, `01`, `02`, `03`).
 - **Asset Size Budget:** Under 2.0 MB total.
 
@@ -28,7 +28,7 @@ concrete-kings/
 ├── package.json                      # NPM test script configuration
 ├── assets/
 │   ├── palettes/
-│   │   └── concrete_kings_64.json    # Master 64-color palette JSON specification
+│   │   └── concrete_kings.json    # Master palette, generated from pixel-engine.js
 │   └── atlases/
 │       ├── master_tiles_atlas.png    # 8-bit Indexed PNG Tilemap Atlas
 │       ├── characters_atlas.png      # 8-bit Indexed PNG Character Sprite Atlas
