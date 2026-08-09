@@ -614,6 +614,9 @@
     <span id="topHudLocation" style="color:#ffcd68;">HARLEM</span>
     <span id="topHudDay">DAY 1</span>
     <span id="topHudHeat" style="color:#f25438;">HEAT: 0/10</span>
+    <span id="hudTrust" style="color:#6fe8d8;">TRUST: -</span>
+    <span id="hudBeat" style="color:#ffcd68;">BEAT 0</span>
+    <span id="hudAct" style="color:#a0aac2;">ACT 1</span>
   </div>
 
   <section id="setup" class="screen active">
@@ -1277,6 +1280,9 @@
       <h2 id="campaignIntroTitle" style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:12px; color:#ffcd68;">FIRST MILES</h2>
       <p id="campaignIntroBody" class="muted" style="font-family:'JetBrains Mono', monospace; font-size:11px; line-height:1.5;">13 beats. One origin. Every mile costs.</p>
       <button id="campaignIntroStart" class="primary" style="font-family:'Press Start 2P', monospace; font-size:10px; background:#ffcd68; border-color:#ffcd68; color:#101116;">BEGIN</button>
+      <div id="campaignContinueWrap" style="margin-top:12px; display:none;">
+        <button id="campaignContinueBtn" class="secondary" style="font-size:8px; padding:8px 12px;">CONTINUE FIRST MILES</button>
+      </div>
       <div style="margin-top:12px;">
         <button class="secondary" onclick="app.showMainMenu()" style="font-size:8px; padding:8px 12px;">BACK TO MENU</button>
       </div>
@@ -2436,6 +2442,24 @@ const app = {
     if (locationEl) locationEl.textContent = location;
     if (dayEl) dayEl.textContent = `DAY ${day}`;
     if (heatEl) heatEl.textContent = `HEAT: ${heat}/10`;
+
+    if (this.firstMilesCampaign && this.firstMilesCampaign.state) {
+      const campHeatEl = document.getElementById('topHudHeat');
+      const campTrustEl = document.getElementById('hudTrust');
+      const campBeatEl = document.getElementById('hudBeat');
+      const campActEl = document.getElementById('hudAct');
+      if (campHeatEl) campHeatEl.textContent = `HEAT: ${this.firstMilesCampaign.state.heat}/10`;
+      if (campTrustEl) {
+        const trusts = this.firstMilesCampaign.state.trust || {};
+        const top = Object.entries(trusts).sort((a, b) => b[1] - a[1])[0];
+        campTrustEl.textContent = top ? `TRUST: ${top[0]} ${top[1]}/5` : 'TRUST: -';
+      }
+      if (campBeatEl) campBeatEl.textContent = `BEAT ${this.firstMilesCampaign.state.currentBeat || 0}`;
+      if (campActEl) {
+        const beat = this.firstMilesCampaign.state.currentBeat || 0;
+        campActEl.textContent = beat <= 9 ? 'ACT 1' : beat <= 16 ? 'ACT 2' : 'ACT 3';
+      }
+    }
   },
 
   localPlayer(index) {
