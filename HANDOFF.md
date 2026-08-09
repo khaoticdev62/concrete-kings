@@ -32,7 +32,7 @@ node server/server.js        # serves index.html + WS relay on port 3001
 
 Open `http://localhost:3001`. **Port is 3001, not 3000.**
 
-Current state: **369 tests across 59 files, all passing. Zero console errors on
+Current state: **433 tests across 64 files, all passing. Zero console errors on
 load** — check the browser console, not just the suite; see trap 2.5.
 
 Always run `npm test` and not just `node --test` — the npm script also
@@ -41,7 +41,7 @@ which catches parse errors the test runner never sees.
 
 ---
 
-## 2. Eleven traps that will cost you hours
+## 2. Twelve traps that will cost you hours
 
 ### 2.1 You cannot measure layout with `documentElement.scrollHeight`
 
@@ -188,9 +188,76 @@ atlas, declare explicit `x`/`w` per slice and check the count.
 
 ---
 
+### 2.9 `index.html` is CRLF, so any pattern containing a newline escape matches nothing
+
+This cost time on four separate occasions in one session: a scripted replace that no-opped,
+an edit marker that would not match, a test slice whose end marker was never found, and a
+doc update that silently changed nothing.
+
+- Editing: use the `Edit` tool, which handles both, or match with `\r?\n`.
+- Scripted edits: **assert every replacement happened.** `if (s === before) throw`. A silent
+  no-op followed by a passing suite is the worst outcome available.
+- Test markers: keep them **single-line**. A multi-line marker fails as a not-found rather
+  than an error, and `indexOf` returning -1 then slices from the wrong place.
+
+Related, and it bit three times: **do not put backticks or quotes in a `node -e` script**.
+The shell interprets them before node sees them. Write the script to a file and run it.
+
+### 2.10 A test or an edit that matches source text can hit the wrong region
+
+Four variants of this shipped green in one session:
+
+1. **A regex with a wildcard span.** `/firstMilesCampaign[\s\S]{0,900}?recordCanon/` passed
+   happily after the `recordCanon` call it was checking was deleted — the window simply
+   reached a different call site. A wildcard span is a coincidence detector.
+2. **`indexOf` on a non-unique marker.** `if (this.game.mode === MODE.ONLINE) {` occurs three
+   times. Searching the whole document found the wrong one, and the slice then spanned the
+   branch it was meant to exclude — proving the opposite of the truth. **Scope to the
+   enclosing function first.**
+3. **A slice that came back empty.** An end marker appearing before the start marker gave an
+   empty string; the check found zero items to validate and reported success. Assert the
+   slice is non-empty and that you found the expected *number* of matches.
+4. **The same mistake in an EDIT, not a test.** Anchoring an insertion on
+   `scnStage.style.display = 'none'` — which exists in two functions — put code referencing
+   `result` into a function with no `result`, and it threw on load. Grep the anchor and
+   confirm it occurs once before replacing on it.
+
+The fix for all of them is the same: delete the thing, run the test, watch it fail. See §9.
+
+### 2.11 Canvas paths anti-alias, and `imageSmoothingEnabled` does not stop them
+
+`imageSmoothingEnabled = false` governs **image scaling only**. Every `ctx.arc`, `ctx.ellipse`
+and stroked path still anti-aliases. The map's trees were drawn with `arc()` and were the
+only soft-edged thing in a scene built entirely from `fillRect` — at 4x they were obviously
+from a different game.
+
+Use the span rasterisers in `topdown-city-renderer.js` (`oval`, `disc`) for any round shape.
+`test/map-depth.test.js` throws if a frame calls `arc` or `ellipse`.
+
+Related: a translucent shape must be **one** fill. Building shadows are a single convex
+hexagon path because sweeping the footprint as a stack of offset rects darkened where they
+overlapped.
+
+### 2.12 When a screen overflows, check the layout before shaving the caps
+
+The crew screen ran 78px past the 595px frame at seven companions. I capped every growing
+list, then trimmed the caps, then trimmed them again — three rounds, and it kept coming
+back. The caps were never the problem: the sections were narrower than they were tall and
+there were simply too many stacked. Putting two of them side by side fixed it in one change,
+and each list stayed long enough to read.
+
+Shaving a cap trades one problem for another — a list too short to be useful. Ask first
+whether the content wants to sit beside something rather than below it.
+
+The scenario screen had the same shape of problem at 777px, and that fix was structural too:
+it rendered SET UP, COMPLETE, REVEAL, WATCH and LIVE WITH IT all at once when the flow is
+sequential. It now shows one phase at a time.
+
+---
+
 ## 3. Architecture
 
-**`index.html` (~6900 lines)** holds all client code in one inline `<script>`:
+**`index.html` (~7250 lines)** holds all client code in one inline `<script>`:
 
 - `Deck` — shuffle/draw with reshuffle
 - `Game` — pure rules and state (players, hands, judging, scoring). No DOM.
@@ -204,6 +271,10 @@ exporting via `module.exports` for tests:
 |---|---|
 | `animation-system.js` | `Animator`. **Must load first** — others resolve it at parse time |
 | `canon-engine.js` | The block ledger: motifs, legends, callbacks, chronicle |
+| `scenario-engine.js` | Scenario slots, resolution, outcome tiers, scene beats |
+| `ai-party.js` | The AI crew: archetypes, decisions, relationships, memory, betrayal |
+| `crew-dialogue.js` | What the crew say. Lines are SELECTED by state, never authored ahead of it |
+| `crew-jobs.js` | Jobs the crew propose, and party news between them |
 | `scenario-engine.js` | Scenario slots, resolution, outcome tiers, scene beats |
 | `lightmap.js` | Pooled lamp light. Must load **before** the renderer |
 | `player-progression.js` | XP, levels, daily quests |
@@ -245,6 +316,7 @@ result, and game over with full standings.
 | `npcPoiScene` | NPC scenes with generated art backdrops |
 | `scenario` | **RUN IT** — complete a scenario, watch it happen, live with it |
 | `chronicle` | **THE RECORD** — what the block remembers. Reachable from the menu |
+| `crew` | **THE CREW** — the AI party: preview, sharpness, their proposed jobs, recap |
 | `minigameCatalog`, `deckBuilder`, `lobby`, `campaign*` | Measured, fine |
 
 **Top-level modals** (`shopModal`, `shopUnavailableModal`, `accessModal`) must
@@ -350,9 +422,30 @@ be fake UI.
 
 ## 8. Where things stand
 
-**Done:** top-down walkable city map (8 districts, collision, camera, travel with
-heat gating), CASH shop with mini-game prep items, character-creation wizard,
-NPC scene backdrops, card table fitting 720p, accessibility panel restored.
+**Done:** top-down walkable city map (8 districts, collision, camera, travel with heat
+gating, alleys, block-fitted parcels, lamp lighting, building volume), a 101-colour palette
+in nine even tone ramps, CASH shop with mini-game prep items, character-creation wizard,
+NPC scene backdrops and arrival art for 7 of 8 districts, card table fitting 720p,
+accessibility panel restored.
+
+And the CARD RPG PRD stack, all deterministic and all persisted:
+
+- **The block ledger** (`canon-engine.js`) — crowned cards become motifs, motifs become
+  block legends, prompts naming one pay a callback. Saved in `ck-block-ledger`.
+- **Scenario mode** (`scenario-engine.js`) — complete a scenario with four cards, watch it
+  play out, live with the consequences. Cards are intent; stats are execution.
+- **The AI crew** (`ai-party.js`, `crew-dialogue.js`, `crew-jobs.js`) — companions with real
+  hands, secret objectives, six-dimension relationships, banded memory, derived emotions,
+  caused and telegraphed betrayal, social voting, spoken reactions, and jobs they propose
+  themselves. Saved in `ck-ai-party`.
+
+No `Math.random` in any of the three, so a campaign replays identically and online clients
+cannot disagree about what happened. That is a hard requirement rather than a preference —
+the ledger and the crew will eventually need to sync.
+
+Unbuilt from the single-player PRD, and each needs content authoring rather than engine
+work: cooperative pre-planning (§19), companion death and successors (§38-39), recruitment
+(§53), leadership contests (§26).
 
 **Open, in rough value order:**
 

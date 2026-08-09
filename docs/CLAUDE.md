@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> **Read `HANDOFF.md` in the repo root first.** It documents eleven failure modes in this
+> **Read `HANDOFF.md` in the repo root first.** It documents twelve failure modes in this
 > codebase that fail *silently*, several of which the test suite cannot catch by
 > construction. Its section 0 is two rules that would have saved more time than everything
 > else in it. This file describes what the project **is**; HANDOFF.md describes the
@@ -36,6 +36,11 @@ largely closed on the mechanics side. Built and working:
 - **Scenario mode** (`scenario-engine.js`) — complete a scenario with four cards
   (WHO/WHAT/HOW/TWIST), watch it play out beat by beat, then live with the consequences.
   Cards are intent; stats are execution; the world state is the consequence.
+- **The AI crew** (`ai-party.js`, `crew-dialogue.js`, `crew-jobs.js`) — single player plus
+  an AI party. Companions hold real hands and choose from them, have secret objectives and
+  six-dimension relationships, remember what you did, betray you only for causes they can
+  name, vote socially rather than optimally, speak during the scene, and propose jobs of
+  their own. Persists in `ck-ai-party`.
 
 **Still only designed:** most of `GAME-MECHANICS-ADVANCED.md`, factions,
 inventory-from-cards, quest generation, an AI narrator, and a Godot port. `CARD RPG.md` is
@@ -59,12 +64,12 @@ node scripts/generate-palette-json.js   # regenerate assets/palettes/concrete_ki
 node scripts/generate-cards.js          # regenerate cards.js from the card database
 ```
 
-No build step, bundler, transpiler or lint config. Current state: **369 tests across 59 files, all passing**. Always run `npm test` rather than `node --test` — the npm script also
+No build step, bundler, transpiler or lint config. Current state: **433 tests across 64 files, all passing**. Always run `npm test` rather than `node --test` — the npm script also
 syntax-checks `index.html`'s inline `<script>`, which the test runner never sees.
 
 ## Architecture
 
-**`index.html` (~6900 lines)** holds all client code in one inline `<script>`:
+**`index.html` (~7250 lines)** holds all client code in one inline `<script>`:
 
 - `Deck` — shuffle/draw with reshuffle.
 - `Game` — pure rules and state: players, hands, judging, scoring, the block ledger.
