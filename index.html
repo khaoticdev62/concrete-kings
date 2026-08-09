@@ -706,7 +706,8 @@
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showBoosterShop()">SHOP</button>
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showBlockMap()">BLOCK MAP</button>
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showLexicon()">LEXICON</button>
-          <button class="secondary" style="font-size:8px; padding:8px; grid-column: span 2;" onclick="app.showMinigameCatalog()">MINI-GAME CATALOG</button>
+          <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showChronicle()">THE RECORD</button>
+          <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showMinigameCatalog()">MINI-GAMES</button>
         </div>
 
         <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
@@ -1462,8 +1463,10 @@
 
       <div id="chronicleStanding" style="margin-top:14px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#ffcd68; line-height:1.6;"></div>
 
-      <div style="margin-top:16px; display:flex; gap:10px;">
+      <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
         <button class="secondary" onclick="app.showGame()">BACK TO TABLE</button>
+        <button class="secondary" onclick="app.showMainMenu()">MENU</button>
+        <button class="secondary" onclick="app.clearLedger()" style="color:#f25438;">FORGET EVERYTHING</button>
       </div>
     </div>
   </section>
@@ -2557,6 +2560,9 @@ const app = {
     }
     
     // Initialize mini-game manager
+    // The block's memory outlives the session, so restore it before anything renders.
+    this.loadLedger();
+
     const minigameCanvas = document.getElementById('minigame-canvas');
     if (minigameCanvas) {
       this.miniGameManager = new MiniGameManager(minigameCanvas);
@@ -4350,6 +4356,14 @@ const app = {
     if (this.firstMilesCampaign) {
       const win = this.game.submissions[index];
       const cardText = win ? win.card : 'Walk the block';
+      // Campaign mode is where the ledger matters most and it was the one path that
+      // skipped it: this branch returns long before the classic recording site. Heat and
+      // trust also finally have somewhere to land here, which they do not in a classic
+      // match.
+      const campaignCanon = this.recordCanon(
+        (win && this.game.players.find(p => p.name === win.player)) || this.game.players[this.humanIndex],
+        cardText
+      );
       const result = this.firstMilesCampaign.choose(cardText);
       this.game.submissions = [];
       this.game.selected.clear();
@@ -4379,6 +4393,13 @@ const app = {
         beatMetaEl.style.display = 'none';
         beatMetaEl.textContent = result.consequenceText || '';
 
+        const campCanonEl = document.getElementById('canonResultMeta');
+        if (campCanonEl) {
+          const canonLines = this.canonResultLines(campaignCanon);
+          campCanonEl.style.display = canonLines.length ? 'block' : 'none';
+          campCanonEl.textContent = canonLines.join('  ·  ');
+        }
+
         const campEl = document.getElementById('campaignResultMeta');
         if (campEl) {
           campEl.style.display = 'block';
@@ -4406,6 +4427,10 @@ const app = {
 
     if (this.storyEngine && this.storyEngine.active) {
       const win = this.game.submissions[index];
+      this.recordCanon(
+        this.game.players.find(p => p.name === win.player) || this.game.players[this.humanIndex],
+        win.card
+      );
       const result = this.storyEngine.applyWinnerCard(win.card);
       this.game.submissions = [];
       this.game.selected.clear();
@@ -4537,8 +4562,51 @@ const app = {
       if (fx.heat) campaign.state.heat = Math.max(0, campaign.state.heat + fx.heat);
     }
 
+    this.saveLedger();
     this.updateTopHud();
     return event;
+  },
+
+  /**
+   * Persists the block's memory.
+   *
+   * Its own key rather than riding along in the campaign save. The block should keep
+   * remembering across classic sessions too, and coupling the ledger's lifetime to the
+   * campaign save would silently wipe it whenever a campaign is abandoned — the exact
+   * opposite of the point (PRD section 43: canon events are saved state).
+   *
+   * Saved on every record rather than on a timer, because the interesting sessions are
+   * the ones that end with the tab being closed.
+   */
+  saveLedger() {
+    try {
+      if (!this.game.ledger || typeof localStorage === 'undefined') return;
+      localStorage.setItem('ck-block-ledger', JSON.stringify(this.game.ledger.toJSON()));
+    } catch (e) {
+      // Quota or private-mode failure. A lost chronicle must never break a round.
+    }
+  },
+
+  /** Restores the block's memory, or leaves a fresh ledger in place. */
+  loadLedger() {
+    try {
+      if (typeof BlockLedger === 'undefined' || typeof localStorage === 'undefined') return;
+      const raw = localStorage.getItem('ck-block-ledger');
+      if (!raw) return;
+      const restored = BlockLedger.fromJSON(JSON.parse(raw));
+      if (restored && Array.isArray(restored.events)) this.game.ledger = restored;
+    } catch (e) {
+      // Corrupt save: keep the fresh ledger rather than refusing to start.
+    }
+  },
+
+  /** Wipes the block's memory. Deliberately explicit — there is no accidental path. */
+  clearLedger() {
+    if (typeof BlockLedger !== 'undefined') this.game.ledger = new BlockLedger();
+    try {
+      if (typeof localStorage !== 'undefined') localStorage.removeItem('ck-block-ledger');
+    } catch (e) { /* nothing to clear */ }
+    this.showChronicle();
   },
 
   /** Short result-screen lines for what the block made of the winning card. */
@@ -5194,11 +5262,23 @@ const app = {
         ReceiptSystem.resolveTrigger(this.game, w);
         ReceiptSystem.awardWin(this.game, w);
       }
+      // Recorded here, not in chooseWinner. In online mode chooseWinner only sends the
+      // pick and returns; the award happens when the server echoes it back. Recording at
+      // the click site would log the round twice on the judge's client and once
+      // everywhere else, and the ledger has to be identical on every client.
+      const onlineCanon = w ? this.recordCanon(w, msg.card) : null;
+
       document.getElementById('winnerName').textContent = msg.player;
       document.getElementById('winnerCard').textContent = msg.card;
       const onlineMetaEl = document.getElementById('winnerMeta');
       onlineMetaEl.style.display = 'block';
       onlineMetaEl.textContent = this.game.currentBlack.prompt;
+      const onlineCanonEl = document.getElementById('canonResultMeta');
+      if (onlineCanonEl) {
+        const lines = this.canonResultLines(onlineCanon);
+        onlineCanonEl.style.display = lines.length ? 'block' : 'none';
+        onlineCanonEl.textContent = lines.join('  ·  ');
+      }
       this.show('roundResult');
       this.updateCanvasCards();
     }

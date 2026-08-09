@@ -204,6 +204,82 @@ test('Canon: the ledger survives a save/load round trip', () => {
     'a reloaded ledger must remember which tiers it already announced');
 });
 
+test('Canon: every mode that crowns a card records it, and online records exactly once', () => {
+  // The ledger shipped wired into the classic path only. The campaign and story branches
+  // of chooseWinner return long before the classic recording site, so the two narrative
+  // modes — the ones where a remembered joke matters most — recorded nothing at all.
+  const fs = require('fs');
+  const path = require('path');
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+
+  // Sliced between explicit markers rather than matched with a wildcard window. The
+  // first version of this test used /firstMilesCampaign[\s\S]{0,900}?recordCanon/, which
+  // passed happily after the campaign's recordCanon call was deleted — the window simply
+  // reached a different call site. A regex with a wildcard span is not a structural
+  // assertion, it is a coincidence detector.
+  const between = (from, to, where = html) => {
+    const start = where.indexOf(from);
+    assert.notEqual(start, -1, `marker not found: ${from}`);
+    const end = where.indexOf(to, start + from.length);
+    assert.notEqual(end, -1, `end marker not found after ${from}: ${to}`);
+    return where.slice(start, end);
+  };
+
+  // Scoped to chooseWinner's own body first. `if (this.game.mode === MODE.ONLINE) {`
+  // occurs three times in the file, and searching the whole document found the wrong one
+  // — the slice then spanned the campaign branch and "proved" the opposite of the truth.
+  const body = between('chooseWinner(index) {', 'recordCanon(winner, cardText) {');
+
+  const campaignBranch = between('if (this.firstMilesCampaign) {', 'if (this.storyEngine && this.storyEngine.active) {', body);
+  assert.ok(campaignBranch.includes('recordCanon'),
+    'the campaign branch must record before it returns');
+
+  // Markers are single-line on purpose: index.html has CRLF endings, so a marker
+  // containing "\n" never matches and the slice silently fails to find its end.
+  const storyBranch = between('if (this.storyEngine && this.storyEngine.active) {',
+    'const winner = this.game.players.find(p => p.name === win.player);', body);
+  assert.ok(storyBranch.includes('recordCanon'),
+    'the story branch must record before it returns');
+
+  // Online must NOT record at the click site: chooseWinner only sends the pick there and
+  // the award happens when the server echoes it. Recording in both places logs the round
+  // twice on the judge's client, and the ledger has to match on every client.
+  const onlineClick = between('if (this.game.mode === MODE.ONLINE) {',
+    'if (this.audioEngine) this.audioEngine.playVictoryFanfare();', body);
+  assert.ok(!onlineClick.includes('recordCanon'),
+    'online must record in the winner message handler, not at the click');
+
+  const onlineHandler = between("if (msg.type === 'winner') {", "if (msg.type === 'chat')");
+  assert.ok(onlineHandler.includes('recordCanon'),
+    'the online winner handler must record');
+});
+
+test('Canon: the ledger is persisted and restored, or the block forgets on reload', () => {
+  // toJSON/fromJSON existed and were unit-tested, but nothing in the game called either,
+  // so the chronicle died with the tab. PRD section 43 lists canon events as saved state.
+  const fs = require('fs');
+  const path = require('path');
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+
+  assert.ok(html.includes("localStorage.setItem('ck-block-ledger'"), 'the ledger must be saved');
+  assert.ok(html.includes("localStorage.getItem('ck-block-ledger'"), 'the ledger must be restored');
+
+  // Saved by recordCanon itself, so the save cannot be forgotten at a call site.
+  const recordBody = html.slice(html.indexOf('recordCanon(winner, cardText) {'));
+  const recordEnd = recordBody.indexOf('canonResultLines(event)');
+  assert.notEqual(recordEnd, -1, 'recordCanon must be followed by canonResultLines');
+  assert.ok(recordBody.slice(0, recordEnd).includes('this.saveLedger()'),
+    'saving must happen inside recordCanon — sessions end by the tab closing, not on a timer');
+
+  const initBody = html.slice(html.indexOf('  init() {'));
+  assert.ok(initBody.slice(0, initBody.indexOf('renderProgressionUI')).includes('this.loadLedger()'),
+    'the ledger must be restored during init, before anything renders');
+  // Its own key, not the campaign save: abandoning a campaign must not wipe the block's
+  // memory of a classic session.
+  assert.ok(!html.includes("ck-first-miles-campaign', JSON.stringify(this.game.ledger"),
+    'the ledger must not ride along in the campaign save');
+});
+
 test('Canon: bad input is handled rather than thrown, because it comes from the round loop', () => {
   const ledger = new BlockLedger();
   assert.doesNotThrow(() => ledger.record({}));
