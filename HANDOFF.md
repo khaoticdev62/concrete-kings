@@ -314,17 +314,55 @@ NPC scene backdrops, card table fitting 720p, accessibility panel restored.
 
 **Open, in rough value order:**
 
-1. **`topdown-recolor/` palette swap** — 12 correctly-shaped assets one recolour
-   away from usable. `SpriteRenderer` already does palette swapping.
+1. ~~**`topdown-recolor/` palette swap**~~ — **investigated and closed. Do not
+   spend time here.** The claim was 12 correctly-shaped assets one recolour away.
+   Both halves are wrong. Colour is not the blocker: the master palette *contains*
+   violet (`#2A1138`, `#521C6E`), so remapping to it legitimately keeps the purple.
+   The real blocker is projection — 9 of the 12 cannot sit on a top-down map at
+   all. Five `iso-*` are isometric, `furniture-street-lamp` and
+   `flora-weed-cluster` are side-on, `prop-car` is a 3/4 front view, and
+   `icon-house` is a UI icon. Only the three `road-*` are top-down, and the
+   renderer already draws roads and lane markings procedurally and crisply.
+   See `assets/ASSET_INVENTORY.md`.
 2. **District arrival art** — 15 unused `scenes/` images; show one on travel.
 3. **Collapse duplicate wireframes** — `UI_WIREFRAME_GAME_BOARD.txt` and
    `UI_WIREFRAME_MAIN_GAME_SCREEN.txt` describe the same four states.
 4. **Repo weight** — `.git` is ~305MB+; a single asset commit moved 379MB and
    took ~12 minutes to push. Decide on downscale-only-in-git or LFS **before**
    the next art batch.
-5. **`narrativeTextBox` is dead** — never shown, only ever hidden. Either wire it
-   to story mode or delete it. `syncStagePanel()` currently assumes it stays
-   hidden, and a test guards that assumption.
+5. **An entire unreachable narrative UI subtree, not just one dead div.**
+   Investigated: `#narrativeTextBox` is 41 lines of markup that is never shown,
+   and everything inside it is unreachable with it —
+
+   - `#abilityMenuOverlay` / `#abilitiesList` and `#secretOverlay` /
+     `#secretsList`, opened only by `[ USE ABILITY ]` and `[ VIEW SECRET ]`
+     buttons that are *themselves inside the hidden box*. Hidden buttons opening
+     hidden overlays: the same bug class as trap 2.3, and as a modal nested in a
+     closed `<details>`.
+   - `app.renderNarrativeBeat()`, which writes beat title, prose, heat, trust and
+     the player's choice buttons into it. It is still called on a live path
+     (`renderGame` → beat advance), so narrative beats are being composed into a
+     container nobody can see.
+   - `app.showAbilityMenu()` and `app.showSecretOverlay()`, reachable from nowhere
+     else.
+
+   **It is superseded, which is why nothing broke.** `FirstMilesCampaign` renders
+   the visible campaign UI into a separate current set of ids —
+   `campaignBeatTitle`, `campaignBeatNarrative`, `campaignBeatPrompt`,
+   `campaignChoiceBar`. The `narrativeTextBox` path is the older
+   `NarrativeStoryEngine` display layer left behind.
+
+   **Not removed, deliberately.** `storyEngine` has 41 references across
+   `index.html`, so this is a subsystem decision rather than a delete: does story
+   mode come back on this path, or is `FirstMilesCampaign` now the only one? That
+   is a product call. It also sits in the exact area being actively refactored,
+   so ripping it out now risks a conflict. Decide the direction first, then either
+   wire the box in or remove the subtree, `renderNarrativeBeat`, both overlay
+   openers and the two `display='none'` lines together.
+
+   `syncStagePanel()` assumes the box stays hidden and a test in
+   `test/card-table-layout.test.js` guards that assumption — both will need
+   updating if it is ever shown.
 
 The 15 dead element references are fixed; Deck Builder, the dust shop, the
 Lexicon and the FPS counter all work now. See section 2.3.

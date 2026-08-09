@@ -31,25 +31,42 @@ one scene per image. Where they fit instead:
 Two are multi-panel sheets needing slicing before use: `alley-variations-4panel`,
 `jukebox-doors-4panel`.
 
-## `topdown-recolor/` — 12 files. Right subjects, wrong palette.
+## `topdown-recolor/` — 12 files. **Investigated and closed. Wrong projection.**
 
-Top-down and isometric assets in a violet + neon-green two-tone that ignores the
-master palette: `iso-building-antennas`, `iso-courtyard-building`,
-`iso-garage-shop`, `iso-building-fire-escape`, `iso-pallet-stack`,
-`furniture-street-lamp`, `flora-weed-cluster`, `road-lane-markings`,
-`road-wet-puddles-rain`, `road-street-segment`, `prop-car`, `icon-house`.
+This section previously said "right subjects, wrong palette" and recommended a
+palette swap as the cheap fix. That was investigated properly and it is wrong on
+both counts. Do not spend time here.
 
-The **shapes and subjects are correct** — these are exactly the categories the
-prompt pack asks for. Only the colour is wrong, and colour is the cheapest thing
-to fix. Two routes:
+**Colour is not the blocker.** The master palette *contains* violet — `#2A1138`
+and `#521C6E` in `cool_tones` — so remapping these assets to
+`concrete_kings_64.json` legitimately keeps them purple. It was tested: the lamp
+comes out just as violet after `-remap`. There is no out-of-gamut colour to
+correct. (These are also 2048x2048 with 6,600-72,900 unique colours, so a
+`SpriteRenderer` index swap was never going to apply to them anyway — that needs a
+small indexed set.)
 
-1. **Recolour.** `SpriteRenderer` in `pixel-engine.js` already does palette
-   swapping. Map violet -> a district's `roofA`/`face` ramp and neon green ->
-   `accent`, and these become usable without regenerating anything.
-2. **Regenerate with the palette actually substituted** (see the diagnosis below).
+**Projection is the blocker, and it is fatal for 9 of the 12.** The map is
+strictly top-down — roofs seen from directly overhead. These are not:
 
-`road-street-segment` and `iso-garage-shop` are already noticeably more muted
-than the rest — closest to on-palette, best first candidates.
+| Asset | Projection | Verdict |
+|---|---|---|
+| `iso-building-antennas` | isometric | unusable |
+| `iso-building-fire-escape` | isometric | unusable |
+| `iso-courtyard-building` | isometric | unusable |
+| `iso-garage-shop` | isometric | unusable — the nicest of the batch, and still unusable |
+| `iso-pallet-stack` | isometric | unusable |
+| `furniture-street-lamp` | side-on | unusable, same failure as the generated lamp prop |
+| `flora-weed-cluster` | side-on blades | unusable |
+| `prop-car` | 3/4 front | unusable, same failure as the generated car prop |
+| `icon-house` | flat front elevation | a UI icon, not map art |
+| `road-lane-markings` | **top-down** | correct, but the renderer already draws lane markings |
+| `road-street-segment` | **top-down** | correct, but the renderer already draws roads |
+| `road-wet-puddles-rain` | **top-down** | correct, but weather is a separate composite pass |
+
+So the three usable ones are redundant with procedural geometry that already looks
+better, and the other nine cannot be fixed by any amount of recolouring. This is
+the same lesson as the generated lamp and car props: **projection is not
+correctable in post, colour is.** Screen new generations for viewing angle first.
 
 ## `decals/` — 4 files. Usable as-is.
 
