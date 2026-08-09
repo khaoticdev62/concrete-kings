@@ -706,6 +706,7 @@
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showBoosterShop()">SHOP</button>
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showBlockMap()">BLOCK MAP</button>
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showLexicon()">LEXICON</button>
+          <button class="secondary" style="font-size:8px; padding:8px; background:#339488; border-color:#6fe8d8; color:#08080a;" onclick="app.newScenario()">RUN IT</button>
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showChronicle()">THE RECORD</button>
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showMinigameCatalog()">MINI-GAMES</button>
         </div>
@@ -1449,6 +1450,47 @@
     </div>
   </section>
 
+  <!-- RUN IT — complete the scenario, watch it happen, live with it (PRD v2) -->
+  <section id="scenario" class="screen">
+    <div class="panel" style="max-width:820px; margin:0 auto; padding:16px; text-align:left;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; border-bottom:2px solid #2d313d; padding-bottom:8px; margin-bottom:12px;">
+        <h2 id="scnTitle" style="margin:0; font-family:'Press Start 2P', monospace; font-size:11px; color:#ffcd68;">THE CORNER STORE</h2>
+        <div id="scnPhase" style="font-family:'Press Start 2P', monospace; font-size:8px; color:#6fe8d8;">SET UP</div>
+      </div>
+
+      <p id="scnSetup" style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; line-height:1.6; background:#0b0c10; border:2px solid #22252e; padding:10px;"></p>
+
+      <!-- COMPLETE: the slots -->
+      <div id="scnSlots" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:12px 0;"></div>
+
+      <div id="scnPickerWrap" style="margin-top:10px;">
+        <div style="font-family:'Press Start 2P', monospace; font-size:9px; color:#ff7a45; margin-bottom:6px;">
+          <span id="scnSlotPrompt">Who is in this with you?</span>
+        </div>
+        <div id="scnHand" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+      </div>
+
+      <!-- WATCH IT HAPPEN -->
+      <div id="scnStage" style="display:none; margin-top:12px; min-height:132px; background:#08080a; border:2px solid #339488; padding:12px;">
+        <div id="scnBeat" style="font-family:'JetBrains Mono', monospace; font-size:13px; color:#f4f7ff; line-height:1.7;"></div>
+      </div>
+
+      <!-- LIVE WITH IT -->
+      <div id="scnOutcome" style="display:none; margin-top:12px;">
+        <div id="scnTier" style="font-family:'Press Start 2P', monospace; font-size:12px; margin-bottom:8px;"></div>
+        <div id="scnBill" style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; line-height:1.7;"></div>
+        <div id="scnChain" style="margin-top:10px; font-family:'JetBrains Mono', monospace; font-size:10px; color:#788196; line-height:1.6;"></div>
+      </div>
+
+      <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="scnRunBtn" onclick="app.runScenario()" disabled>RUN IT</button>
+        <button id="scnMicroBtn" class="secondary" onclick="app.playScenarioMicro()" style="display:none;">TAKE CONTROL</button>
+        <button id="scnNextBtn" class="secondary" onclick="app.newScenario()" style="display:none;">NEXT JOB</button>
+        <button class="secondary" onclick="app.showMainMenu()">BACK</button>
+      </div>
+    </div>
+  </section>
+
   <!-- THE BLOCK REMEMBERS — the campaign chronicle -->
   <section id="chronicle" class="screen">
     <div class="panel" style="max-width:760px; margin:0 auto; padding:16px; text-align:left;">
@@ -1739,6 +1781,7 @@
 <script src="src/pixel_engine/lightmap.js"></script>
 <script src="src/pixel_engine/topdown-city-renderer.js"></script>
 <script src="src/pixel_engine/canon-engine.js"></script>
+<script src="src/pixel_engine/scenario-engine.js"></script>
 <script src="src/pixel_engine/aave-lexicon-hud.js"></script>
 <script src="src/pixel_engine/campaign-mode.js"></script>
 <script src="src/pixel_engine/first-miles-campaign.js"></script>
@@ -4631,6 +4674,197 @@ const app = {
     }
     if (deltas.length) lines.push(deltas.join(' '));
     return lines;
+  },
+
+  /* ---------- RUN IT: complete the scenario, watch it happen, live with it ---------- */
+
+  /**
+   * Starts a scenario (PRD v2 sections 1-4).
+   *
+   * Template choice is deterministic on the ledger length rather than random, so the
+   * sequence a player sees is reproducible — the same reason nothing else in this feature
+   * calls Math.random.
+   */
+  newScenario() {
+    if (typeof ScenarioRun === 'undefined') return;
+    if (!this.game.players.length) {
+      this.game.addPlayer('You');
+      this.game.dealAll();
+    }
+    const me = this.game.players[this.humanIndex] || this.game.players[0];
+    if (me.hand.length < SCN_SLOTS.length) this.game.refillHand(me);
+
+    const n = this.game.ledger ? this.game.ledger.events.length : 0;
+    const template = SCN_TEMPLATES[n % SCN_TEMPLATES.length];
+    this.scenarioRun = new ScenarioRun(template, { district: this.game.activeCity });
+    this.scenarioResult = null;
+
+    document.getElementById('scnTitle').textContent = template.title;
+    document.getElementById('scnSetup').textContent = template.setup;
+    document.getElementById('scnStage').style.display = 'none';
+    document.getElementById('scnOutcome').style.display = 'none';
+    document.getElementById('scnMicroBtn').style.display = 'none';
+    document.getElementById('scnNextBtn').style.display = 'none';
+    document.getElementById('scnPickerWrap').style.display = 'block';
+    this.renderScenario();
+    this.show('scenario');
+  },
+
+  /** Draws the slot board and the hand. */
+  renderScenario() {
+    const run = this.scenarioRun;
+    if (!run) return;
+    const me = this.game.players[this.humanIndex] || this.game.players[0];
+
+    document.getElementById('scnPhase').textContent = run.complete ? 'READY' : 'COMPLETE IT';
+    document.getElementById('scnSlots').innerHTML = SCN_SLOTS.map(slot => {
+      const filled = run.slots[slot];
+      const next = run.pending[0] === slot;
+      return `<div style="border:2px ${filled ? 'solid #339488' : 'dashed #393e4d'}; padding:8px; background:${next ? '#14151c' : '#0b0c10'};">`
+        + `<div style="font-family:'Press Start 2P', monospace; font-size:8px; color:${filled ? '#6fe8d8' : '#788196'}; margin-bottom:4px;">${slot}</div>`
+        + `<div style="font-family:'JetBrains Mono', monospace; font-size:11px; color:${filled ? '#f4f7ff' : '#4a4f63'};">`
+        + `${filled ? filled.card : '—'}</div></div>`;
+    }).join('');
+
+    const nextSlot = run.pending[0];
+    document.getElementById('scnSlotPrompt').textContent =
+      nextSlot ? SCN_SLOT_PROMPTS[nextSlot] : 'Plan complete. Run it and find out.';
+    document.getElementById('scnHand').innerHTML = nextSlot
+      ? me.hand.map((card, i) =>
+        `<button class="secondary" style="font-size:10px; padding:6px 8px; max-width:220px; text-align:left; white-space:normal;"`
+        + ` onclick="app.fillScenarioSlot(${i})">${card}</button>`).join('')
+      : '';
+    document.getElementById('scnRunBtn').disabled = !run.complete;
+  },
+
+  /** Assigns the picked card to the next empty slot. */
+  fillScenarioSlot(handIndex) {
+    const run = this.scenarioRun;
+    const me = this.game.players[this.humanIndex] || this.game.players[0];
+    if (!run || !me) return;
+    const slot = run.pending[0];
+    if (!slot) return;
+    const card = me.hand[handIndex];
+    if (card === undefined) return;
+    run.fill(slot, card, me.name);
+    me.hand.splice(handIndex, 1);
+    if (this.audioEngine && this.audioEngine.playCardPlace) this.audioEngine.playCardPlace();
+    this.renderScenario();
+  },
+
+  /**
+   * Resolves, then plays the scene beat by beat, then presents the bill.
+   *
+   * The order matters and is the point of v2 section 22: the consequences are withheld
+   * until the scene has finished, so the player watches what they made before finding out
+   * what it cost. Showing both at once collapses the whole loop into a results screen.
+   */
+  runScenario() {
+    const run = this.scenarioRun;
+    if (!run || !run.complete) return;
+    const me = this.game.players[this.humanIndex] || this.game.players[0];
+    const world = (this.firstMilesCampaign && this.firstMilesCampaign.state) || {};
+
+    this.scenarioResult = run.resolve(me, world);
+    const beats = scnSceneBeats(this.scenarioResult);
+
+    document.getElementById('scnPickerWrap').style.display = 'none';
+    document.getElementById('scnRunBtn').disabled = true;
+    document.getElementById('scnPhase').textContent = 'WATCH IT HAPPEN';
+    const stage = document.getElementById('scnStage');
+    const beatEl = document.getElementById('scnBeat');
+    stage.style.display = 'block';
+
+    this.clearScenarioPlayback();
+    let i = 0;
+    const step = () => {
+      if (i >= beats.length) {
+        this.finishScenario();
+        return;
+      }
+      beatEl.textContent = beats[i].text;
+      const ms = beats[i].ms;
+      i++;
+      this.scenarioBeatTimer = setTimeout(step, ms);
+    };
+    step();
+  },
+
+  clearScenarioPlayback() {
+    if (this.scenarioBeatTimer) clearTimeout(this.scenarioBeatTimer);
+    this.scenarioBeatTimer = null;
+  },
+
+  /** The bill, the causal chain, and the world update. */
+  finishScenario() {
+    const result = this.scenarioResult;
+    if (!result) return;
+    this.clearScenarioPlayback();
+
+    // Three bands, not two. A two-way good/bad split painted SUCCESS, WITH A COST in
+    // failure red, which tells the player they failed when they did not.
+    const TIER_COLOUR = {
+      CRITICAL_SUCCESS: '#FFCD68',
+      SUCCESS: '#FFCD68',
+      SUCCESS_WITH_CONSEQUENCE: '#F0AB43',   // paid for, not lost
+      CHAOTIC_SUCCESS: '#6FE8D8',            // sideways, and the signature result
+      PARTIAL_FAILURE: '#C9822B',
+      FAILURE: '#F25438',
+      CATASTROPHIC_FAILURE: '#D9382E'
+    };
+    document.getElementById('scnPhase').textContent = 'LIVE WITH IT';
+    const tierEl = document.getElementById('scnTier');
+    tierEl.textContent = result.label;
+    tierEl.style.color = TIER_COLOUR[result.tier] || '#CBD5ED';
+
+    const fx = result.effects;
+    const bill = [];
+    const line = (k, label) => {
+      if (!fx[k]) return;
+      bill.push(`${fx[k] > 0 ? '+' : ''}${fx[k]} ${label}`);
+    };
+    line('cash', 'CASH'); line('reputation', 'REP'); line('trust', 'TRUST'); line('heat', 'HEAT');
+    document.getElementById('scnBill').innerHTML = bill.length
+      ? bill.map(b => `<div>${b}</div>`).join('')
+      : '<div>Nothing changed hands.</div>';
+    document.getElementById('scnChain').innerHTML = result.chain.map(c => `<div>${c}</div>`).join('');
+    document.getElementById('scnOutcome').style.display = 'block';
+
+    // Apply to the character and the world. The ledger records the WHAT card, because that
+    // is the slot carrying the intent — recording all four would count one scene as four
+    // crownings and inflate every motif fourfold.
+    const me = this.game.players[this.humanIndex] || this.game.players[0];
+    if (me) {
+      if (fx.cash) me.stats.streetCred = Math.max(0, (me.stats.streetCred || 0) + fx.cash);
+      if (fx.reputation) me.stats.reputation = (me.stats.reputation || 0) + fx.reputation;
+    }
+    const campaign = this.firstMilesCampaign;
+    if (campaign && campaign.state && fx.heat) {
+      campaign.state.heat = Math.max(0, campaign.state.heat + fx.heat);
+    }
+    if (this.game.ledger) {
+      this.game.ledger.record({
+        player: result.actor,
+        card: result.intent.WHAT,
+        round: this.game.ledger.events.length + 1,
+        district: result.district
+      });
+      this.saveLedger();
+    }
+    this.updateTopHud();
+
+    // A micro-scene is offered rather than forced (v2 section 18): the scene has already
+    // resolved, so this is a chance to see the plan from the inside, not a second verdict.
+    const microBtn = document.getElementById('scnMicroBtn');
+    microBtn.style.display = (result.micro && this.miniGameManager) ? 'inline-block' : 'none';
+    document.getElementById('scnNextBtn').style.display = 'inline-block';
+  },
+
+  /** Hands control to the mini-game this scenario is built around. */
+  playScenarioMicro() {
+    const result = this.scenarioResult;
+    if (!result || !result.micro || !this.miniGameManager) return;
+    this.launchCatalogMinigame(result.micro);
   },
 
   /** THE BLOCK REMEMBERS screen — the campaign chronicle. */
