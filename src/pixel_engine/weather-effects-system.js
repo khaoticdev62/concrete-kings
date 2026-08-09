@@ -4,6 +4,13 @@
  * Version: 1.1.0
  */
 
+const { Animator } = (() => {
+  try {
+    if (typeof require !== 'undefined') return require('./animation-system.js');
+  } catch (e) {}
+  return { Animator: class { update() { return 0; } } };
+})();
+
 const WEATHER_MODES = {
   CLEAR: 'CLEAR',
   RAIN: 'RAIN',
@@ -150,14 +157,13 @@ class WeatherEffectsSystem {
   }
 
   /**
-   * Anim ID: A-05 - Bodega Neon Flicker (4-Frame Loop)
+   * Anim ID: A-05 - Bodega Neon Flicker (4-Frame Loop, alpha baked into fillStyle — never ctx.globalAlpha)
    */
   renderNeonFlicker(ctx) {
-    const isLit = (this.frameIndex !== 1); // Random flicker off on frame 1
-    if (isLit) {
-      ctx.fillStyle = '#f25438'; // Neon Crimson (#F25438)
-      ctx.fillRect(100, 48, 40, 8);
-    }
+    const alphas = [1.0, 0.7, 1.0, 0.9];
+    const alpha = alphas[this.frameIndex];
+    ctx.fillStyle = `rgba(242, 84, 56, ${alpha})`; // Neon Crimson (#F25438)
+    ctx.fillRect(100, 48, 40, 8);
   }
 }
 
