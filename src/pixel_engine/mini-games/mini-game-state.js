@@ -3,11 +3,20 @@
  * Mini-Game Base Class & Common API
  */
 
-const { Animator } = (() => {
+// Prefixed because these files load as classic <script> tags sharing ONE global
+// scope. Four of them declared `const { MGS_Animator }` at top level; the second
+// onwards threw "Identifier 'MGS_Animator' has already been declared" and stopped
+// parsing, so WeatherEffectsSystem was never defined and app.init() died on it.
+// Node's per-module scope hides this — test/global-collisions.test.js catches it.
+const { Animator: MGS_Animator } = (() => {
   try {
     if (typeof require !== 'undefined') return require('../animation-system.js');
   } catch (e) {}
-  return { Animator: class { update() { return 0; } } };
+  // Browser path: animation-system.js loads as its own <script> and assigns
+  // window.Animator. Without this branch every file fell back to the stub, and
+  // BlockMapController then called .add() on something that only had update().
+  if (typeof window !== 'undefined' && window.Animator) return window;
+  return { Animator: class { add() {} play() { return null; } stop() {} update() { return 0; } currentFrame() { return 0; } isFinished() { return false; } } };
 })();
 
 class MiniGame {
@@ -26,7 +35,7 @@ class MiniGame {
     this.frameAge = 0;
     this.frameIndex = 0;
     this.timeRemaining = 30;
-    this.animator = new Animator();
+    this.animator = new MGS_Animator();
     this.animator.add('default', { frames: [0, 1, 2, 3], frameDuration: 120 });
     this.animator.play('default');
   }

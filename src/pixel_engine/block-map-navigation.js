@@ -116,11 +116,20 @@ if (typeof window !== 'undefined' && window.drawHighDetailCharacterSprite) {
   drawHighDetailCharacterSpriteFn = () => {};
 }
 
-const { Animator, DEFAULT_FRAME_DURATION } = (() => {
+// Prefixed because these files load as classic <script> tags sharing ONE global
+// scope. Four of them declared `const { BMN_Animator }` at top level; the second
+// onwards threw "Identifier 'BMN_Animator' has already been declared" and stopped
+// parsing, so WeatherEffectsSystem was never defined and app.init() died on it.
+// Node's per-module scope hides this — test/global-collisions.test.js catches it.
+const { Animator: BMN_Animator, DEFAULT_FRAME_DURATION: BMN_DEFAULT_FRAME_DURATION } = (() => {
   try {
     if (typeof require !== 'undefined') return require('./animation-system.js');
   } catch (e) {}
-  return { Animator: class { update() { return 0; } }, DEFAULT_FRAME_DURATION: 120 };
+  // Browser path: animation-system.js loads as its own <script> and assigns
+  // window.Animator. Without this branch every file fell back to the stub, and
+  // BlockMapController then called .add() on something that only had update().
+  if (typeof window !== 'undefined' && window.Animator) return window;
+  return { Animator: class { add() {} play() { return null; } stop() {} update() { return 0; } currentFrame() { return 0; } isFinished() { return false; } }, DEFAULT_FRAME_DURATION: 120 };
 })();
 
 class BlockMapController {
@@ -157,9 +166,9 @@ class BlockMapController {
 
     this.setupInputListeners();
 
-    this.animator = new Animator();
-    this.animator.add('idle', { frames: [0, 1], frameDuration: DEFAULT_FRAME_DURATION });
-    this.animator.add('walk', { frames: [0, 1, 2, 3], frameDuration: DEFAULT_FRAME_DURATION });
+    this.animator = new BMN_Animator();
+    this.animator.add('idle', { frames: [0, 1], frameDuration: BMN_DEFAULT_FRAME_DURATION });
+    this.animator.add('walk', { frames: [0, 1, 2, 3], frameDuration: BMN_DEFAULT_FRAME_DURATION });
     this.animator.play('idle');
   }
 
