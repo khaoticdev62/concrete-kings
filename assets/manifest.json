@@ -10,18 +10,51 @@
     "atlanta_tiles": "assets/sprite_packs/city_atlanta_tiles.png",
     "oakland_tiles": "assets/sprite_packs/city_oakland_tiles.png",
     "nola_tiles": "assets/sprite_packs/city_nola_tiles.png",
-
     "poi_barber": "assets/props/web/barbershop_pole.png",
     "poi_bodega": "assets/props/web/bodega_storefront.png",
     "poi_chess": "assets/props/web/chess_table.png",
     "poi_gate": "assets/props/web/locked_door.png",
-    "poi_deal": "assets/props/web/shop_deal.png"
+    "poi_deal": "assets/props/web/shop_deal.png",
+    "prop_car": "assets/prop_car.jpg",
+    "prop_street_lamp": "assets/prop_street_lamp.jpg",
+    "prop_phone_booth": "assets/prop_phone_booth.jpg",
+    "prop_dumpster": "assets/prop_dumpster.jpg"
   },
   "sprites": {
-    "prop_poi_barber_shop": { "source": "poi_barber", "x": 0, "y": 0, "w": 46, "h": 96 },
-    "prop_poi_bodega": { "source": "poi_bodega", "x": 0, "y": 0, "w": 96, "h": 85 },
-    "prop_poi_chess_park": { "source": "poi_chess", "x": 0, "y": 0, "w": 96, "h": 81 },
-    "prop_poi_locked_door": { "source": "poi_gate", "x": 0, "y": 0, "w": 64, "h": 96 },
-    "prop_poi_shop_deal": { "source": "poi_deal", "x": 0, "y": 0, "w": 82, "h": 96 }
+    "prop_poi_barber_shop": {
+      "source": "poi_barber",
+      "x": 0,
+      "y": 0,
+      "w": 46,
+      "h": 96
+    },
+    "prop_poi_bodega": {
+      "source": "poi_bodega",
+      "x": 0,
+      "y": 0,
+      "w": 96,
+      "h": 85
+    },
+    "prop_poi_chess_park": {
+      "source": "poi_chess",
+      "x": 0,
+      "y": 0,
+      "w": 96,
+      "h": 81
+    },
+    "prop_poi_locked_door": {
+      "source": "poi_gate",
+      "x": 0,
+      "y": 0,
+      "w": 64,
+      "h": 96
+    },
+    "prop_poi_shop_deal": {
+      "source": "poi_deal",
+      "x": 0,
+      "y": 0,
+      "w": 82,
+      "h": 96
+    }
   }
 }
