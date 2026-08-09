@@ -4,9 +4,12 @@
  * Version: 1.0.0
  */
 
-const CARD_PALETTE_64 = (typeof window !== 'undefined' && window.MASTER_PALETTE_64)
-  ? window.MASTER_PALETTE_64
-  : ((typeof require !== 'undefined') ? require('./pixel-engine.js').MASTER_PALETTE_64 : {});
+const { Animator } = (() => {
+  try {
+    if (typeof require !== 'undefined') return require('./animation-system.js');
+  } catch (e) {}
+  return { Animator: class { update() { return 0; } } };
+})();
 
 const CARD_TYPES = {
   BLACK: 'BLACK',
@@ -130,6 +133,9 @@ class CardVisualRenderer {
     this.width = options.width || 160;
     this.height = options.height || 240;
     this.shimmerFrame = 0; // 4-frame budget (0, 1, 2, 3)
+    this.animator = new Animator();
+    this.animator.add('shimmer', { frames: [0, 1, 2, 3], frameDuration: 120 });
+    this.animator.play('shimmer');
   }
 
   advanceShimmerFrame() {

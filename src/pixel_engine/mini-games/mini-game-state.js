@@ -3,6 +3,13 @@
  * Mini-Game Base Class & Common API
  */
 
+const { Animator } = (() => {
+  try {
+    if (typeof require !== 'undefined') return require('../animation-system.js');
+  } catch (e) {}
+  return { Animator: class { update() { return 0; } } };
+})();
+
 class MiniGame {
   constructor(manager, canvas, ctx, gameState) {
     this.manager = manager;
@@ -19,6 +26,9 @@ class MiniGame {
     this.frameAge = 0;
     this.frameIndex = 0;
     this.timeRemaining = 30;
+    this.animator = new Animator();
+    this.animator.add('default', { frames: [0, 1, 2, 3], frameDuration: 120 });
+    this.animator.play('default');
   }
 
   /**
@@ -53,10 +63,9 @@ class MiniGame {
 
     this.timeRemaining = Math.max(0, this.timeRemaining - (dt / 1000));
     this.frameAge += dt;
-    
-    // Strict 4-frame animation budget (120ms frame duration = 8.3 FPS approximation or similar)
-    const frameDuration = 120; // ms
-    this.frameIndex = Math.floor(this.frameAge / frameDuration) % 4;
+
+    this.animator.update(dt);
+    this.frameIndex = this.animator.currentFrame();
 
     if (this.timeRemaining <= 0) {
       this.autoResolve();

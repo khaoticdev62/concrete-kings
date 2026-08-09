@@ -116,6 +116,13 @@ if (typeof window !== 'undefined' && window.drawHighDetailCharacterSprite) {
   drawHighDetailCharacterSpriteFn = () => {};
 }
 
+const { Animator, DEFAULT_FRAME_DURATION } = (() => {
+  try {
+    if (typeof require !== 'undefined') return require('./animation-system.js');
+  } catch (e) {}
+  return { Animator: class { update() { return 0; } }, DEFAULT_FRAME_DURATION: 120 };
+})();
+
 class BlockMapController {
   constructor(options = {}) {
     this.width = options.width || 1280;
@@ -131,7 +138,8 @@ class BlockMapController {
     // Character Origin
     this.origin = options.origin || CHARACTER_ORIGINS.BARBER;
 
-    // Animation budget (4 frames max: 0, 1, 2, 3)
+    // Animation state
+    this.animator = null;
     this.animFrame = 0;
     this.animTick = 0;
 
@@ -148,6 +156,11 @@ class BlockMapController {
     this.keys = {};
 
     this.setupInputListeners();
+
+    this.animator = new Animator();
+    this.animator.add('idle', { frames: [0, 1], frameDuration: DEFAULT_FRAME_DURATION });
+    this.animator.add('walk', { frames: [0, 1, 2, 3], frameDuration: DEFAULT_FRAME_DURATION });
+    this.animator.play('idle');
   }
 
   setOrigin(originKey) {
@@ -196,11 +209,9 @@ class BlockMapController {
     this.x = nextX;
     this.y = nextY;
 
-    // Advance 4-frame animation loop
-    this.animTick++;
-    if (this.animTick % 10 === 0) {
-      this.animFrame = (this.animFrame + 1) % 4;
-    }
+    this.animator.play(this.isMoving ? 'walk' : 'idle');
+    this.animator.update(16);
+    this.animFrame = this.animator.currentFrame();
 
     // Check hotspot proximity
     this.checkHotspots();
