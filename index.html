@@ -707,6 +707,7 @@
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showBlockMap()">BLOCK MAP</button>
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showLexicon()">LEXICON</button>
           <button class="secondary" style="font-size:8px; padding:8px; background:#339488; border-color:#6fe8d8; color:#08080a;" onclick="app.newScenario()">RUN IT</button>
+          <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showCrew()">THE CREW</button>
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showChronicle()">THE RECORD</button>
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showMinigameCatalog()">MINI-GAMES</button>
         </div>
@@ -1450,6 +1451,40 @@
     </div>
   </section>
 
+  <!-- THE CREW — single player + AI party (PRD 2.1) -->
+  <section id="crew" class="screen">
+    <div class="panel" style="max-width:820px; margin:0 auto; padding:16px; text-align:left;">
+      <h2 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:11px; color:#ffcd68;">THE CREW</h2>
+      <p class="muted" style="font-size:10px; margin-top:0;">Bring nobody. The disaster comes with you. They hold their own cards, pick their own plays, and remember what you did.</p>
+
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin:10px 0;">
+        <button class="secondary" style="font-size:8px; padding:6px 8px;" onclick="app.rollCrew({size:3})">ROLL A CREW</button>
+        <button class="secondary" style="font-size:8px; padding:6px 8px;" onclick="app.rollCrew({size:3, theme:'WORST_POSSIBLE'})">WORST POSSIBLE</button>
+        <button class="secondary" style="font-size:8px; padding:6px 8px;" onclick="app.rollCrew({size:3, theme:'MASTERMINDS'})">MASTERMINDS</button>
+        <button class="secondary" style="font-size:8px; padding:6px 8px;" onclick="app.rollCrew({size:3, theme:'SOLID_CREW'})">SOLID CREW</button>
+        <button class="secondary" style="font-size:8px; padding:6px 8px;" onclick="app.rollCrew({size:1})">JUST ONE</button>
+        <button class="secondary" style="font-size:8px; padding:6px 8px;" onclick="app.rollCrew({size:7})">SEVEN DEEP</button>
+      </div>
+
+      <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
+        <span style="font-family:'Press Start 2P', monospace; font-size:8px; color:#788196;">SHARPNESS</span>
+        <button class="secondary" data-crew-diff="STORY" style="font-size:7px; padding:5px 7px;" onclick="app.setCrewDifficulty('STORY')">STORY</button>
+        <button class="secondary" data-crew-diff="NORMAL" style="font-size:7px; padding:5px 7px;" onclick="app.setCrewDifficulty('NORMAL')">NORMAL</button>
+        <button class="secondary" data-crew-diff="HARD" style="font-size:7px; padding:5px 7px;" onclick="app.setCrewDifficulty('HARD')">HARD</button>
+        <button class="secondary" data-crew-diff="NIGHTMARE" style="font-size:7px; padding:5px 7px;" onclick="app.setCrewDifficulty('NIGHTMARE')">NIGHTMARE</button>
+      </div>
+
+      <div id="crewList" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"></div>
+      <div id="crewRecap" style="margin-top:12px; font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; line-height:1.7;"></div>
+
+      <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button onclick="app.newScenario()">RUN A JOB WITH THEM</button>
+        <button class="secondary" onclick="app.showMainMenu()">BACK</button>
+        <button class="secondary" onclick="app.disbandCrew()" style="color:#f25438;">DISBAND</button>
+      </div>
+    </div>
+  </section>
+
   <!-- RUN IT — complete the scenario, watch it happen, live with it (PRD v2) -->
   <section id="scenario" class="screen">
     <div class="panel" style="max-width:820px; margin:0 auto; padding:16px; text-align:left;">
@@ -1470,10 +1505,20 @@
         <div id="scnHand" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
       </div>
 
+      <!-- REVEAL: the party's competing completions, and the vote -->
+      <div id="scnReveal" style="display:none; margin-top:12px;">
+        <div style="font-family:'Press Start 2P', monospace; font-size:9px; color:#ff7a45; margin-bottom:6px;">THE CREW HAD IDEAS TOO</div>
+        <div id="scnPlans" style="display:flex; flex-direction:column; gap:6px;"></div>
+        <div id="scnVotes" style="margin-top:8px; font-family:'JetBrains Mono', monospace; font-size:10px; color:#788196; line-height:1.6;"></div>
+      </div>
+
       <!-- WATCH IT HAPPEN -->
       <div id="scnStage" style="display:none; margin-top:12px; min-height:132px; background:#08080a; border:2px solid #339488; padding:12px;">
         <div id="scnBeat" style="font-family:'JetBrains Mono', monospace; font-size:13px; color:#f4f7ff; line-height:1.7;"></div>
       </div>
+
+      <!-- AI REACTIONS (section 28) -->
+      <div id="scnReactions" style="display:none; margin-top:10px; font-family:'JetBrains Mono', monospace; font-size:11px; line-height:1.7;"></div>
 
       <!-- LIVE WITH IT -->
       <div id="scnOutcome" style="display:none; margin-top:12px;">
@@ -1782,6 +1827,7 @@
 <script src="src/pixel_engine/topdown-city-renderer.js"></script>
 <script src="src/pixel_engine/canon-engine.js"></script>
 <script src="src/pixel_engine/scenario-engine.js"></script>
+<script src="src/pixel_engine/ai-party.js"></script>
 <script src="src/pixel_engine/aave-lexicon-hud.js"></script>
 <script src="src/pixel_engine/campaign-mode.js"></script>
 <script src="src/pixel_engine/first-miles-campaign.js"></script>
@@ -2617,6 +2663,7 @@ const app = {
     // Initialize mini-game manager
     // The block's memory outlives the session, so restore it before anything renders.
     this.loadLedger();
+    this.loadAiParty();
 
     const minigameCanvas = document.getElementById('minigame-canvas');
     if (minigameCanvas) {
@@ -4682,6 +4729,122 @@ const app = {
     return lines;
   },
 
+  /* ---------- SINGLE PLAYER + AI: the crew ---------- */
+
+  /**
+   * Rolls a crew and shows the preview (PRD 2.1 sections 43-45).
+   *
+   * The seed is stored, so PARTY PREVIEW shows the crew that actually gets played — a
+   * re-roll between preview and start would make the preview a lie (section 44).
+   */
+  rollCrew(opts) {
+    if (typeof AiParty === 'undefined') return;
+    const o = opts || {};
+    const me = this.game.players[this.humanIndex] || { name: 'You' };
+    this.aiPartySeed = o.seed || ('crew-' + Date.now());
+    this.aiParty = AiParty.generate({
+      size: o.size === undefined ? 3 : o.size,
+      seed: this.aiPartySeed,
+      theme: o.theme || null,
+      difficulty: o.difficulty || 'NORMAL',
+      humanName: me.name
+    });
+    // Dealt now, not lazily at the first vote: section 6 says the crew hold real hands,
+    // and a preview of people holding nothing is not a preview of the crew.
+    if (this.game && this.game.whiteDeck) this.aiParty.deal(this.game.whiteDeck, SCN_SLOTS.length + 2);
+    this.saveAiParty();
+    this.renderCrew();
+  },
+
+  /** Party preview (section 44): the player should read it and think "this is a problem". */
+  renderCrew() {
+    const el = document.getElementById('crewList');
+    if (!el) return;
+    const party = this.aiParty;
+    if (!party) {
+      el.innerHTML = '<div class="muted">No crew yet. Roll one.</div>';
+      const r = document.getElementById('crewRecap');
+      if (r) r.innerHTML = '';
+      return;
+    }
+    const me = this.game.players[this.humanIndex] || { name: 'You' };
+
+    el.innerHTML = party.members.map(m => {
+      const rel = m.toward(me.name);
+      const risk = m.betrayalRisk(me.name);
+      // The public goal only. The secret objective is the player's to discover
+      // through play (section 10) — printing it here would delete the feature.
+      const flag = risk.betrayal || risk.willBetray ? '<span style="color:#f25438;">DONE WITH YOU</span>'
+        : risk.warning ? '<span style="color:#f0ab43;">WATCHING YOU</span>'
+          : `<span style="color:#6fe8d8;">TRUST ${rel.trust}</span>`;
+      return `<div style="border:2px solid #22252e; padding:8px; background:#0b0c10;">`
+        + `<div style="font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68;">${m.name.toUpperCase()}`
+        + ` <span style="color:#788196; font-size:8px;">LV${m.level}</span></div>`
+        + `<div style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; margin:3px 0;">`
+        + `${m.archetype.label} — ${m.archetype.blurb}</div>`
+        + `<div style="font-family:'JetBrains Mono', monospace; font-size:10px; color:#788196;">`
+        + `"${(m.objective && m.objective.publicGoal) || 'Says nothing about why they are here.'}"</div>`
+        + `<div style="font-family:'JetBrains Mono', monospace; font-size:10px; margin-top:3px;">${m.emotion} · ${flag}</div>`
+        + `</div>`;
+    }).join('');
+
+    // Reflect the saved difficulty rather than only reacting to a click, or a reloaded
+    // crew shows no setting at all and the player cannot tell what it is on.
+    document.querySelectorAll('[data-crew-diff]').forEach(b => {
+      b.style.borderColor = b.dataset.crewDiff === party.difficulty ? '#6fe8d8' : '';
+    });
+
+    // Previously... (section 41), built only from recorded memories.
+    const recapEl = document.getElementById('crewRecap');
+    if (recapEl) {
+      const recap = party.recap();
+      recapEl.innerHTML = `<div style="font-family:'Press Start 2P', monospace; font-size:9px; color:#ff7a45; margin-bottom:6px;">PREVIOUSLY</div>`
+        + recap.events.map(e => `<div>${e}</div>`).join('')
+        + `<div style="margin-top:6px; color:#788196;">${recap.standing.join(' ')}</div>`;
+    }
+  },
+
+  showCrew() {
+    if (!this.aiParty) this.loadAiParty();
+    this.renderCrew();
+    this.show('crew');
+  },
+
+  setCrewDifficulty(level) {
+    if (this.aiParty && AIP_DIFFICULTY[level]) {
+      this.aiParty.difficulty = level;
+      this.saveAiParty();
+    }
+    document.querySelectorAll('[data-crew-diff]').forEach(b => {
+      b.style.borderColor = b.dataset.crewDiff === level ? '#6fe8d8' : '';
+    });
+  },
+
+  saveAiParty() {
+    try {
+      if (!this.aiParty || typeof localStorage === 'undefined') return;
+      localStorage.setItem('ck-ai-party', JSON.stringify(this.aiParty.toJSON()));
+    } catch (e) { /* quota or private mode; a lost crew must not break a round */ }
+  },
+
+  loadAiParty() {
+    try {
+      if (typeof AiParty === 'undefined' || typeof localStorage === 'undefined') return;
+      const raw = localStorage.getItem('ck-ai-party');
+      if (!raw) return;
+      const restored = AiParty.fromJSON(JSON.parse(raw));
+      if (restored && restored.members.length) this.aiParty = restored;
+    } catch (e) { /* corrupt save: start without a crew rather than refusing to load */ }
+  },
+
+  disbandCrew() {
+    this.aiParty = null;
+    try {
+      if (typeof localStorage !== 'undefined') localStorage.removeItem('ck-ai-party');
+    } catch (e) { /* nothing to clear */ }
+    this.renderCrew();
+  },
+
   /* ---------- RUN IT: complete the scenario, watch it happen, live with it ---------- */
 
   /**
@@ -4771,7 +4934,13 @@ const app = {
     const me = this.game.players[this.humanIndex] || this.game.players[0];
     const world = (this.firstMilesCampaign && this.firstMilesCampaign.state) || {};
 
-    this.scenarioResult = run.resolve(me, world);
+    // The crew complete the same scenario in their own words, then everybody votes on which
+    // plan actually runs. Section 27 of the single-player PRD: no separate AI rules — the
+    // winning plan goes through the identical ScenarioRun, whoever wrote it.
+    const winning = this.resolveCrewVote(run, me);
+
+    this.scenarioResult = winning.run.resolve(winning.actor, world);
+    this.scenarioResult.author = winning.author;
     const beats = scnSceneBeats(this.scenarioResult);
 
     document.getElementById('scnPickerWrap').style.display = 'none';
@@ -4794,6 +4963,101 @@ const app = {
       this.scenarioBeatTimer = setTimeout(step, ms);
     };
     step();
+  },
+
+  /**
+   * The crew complete the scenario too, then the party votes (PRD 2.1 sections 16-17, 58).
+   *
+   * Returns the winning plan as a ScenarioRun, so the caller cannot tell whose plan it is
+   * — which is the whole point of section 27. With no AI party the human's plan wins
+   * unopposed and the flow is exactly what it was before this existed.
+   */
+  resolveCrewVote(humanRun, me) {
+    const mine = {
+      author: me.name,
+      archetype: 'You',
+      slots: SCN_SLOTS.reduce((a, s) => { a[s] = humanRun.slots[s].card; return a; }, {}),
+      summary: SCN_SLOTS.map(s => humanRun.slots[s].card).join(' / ')
+    };
+    const revealEl = document.getElementById('scnReveal');
+    const party = this.aiParty;
+
+    if (!party || !party.active().length) {
+      if (revealEl) revealEl.style.display = 'none';
+      return { run: humanRun, actor: me, author: me.name, plans: [mine] };
+    }
+
+    // Companions need cards in hand to have plans at all (section 6).
+    party.deal(this.game.whiteDeck, SCN_SLOTS.length + 2);
+    const legends = this.game.ledger
+      ? this.game.ledger.legends('LEGEND').map(l => l.motif)
+      : [];
+    const seed = `${this.scenarioRun.template.id}|${this.game.ledger ? this.game.ledger.events.length : 0}`;
+    const aiPlans = party.completePlans(SCN_SLOTS, {
+      stake: this.scenarioRun.template.stake, seed, legends
+    });
+    const plans = [mine, ...aiPlans];
+
+    // The human votes for their own plan; the crew vote on their own terms, which is where
+    // the politics comes from — a companion will back a worse plan from someone they like.
+    const { tally, ballots } = party.tallyVotes(plans, { seed, legends });
+    tally[me.name] = (tally[me.name] || 0) + 1;
+    ballots.unshift({ voter: me.name, votedFor: me.name });
+
+    const winnerName = Object.keys(tally).sort((a, b) =>
+      (tally[b] - tally[a]) || a.localeCompare(b))[0];
+    const winningPlan = plans.find(p => p.author === winnerName) || mine;
+
+    if (revealEl) {
+      revealEl.style.display = 'block';
+      document.getElementById('scnPlans').innerHTML = plans.map(p => {
+        const won = p.author === winnerName;
+        return `<div style="border:2px ${won ? 'solid #6fe8d8' : 'solid #22252e'}; padding:6px 8px; background:${won ? '#14151c' : '#0b0c10'};">`
+          + `<div style="font-family:'Press Start 2P', monospace; font-size:8px; color:${won ? '#6fe8d8' : '#788196'}; margin-bottom:3px;">`
+          + `${p.author.toUpperCase()} · ${p.archetype}${won ? ' · RUNNING THIS' : ''} · ${tally[p.author] || 0} vote${(tally[p.author] || 0) === 1 ? '' : 's'}</div>`
+          + `<div style="font-family:'JetBrains Mono', monospace; font-size:10px; color:#cbd5ed;">${p.summary}</div></div>`;
+      }).join('');
+      document.getElementById('scnVotes').innerHTML =
+        ballots.map(b => `${b.voter} → ${b.votedFor}`).join(' · ');
+    }
+
+    if (winnerName === me.name) {
+      return { run: humanRun, actor: me, author: me.name, plans };
+    }
+    // A companion's plan won: rebuild it as a run and let them be the one who executes it,
+    // using their own level as a stand-in for attributes so a seasoned companion runs it
+    // better than a new one.
+    const member = party.active().find(m => m.name === winnerName);
+    const aiRun = new ScenarioRun(this.scenarioRun.template, { district: this.game.activeCity });
+    SCN_SLOTS.forEach(s => aiRun.fill(s, winningPlan.slots[s], winnerName));
+    const lvl = member ? Math.min(9, member.level + 2) : 3;
+    return {
+      run: aiRun, author: winnerName, plans,
+      actor: { name: winnerName, attributes: { str: lvl, wit: lvl, soul: lvl }, stats: {} }
+    };
+  },
+
+  /** Shows how the crew took it (sections 28, 31, 21). */
+  renderCrewReactions(result) {
+    const el = document.getElementById('scnReactions');
+    if (!el) return;
+    const party = this.aiParty;
+    if (!party || !party.active().length) { el.style.display = 'none'; return; }
+
+    const { reactions } = party.applyOutcome(result, {
+      author: result.author || (this.game.players[this.humanIndex] || {}).name,
+      round: this.game.ledger ? this.game.ledger.events.length : 0
+    });
+    this.saveAiParty();
+
+    el.style.display = 'block';
+    el.innerHTML = reactions.map(r => {
+      const colour = r.betrayal ? '#f25438' : r.warning ? '#f0ab43' : '#788196';
+      const tail = r.betrayal
+        ? ` — DONE WITH YOU: ${r.betrayal.causes[0]}`
+        : r.warning ? ` — watching you: ${r.warning.causes[0]}` : '';
+      return `<div style="color:${colour};">${r.name}: ${r.emotion}${tail}</div>`;
+    }).join('');
   },
 
   clearScenarioPlayback() {
@@ -4858,6 +5122,8 @@ const app = {
       this.saveLedger();
     }
     this.updateTopHud();
+
+    this.renderCrewReactions(result);
 
     // A micro-scene is offered rather than forced (v2 section 18): the scene has already
     // resolved, so this is a chance to see the plan from the inside, not a second verdict.
