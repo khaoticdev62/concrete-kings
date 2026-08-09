@@ -152,6 +152,28 @@ function grove(x, y, cols, rows, gap) {
   return out;
 }
 
+
+/**
+ * Street furniture along a sidewalk lane. Density and mix are the main levers
+ * for district character now that all eight share one street skeleton —
+ * Chicago is lamp-heavy under the L, Detroit sparse with dumpsters in its empty
+ * lots, Atlanta and NOLA lean on canopy instead.
+ */
+function furnitureRow(type, startX, y, count, gap) {
+  const out = [];
+  for (let i = 0; i < count; i++) out.push({ type, x: startX + i * gap, y });
+  return out;
+}
+
+/** Alternating run, for busy commercial sidewalks. */
+function furnitureMix(startX, y, count, gap, kinds) {
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    out.push({ type: kinds[i % kinds.length], x: startX + i * gap, y });
+  }
+  return out;
+}
+
 const SK = streetSkeleton();
 
 const DISTRICTS = {
@@ -186,6 +208,9 @@ const DISTRICTS = {
       { x: 1290, y: 1140, w: 390, h: 100, kind: 'building', roof: 'roofC', solid: true }
     ],
     decor: [
+      ...furnitureMix(120, 586, 8, 132, ['lamp','booth','lamp','dumpster']),
+      ...furnitureMix(1340, 586, 7, 140, ['lamp','dumpster','lamp']),
+      ...furnitureRow('lamp', 160, 742, 7, 148),
       ...treeRow(90, 566, 11, 96), ...treeRow(1310, 566, 11, 96),
       ...treeRow(90, 752, 11, 96), ...treeRow(1310, 752, 11, 96),
       ...grove(1330, 850, 4, 3, 90),
@@ -224,6 +249,9 @@ const DISTRICTS = {
       { x: 1290, y: 1040, w: 1070, h: 210, kind: 'building', roof: 'roofB', solid: true }
     ],
     decor: [
+      ...furnitureRow('dumpster', 200, 500, 4, 260),
+      ...furnitureRow('lamp', 180, 586, 4, 300),
+      ...furnitureRow('dumpster', 300, 980, 3, 300),
       ...treeRow(120, 566, 5, 220), ...treeRow(1340, 566, 5, 220),
       ...treeRow(120, 752, 4, 260),
       { type: 'car', x: 300, y: 640, dir: 'h' },
@@ -264,6 +292,10 @@ const DISTRICTS = {
       { x: 1290, y: 1030, w: 1070, h: 220, kind: 'building', roof: 'roofB', solid: true }
     ],
     decor: [
+      ...furnitureRow('lamp', 100, 586, 10, 104),
+      ...furnitureRow('lamp', 1320, 586, 10, 108),
+      ...furnitureMix(140, 742, 8, 128, ['lamp','booth']),
+      ...furnitureMix(1360, 742, 8, 128, ['lamp','dumpster']),
       ...treeRow(100, 566, 9, 110), ...treeRow(1320, 566, 9, 118),
       ...treeRow(100, 752, 8, 118), ...treeRow(1320, 752, 8, 130),
       { type: 'car', x: 120, y: 618, dir: 'h' }, { type: 'car', x: 380, y: 618, dir: 'h' },
@@ -313,6 +345,9 @@ const DISTRICTS = {
       { x: 2030, y: 1040, w: 330, h: 210, kind: 'building', roof: 'roofC', solid: true }
     ],
     decor: [
+      ...furnitureMix(110, 586, 11, 96, ['lamp','booth']),
+      ...furnitureMix(1310, 586, 11, 96, ['lamp','lamp','booth']),
+      ...furnitureRow('lamp', 150, 742, 9, 116),
       ...treeRow(80, 566, 15, 72), ...treeRow(1300, 566, 15, 72),
       ...treeRow(80, 752, 15, 72), ...treeRow(1300, 752, 15, 72),
       ...grove(1550, 840, 5, 4, 84),
@@ -354,6 +389,9 @@ const DISTRICTS = {
       { x: 1950, y: 1090, w: 410, h: 110, kind: 'park', roof: 'grass', solid: false }
     ],
     decor: [
+      ...furnitureRow('dumpster', 520, 995, 3, 140),
+      ...furnitureMix(140, 586, 7, 150, ['lamp','booth']),
+      ...furnitureRow('lamp', 1360, 742, 7, 150),
       ...treeRow(100, 566, 8, 120), ...treeRow(1320, 566, 8, 130),
       ...treeRow(100, 752, 8, 120), ...treeRow(1320, 752, 8, 130),
       ...grove(1990, 1120, 4, 1, 96),
@@ -395,6 +433,9 @@ const DISTRICTS = {
       { x: 1940, y: 1040, w: 420, h: 210, kind: 'building', roof: 'roofB', solid: true }
     ],
     decor: [
+      ...furnitureRow('lamp', 200, 586, 5, 220),
+      ...furnitureRow('lamp', 1400, 742, 5, 220),
+      ...furnitureRow('dumpster', 1900, 450, 2, 200),
       ...treeRow(80, 566, 15, 72), ...treeRow(1300, 566, 15, 72),
       ...treeRow(80, 752, 15, 72), ...treeRow(1300, 752, 15, 72),
       ...grove(100, 130, 6, 5, 88), ...grove(1330, 1080, 6, 2, 96),
@@ -432,6 +473,9 @@ const DISTRICTS = {
       { x: 1830, y: 970, w: 530, h: 280, kind: 'building', roof: 'roofC', solid: true }
     ],
     decor: [
+      ...furnitureRow('dumpster', 560, 420, 4, 130),
+      ...furnitureMix(130, 586, 9, 116, ['lamp','dumpster']),
+      ...furnitureRow('lamp', 1350, 742, 8, 128),
       ...treeRow(110, 566, 10, 100), ...treeRow(1330, 566, 10, 112),
       ...treeRow(110, 752, 9, 112), ...treeRow(1330, 752, 9, 118),
       ...grove(1330, 1010, 5, 3, 92),
@@ -474,6 +518,9 @@ const DISTRICTS = {
       { x: 1830, y: 910, w: 530, h: 340, kind: 'building', roof: 'roofC', solid: true }
     ],
     decor: [
+      ...furnitureRow('lamp', 130, 586, 8, 130),
+      ...furnitureRow('lamp', 1340, 586, 8, 130),
+      ...furnitureMix(180, 742, 6, 160, ['booth','lamp']),
       ...treeRow(80, 566, 15, 72), ...treeRow(1300, 566, 15, 72),
       ...treeRow(80, 752, 15, 72), ...treeRow(1300, 752, 15, 72),
       ...grove(240, 230, 6, 3, 92), ...grove(250, 930, 6, 3, 88),

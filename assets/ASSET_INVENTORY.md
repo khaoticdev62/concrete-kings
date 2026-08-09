@@ -97,3 +97,29 @@ appears nowhere in `concrete_kings_64.json`. Worth checking before the next batc
 Same palette failure as above; `harlem_raw` is abstract parking-stall striping,
 `miami_raw` is a single framed AC unit. Not sliceable as tilesets. Left in place
 pending regeneration rather than sorted, since they are the current working set.
+
+## `props/web/` — street furniture. Two of four are the wrong projection.
+
+Run every new prop through `scripts/process-props.sh`. It trims the transparent
+padding the generator leaves around a small subject, pre-scales to the exact size
+the renderer draws it (`FURNITURE_DISPLAY` in `topdown-city-renderer.js`), and
+thresholds alpha to binary. Skipping it is how lamps first shipped looking like
+hair-thin squiggles: the canvas runs with `imageSmoothingEnabled = false`, so a
+96x96 source drawn at 18x30 is point-sampled and the grid misses a thin post.
+
+| File | Status |
+|---|---|
+| `phone_booth_prop.png` | **In use.** Reads as a lit booth at 14x26. |
+| `dumpster_prop.png` | **In use.** Reads as a bin at 24x22. |
+| `street_lamp_prop.png` | **Not declared in the manifest.** Side-on lamp post with a ground light pool — a side view fights the top-down projection. Renderer draws a procedural warm light pool instead. |
+| `car_prop.png` | **Not declared in the manifest.** Front-on view of a vehicle, so it read as a gold picture frame lying on the asphalt. Renderer draws a procedural top-down car instead. |
+
+Do not re-add the two undeclared sprites to `assets/manifest.json` without
+regenerating the art from directly overhead. A wrong-perspective sprite looks
+worse than the procedural shape it replaces. Both `drawCar` and `drawFurniture`
+keep their asset branch, so correct art needs only the manifest entry.
+
+The five POI props (`bodega_storefront`, `barbershop_pole`, `chess_table`,
+`locked_door`, `shop_deal`) are correct and in use. `shop_deal` shipped once with
+an opaque white background because `-transparent black` does not clear a white
+border; `test/manifest-integrity.test.js` now guards corner alpha.

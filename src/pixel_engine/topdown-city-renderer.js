@@ -25,6 +25,23 @@ if (typeof require !== 'undefined') {
 const RND_WORLD = RND_DATA.WORLD;
 
 const SHADOW_OFFSET = 3;   // one shared offset is what sells the depth
+
+/**
+ * On-screen size of each street furniture piece, in world pixels.
+ *
+ * These are also the pixel dimensions the sprite PNGs must have on disk. The
+ * canvas runs with imageSmoothingEnabled = false, so any downscale here is a
+ * point-sample: a 96x96 generator canvas drawn at 18x30 loses ~80% of its
+ * pixels and the sampling grid can miss a thin lamp post entirely. That is how
+ * the first pass shipped lamps that looked like hair-thin squiggles.
+ * scripts/process-props.sh pre-scales the art to these numbers so the draw is
+ * 1:1, and test/manifest-integrity.test.js asserts the two stay in step.
+ */
+const FURNITURE_DISPLAY = {
+  street_lamp: { w: 18, h: 30 },
+  phone_booth: { w: 14, h: 26 },
+  dumpster:    { w: 24, h: 22 }
+};
 const FACE_HEIGHT = 6;     // visible building front face
 
 const POI_LABELS = {
@@ -120,7 +137,11 @@ class TopDownCityRenderer {
 
     // ---- Layer 1: props and furniture ----
     d.decor.filter(i => i.type === 'car').forEach(item => {
-      this.drawCar(ctx, key, item.x, item.y, item.dir, p);
+      this.drawCar(ctx, item.x, item.y, item.dir, p);
+    });
+    const FURNITURE_KIND = { lamp: 'street_lamp', booth: 'phone_booth', dumpster: 'dumpster' };
+    d.decor.filter(i => FURNITURE_KIND[i.type]).forEach(item => {
+      this.drawFurniture(ctx, FURNITURE_KIND[item.type], item.x, item.y, p);
     });
 
     // ---- Layer 2: flora (weather composites separately, over this canvas) ----
@@ -246,10 +267,57 @@ class TopDownCityRenderer {
     this.stats.proceduralDraws++;
   }
 
-  drawCar(ctx, key, x, y, dir, p) {
+  /**
+   * Props shared by every district — cars and street furniture — look up without
+   * a district prefix, like the POI props. Only terrain keys are per-district.
+   *
+   * Source art is 96px so it reads at POI scale; street furniture is drawn much
+   * smaller than that, or a lamp post would dwarf the 24px street trees.
+   */
+  sharedSlice(element) {
+    return this.registry ? this.registry.get(element) : null;
+  }
+
+  /** Soft contact shadow. A boxy offset rect looks wrong under an irregular sprite. */
+  contactShadow(ctx, cx, cy, rx, ry, p) {
+    ctx.globalAlpha = 0.35;
+    ctx.fillStyle = p.shadow;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  /**
+   * Cars. `prop_car` is intentionally absent from assets/manifest.json: the
+   * generated art is a front-on view of a vehicle, not a roof-down one, so it
+   * read as a gold picture frame on the asphalt. A wrong-perspective sprite is
+   * worse than a clean procedural shape, so this falls through to the block
+   * below until top-down art exists. Same for `prop_street_lamp`. The asset
+   * branch stays, ready for correct art — see assets/ASSET_INVENTORY.md.
+   */
+  drawCar(ctx, x, y, dir, p) {
     const w = dir === 'v' ? 16 : 30;
     const h = dir === 'v' ? 30 : 16;
-    if (this.tryAsset(ctx, key, `prop_car_${dir}`, x, y, w, h)) return;
+
+    const slice = this.sharedSlice('prop_car');
+    if (slice) {
+      // Source art points "up"; a horizontal car is the same sprite rotated,
+      // which keeps one asset serving both lanes.
+      const L = 36, W = 22;
+      const cx = x + w / 2;
+      const cy = y + h / 2;
+      this.contactShadow(ctx, cx, cy + (dir === 'v' ? L / 2 - 4 : 0), dir === 'v' ? W * 0.5 : L * 0.45, 4, p);
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      if (dir === 'h') ctx.rotate(Math.PI / 2);
+      ctx.drawImage(slice.image, slice.x, slice.y, slice.w, slice.h, -W / 2, -L / 2, W, L);
+      ctx.restore();
+      this.stats.assetDraws++;
+      return;
+    }
+
     this.fill(ctx, x + SHADOW_OFFSET, y + SHADOW_OFFSET, w, h, p.shadow);
     this.fill(ctx, x, y, w, h, p.accent);
     if (dir === 'v') {
@@ -259,6 +327,43 @@ class TopDownCityRenderer {
       this.fill(ctx, x + 5, y + 3, 8, h - 6, p.face);
       this.fill(ctx, x + 19, y + 3, 6, h - 6, p.face);
     }
+  }
+
+  /**
+   * Street furniture: lamps, phone booths, dumpsters. Anchored base-to-point so
+   * an object stands on the pavement rather than floating centred on it. Falls
+   * back to a small dark block, which still reads as clutter.
+   */
+  drawFurniture(ctx, kind, x, y, p) {
+    const size = FURNITURE_DISPLAY[kind] || { w: 16, h: 22 };
+    const slice = this.sharedSlice('prop_' + kind);
+
+    if (slice) {
+      this.contactShadow(ctx, x, y + 1, size.w * 0.55, 3.5, p);
+      ctx.drawImage(slice.image, slice.x, slice.y, slice.w, slice.h,
+        x - size.w / 2, y - size.h + 3, size.w, size.h);
+      this.stats.assetDraws++;
+      return;
+    }
+
+    if (kind === 'street_lamp') {
+      // Seen from directly above, a lamp is mostly its light: a warm pool on the
+      // pavement with the head at the centre. A tall pole drawn upward would be
+      // a side-on read and fights the projection.
+      ctx.globalAlpha = 0.16;
+      ctx.fillStyle = p.accent;
+      ctx.beginPath();
+      ctx.ellipse(x, y, 12, 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      this.fill(ctx, x - 3, y - 3, 6, 6, p.roofADk);   // lamp head
+      this.fill(ctx, x - 1, y - 1, 2, 2, p.accent);    // bulb
+      return;
+    }
+
+    this.fill(ctx, x - 5 + SHADOW_OFFSET, y - 14 + SHADOW_OFFSET, 10, 16, p.shadow);
+    this.fill(ctx, x - 5, y - 14, 10, 16, p.walkHi);
+    this.fill(ctx, x - 4, y - 13, 8, 5, p.face);
   }
 
   drawPoi(ctx, poi, active, p) {
@@ -333,7 +438,7 @@ class TopDownCityRenderer {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { TopDownCityRenderer, POI_LABELS, SHADOW_OFFSET };
+  module.exports = { TopDownCityRenderer, POI_LABELS, SHADOW_OFFSET, FURNITURE_DISPLAY };
 }
 if (typeof window !== 'undefined') {
   window.TopDownCityRenderer = TopDownCityRenderer;

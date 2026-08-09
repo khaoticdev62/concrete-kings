@@ -16,7 +16,7 @@ node server/server.js        # serves index.html + WS relay on port 3001
 
 Open `http://localhost:3001`. **Port is 3001, not 3000.**
 
-Current state: **229 tests, all passing**, 47 test files, clean tree, pushed.
+Current state: **234 tests, all passing**, 46 test files.
 
 Always run `npm test` and not just `node --test` — the npm script also
 syntax-checks `index.html`'s inline `<script>`, `cards.js` and `server/server.js`,
@@ -24,7 +24,7 @@ which catches parse errors the test runner never sees.
 
 ---
 
-## 2. Five traps that will cost you hours
+## 2. Six traps that will cost you hours
 
 ### 2.1 You cannot measure layout with `documentElement.scrollHeight`
 
@@ -94,12 +94,36 @@ node -e "const fs=require('fs');const o={};for(const f of fs.readdirSync('src/pi
 
 ### 2.5 Green tests do not mean it looks right
 
-Twice a change passed every test and looked wrong: the top-down city rendered as
-flat colour slabs with a 160px strip of bare ground, and the NPC backdrop was
-effectively invisible behind panels covering 85% of the screen. Both were only
-caught by screenshotting and looking.
+Three times a change passed every test and looked wrong: the top-down city
+rendered as flat colour slabs with a 160px strip of bare ground; the NPC backdrop
+was effectively invisible behind panels covering 85% of the screen; and street
+furniture drew as hair-thin squiggles and pixel noise. All three were only caught
+by screenshotting and looking.
 
-Take a screenshot at 1280x720 and actually look at it.
+Take a screenshot at 1280x720 and actually look at it. For anything small, crop
+and magnify — `magick shot.png -crop WxH+X+Y +repage -filter point -resize 300%
+out.png`. At display scale the broken lamps looked like plausible clutter; at 3x
+they were obviously wrong.
+
+### 2.6 A sprite can be the right size, right format, and still unusable
+
+The canvas runs with `imageSmoothingEnabled = false`, so the browser downscales
+by point sampling. A 96x96 generator canvas drawn at 18x30 loses ~80% of its
+pixels and the sampling grid can miss a thin lamp post entirely. Generators also
+centre a small subject on a large canvas, which shrinks the visible art further.
+
+Run new props through `scripts/process-props.sh`, which trims the padding and
+pre-scales to the renderer's `FURNITURE_DISPLAY` sizes so the draw is 1:1.
+
+Two related failures, both now guarded by `test/manifest-integrity.test.js`:
+
+- **Opaque backgrounds.** Background removal that only strips near-black leaves a
+  white or teal border, and the prop draws as a solid box. Edge flood-fill
+  (`-fill none -draw "color x,y floodfill"`) clears it while preserving interior
+  colour; plain `-fuzz` at any useful threshold floods the whole sprite.
+- **Size drift** between the PNG on disk and the size the renderer draws it at.
+
+Neither dimensions, file size, nor resolution catch either one.
 
 ---
 
