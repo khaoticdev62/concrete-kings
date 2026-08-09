@@ -12,7 +12,9 @@
     "nola_tiles": "assets/sprite_packs/city_nola_tiles.png",
     "prop_bodega_storefront": "assets/prop_bodega_storefront.jpg",
     "prop_chess_table": "assets/prop_chess_table.jpg",
-    "prop_barbershop_pole": "assets/prop_barbershop_pole.jpg"
+    "prop_barbershop_pole": "assets/prop_barbershop_pole.jpg",
+    "prop_shop_deal": "assets/prop_shop_deal.jpg",
+    "prop_locked_door": "assets/prop_locked_door.jpg"
   },
   "sprites": {}
 }
