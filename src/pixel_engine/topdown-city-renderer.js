@@ -24,6 +24,14 @@ if (typeof require !== 'undefined') {
 }
 const RND_WORLD = RND_DATA.WORLD;
 
+/** Lightmap, loaded the same dual-mode way. Optional: no module, no lighting. */
+let RND_Lightmap = null;
+if (typeof require !== 'undefined') {
+  try { RND_Lightmap = require('./lightmap.js').TopDownLightmap; } catch (e) { RND_Lightmap = null; }
+} else if (typeof window !== 'undefined') {
+  RND_Lightmap = window.TopDownLightmap || null;
+}
+
 const SHADOW_OFFSET = 3;   // one shared offset is what sells the depth
 
 /**
@@ -86,6 +94,11 @@ class TopDownCityRenderer {
     // Decal placement is computed once per district and reused. Re-rolling it
     // every frame would make the litter crawl around the pavement.
     this.decalCache = new Map();
+    // Pooled lamp light on the street surface. Optional by design: with the
+    // module absent the map renders exactly as it did before.
+    this.lightmap = options.lightmap !== undefined
+      ? options.lightmap
+      : (RND_Lightmap ? new RND_Lightmap() : null);
   }
 
   /**
@@ -328,6 +341,14 @@ class TopDownCityRenderer {
 
     // ---- Parcels: each carries its own roof detail (layer 4) internally ----
     d.parcels.forEach(parcel => this.drawParcel(ctx, key, parcel, p));
+
+    // ---- Layer 0.5: lamp light pools on the surface ----
+    // After the road, sidewalks and ground decals, before anything standing on
+    // the street, so furniture and the player sit IN the light rather than under
+    // a wash laid over the top of them.
+    if (this.lightmap) {
+      this.lightmap.render(ctx, d, p, cam, { width: ctx.canvas.width, height: ctx.canvas.height });
+    }
 
     // ---- Layer 1: props and furniture ----
     d.decor.filter(i => i.type === 'car').forEach(item => {
