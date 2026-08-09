@@ -38,6 +38,74 @@ const CITY_THEME_OVERRIDES = {
 };
 
 /**
+ * Tone ramps derived from MASTER_PALETTE_64, for deriving shadows and highlights.
+ *
+ * Deliberately NOT the four palette groups. Two of those groups hold several
+ * unrelated ramps end to end: warm_tones runs dark red up to pale cream and then
+ * restarts at dark brown, and cool_tones runs blues, then teals, then violets.
+ * Shifting a colour one step within its *group* can therefore cross a boundary
+ * and change hue instead of shade — #FFE299 + 1 would land on #6E3E14, pale cream
+ * to dark brown.
+ *
+ * Ramps are found by splitting each group wherever luminance drops, which
+ * recovers the real ramps exactly (warm splits at 10; cool at 8 and 14; skin at
+ * 13; blacks_grays stays whole) without hand-maintaining a second table that
+ * could drift from the palette.
+ */
+const PALETTE_RAMPS = (() => {
+  const luminance = (hex) => {
+    const n = parseInt(hex.slice(1), 16);
+    return 0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255);
+  };
+  const ramps = [];
+  for (const group of Object.values(MASTER_PALETTE_64)) {
+    let current = [group[0]];
+    for (let i = 1; i < group.length; i++) {
+      if (luminance(group[i]) < luminance(group[i - 1])) {
+        ramps.push(current);
+        current = [];
+      }
+      current.push(group[i]);
+    }
+    ramps.push(current);
+  }
+  return ramps;
+})();
+
+/**
+ * Shifts a hex colour `steps` positions along its tone ramp.
+ *
+ * Negative steps darken (shadow), positive lighten (highlight). Clamps at the
+ * ramp's ends rather than wrapping or crossing into another hue, and returns the
+ * input untouched if it is not a palette colour — so a caller can shade
+ * unconditionally without first checking.
+ *
+ * This is how shading stays inside the 64-colour palette. test/pixel-engine.test.js
+ * asserts the palette is exactly 64 unique colours, so shadows and highlights
+ * cannot be produced by darkening a hex value arithmetically.
+ */
+function paletteShift(hex, steps) {
+  const normalized = String(hex).toUpperCase();
+  for (const ramp of PALETTE_RAMPS) {
+    const index = ramp.indexOf(normalized);
+    if (index !== -1) {
+      const clamped = Math.max(0, Math.min(ramp.length - 1, index + steps));
+      return ramp[clamped];
+    }
+  }
+  return hex;
+}
+
+/**
+ * Floors a coordinate. Fractional canvas coordinates are what turn crisp pixel
+ * art into a blurred half-pixel smear, and `imageSmoothingEnabled = false` does
+ * not save you — it only governs image scaling, not path and rect geometry.
+ */
+function snapToPixel(value) {
+  return Math.floor(value);
+}
+
+/**
  * Calculates strict integer scaling factors and letterboxing margins.
  */
 function calculateIntegerScale(viewportWidth, viewportHeight, nativeW = NATIVE_WIDTH, nativeH = NATIVE_HEIGHT) {
@@ -356,6 +424,8 @@ class SpriteRenderer {
  
  if (typeof window !== 'undefined') {
    window.drawHighDetailCharacterSprite = drawHighDetailCharacterSprite;
+   window.paletteShift = paletteShift;
+   window.snapToPixel = snapToPixel;
  }
  
  if (typeof module !== 'undefined' && module.exports) {
@@ -365,6 +435,9 @@ class SpriteRenderer {
      MASTER_PALETTE_64,
      CITY_THEME_OVERRIDES,
      calculateIntegerScale,
+     paletteShift,
+     snapToPixel,
+     PALETTE_RAMPS,
      PixelCanvasEngine,
      SpriteRenderer,
      drawHighDetailCharacterSprite

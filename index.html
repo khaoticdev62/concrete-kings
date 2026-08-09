@@ -2124,137 +2124,12 @@ function hdFont(ctx, basePx) {
 }
 
 /* Procedural background drawer for 8 acts */
-function drawProceduralBackground(ctx, city, frame) {
-  const colorMap = CITY_THEME_OVERRIDES[city] || {};
-  const skyTop = city === 'Miami' ? '#521c6e' : (city === 'Detroit' ? '#11233f' : '#0a1526');
-  const skyBottom = city === 'Miami' ? '#ff7a45' : (city === 'Atlanta' ? '#aa2724' : '#11233f');
-  const brickColor = colorMap["7a1d1c"] ? "#" + colorMap["7a1d1c"] : "#7a1d1c";
-  const trimColor = colorMap["474d5e"] ? "#" + colorMap["474d5e"] : "#474d5e";
-
-  const grad = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
-  grad.addColorStop(0, skyTop);
-  grad.addColorStop(1, skyBottom);
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-  if (city === 'Chicago' || city === 'Oakland') {
-    ctx.fillStyle = '#8b95ab';
-    ctx.fillRect(...hdRect(ctx, 40 + (frame % 4) * 2, 15, 20, 2));
-    ctx.fillRect(...hdRect(ctx, 180 - (frame % 4) * 2, 25, 30, 2));
-  } else {
-    ctx.fillStyle = '#f4f7ff';
-    [[30,10],[110,20],[220,12],[280,25]].forEach(([x,y]) => {
-      const r = hdRect(ctx, x, y, 1, 1);
-      ctx.fillRect(r[0], r[1], r[2], r[3]);
-    });
-  }
-
-  ctx.fillStyle = '#1c375c';
-  if (city === 'Detroit') {
-    ctx.fillRect(...hdRect(ctx, 20, 35, 40, 25));
-    ctx.fillRect(...hdRect(ctx, 50, 20, 5, 20));
-    ctx.fillRect(...hdRect(ctx, 150, 40, 60, 20));
-    ctx.fillRect(...hdRect(ctx, 250, 30, 30, 30));
-  } else if (city === 'Chicago' || city === 'Harlem') {
-    ctx.fillRect(...hdRect(ctx, 10, 20, 25, 40));
-    ctx.fillRect(...hdRect(ctx, 50, 10, 35, 50));
-    ctx.fillRect(...hdRect(ctx, 120, 25, 20, 35));
-    ctx.fillRect(...hdRect(ctx, 180, 15, 30, 45));
-    ctx.fillRect(...hdRect(ctx, 260, 30, 25, 30));
-  } else if (city === 'Miami') {
-    ctx.fillStyle = '#2a1138';
-    [40, 280].forEach(tx => {
-      ctx.fillRect(...hdRect(ctx, tx, 30, 2, 30));
-      ctx.fillRect(...hdRect(ctx, tx - 6, 28, 14, 2));
-      ctx.fillRect(...hdRect(ctx, tx - 4, 26, 10, 2));
-    });
-    ctx.fillStyle = '#1c375c';
-  } else {
-    ctx.fillRect(...hdRect(ctx, 20, 40, 50, 20));
-    ctx.fillRect(...hdRect(ctx, 110, 35, 70, 25));
-    ctx.fillRect(...hdRect(ctx, 220, 45, 60, 15));
-  }
-
-  const lightColor = city === 'Miami' ? '#6fe8d8' : '#ffc475';
-  ctx.fillStyle = lightColor;
-  ctx.fillRect(...hdRect(ctx, 40, 70 - (frame % 2), 4, 4));
-  ctx.fillRect(...hdRect(ctx, 270, 70 - (frame % 2), 4, 4));
-
-  ctx.fillStyle = '#666e82';
-  ctx.fillRect(...hdRect(ctx, 41, 74, 2, 46));
-  ctx.fillRect(...hdRect(ctx, 271, 74, 2, 46));
-
-  ctx.fillStyle = brickColor;
-  if (city === 'Harlem' || city === 'Baltimore') {
-    ctx.fillRect(...hdRect(ctx, 60, 40, 200, 80));
-    ctx.fillStyle = '#2b0d0d';
-    for (let by = 45; by < 120; by += 12) {
-      for (let bx = 60; bx < 260; bx += 20) {
-        ctx.fillRect(...hdRect(ctx, bx + (by % 2 * 5), by, 2, 1));
-      }
-    }
-  } else if (city === 'Chicago') {
-    ctx.fillRect(...hdRect(ctx, 60, 40, 200, 80));
-    ctx.fillStyle = '#393e4d';
-    for (let bx = 60; bx < 260; bx += 40) {
-      ctx.fillRect(...hdRect(ctx, bx, 40, 1, 80));
-    }
-  } else if (city === 'Miami') {
-    ctx.fillRect(...hdRect(ctx, 60, 45, 200, 75));
-    ctx.fillStyle = '#f25438';
-    ctx.fillRect(...hdRect(ctx, 60, 50, 200, 3));
-    ctx.fillRect(...hdRect(ctx, 158, 45, 4, 75));
-  } else if (city === 'Detroit') {
-    ctx.fillRect(...hdRect(ctx, 60, 40, 200, 80));
-    ctx.fillStyle = '#101116';
-    for (let bx = 65; bx < 260; bx += 10) {
-      ctx.fillRect(...hdRect(ctx, bx, 40, 1, 80));
-    }
-  } else {
-    ctx.fillRect(...hdRect(ctx, 60, 40, 200, 80));
-  }
-
-  ctx.fillStyle = (city === 'Miami') ? '#6fe8d8' : ((city === 'Detroit') ? '#181920' : '#ffe299');
-  for (let row = 0; row < 2; row++) {
-    for (let col = 0; col < 5; col++) {
-      if (city === 'Miami' && col === 2) continue;
-      const win = hdRect(ctx, 75 + col * 35, 52 + row * 25, 16, 16);
-      ctx.fillRect(win[0], win[1], win[2], win[3]);
-
-      ctx.fillStyle = '#181920';
-      ctx.fillRect(...hdRect(ctx, 75 + col * 35 + 7, 52 + row * 25, 2, 16));
-      ctx.fillRect(...hdRect(ctx, 75 + col * 35, 52 + row * 25 + 7, 16, 2));
-      ctx.fillStyle = (city === 'Miami') ? '#6fe8d8' : ((city === 'Detroit') ? '#181920' : '#ffe299');
-    }
-  }
-
-  ctx.fillStyle = '#6e3e14';
-  ctx.fillRect(...hdRect(ctx, 145, 75, 30, 45));
-  ctx.fillStyle = '#c9822b';
-  ctx.fillRect(...hdRect(ctx, 170, 98, 2, 2));
-
-  ctx.fillStyle = '#474d5e';
-  ctx.fillRect(...hdRect(ctx, 140, 110, 40, 4));
-  ctx.fillRect(...hdRect(ctx, 135, 114, 50, 4));
-  ctx.fillRect(...hdRect(ctx, 130, 118, 60, 3));
-
-  ctx.fillStyle = trimColor;
-  ctx.fillRect(...hdRect(ctx, 0, 120, 320, 20));
-
-  ctx.fillStyle = '#2d313d';
-  for (let sx = 0; sx < 320; sx += 40) {
-    ctx.fillRect(...hdRect(ctx, sx, 120, 1, 20));
-  }
-
-  ctx.fillStyle = '#101116';
-  ctx.fillRect(...hdRect(ctx, 0, 140, 320, 40));
-
-  ctx.fillStyle = '#ffcd68';
-  for (let rx = 10; rx < 320; rx += 40) {
-    ctx.fillRect(...hdRect(ctx, rx, 158, 20, 4));
-  }
-}
-
+/* drawProceduralBackground was removed here.
+   It rendered the side-on street background for the old block viewport, which
+   the top-down city map replaced. The function survived that change as 130 lines
+   of dead code: defined, never called, and invisible to
+   test/dead-references.test.js because that scans getElementById, not uncalled
+   functions. Live rendering is topdown-city-renderer.js. */
 function drawCharacterPreview(ctx, origin, frame) {
   ctx.fillStyle = '#101116';
   ctx.fillRect(0, 0, 32, 32);
@@ -3586,9 +3461,6 @@ const app = {
     this.game.activeCity = act.city;
     this.game.isCampaign = true;
     
-    if (this.pixelEngine) {
-      this.pixelEngine.setCityTheme(act.city);
-    }
     
     this.game.addPlayer(host);
     const originKey = document.getElementById('characterOriginSelect').value;
@@ -3958,9 +3830,6 @@ const app = {
 
     if (this.weatherSystem) {
       this.weatherSystem.setMode(this.game.weatherMode);
-    }
-    if (this.pixelEngine) {
-      this.pixelEngine.setCityTheme(this.game.activeCity || 'Harlem');
     }
 
     this.renderHand();
@@ -6120,7 +5989,6 @@ const app = {
 
     this.game.activeCity = d.city;
     this.setWeather('CLEAR');
-    if (this.pixelEngine) this.pixelEngine.setCityTheme(d.city);
     if (this.audioEngine && this.audioEngine.isPlayingBGM) this.audioEngine.startBGM(d.city);
 
     const title = document.getElementById('mapDistrictTitle');
