@@ -6,19 +6,22 @@ const { AssetRegistry } = require('../src/pixel_engine/asset-registry.js');
 
 /** Records calls instead of painting, so drawing is assertable without canvas. */
 function recordingCtx() {
-  const calls = { fillRect: 0, drawImage: 0, arc: 0, fillText: 0 };
+  // fill/beginPath/ellipse are counted because the procedural ground decals draw
+  // with paths rather than rects, so an uncounted no-op would make "did it draw
+  // anything?" unanswerable.
+  const calls = { fillRect: 0, drawImage: 0, arc: 0, fillText: 0, fill: 0, beginPath: 0, ellipse: 0 };
   return {
     calls,
     canvas: { width: 960, height: 520 },
     fillStyle: '', strokeStyle: '', font: '', textAlign: 'left', lineWidth: 1,
     imageSmoothingEnabled: true,
-    save() {}, restore() {}, translate() {}, beginPath() {}, closePath() {},
-    fill() {}, stroke() {}, clip() {},
+    save() {}, restore() {}, translate() {}, beginPath() { calls.beginPath++; }, closePath() {},
+    fill() { calls.fill++; }, stroke() {}, clip() {},
     fillRect() { calls.fillRect++; },
     strokeRect() {},
     drawImage() { calls.drawImage++; },
     arc() { calls.arc++; },
-    ellipse() {},
+    ellipse() { calls.ellipse++; },
     fillText() { calls.fillText++; },
     measureText() { return { width: 20 }; },
     createLinearGradient() { return { addColorStop() {} }; }
@@ -165,8 +168,8 @@ test('Renderer: ground decals are placed deterministically, so litter does not c
 
   assert.ok(planA.length > 0, 'declared decals must actually get placed');
   assert.deepEqual(
-    planA.map(s => `${s.key}@${s.x},${s.y}`),
-    planB.map(s => `${s.key}@${s.x},${s.y}`),
+    planA.map(s => `${s.kind}@${s.x},${s.y}`),
+    planB.map(s => `${s.kind}@${s.x},${s.y}`),
     'two renderers must agree on placement'
   );
 
@@ -207,21 +210,25 @@ test('Renderer: every decal lands wholly inside a sidewalk band', () => {
   });
 });
 
-test('Renderer: a district with no declared decals draws none, keeping the pre-asset look', () => {
+test('Renderer: a district with no declared decal art falls back to procedural decals', () => {
   const { getDistrict } = require('../src/pixel_engine/topdown-city-data.js');
   const r = new TopDownCityRenderer({ registry: registryWith([]) });
-  assert.deepEqual(r.decalPlan('NOLA', getDistrict('NOLA')), []);
+  const plan = r.decalPlan('NOLA', getDistrict('NOLA'));
+  assert.ok(plan.length > 0, 'NOLA should still place decal slots with no art');
 
   const ctx = recordingCtx();
   r.render(ctx, new TopDownCityController({ districtKey: 'NOLA', attachInput: false }));
-  assert.equal(ctx.calls.drawImage, 0, 'no declared sprites must mean no drawImage');
+  assert.ok(ctx.calls.drawImage === 0, 'no declared sprites must mean no asset drawImage');
+  assert.ok(ctx.calls.fill > 0 || ctx.calls.beginPath > 0, 'procedural decals must draw something');
 });
 
-test('Renderer: decals appear once assets finish loading, not only if they were ready on frame one', () => {
+test('Renderer: the decal plan does not depend on whether assets have loaded yet', () => {
   // Assets preload asynchronously and the map renders immediately, so the first
-  // decalPlan call routinely runs against an empty registry. Caching that empty
-  // result kept decals off the map permanently even though the sprites resolved
-  // moments later — every test passed and the browser showed nothing.
+  // decalPlan call routinely runs before any sprite has decoded. An earlier
+  // version built the plan from the registry and cached it, which kept decals
+  // off the map permanently even though the sprites resolved moments later —
+  // every test passed and the browser showed nothing. The plan is now purely
+  // geometric, so the race cannot exist.
   const { getDistrict } = require('../src/pixel_engine/topdown-city-data.js');
   const d = getDistrict('HARLEM');
 
@@ -233,7 +240,54 @@ test('Renderer: decals appear once assets finish loading, not only if they were 
     }
   });
 
-  assert.deepEqual(r.decalPlan('HARLEM', d), [], 'nothing to place before the strip decodes');
+  const before = r.decalPlan('HARLEM', d);
+  assert.ok(before.length > 0, 'placement must be planned before any art exists');
+
   loaded = true;
-  assert.ok(r.decalPlan('HARLEM', d).length > 0, 'decals must appear after assets resolve');
+  const after = r.decalPlan('HARLEM', d);
+  assert.deepEqual(
+    after.map(s => `${s.kind}@${s.x},${s.y}`),
+    before.map(s => `${s.kind}@${s.x},${s.y}`),
+    'loading art must not move anything'
+  );
+});
+
+test('Renderer: a district with no decal art draws them procedurally instead of leaving bare pavement', () => {
+  // Only three of the eight districts have atlases. Before this, the other five
+  // rendered with completely empty sidewalks next to neighbours full of detail,
+  // which read as an unfinished district rather than a different one.
+  const r = new TopDownCityRenderer({ registry: registryWith([]) });
+  const ctx = recordingCtx();
+  r.render(ctx, new TopDownCityController({ districtKey: 'CHICAGO', attachInput: false }));
+
+  assert.equal(ctx.calls.drawImage, 0, 'no art means no drawImage');
+  assert.ok(r.stats.proceduralDraws > 0, 'the district must still be drawn');
+
+  // The procedural forms use ellipses (manhole, stain) and fills (grate, litter).
+  const bare = new TopDownCityRenderer({ registry: registryWith([]) });
+  const plan = bare.decalPlan('CHICAGO', require('../src/pixel_engine/topdown-city-data.js').getDistrict('CHICAGO'));
+  assert.ok(plan.length > 0, 'an art-less district must still plan decal positions');
+  assert.ok(plan.every(s => s.kind && s.size >= 14),
+    'every planned slot needs a kind and a usable size');
+});
+
+test('Renderer: a district with art draws only its art, never mixed with drawn stand-ins', () => {
+  // Harlem declares three of the five decal kinds. The planned slots for the
+  // other two are skipped rather than drawn procedurally: a photographic drain
+  // beside a hand-drawn one reads as a bug, not as variety.
+  const { getDistrict } = require('../src/pixel_engine/topdown-city-data.js');
+  const r = new TopDownCityRenderer({
+    registry: registryWith(['harlem_decal_drain', 'harlem_decal_manhole', 'harlem_decal_litter'])
+  });
+  const ctx = recordingCtx();
+  const before = { arc: ctx.calls.arc };
+  r.render(ctx, new TopDownCityController({ districtKey: 'HARLEM', attachInput: false }));
+
+  const plan = r.decalPlan('HARLEM', getDistrict('HARLEM'));
+  const withArt = plan.filter(s => ['decal_drain', 'decal_manhole', 'decal_litter'].includes(s.kind));
+  assert.ok(withArt.length > 0 && withArt.length < plan.length,
+    'this test needs a district that has art for some kinds but not all');
+  assert.equal(r.stats.assetDraws, withArt.length,
+    'exactly the slots with art should draw, and nothing should stand in for the rest');
+  void before;
 });

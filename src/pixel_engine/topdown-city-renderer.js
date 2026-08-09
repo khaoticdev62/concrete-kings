@@ -101,17 +101,12 @@ class TopDownCityRenderer {
     const cached = this.decalCache.get(districtKey);
     if (cached) return cached;
 
-    const pool = DECAL_KEYS
-      .map(name => `${String(districtKey).toLowerCase()}_${name}`)
-      .filter(key => this.sharedSlice(key));
-
-    // Assets preload asynchronously, so the first frame can land before the
-    // strip has decoded. Caching the empty plan that produces would keep the
-    // decals off permanently — the registry resolves them a moment later and
-    // nothing ever asks again. So only a plan built from a real pool is cached;
-    // an empty pool is treated as "not ready yet" and retried next frame.
-    if (!pool.length) return [];
-
+    // The plan deliberately does not consult the registry. Assets preload
+    // asynchronously and the map renders immediately, so a registry-dependent
+    // plan built on frame one is built from nothing — and caching that kept the
+    // decals off the map permanently while every test passed. Planning positions
+    // and kinds up front and resolving art only at draw time removes that race
+    // rather than guarding against it.
     const spots = [];
     if (d.sidewalks.length) {
       // Small deterministic LCG. Seeded from the key's characters so each
@@ -128,7 +123,7 @@ class TopDownCityRenderer {
         const size = Math.max(DECAL_MIN, Math.min(DECAL_MAX, Math.min(band.w, band.h)));
         if (band.w < size || band.h < size) continue;
         spots.push({
-          key: pool[Math.floor(rand() * pool.length)],
+          kind: DECAL_KEYS[Math.floor(rand() * DECAL_KEYS.length)],
           size,
           x: Math.round(band.x + rand() * (band.w - size)),
           y: Math.round(band.y + rand() * (band.h - size))
@@ -140,14 +135,92 @@ class TopDownCityRenderer {
     return spots;
   }
 
-  drawDecals(ctx, districtKey, d) {
+  /**
+   * Ground decals, asset-first like everything else.
+   *
+   * A district that has any decal art uses only that art, and skips the planned
+   * slots it has no sprite for — mixing one district's photographic drain with a
+   * drawn one beside it reads as a mistake. A district with no art at all draws
+   * every slot procedurally, so no block is left bare while its neighbours have
+   * detail. Only three of the eight districts have atlases so far.
+   */
+  drawDecals(ctx, districtKey, d, p) {
+    const prefix = `${String(districtKey).toLowerCase()}_`;
+    const hasArt = DECAL_KEYS.some(kind => this.sharedSlice(prefix + kind));
+
     this.decalPlan(districtKey, d).forEach(spot => {
-      const slice = this.sharedSlice(spot.key);
-      if (!slice) return;
-      ctx.drawImage(slice.image, slice.x, slice.y, slice.w, slice.h,
-        spot.x, spot.y, spot.size, spot.size);
-      this.stats.assetDraws++;
+      const slice = this.sharedSlice(prefix + spot.kind);
+      if (slice) {
+        ctx.drawImage(slice.image, slice.x, slice.y, slice.w, slice.h,
+          spot.x, spot.y, spot.size, spot.size);
+        this.stats.assetDraws++;
+      } else if (!hasArt) {
+        this.drawProceduralDecal(ctx, spot, p);
+      }
     });
+  }
+
+  /**
+   * Drawn stand-ins for the decal vocabulary, in the district's own palette.
+   *
+   * Kept deliberately plain. These sit on a 20px sidewalk band and read at a
+   * glance as "the pavement has something on it", which is the whole job; a
+   * detailed drawing at this size turns to noise.
+   */
+  drawProceduralDecal(ctx, spot, p) {
+    const s = spot.size;
+    const cx = spot.x + s / 2;
+    const cy = spot.y + s / 2;
+
+    switch (spot.kind) {
+      case 'decal_manhole':
+        // Light rim, dark cover. The other way round — dark ring with a light
+        // centre — reads as a hollow circle rather than a lid sitting in a
+        // socket, because on most district palettes roofADk is close enough to
+        // the pavement that only the inner disc registers.
+        ctx.fillStyle = p.walkHi;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, s * 0.36, s * 0.36, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = p.roofADk;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, s * 0.28, s * 0.28, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // A single across-the-lid seam is what makes it read as a cover.
+        this.fill(ctx, cx - s * 0.24, cy - 0.5, s * 0.48, 1, p.walk);
+        this.stats.proceduralDraws++;
+        break;
+
+      case 'decal_drain':
+      case 'decal_vent': {
+        // A slotted grate: dark plate, lighter slots across it.
+        const w = Math.round(s * 0.7);
+        const h = Math.round(s * 0.5);
+        this.fill(ctx, cx - w / 2, cy - h / 2, w, h, p.roofADk);
+        for (let i = 1; i < 4; i++) {
+          this.fill(ctx, cx - w / 2 + 2, cy - h / 2 + i * (h / 4), w - 4, 1, p.walkHi);
+        }
+        break;
+      }
+
+      case 'decal_litter':
+        // A few specks rather than one shape, so it reads as scatter.
+        [[-4, -3], [2, -5], [5, 1], [-2, 4], [1, 0]].forEach(([dx, dy], i) => {
+          this.fill(ctx, cx + dx, cy + dy, 2, 2, i % 2 ? p.walkHi : p.face);
+        });
+        break;
+
+      case 'decal_stain':
+      default:
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = p.shadow;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, s * 0.34, s * 0.24, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        this.stats.proceduralDraws++;
+        break;
+    }
   }
 
   spriteKey(districtKey, element) {
@@ -226,7 +299,7 @@ class TopDownCityRenderer {
 
     // ---- Layer 0: ground decals, drawn onto the pavement before anything
     //      stands on it, so furniture and the player occlude them correctly ----
-    this.drawDecals(ctx, key, d);
+    this.drawDecals(ctx, key, d, p);
 
     // ---- Parcels: each carries its own roof detail (layer 4) internally ----
     d.parcels.forEach(parcel => this.drawParcel(ctx, key, parcel, p));

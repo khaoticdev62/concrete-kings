@@ -134,8 +134,15 @@ warm-grey squares sitting on cool blue-grey pavement.
 Decals are drawn at the width of the sidewalk they sit on, not a fixed size:
 sidewalk bands are 20px, so a 32px decal cannot fit inside one at all.
 
-Six districts still have no atlas. They draw no decals, which is the pre-asset
-look — `DECAL_KEYS` in `topdown-city-renderer.js` is the vocabulary to fill.
+Five districts still have no atlas. They draw the decal vocabulary procedurally
+instead — a drawn manhole, grate, litter scatter and stain in the district's own
+palette — so no block reads as unfinished next to a neighbour full of detail. A
+district that has *any* art uses only that art and skips the slots it has no
+sprite for: a photographic drain beside a hand-drawn one looks like a bug, not
+like variety.
+
+So generating an atlas for a district is an upgrade, never a prerequisite.
+`DECAL_KEYS` in `topdown-city-renderer.js` is the vocabulary to fill.
 
 ## `props/web/` — street furniture. Two of four are the wrong projection.
 
@@ -159,6 +166,19 @@ worse than the procedural shape it replaces. Both `drawCar` and `drawFurniture`
 keep their asset branch, so correct art needs only the manifest entry.
 
 The five POI props (`bodega_storefront`, `barbershop_pole`, `chess_table`,
-`locked_door`, `shop_deal`) are correct and in use. `shop_deal` shipped once with
-an opaque white background because `-transparent black` does not clear a white
-border; `test/manifest-integrity.test.js` now guards corner alpha.
+`locked_door`, `shop_deal`) are correct and in use.
+
+`shop_deal` took three passes to get clean and is worth knowing about:
+
+1. It shipped with a fully **opaque white background**, because `-transparent
+   black` does not clear a white border. It drew as a solid box.
+   `test/manifest-integrity.test.js` now guards corner alpha.
+2. A 14% corner flood-fill cleared the solid white but left the **anti-aliased
+   grey ring**, which read as a white outline round the building on dark asphalt.
+3. Raising the fuzz did nothing, because a flood-fill seeded on an
+   already-transparent corner matches only transparent pixels. The background has
+   to be flattened back to white first so the fill has a real seed colour.
+
+`scripts/process-props.sh` does step 3, for `shop_deal` only. The other four POI
+props are clean and must not be put through it — see the warning in the script
+about why no pixel metric decides membership of that list.

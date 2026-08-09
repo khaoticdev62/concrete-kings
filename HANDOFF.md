@@ -16,7 +16,7 @@ node server/server.js        # serves index.html + WS relay on port 3001
 
 Open `http://localhost:3001`. **Port is 3001, not 3000.**
 
-Current state: **248 tests, all passing**.
+Current state: **250 tests, all passing**.
 
 Always run `npm test` and not just `node --test` — the npm script also
 syntax-checks `index.html`'s inline `<script>`, `cards.js` and `server/server.js`,
@@ -105,6 +105,19 @@ and magnify — `magick shot.png -crop WxH+X+Y +repage -filter point -resize 300
 out.png`. At display scale the broken lamps looked like plausible clutter; at 3x
 they were obviously wrong.
 
+**A metric you invent to check a fix can measure the wrong thing and hide it.**
+The `shop_deal` prop had a white halo. A check counting light *semi-transparent*
+pixels reported it fixed — but the "fix" had binarised alpha, so the halo was now
+fully *opaque* and simply no longer matched the check. Rewriting it to count light
+opaque pixels then flagged the chess table's checkerboard and the barber pole's
+white stripes as halo and made both worse. No threshold separates halo from art
+when the art contains near-white paint. Composite on dark and look:
+
+```bash
+magick assets/props/web/shop_deal.png -background "#101116" -flatten \
+  -filter point -resize 250% /tmp/check.png
+```
+
 ### 2.6 A sprite can be the right size, right format, and still unusable
 
 The canvas runs with `imageSmoothingEnabled = false`, so the browser downscales
@@ -133,10 +146,16 @@ and cached — and caching the empty result it produced on frame one kept decals
 off the map permanently, because the sprites resolved a moment later and nothing
 ever recomputed. Every test passed; the browser showed nothing.
 
-`decalPlan` therefore treats an empty sprite pool as "not ready yet" and returns
-without caching. If you cache anything else derived from the registry, do the
-same. `test/topdown-city-renderer.test.js` covers this with a registry that
-starts empty and resolves later.
+The first fix was to treat an empty pool as "not ready yet" and skip caching it.
+That works, but the better fix was to remove the dependency: `decalPlan` now
+computes positions and kinds from geometry alone and never touches the registry,
+resolving art only at draw time. The race cannot exist rather than being guarded
+against.
+
+**If you cache anything derived from the registry, prefer the same move** — make
+the cached thing registry-independent. `test/topdown-city-renderer.test.js` covers
+it with a registry that starts empty and resolves later, asserting the plan is
+identical before and after.
 
 ### 2.8 A sprite at x=0,y=0 is not necessarily the whole image
 
