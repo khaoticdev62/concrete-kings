@@ -30,7 +30,7 @@ function fakeDocument() {
     },
     appendChild() {}, querySelector() { return null; }, querySelectorAll() { return []; },
     getContext() { return null; },
-    addEventListener() {}
+    addEventListener(){}, focus(){}
   });
   return {
     getElementById(id) { if (!elements[id]) elements[id] = make(id); return elements[id]; },

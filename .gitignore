@@ -2,3 +2,6 @@ node_modules/
 .playwright-mcp/
 .claude/worktrees/
 .superpowers/
+assets/*_raw.*
+assets/ui-mockups/
+assets/unusable/

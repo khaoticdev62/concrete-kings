@@ -81,8 +81,8 @@ test('NPC backdrop: resolveNpcBackdrop prefers a city override over the default'
   try {
     const { resolveNpcBackdrop } = loadGameModule();
     assert.equal(resolveNpcBackdrop('chen', 'Chicago'), 'elsol-bodega-underpass');
-    assert.equal(resolveNpcBackdrop('chen', 'Oakland'), 'corner-bodega-night', 'unlisted city falls back to default');
-    assert.equal(resolveNpcBackdrop('ray', 'Harlem'), 'midtown-liquor-barber-wall');
+    assert.equal(resolveNpcBackdrop('chen', 'Oakland'), 'deli-grocer-storefront', 'unlisted city falls back to default');
+    assert.equal(resolveNpcBackdrop('ray', 'Harlem'), 'barber-shop-neon-alley');
     assert.equal(resolveNpcBackdrop('nobody', 'Harlem'), null, 'unknown npc resolves to null, not a guess');
   } finally {
     delete global.document; delete global.window;

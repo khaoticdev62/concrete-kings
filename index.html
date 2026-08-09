@@ -89,10 +89,16 @@
   }
   .screen.active {
     display: block;
+    animation: screenFadeIn 0.18s ease;
+  }
+  @keyframes screenFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
   #game.screen.active {
     display: block;
     overflow: hidden;
+    animation: none;
   }
   
   button {
@@ -542,6 +548,70 @@
     background-image: none !important;
     background: #000000;
     border-color: #ffffff;
+  }
+
+  /* ---------- DISTRICT ARRIVAL SPLASH ---------- */
+  /* Lives inside the map viewport frame, not over the page. The block map
+     measures exactly 595px in a 595px frame at 720p, and an overlay confined to
+     the frame cannot change that. */
+  #districtArrival {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    background: #08080a;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  #districtArrival.active { display: flex; }
+  #districtArrivalImg {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    image-rendering: pixelated;
+    display: block;
+  }
+  /* Title and hint sit over the art rather than beside it, so the image keeps the
+     full frame and the panel height never changes. */
+  #districtArrivalTitle {
+    position: absolute;
+    left: 0; right: 0; bottom: 34px;
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    color: #ffcd68;
+    text-shadow: 2px 2px 0 #08080a, -2px 2px 0 #08080a, 2px -2px 0 #08080a, -2px -2px 0 #08080a;
+  }
+  #districtArrivalHint {
+    position: absolute;
+    left: 0; right: 0; bottom: 12px;
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: #cbd5ed;
+    text-shadow: 2px 2px 0 #08080a;
+  }
+  /* Focus lands on the overlay itself; it is a dialog, so the ring must be
+     visible rather than suppressed. */
+  #districtArrival:focus-visible {
+    outline: 3px solid #6fe8d8;
+    outline-offset: -3px;
+  }
+  #districtArrival.active { animation: arrivalFade 220ms ease-out; }
+  @keyframes arrivalFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #districtArrival.active { animation: none; }
+  }
+  body.high-contrast #districtArrivalImg { display: none; }
+  body.high-contrast #districtArrival {
+    background: #000000;
+    border: 2px solid #ffffff;
   }
 
   /* ---------- ACCESSIBILITY OVERRIDES ---------- */
@@ -1281,7 +1351,7 @@
       <p id="campaignIntroBody" class="muted" style="font-family:'JetBrains Mono', monospace; font-size:11px; line-height:1.5;">13 beats. One origin. Every mile costs.</p>
       <button id="campaignIntroStart" class="primary" style="font-family:'Press Start 2P', monospace; font-size:10px; background:#ffcd68; border-color:#ffcd68; color:#101116;">BEGIN</button>
       <div id="campaignContinueWrap" style="margin-top:12px; display:none;">
-        <button id="campaignContinueBtn" class="secondary" style="font-size:8px; padding:8px 12px;">CONTINUE FIRST MILES</button>
+        <button id="campaignContinueBtn" class="secondary" onclick="app.continueFirstMilesCampaign()" style="font-size:8px; padding:8px 12px;">CONTINUE FIRST MILES</button>
       </div>
       <div style="margin-top:12px;">
         <button class="secondary" onclick="app.showMainMenu()" style="font-size:8px; padding:8px 12px;">BACK TO MENU</button>
@@ -1387,8 +1457,15 @@
           <!-- max-height keeps the whole screen inside 720px: without it the
                canvas scales to ~520px tall and pushes the exit buttons past the
                viewport bottom, where the clipped body makes them unreachable. -->
-          <div class="crt-screen" style="border:3px solid #ffcd68; background:#08080a; display:flex; justify-content:center;">
-            <canvas id="topDownMapCanvas" width="960" height="520" class="pixel-canvas" style="max-width:100%; max-height:calc(100vh - 290px); width:auto; height:auto; display:block; image-rendering:pixelated;"></canvas>
+          <div class="crt-screen" style="border:3px solid #ffcd68; background:#08080a; display:flex; justify-content:center; position:relative;">
+            <canvas id="topDownMapCanvas" tabindex="0" width="960" height="520" class="pixel-canvas" style="max-width:100%; max-height:calc(100vh - 290px); width:auto; height:auto; display:block; image-rendering:pixelated;"></canvas>
+            <!-- Arrival splash. Inside the frame on purpose: an overlay here cannot
+                 add height, and the block map has no spare height at 720p. -->
+            <div id="districtArrival" role="dialog" aria-modal="true" aria-labelledby="districtArrivalTitle" tabindex="-1" onclick="app.dismissDistrictArrival()">
+              <img id="districtArrivalImg" src="" alt="" />
+              <div id="districtArrivalTitle"></div>
+              <div id="districtArrivalHint">CLICK OR PRESS ENTER TO WALK</div>
+            </div>
           </div>
           <div id="mapPromptLine" style="margin-top:6px; min-height:16px; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68; text-align:center;">Walk with WASD / Arrows.</div>
         </div>
@@ -2200,10 +2277,16 @@ function drawCharacterPreview(ctx, origin, frame) {
 const NPC_SCENE_BACKDROPS = {
   ray: {
     default: 'barber-shop-interior',
-    Harlem: 'midtown-liquor-barber-wall'
+    // Was midtown-liquor-barber-wall, which is a boarded-up LIQUOR wall in a
+    // vacant lot — a poor fit for a barber, and the only decay/lot image in the
+    // set, which Detroit Lot needs. This is an actual barber shop with a pole.
+    Harlem: 'barber-shop-neon-alley'
   },
   chen: {
-    default: 'corner-bodega-night',
+    // Was corner-bodega-night, which despite its filename is a French Quarter
+    // corner BAR with a wrought-iron balcony — a poor fit for a grocer, and the
+    // only balcony image, which NOLA Balcony needs. This is a DELI GROCERY.
+    default: 'deli-grocer-storefront',
     Chicago: 'elsol-bodega-underpass',
     Miami: 'elsol-bodega-taco-truck'
   },
@@ -2226,6 +2309,36 @@ function resolveNpcBackdrop(npcId, city) {
   return entry[city] || entry.default || null;
 }
 
+/**
+ * One establishing scene per district, shown on first arrival.
+ *
+ * Keyed by district key rather than city because arrival is per district. Chosen
+ * on what each image SHOWS, not on its filename — three filenames are actively
+ * misleading, and the picks for Detroit, Baltimore and NOLA all come from files
+ * named after something else. See
+ * docs/superpowers/specs/2026-08-08-district-arrival-art-design.md.
+ *
+ * ATLANTA is deliberately absent. No Southern porch art exists, and a wrong-city
+ * establishing shot is worse than none — the same call made for the generated
+ * lamp, the car prop and Miami's tile atlas. It needs one generation.
+ *
+ * Nothing here may also appear in NPC_SCENE_BACKDROPS; a test enforces that, so
+ * an image cannot be silently double-booked across two screens.
+ */
+const DISTRICT_ARRIVAL_SCENES = {
+  HARLEM:    'bodega-corner-night',          // 4AM BODEGA on a brownstone corner
+  DETROIT:   'midtown-liquor-barber-wall',   // vacant lot, chain-link, RESIST graffiti
+  CHICAGO:   'chicago-el-platform',          // elevated track underpass, LAKEFRONT
+  MIAMI:     'art-deco-hotel-neon',          // deco neon and palms, wet street
+  BALTIMORE: 'nola-balcony-interior',        // rowhouse street, stoops and steps
+  OAKLAND:   'elsol-bodega-street-truck',    // bodega, food truck, overpass
+  NOLA:      'corner-bodega-night'           // French Quarter corner, iron balcony
+};
+
+function resolveDistrictArrival(districtKey) {
+  return DISTRICT_ARRIVAL_SCENES[districtKey] || null;
+}
+
 const SHOP_ITEMS = [
   { gameId: 'street_dice', name: 'Loaded Dice', desc: '+3 WIT bonus on your next Street Dice roll.', cost: 30 },
   { gameId: 'bodega_run', name: 'Rubber Soles', desc: 'Alertness builds slower on your next Bodega Run.', cost: 30 },
@@ -2244,9 +2357,16 @@ const app = {
   show(id) {
     if (id !== 'judging') this.clearJudgingCountdown();
     if (id !== 'roundResult') this.clearResolutionAutoAdvance();
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const targetScreen = document.getElementById(id);
-    targetScreen.classList.add('active');
+    const target = document.getElementById(id);
+    if (!target) return;
+    const current = document.querySelector('.screen.active');
+    if (current && current !== target) {
+      current.classList.remove('active');
+      target.classList.add('active');
+    } else {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      target.classList.add('active');
+    }
     this.updateTopHud();
   },
   showSetup() { this.showMainMenu(); },
@@ -2267,6 +2387,28 @@ const app = {
 
   showMainMenu() {
     this.showSetupView('menu');
+    this.refreshCampaignContinueButton();
+  },
+
+  refreshCampaignContinueButton() {
+    try {
+      const wrap = document.getElementById('campaignContinueWrap');
+      if (!wrap) return;
+      if (this.firstMilesCampaign && this.firstMilesCampaign.active) {
+        wrap.style.display = 'none';
+        return;
+      }
+      const raw = typeof window !== 'undefined' && window.localStorage ? window.localStorage.getItem('ck-first-miles-campaign') : null;
+      let hasSave = false;
+      if (raw) {
+        const data = JSON.parse(raw);
+        hasSave = !!(data && data.version === 1 && data.state);
+      }
+      wrap.style.display = hasSave ? 'block' : 'none';
+    } catch (e) {
+      const wrap = document.getElementById('campaignContinueWrap');
+      if (wrap) wrap.style.display = 'none';
+    }
   },
 
   showCharacterCreation() {
@@ -5097,6 +5239,43 @@ const app = {
     this.updateTopHud();
   },
 
+  continueFirstMilesCampaign() {
+    try {
+      if (typeof window === 'undefined' || !window.localStorage) return;
+      const raw = window.localStorage.getItem('ck-first-miles-campaign');
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (!data || data.version !== 1 || !data.state) return;
+      const campaign = window.FirstMilesCampaign ? new window.FirstMilesCampaign(this) : null;
+      if (!campaign) return;
+      campaign.loadCampaign();
+      if (!campaign.active) return;
+      this.storyEngine = new NarrativeStoryEngine();
+      this.storyEngine.reset(campaign.state.origin);
+      if (campaign.state.originSecret && !this.storyEngine.secrets.includes(campaign.state.originSecret)) {
+        this.storyEngine.secrets.push(campaign.state.originSecret);
+      }
+      this.game = new Game();
+      this.game.mode = MODE.OFFLINE;
+      this.game.isCampaign = true;
+      this.game.pointsToWin = 99;
+      const myName = document.getElementById('hostName').value.trim() || 'Player';
+      this.game.players = [];
+      this.game.addPlayer(myName);
+      this.humanIndex = 0;
+      this.assignOriginAttrs(this.game.players[0], campaign.state.origin);
+      this.firstMilesCampaign = campaign;
+      this.show('game');
+      if (campaign.currentScreen === 'beat') campaign.renderBeat();
+      else if (campaign.currentScreen === 'actBreak') campaign.renderActBreak(campaign.state.currentBeat === 10 ? 2 : 3);
+      else if (campaign.currentScreen === 'epilogue') campaign.renderEpilogue();
+      else campaign.renderIntro();
+      this.updateTopHud();
+    } catch (e) {
+      this.firstMilesCampaign = null;
+    }
+  },
+
   submitCampaignBeat(cardText) {
     if (this.firstMilesCampaign && typeof this.firstMilesCampaign.choose === 'function') {
       this.firstMilesCampaign.choose(cardText);
@@ -5482,7 +5661,14 @@ const app = {
     const reviewLogBtn = document.getElementById('reviewLogBtn');
     if (reviewLogBtn) reviewLogBtn.style.display = 'none';
 
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.removeItem('ck-first-miles-campaign');
+      }
+    } catch (e) {}
+
     this.show('setup');
+    this.refreshCampaignContinueButton();
   },
 
   renderCampaignIntro() {
@@ -5517,6 +5703,7 @@ const app = {
     } catch (e) {
       this.firstMilesCampaign = null;
     }
+    this.refreshCampaignContinueButton();
   },
 
   renderCampaignBeat() {
@@ -5868,6 +6055,12 @@ const app = {
 
     this.topDownController = new TopDownCityController({ districtKey: startKey });
     this.topDownRenderer = new TopDownCityRenderer({ registry: this.assetRegistry });
+
+    // The starting district counts as already arrived. Otherwise opening the map
+    // for the first time greets the player with a splash they did not travel to,
+    // and the feature reads as an intro screen rather than as arrival.
+    if (!this.arrivedDistricts) this.arrivedDistricts = new Set();
+    this.arrivedDistricts.add(startKey);
   },
 
   showBlockMap() {
@@ -5933,6 +6126,55 @@ const app = {
     const title = document.getElementById('mapDistrictTitle');
     if (title) title.textContent = d.name.toUpperCase();
     this.renderDistrictRail();
+    this.showDistrictArrival(districtKey, d.name);
+    return true;
+  },
+
+  /**
+   * Establishing scene on first arrival at a district.
+   *
+   * Once per district per run: every arrival would turn it into a loading screen,
+   * while the first makes it discovery. The starting district is marked seen when
+   * the map initialises, so the splash is only ever a consequence of travelling.
+   *
+   * Never blocks travel. If there is no art for the district, or the image has not
+   * decoded, the map simply appears — which is also how Atlanta behaves, since it
+   * has no scene at all.
+   */
+  showDistrictArrival(districtKey, districtName) {
+    const overlay = document.getElementById('districtArrival');
+    if (!overlay) return false;
+    if (!this.arrivedDistricts) this.arrivedDistricts = new Set();
+    if (this.arrivedDistricts.has(districtKey)) return false;
+    this.arrivedDistricts.add(districtKey);
+
+    const file = resolveDistrictArrival(districtKey);
+    if (!file) return false;
+
+    const img = document.getElementById('districtArrivalImg');
+    const titleEl = document.getElementById('districtArrivalTitle');
+    if (!img || !titleEl) return false;
+
+    img.src = NPC_SCENE_BACKDROP_DIR + file + '.png';
+    // Describes the place, not the file. A screen reader announcing
+    // "bodega-corner-night" conveys nothing.
+    img.alt = `Arriving in ${districtName}`;
+    titleEl.textContent = districtName.toUpperCase();
+
+    overlay.classList.add('active');
+    this.districtArrivalOpen = true;
+    overlay.focus();
+    return true;
+  },
+
+  dismissDistrictArrival() {
+    const overlay = document.getElementById('districtArrival');
+    if (!overlay || !this.districtArrivalOpen) return false;
+    overlay.classList.remove('active');
+    this.districtArrivalOpen = false;
+    // Focus returns to the canvas or WASD stops reaching the map.
+    const canvas = document.getElementById('topDownMapCanvas');
+    if (canvas) canvas.focus();
     return true;
   },
 
@@ -6205,6 +6447,29 @@ document.addEventListener('keydown', (e) => {
     if (!btn.disabled) app.submitSelection();
   }
 });
+
+/**
+ * Arrival splash key handling, in the CAPTURE phase on purpose.
+ *
+ * TopDownCityController listens for keydown on window in the bubble phase, so a
+ * bubble-phase handler here would run after it and the player would walk around
+ * behind the splash. Capture on window runs before that, and stopPropagation
+ * keeps every key away from the controller while the splash is up.
+ */
+window.addEventListener('keydown', (e) => {
+  if (!app.districtArrivalOpen) return;
+  // stopPropagation alone is not enough. It stops the event reaching OTHER nodes,
+  // but the controller's listener is on window too, and listeners on the same node
+  // still run — so with the event at window the player walked around behind the
+  // splash. stopImmediatePropagation makes this independent of both the event's
+  // target and the order the two listeners happened to be registered in.
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+  if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar' || e.key === 'Escape') {
+    e.preventDefault();
+    app.dismissDistrictArrival();
+  }
+}, true);
 </script>
 </body>
 </html>

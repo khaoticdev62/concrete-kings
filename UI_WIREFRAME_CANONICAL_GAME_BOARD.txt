@@ -1,0 +1,168 @@
+CONCRETE KINGS — CANONICAL GAME BOARD WIREFRAME
+Full Detail / ASCII-Safe / Aligned to 1280x720
+================================================
+
+NATIVE RESOLUTION: 1280x720
+FORMAT: ASCII-safe borders only
+AUTHORITY: This file supersedes UI_WIREFRAME_GAME_BOARD.txt and UI_WIREFRAME_MAIN_GAME_SCREEN.txt.
+
+GAME BOARD / MAIN GAMEPLAY
+- Default state: top HUD, center story panel, lower state + action bar
+- Card selected: card zooms, options highlight, hint text appears
+- Judging: timer panel + voting panel + result preview
+- Resolution: narrative text + stat delta panel
+- Ending: full-screen story beat, final stats, restart/new game
+- Narrative beat mode: story text lives in #narrativeTextBox inside the stage panel, with choices and stat readouts
+
+DEFAULT STATE
++--------------------------------------------------------------------+
+| CONCRETE KINGS    HARLEM — 125TH ST    DAY 1    HEAT: 2/10         |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   |  STORY PANEL                                               |   |
+|   |  Lore text / beat art / portrait area                      |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +----------------------------+  +----------------------------+    |
+|   | STATE PANEL                |  | CARD PLAY AREA             |    |
+|   | Trust / Heat / Rep / Cash  |  | Black card + option list    |    |
+|   +----------------------------+  +----------------------------+    |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | ACTION BAR                                                |   |
+|   | [ PLAY ]  [ INVENTORY ]  [ MAP ]  [ QUESTS ]              |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+CARD SELECTED STATE
++--------------------------------------------------------------------+
+| CONCRETE KINGS    HARLEM — 125TH ST    DAY 1    HEAT: 2/10         |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   |  CARD ART ZOOM                                            |   |
+|   |  Large card preview with option highlights                 |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +----------------------------+  +----------------------------+    |
+|   | STATE PANEL                |  | OPTION LIST                |    |
+|   | Trust / Heat / Rep / Cash  |  | A / B / C / D details      |    |
+|   +----------------------------+  +----------------------------+    |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ PLAY CARD ]  [ CANCEL ]                                  |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+JUDGING STATE
++--------------------------------------------------------------------+
+| CONCRETE KINGS    HARLEM — 125TH ST    DAY 1    HEAT: 2/10         |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | TIMER  00:12                                               |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +----------------------------+  +----------------------------+    |
+|   | WHITE CARDS               |  | VOTE PREVIEW               |    |
+|   | W1 / W2 / W3 / W4        |  | Winner preview / tie notice |    |
+|   +----------------------------+  +----------------------------+    |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ CONFIRM VOTE ]  [ PASS ]                                |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+RESOLUTION STATE
++--------------------------------------------------------------------+
+| CONCRETE KINGS    HARLEM — 125TH ST    DAY 1    HEAT: 2/10         |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | OUTCOME TEXT                                               |   |
+|   | Result + flavor text                                       |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | STAT DELTA                                                 |   |
+|   | Trust +1  Heat -1  Rep +1  Cash +15                        |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ CONTINUE ]                                               |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+ENDING STATE
++--------------------------------------------------------------------+
+| CONCRETE KINGS — ENDING                                            |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | CINEMATIC / FINAL BEAT TEXT                                 |   |
+|   | Full story ending                                           |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | FINAL STATS                                                 |   |
+|   | Trust / Heat / Rep / Cash / Secrets / Flags                 |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | [ NEW GAME ]  [ REVIEW LOG ]                               |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+NARRATIVE BEAT STATE
++--------------------------------------------------------------------+
+| CONCRETE KINGS    HARLEM — 125TH ST    DAY 1    HEAT: 2/10         |
++--------------------------------------------------------------------+
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | STAGE PANEL / NARRATIVE TEXT BOX                            |   |
+|   | Beat title, lore text, choices, heat/trust readouts        |   |
+|   +------------------------------------------------------------+   |
+|                                                                    |
+|   +----------------------------+  +----------------------------+    |
+|   | STATE PANEL                |  | CARD PLAY AREA             |    |
+|   | Trust / Heat / Rep / Cash  |  | Black card + white options  |    |
+|   +----------------------------+  +----------------------------+    |
+|                                                                    |
+|   +------------------------------------------------------------+   |
+|   | ACTION BAR                                                |   |
+|   | [ PLAY ]  [ INVENTORY ]  [ MAP ]  [ QUESTS ]              |   |
+|   +------------------------------------------------------------+   |
++--------------------------------------------------------------------+
+
+TRANSITION RULES
+- Judging must resolve within 12 seconds or auto-randomize
+- Resolution panel stays for 5 seconds or until confirm
+- Ending screen requires confirm to proceed
+- Narrative beat opens in the stage panel as the active story view
+
+INTERACTION MAP
+- D-pad / click: move focus
+- Confirm: select card or option
+- Cancel: back to default or close zoom
+- Bumpers / shortcuts: quick action bar
+
+PANEL PLACEMENT RULES
+- Story panel always fills the central narrative focus
+- Narrative text box uses the stage panel when active
+- State panel stays left-lower for quick reference
+- Card play is always right-lower during play states
+- Action bar is always bottom-center in default state
+- Judging replaces story panel with timer + voting stack
+
+TEXT LAYOUT RULES
+- Max narrative width: 1040 px
+- Max choice width: 520 px per choice slot
+- HUD font row height: 36 px
+- Panel padding: 18 px internal on all sides
+
+STATE TRANSITIONS
+- Default -> Card Selected -> Judging -> Resolution -> Default/Ending
+- Judgment timeout: 12 seconds then auto-randomize
+- Resolution hold: 5 seconds or confirm
+- Narrative beat transitions back to default/round flow after choice or resolution
