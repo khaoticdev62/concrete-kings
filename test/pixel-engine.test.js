@@ -129,3 +129,43 @@ test('Pixel Engine: snapToPixel floors toward negative infinity', () => {
   assert.equal(snapToPixel(-2.1), -3, 'truncation would give -2 and drift the sprite right');
   assert.equal(snapToPixel(5), 5);
 });
+
+test('Pixel Engine: character shading shifts the palette index, never layers flat black', () => {
+  // The palette is locked to exactly 64 colours, so a shadow cannot be a black
+  // overlay on the base tone — it has to be a darker entry from the same ramp.
+  // This previously used rgba(20,10,7,0.25) for melanin shading and
+  // rgba(8,8,10,0.2) for pants wrinkles, which muddies a tone instead of shading
+  // it and drifts off-palette.
+  const fillStyles = [];
+  const mockCtx = {
+    fillRect() {}, beginPath() {}, ellipse() {}, fill() {},
+    font: '', textAlign: '', fillText() {}
+  };
+  Object.defineProperty(mockCtx, 'fillStyle', {
+    get() { return fillStyles[fillStyles.length - 1]; },
+    set(v) { fillStyles.push(v); }
+  });
+
+  const origin = {
+    hairColor: '#140A07', skinColor: '#522717', outfitColor: '#393E4D',
+    apronColor: '#F4F7FF', pantsColor: '#181920'
+  };
+  drawHighDetailCharacterSprite(mockCtx, origin, 0, 0, 1, true, true, 'Boss');
+
+  ['rgba(20, 10, 7, 0.25)', 'rgba(8, 8, 10, 0.2)'].forEach(style => {
+    assert.ok(!fillStyles.includes(style),
+      `shading must not use the flat overlay ${style} — shift the palette index instead`);
+  });
+  assert.ok(fillStyles.includes(paletteShift(origin.skinColor, -2)),
+    'melanin shading must be the palette-shifted skin tone');
+  assert.ok(fillStyles.includes(paletteShift(origin.pantsColor, -1)),
+    'pants wrinkles must be the palette-shifted trouser tone');
+
+  // The invariant that actually matters: every hex fill must be a palette entry.
+  // This caught the floating name tag drawing in #ffffff, a 65th colour.
+  const palette = new Set(Object.values(MASTER_PALETTE_64).flat());
+  const offPalette = fillStyles
+    .filter(s => typeof s === 'string' && s.startsWith('#'))
+    .filter(s => !palette.has(s.toUpperCase()));
+  assert.deepEqual(offPalette, [], `hex fills outside the 64-colour palette: ${offPalette.join(', ')}`);
+});

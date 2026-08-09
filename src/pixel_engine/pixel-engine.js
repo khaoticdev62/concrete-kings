@@ -415,7 +415,9 @@ class SpriteRenderer {
  
    // 9. Floating Name Tag
    if (labelName) {
-     ctx.fillStyle = '#ffffff';
+     // #F4F7FF, not #ffffff: pure white is a 65th colour, and the palette's
+     // brightest tone is indistinguishable from it at 5-12px.
+     ctx.fillStyle = '#F4F7FF';
      ctx.font = isLarge ? 'bold 12px monospace' : '5px monospace';
      ctx.textAlign = 'center';
      ctx.fillText(labelName.toUpperCase(), px + (isLarge ? 64 : 16), py - (isLarge ? 90 : 24));
