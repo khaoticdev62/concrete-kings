@@ -714,6 +714,23 @@
           <button class="secondary" style="font-size:7px; padding:6px 10px;" onclick="app.toggleSFX()">SOUND</button>
           <button class="secondary" style="font-size:7px; padding:6px 10px;" onclick="app.toggleAccessModal()">ACCESSIBILITY</button>
         </div>
+
+        <!-- Player Level & Daily Quests Panel -->
+        <div class="panel" style="margin-top:16px; background:#101116; border:1px solid #2d313d; padding:12px; text-align:left;">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #2d313d; padding-bottom:6px; margin-bottom:8px;">
+            <div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#ffcd68;">
+              PLAYER LEVEL: <span id="playerLevelVal" style="color:#6fe8d8;">LVL 1</span>
+            </div>
+            <div style="font-family:'Press Start 2P', monospace; font-size:7px; color:#a0aac2;">
+              XP: <span id="playerXpVal" style="color:#ffffff;">0/100</span>
+            </div>
+          </div>
+          <div style="width:100%; background:#22252e; height:6px; border-radius:3px; overflow:hidden; margin-bottom:10px;">
+            <div id="playerXpBar" style="width:0%; background:#339488; height:100%;"></div>
+          </div>
+          <div style="font-family:'Press Start 2P', monospace; font-size:7px; color:#ff7a45; margin-bottom:6px;">DAILY QUESTS</div>
+          <div id="dailyQuestsList" style="display:flex; flex-direction:column; gap:6px; font-size:10px; font-family:'JetBrains Mono', monospace;"></div>
+        </div>
       </div>
     </div>
 
@@ -1707,6 +1724,7 @@
 <script src="src/pixel_engine/mini-games/games/haircut-challenge.js"></script>
 <script src="src/pixel_engine/mini-games/games/lockpicking.js"></script>
 <script src="src/pixel_engine/mini-games/games/negotiation.js"></script>
+<script src="src/pixel_engine/player-progression.js"></script>
 <script>
 /* ==================================
    CONCRETE KINGS - 16-Bit Retro Game
@@ -2539,6 +2557,41 @@ const app = {
     this.initCharacterCreation();
     this.initAccessibility();
     this.restoreFirstMilesCampaign();
+
+    if (typeof PlayerProgression !== 'undefined') {
+      this.progression = new PlayerProgression();
+      this.renderProgressionUI();
+    }
+  },
+
+  renderProgressionUI() {
+    if (!this.progression) return;
+    const lvlEl = document.getElementById('playerLevelVal');
+    const xpValEl = document.getElementById('playerXpVal');
+    const xpBarEl = document.getElementById('playerXpBar');
+    const listEl = document.getElementById('dailyQuestsList');
+
+    if (lvlEl) lvlEl.textContent = `LVL ${this.progression.level}`;
+    if (xpValEl) xpValEl.textContent = `${this.progression.progressInLevel}/100`;
+    if (xpBarEl) xpBarEl.style.width = `${this.progression.progressInLevel}%`;
+
+    if (listEl) {
+      listEl.innerHTML = '';
+      this.progression.quests.forEach(q => {
+        const div = document.createElement('div');
+        div.style.cssText = `background:${q.completed ? 'rgba(51,148,136,0.15)' : '#181920'}; border:1px solid ${q.completed ? '#339488' : '#2d313d'}; padding:6px; border-radius:3px; display:flex; justify-content:space-between; align-items:center;`;
+        div.innerHTML = `
+          <div>
+            <div style="font-family:'Press Start 2P', monospace; font-size:7px; color:${q.completed ? '#6fe8d8' : '#ffcd68'};">${q.title} (${q.progress}/${q.target})</div>
+            <div style="color:#a0aac2; font-size:9px;">${q.desc}</div>
+          </div>
+          <div style="font-family:'Press Start 2P', monospace; font-size:7px; color:${q.completed ? '#6fe8d8' : '#10b981'}; text-align:right;">
+            ${q.completed ? 'COMPLETED' : `+${q.rewardXp} XP`}
+          </div>
+        `;
+        listEl.appendChild(div);
+      });
+    }
   },
 
   /* ---------- CHARACTER CREATION & ATTRIBUTES ---------- */
