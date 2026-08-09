@@ -8,6 +8,28 @@
 
 **Tech Stack:** Plain CommonJS JS (dual `window.X` / `module.exports` per file), HTML5 Canvas2D, Node's built-in `node --test` runner, zero external rendering/test dependencies (repo has no jsdom/canvas package and none should be added).
 
+## STATUS — 2026-08-09: COMPLETE, WITH THREE TASKS RETIRED AS STALE
+
+Do not execute this plan as written. It was authored against a codebase that has
+since changed underneath it, and a pre-flight pass found three of its seven tasks
+aimed at code that no longer runs.
+
+| Task | Outcome |
+|---|---|
+| 1 — palette-shift / pixel-snap helpers | **Done.** `paletteShift` deviates from the plan: shifting within the four palette *groups* crosses ramp boundaries (warm_tones is reds then browns; cool_tones is blues, teals, violets), so `#FFE299 + 1` became dark brown. Ramps are derived from luminance drops instead. |
+| 2 — offscreen parallax layer caching | **Retired.** `PixelCanvasEngine` is never instantiated; `this.pixelEngine` was read in three places and every guard was permanently false. Those calls are deleted. |
+| 3 — lightmap | **Done, retargeted.** Now `src/pixel_engine/lightmap.js` over the top-down map, driven by each district's existing `lamp` decor. |
+| 4 — wire parallax into the render loop | **Retired.** `drawProceduralBackground` was defined but never called — 130 lines orphaned when the top-down map replaced the side-on viewport. Deleted. Parallax depth is meaningless looking straight down. |
+| 5 — palette-index character shading | **Done**, plus the regression test it lacked. That test caught the floating name tag drawing in `#ffffff`, a 65th colour. |
+| 6 — neon flicker curve + card wrap memoisation | **Done**, plus the four tests it lacked. |
+| 7 — full verification pass | **Done.** 291 tests passing. |
+
+Two of the plan's own premises were also wrong and are worth remembering:
+the suite was 75 tests when this was written and is now 291, and the plan assumed
+the side-on background was live. **Pre-flight any older plan against the code
+before executing it.**
+
+---
 ## Global Constraints
 
 - Strict 4-frame animation budget (frames 0,1,2,3) on every animated system — non-negotiable, already enforced by `WeatherEffectsSystem.frameIndex`, `CardVisualRenderer.shimmerFrame`, `PixelCanvasEngine.animationFrameCount`; new code must not exceed it.
