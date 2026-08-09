@@ -43,3 +43,49 @@ test('Card Visual System: CardVisualRenderer adheres to strict 4-frame shimmer a
   assert.equal(renderer.advanceShimmerFrame(), 3);
   assert.equal(renderer.advanceShimmerFrame(), 0, 'Frame 4 cycles back to 0');
 });
+
+test('Card Visuals: text wrapping is memoised, so measureText is not re-run every render', () => {
+  // renderCardText re-wraps on every draw, and the shimmer loop redraws cards
+  // continuously. measureText forces a text-metrics computation per word per
+  // frame, which is the most expensive thing on the card path.
+  let measureCalls = 0;
+  const ctx = {
+    fillStyle: '', font: '', textAlign: '', strokeStyle: '', lineWidth: 1,
+    fillRect() {}, strokeRect() {}, fillText() {}, beginPath() {}, closePath() {},
+    moveTo() {}, lineTo() {}, fill() {}, stroke() {}, save() {}, restore() {},
+    createLinearGradient() { return { addColorStop() {} }; },
+    measureText(s) { measureCalls++; return { width: s.length * 6 }; }
+  };
+
+  const renderer = new CardVisualRenderer({ width: 160, height: 240 });
+  const text = 'the landlord said the rent is due and the heat is still off';
+  const category = { type: CARD_TYPES.BLACK, accent: '#F25438', label: 'TEST' };
+
+  renderer.renderCardText(ctx, text, category);
+  const afterFirst = measureCalls;
+  assert.ok(afterFirst > 0, 'the first wrap must actually measure');
+
+  for (let i = 0; i < 5; i++) renderer.renderCardText(ctx, text, category);
+  assert.equal(measureCalls, afterFirst,
+    `repeat renders must hit the cache, but measureText ran ${measureCalls - afterFirst} more times`);
+});
+
+test('Card Visuals: the wrap cache is keyed on width, so a differently sized card re-wraps', () => {
+  // Keying on text alone would hand a narrow card the line breaks computed for a
+  // wide one, silently overflowing it.
+  let measureCalls = 0;
+  const makeCtx = () => ({
+    fillStyle: '', font: '', textAlign: '', strokeStyle: '', lineWidth: 1,
+    fillRect() {}, strokeRect() {}, fillText() {}, beginPath() {}, closePath() {},
+    moveTo() {}, lineTo() {}, fill() {}, stroke() {}, save() {}, restore() {},
+    createLinearGradient() { return { addColorStop() {} }; },
+    measureText(s) { measureCalls++; return { width: s.length * 6 }; }
+  });
+  const text = 'a completely different string for this width keying test';
+  const category = { type: CARD_TYPES.WHITE, accent: '#FFCD68', label: 'TEST' };
+
+  new CardVisualRenderer({ width: 160, height: 240 }).renderCardText(makeCtx(), text, category);
+  const afterWide = measureCalls;
+  new CardVisualRenderer({ width: 96, height: 240 }).renderCardText(makeCtx(), text, category);
+  assert.ok(measureCalls > afterWide, "a new width must recompute rather than reuse another width's wrap");
+});
