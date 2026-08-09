@@ -400,7 +400,14 @@ class FirstMilesCampaign {
 
   recordHistory(beat, cardText, category, text) {
     if (!this.state) return;
-    this.state.receipts.push({ beat: beat.beat, text: cardText, category });
+    if (!Array.isArray(this.state.beatHistory)) this.state.beatHistory = [];
+    this.state.beatHistory.push({
+      beat: beat.beat || beat.id,
+      title: beat.title,
+      cardText,
+      category,
+      text
+    });
   }
 
   resolveEnding() {
@@ -419,6 +426,31 @@ class FirstMilesCampaign {
   trustBalanced() {
     const values = Object.values(this.state.trust);
     return values.every(v => v >= 1 && v <= 3);
+  }
+
+  getOriginSecretCallbackText() {
+    const secret = this.state.originSecret;
+    if (!secret) return '';
+    switch (secret) {
+      case 'shop_debt':
+        return 'SECRET CALLBACK: old shop debt can buy silence or force a reckoning.';
+      case 'expelled_record':
+        return 'SECRET CALLBACK: the expelled record can clear your name or bury you.';
+      case 'old_tapes':
+        return 'SECRET CALLBACK: the old tapes only help if someone still believes you.';
+      case 'supply_ledger':
+        return 'SECRET CALLBACK: the supply ledger can redirect shipments—or expose them.';
+      case 'petition_file':
+        return 'SECRET CALLBACK: the petition file shifts power if it ever goes public.';
+      case 'bootleg_track':
+        return 'SECRET CALLBACK: the bootleg track can start a riot or save a life.';
+      case 'site_plans':
+        return 'SECRET CALLBACK: the site plans prove what they tried to hide.';
+      case 'old_contact':
+        return 'SECRET CALLBACK: the old contact answers only once.';
+      default:
+        return `SECRET IN PLAY: ${secret}`;
+    }
   }
 
   renderIntro() {

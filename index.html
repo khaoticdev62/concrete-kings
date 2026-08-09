@@ -1303,6 +1303,7 @@
     <div class="panel" style="max-width: 640px; margin: 0 auto; text-align: center; padding: 24px;">
       <h2 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68;">EPILOGUE</h2>
       <div id="campaignEndingTitle" style="font-family:'Press Start 2P', monospace; font-size:12px; color:#ff7a45; margin-bottom:8px;"></div>
+      <div id="campaignEndingBody" style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; line-height:1.6;"></div>
       <p id="campaignEndingText" style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; line-height:1.5;"></p>
       <div style="margin-top:14px; display:flex; gap:10px; justify-content:center;">
         <button class="primary" onclick="app.startJourneyCampaign()" style="font-family:'Press Start 2P', monospace; font-size:8px; background:#ffcd68; border-color:#ffcd68; color:#101116;">NEW GAME+</button>
@@ -4189,6 +4190,51 @@ const app = {
 
   chooseWinner(index) {
     this.clearJudgingCountdown();
+    if (this.firstMilesCampaign) {
+      const win = this.game.submissions[index];
+      const cardText = win ? win.card : 'Walk the block';
+      const result = this.firstMilesCampaign.choose(cardText);
+      this.game.submissions = [];
+      this.game.selected.clear();
+
+      if (result.ended) {
+        document.getElementById('winnerName').textContent = result.endingTitle || 'FIN';
+        document.getElementById('winnerCard').textContent = result.endingText || '';
+        const me = this.game.players[this.humanIndex];
+        const rep = me && me.stats ? me.stats.reputation : 0;
+        const cash = me && me.stats ? me.stats.streetCred : 0;
+        const metaEl = document.getElementById('winnerMeta');
+        metaEl.style.display = 'block';
+        metaEl.textContent = `FINAL STATS: HEAT ${this.firstMilesCampaign.state.heat} | TRUST ${this.firstMilesCampaign.state.trust} | REP ${rep} | CASH ${cash}`;
+
+        const nextBtn = document.querySelector('#roundResult button');
+        if (nextBtn) {
+          nextBtn.setAttribute('onclick', 'app.endCampaignRun()');
+          nextBtn.textContent = 'BACK TO STOOP';
+        }
+
+        const reviewLogBtn = document.getElementById('reviewLogBtn');
+        if (reviewLogBtn) reviewLogBtn.style.display = 'inline-block';
+      } else {
+        document.getElementById('winnerName').textContent = `BEAT WINNER: ${(win && win.player) ? win.player.toUpperCase() : 'YOU'}`;
+        document.getElementById('winnerCard').textContent = `"${cardText}"`;
+        const beatMetaEl = document.getElementById('winnerMeta');
+        beatMetaEl.style.display = 'block';
+        beatMetaEl.textContent = result.consequenceText || '';
+
+        const nextBtn = document.querySelector('#roundResult button');
+        if (nextBtn) {
+          nextBtn.setAttribute('onclick', 'app.nextRound()');
+          nextBtn.textContent = 'NEXT ROUND';
+        }
+      }
+      this.show('roundResult');
+      if (!result.ended) {
+        this.startResolutionAutoAdvance();
+      }
+      return;
+    }
+
     if (this.storyEngine && this.storyEngine.active) {
       const win = this.game.submissions[index];
       const result = this.storyEngine.applyWinnerCard(win.card);
@@ -4280,6 +4326,26 @@ const app = {
 
   nextRound() {
     this.clearResolutionAutoAdvance();
+    if (this.firstMilesCampaign) {
+      const beat = this.firstMilesCampaign.currentBeatData;
+      if (!beat) {
+        this.endCampaignRun();
+        return;
+      }
+
+      this.game.currentBlack = {
+        raw: beat.blackCard,
+        prompt: beat.blackCard,
+        hasDice: false,
+        effect: null
+      };
+      this.firstMilesCampaign.renderBeat();
+      this.show('game');
+      this.renderGame();
+      this.runNarrativeBotTurns();
+      return;
+    }
+
     if (this.storyEngine && this.storyEngine.active) {
       const beat = this.storyEngine.getCurrentBeat();
       
@@ -5344,6 +5410,7 @@ const app = {
   endNarrativeGame() {
     this.clearResolutionAutoAdvance();
     this.storyEngine = null;
+    this.firstMilesCampaign = null;
     document.getElementById('narrativeTextBox').style.display = 'none';
     
     const nextBtn = document.querySelector('#roundResult button');
@@ -5357,13 +5424,92 @@ const app = {
     this.show('setup');
   },
 
+  endCampaignRun() {
+    this.clearResolutionAutoAdvance();
+    this.firstMilesCampaign = null;
+    this.storyEngine = null;
+    document.getElementById('narrativeTextBox').style.display = 'none';
+
+    const nextBtn = document.querySelector('#roundResult button');
+    if (nextBtn) {
+      nextBtn.setAttribute('onclick', 'app.nextRound()');
+      nextBtn.textContent = 'NEXT ROUND';
+    }
+    const reviewLogBtn = document.getElementById('reviewLogBtn');
+    if (reviewLogBtn) reviewLogBtn.style.display = 'none';
+
+    this.show('setup');
+  },
+
+  renderCampaignIntro() {
+    if (!this.firstMilesCampaign) return;
+    const state = this.firstMilesCampaign.state;
+    const title = document.getElementById('campaignIntroTitle');
+    const body = document.getElementById('campaignIntroBody');
+    if (title) title.textContent = 'FIRST MILES';
+    if (body) body.textContent = `Origin: ${state.origin || '?'} | Secret: ${state.originSecret || '?'}\nBeat progression is active.`;
+    this.show('game');
+  },
+
+  renderCampaignBeat() {
+    if (!this.firstMilesCampaign) return;
+    const beat = this.firstMilesCampaign.currentBeatData;
+    if (!beat) return this.renderCampaignEpilogue();
+    const title = document.getElementById('campaignBeatTitle');
+    const day = document.getElementById('campaignBeatDay');
+    const narrative = document.getElementById('campaignBeatNarrative');
+    const prompt = document.getElementById('campaignBeatPrompt');
+    if (title) title.textContent = `BEAT ${beat.beat || this.firstMilesCampaign.state.currentBeat}: ${(beat.title || '').toUpperCase()}`;
+    if (day) day.textContent = String(beat.day || this.firstMilesCampaign.state.day || 1);
+    if (narrative) narrative.textContent = beat.narrative || '';
+    if (prompt) prompt.textContent = beat.blackCard || '';
+    this.updateCampaignBeatPreview(beat);
+  },
+
+  renderCampaignEpilogue() {
+    const ending = this.firstMilesCampaign && this.firstMilesCampaign.resolveEnding();
+    const title = document.getElementById('campaignEndingTitle');
+    const body = document.getElementById('campaignEndingBody');
+    if (title) title.textContent = ending ? ending.title : 'FIN';
+    if (body) body.textContent = ending ? ending.text : '';
+    this.show('campaignEnding');
+  },
+
+  updateCampaignBeatPreview(beat) {
+    if (!this.firstMilesCampaign || !beat) return;
+    const state = this.firstMilesCampaign.state;
+    const preview = [];
+    const secretText = this.firstMilesCampaign.getOriginSecretCallbackText && this.firstMilesCampaign.getOriginSecretCallbackText();
+    if (secretText) preview.push(secretText);
+    else if (state.originSecret) preview.push(`SECRET IN PLAY: ${state.originSecret}`);
+
+    const completed = new Set(state.sideQuestsCompleted || []);
+    const pendingQuests = Object.entries(FIRST_MILES_SIDE_QUESTS)
+      .filter(([id, q]) => !completed.has(id) && state.day >= q.day[0] && state.day <= q.day[1])
+      .slice(0, 3)
+      .map(([, q]) => q.title);
+    if (pendingQuests.length) preview.push('SIDE QUESTS: ' + pendingQuests.join(', '));
+    if (state.heat >= 7) preview.push('HEAT SPIKE: choices are narrowing');
+
+    const bar = document.getElementById('campaignChoiceBar');
+    if (bar && preview.length) {
+      bar.innerHTML = preview.map(line =>
+        `<div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#6fe8d8; background:#101116; border:1px dashed #393e4d; padding:8px;">${line}</div>`
+      ).join('');
+    }
+  },
+
   showReviewLog() {
-    if (!this.storyEngine) return;
-    const content = this.storyEngine.history.map(entry =>
-      `<strong>BEAT ${entry.beat}:</strong> "${entry.card}"<br/><span class="muted">${entry.consequenceText}</span>`
+    const history = (this.campaignEngine && Array.isArray(this.campaignEngine.state.beatHistory))
+      ? this.campaignEngine.state.beatHistory
+      : (this.storyEngine && Array.isArray(this.storyEngine.history) ? this.storyEngine.history : []);
+    const content = history.map(entry =>
+      `<strong>BEAT ${entry.beat}:</strong> ${entry.title || ''} — "${entry.cardText || entry.card || ''}"<br/><span class="muted">${entry.text || entry.consequenceText || ''}</span>`
     ).join('<br/><br/>');
-    document.getElementById('reviewLogContent').innerHTML = content || '<span class="muted">No beats recorded.</span>';
-    document.getElementById('reviewLogModal').style.display = 'flex';
+    const reviewLogContent = document.getElementById('reviewLogContent');
+    if (reviewLogContent) reviewLogContent.innerHTML = content || '<span class="muted">No beats recorded.</span>';
+    const reviewLogModal = document.getElementById('reviewLogModal');
+    if (reviewLogModal) reviewLogModal.style.display = 'flex';
   },
 
   renderLobbyBrowserList(rooms) {
