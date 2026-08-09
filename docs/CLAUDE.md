@@ -2,49 +2,113 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> **Read `HANDOFF.md` in the repo root first.** It documents five failure modes in
-> this codebase that fail *silently* — including two that the test suite cannot
-> catch by construction (browser-only global collisions, and layout that always
-> measures as a perfect fit). It also records current state, asset rules, and
-> what is deliberately unbuilt. This file describes the project; HANDOFF.md
-> describes the traps.
+> **Read `HANDOFF.md` in the repo root first.** It documents eleven failure modes in this
+> codebase that fail *silently*, several of which the test suite cannot catch by
+> construction. Its section 0 is two rules that would have saved more time than everything
+> else in it. This file describes what the project **is**; HANDOFF.md describes the
+> **traps** and where things stand.
 
 ## What this is
 
-Concrete Kings is a Cards-Against-Humanity-style party game with Black-culture-focused, AAVE-voiced content. There is a large gap between what's **built** and what's **designed**:
+Concrete Kings: The Block Chronicles — a Cards-Against-Humanity-derived party game with
+Black-culture-focused, AAVE-voiced content, built out into a narrative RPG. Plain
+HTML/CSS/JS, no build step, plus a small Node WebSocket relay for online play.
 
-- **Built (working code):** `index.html` + `server/server.js` — a single-file client and a small Node WebSocket relay implementing a straightforward CAH clone (black-card prompt, white-card hand, judge picks a winner, first to N points wins). Offline pass-and-play mode is fully self-contained in the browser; online mode uses the WS server for room join/leave/broadcast, but game logic (dealing, judging, scoring) still runs client-side per browser — the server only relays messages and tracks player names/points, it does not referee gameplay.
-- **Partially implemented — RPG mechanics layer:** a subset of the "narrative RPG" vision now exists in code and is wired into the core game loop for **offline** play: player stats are pruned to `{streetCred, reputation}` (shown live in a Stat HUD), `ReceiptSystem` (win-streak receipts), `AllianceSystem` (Cookout Alliance proposals), `CornerHustleBetting` (dice-roll betting), and O.G. Judge powers (Veto / Double-Down) are all implemented and tested in `Game`/the standalone system objects, with controls surfaced in the main play UI (not just the dev console). These four controls (`vetoBtn`, `doubleDownBtn`, the bet prompt, the alliance prompt) are hidden whenever `app.game.mode === MODE.ONLINE` — see the online-sync note below for why.
-- **Still only designed, not implemented:** the rest of the root-level `*.md` files (`DESIGN.md`, `GAME-MECHANICS-E2E.md`, `GAME-MECHANICS-ADVANCED.md`, `DESIGN-CARD-ANIMATION.md`, `CLAUDE-AAVE-MASTER-PROMPT.md`, `CLAUDE-DESIGN-PROMPT.md`, `CONTENT-*-EXPANDED.md`) describe a broader vision beyond the mechanics above — persistent characters, a Block Map, a full AAVE-first voice system, and a planned Godot port. `wireframes/*.html` are standalone, unwired HTML mockups of that aspirational UI (character creation, judge phase with O.G. powers, block map, cookout alliance, game over) — they are not connected to `index.html` and use a different visual/mechanical model than the shipped game.
+The gap between "built" and "designed" that earlier versions of this file warned about has
+largely closed on the mechanics side. Built and working:
 
-When asked to "implement the design" or "add feature X from the docs," check first whether it's describing the RPG vision docs (net-new work, needs scoping) or the shipped CAH game (`index.html`/`server.js`, incremental change). Don't assume the docs reflect current app state.
+- **The card table** — black-card prompt, white-card hand, judge crowns a winner, first to
+  N points. Offline pass-and-play is self-contained in the browser.
+- **RPG layer** — `TRUST / HEAT / REP / CASH`, `str/wit/soul` attributes, origins and a
+  4-step character-creation wizard, XP and levels, receipts, Cookout Alliances,
+  corner-hustle betting, O.G. Judge veto and double-down.
+- **A top-down walkable city** — 8 districts, per-axis collision, camera, travel gated on
+  heat, weather, lamp lighting, district arrival art. **Entirely procedural**: there is no
+  district terrain art at all, and the renderer's asset branches have never run against
+  real terrain sprites. See HANDOFF section 5.
+- **Five mini-games** with a shared manager, and a CASH shop selling prep items that
+  modify them.
+- **A solo campaign** (`first-miles-campaign.js`) with beats, choices, flags and endings.
+- **The block ledger** (`canon-engine.js`) — every crowned card is recorded, motifs
+  accumulate into block legends, a prompt naming one pays a callback bonus, and THE RECORD
+  screen shows what the block remembers. Persists across sessions in its own
+  `localStorage` key.
+- **Scenario mode** (`scenario-engine.js`) — complete a scenario with four cards
+  (WHO/WHAT/HOW/TWIST), watch it play out beat by beat, then live with the consequences.
+  Cards are intent; stats are execution; the world state is the consequence.
+
+**Still only designed:** most of `GAME-MECHANICS-ADVANCED.md`, factions,
+inventory-from-cards, quest generation, an AI narrator, and a Godot port. `CARD RPG.md` is
+a 76-section PRD plus a v2 revision — the v2 core loop is built, the rest is not. Two specs
+record exactly what was excluded and why:
+`docs/superpowers/specs/2026-08-09-block-remembers-canon-design.md` and the scenario
+engine's own header comment.
+
+When asked to "implement the design", check first whether the request describes a vision
+doc (net-new, needs scoping) or shipped code (incremental). **The docs do not all reflect
+app state** — several describe systems that were investigated and deliberately rejected,
+and HANDOFF section 8 records those so they are not re-attempted.
 
 ## Commands
 
 ```bash
-npm install        # installs the one runtime dependency: ws
-npm test           # sanity-checks index.html's inline <script> and server/server.js both parse as valid JS
-node server/server.js   # run the server (serves index.html statically + WS relay), default port 3001, override with PORT env var
+npm install             # one runtime dependency: ws
+npm test                # syntax-checks index.html/cards.js/server.js, then node --test over test/**
+node server/server.js   # serves the repo statically + WS relay. PORT 3001, not 3000
+node scripts/generate-palette-json.js   # regenerate assets/palettes/concrete_kings.json
+node scripts/generate-cards.js          # regenerate cards.js from the card database
 ```
 
-There is no build step, bundler, or transpiler — `index.html` is plain HTML/CSS/JS served as-is, and `server/server.js` is plain CommonJS Node with no external deps besides `ws`. There is no lint config and no test framework beyond the smoke-test `npm test` script.
+No build step, bundler, transpiler or lint config. Current state: **363 tests across 58
+files, all passing**. Always run `npm test` rather than `node --test` — the npm script also
+syntax-checks `index.html`'s inline `<script>`, which the test runner never sees.
 
-To run locally: `node server/server.js`, then open `http://localhost:3001`.
+## Architecture
 
-## Architecture (index.html)
+**`index.html` (~6900 lines)** holds all client code in one inline `<script>`:
 
-Everything client-side lives inline in `index.html`'s single `<script>` block:
+- `Deck` — shuffle/draw with reshuffle.
+- `Game` — pure rules and state: players, hands, judging, scoring, the block ledger.
+  **No DOM references.**
+- `app` — the controller. Screen transitions via `.screen.active`, rendering, offline and
+  online flows. Everything player-facing hangs off `app`.
 
-- `Deck` — generic shuffle/draw-with-reshuffle over an array (used for both black and white card decks).
-- `Game` — pure game state and rules: players, hands, current black card, dice-effect prompt mutation, judge rotation, submissions, scoring. No DOM references.
-- `app` — the UI/controller layer: owns the single `Game` instance, drives screen transitions (`.screen.active` toggling between `setup` / `lobby` / `game` / `judging` / `roundResult` / `gameOver`), renders hand/scoreboard/submissions into the DOM, and handles both offline and online flows.
+**`src/pixel_engine/*.js`** load as classic `<script>` tags **sharing one global scope**,
+and also export via `module.exports` for tests. That dual nature is the source of a whole
+bug class that node cannot see — HANDOFF trap 2.4. Engine files use file-prefixed locals
+(`CTRL_WORLD`, `RND_WORLD`, `SCN_SLOTS`, `CANON_TIERS`) for exactly this reason.
 
-**Offline mode:** single `Game` instance shared by all "players," pass-and-play — `app.humanIndex` tracks whose turn it is and `showPassDevice()` prompts "pass the device."
+The module table lives in HANDOFF section 3 rather than being duplicated here.
 
-**Online mode:** each browser still runs its own local `Game` instance (players/hands/deck state are NOT synced or authoritative on the server). The `WebSocket` connection (see message types below) is used to relay room membership and human-readable event text between clients; card game state itself does not currently flow through it end-to-end. Treat this as the biggest architectural gap if extending multiplayer — a faithful synced online mode would need the server (or one client) to own canonical `Game` state. This is also why the O.G. Veto/Double-Down, dice betting, and Cookout Alliance controls are hidden in online mode: those actions only mutate the clicking browser's local `Game`, so surfacing them online would let a player take an action that no other player in the room ever sees.
+**Online multiplayer is not authoritative.** Each browser runs its own `Game`; the server
+only relays. O.G. powers, betting and alliances are hidden in online mode because they
+would mutate only the clicking browser's state. A faithful synced mode needs the server or
+one client to own canonical `Game` state — still the biggest architectural gap.
 
-Card content (`BLACK_CARDS`, `WHITE_CARDS`, `DICE_EFFECTS`) is inlined as JS arrays in the same script block — this is the actual in-game card pool, distinct from and much smaller than the card lists proposed in the root `CONTENT-*.md` docs.
+The block ledger and the scenario engine are both **deterministic** — no `Math.random` in
+either — specifically so they can eventually sync. Two clients replaying the same rounds
+must derive the same history, or players see different endings.
 
 ## Architecture (server/server.js)
 
-Plain `http` server that static-file-serves the repo root (path-traversal-guarded via `path.resolve`/`startsWith` check) plus a `ws` `WebSocketServer` attached to the same HTTP server. Room state lives in an in-memory `Map` (`rooms`) keyed by room code — no persistence, so all rooms/scores are lost on restart. WS message protocol (`msg.type`): `join`, `leave`, `start`, `black`, `roll`, `submission`, `judge_phase`, `winner` — each is broadcast to other clients in the same room via `broadcast()`. There's no auth, no room-code collision handling beyond last-writer-wins, and no validation that a sender is actually the judge/host before honoring privileged message types (`start`, `winner`) — treat this as untrusted-input surface if hardening multiplayer.
+Plain `http` server static-serving the repo root (path-traversal-guarded via
+`path.resolve`/`startsWith`) plus a `ws` `WebSocketServer` on the same HTTP server. Room
+state is an in-memory `Map` keyed by room code — no persistence, so rooms and scores are
+lost on restart. Message types: `join`, `leave`, `start`, `black`, `roll`, `submission`,
+`judge_phase`, `winner`, `chat`, `system`.
+
+**Untrusted-input surface:** no auth, no room-code collision handling beyond
+last-writer-wins, and no validation that a sender is actually the judge or host before
+honouring privileged types (`start`, `winner`). Harden here first if securing multiplayer.
+
+## Content and the palette
+
+`cards.js` is **generated** from `docs/CONCRETE-KINGS-CARD-DATABASE.md` — do not hand-edit;
+re-run `scripts/generate-cards.js`. Cards are plain strings with **no metadata**, so
+anything needing tags infers them from text (`canonTags` in `canon-engine.js`). Tagging
+1137 lines by hand would drift from the generator on its next run.
+
+The palette is **101 colours in 9 named ramps**, authored in `pixel-engine.js`, which is
+the authority; `assets/palettes/concrete_kings.json` is generated from it and a test
+asserts they match. Shade with `paletteShift(colour, ±n)` — never darken a hex
+arithmetically. See HANDOFF section 5 for why ramp step size is load-bearing.

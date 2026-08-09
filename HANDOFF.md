@@ -1,8 +1,24 @@
 # Concrete Kings — Agent Handoff
 
-Last updated 2026-08-08. Read this before touching the codebase. It exists to
+Last updated 2026-08-09. Read this before touching the codebase. It exists to
 stop you rediscovering the same traps: several bugs here fail **silently** and
 some are invisible to the test suite by construction.
+
+---
+
+## 0. The two rules that would have saved the most time
+
+**Commit as soon as something works.** Another agent has been committing to this
+working tree, and `git checkout`/`reset` from a concurrent session has destroyed
+uncommitted work here repeatedly — a full day of map work once, and most of an
+edit to this very file. `git reflog` and `git log` are the recovery path; your own
+recollection is not. If a change is green, commit it before starting the next one.
+Prefer applying an edit and committing it in **one** command.
+
+**Mutation-test every test that reads source text.** Delete the thing the test
+claims to check and confirm it fails. Three tests written here passed against
+source with the feature *removed* — see trap 2.10. If you have not watched a test
+fail, you do not know what it tests.
 
 ---
 
@@ -16,7 +32,8 @@ node server/server.js        # serves index.html + WS relay on port 3001
 
 Open `http://localhost:3001`. **Port is 3001, not 3000.**
 
-Current state: **250 tests, all passing**.
+Current state: **363 tests across 58 files, all passing. Zero console errors on
+load** — check the browser console, not just the suite; see trap 2.5.
 
 Always run `npm test` and not just `node --test` — the npm script also
 syntax-checks `index.html`'s inline `<script>`, `cards.js` and `server/server.js`,
@@ -24,7 +41,7 @@ which catches parse errors the test runner never sees.
 
 ---
 
-## 2. Eight traps that will cost you hours
+## 2. Eleven traps that will cost you hours
 
 ### 2.1 You cannot measure layout with `documentElement.scrollHeight`
 
@@ -173,7 +190,7 @@ atlas, declare explicit `x`/`w` per slice and check the count.
 
 ## 3. Architecture
 
-**`index.html` (~5900 lines)** holds all client code in one inline `<script>`:
+**`index.html` (~6900 lines)** holds all client code in one inline `<script>`:
 
 - `Deck` — shuffle/draw with reshuffle
 - `Game` — pure rules and state (players, hands, judging, scoring). No DOM.
@@ -185,6 +202,11 @@ exporting via `module.exports` for tests:
 
 | File | Role |
 |---|---|
+| `animation-system.js` | `Animator`. **Must load first** — others resolve it at parse time |
+| `canon-engine.js` | The block ledger: motifs, legends, callbacks, chronicle |
+| `scenario-engine.js` | Scenario slots, resolution, outcome tiers, scene beats |
+| `lightmap.js` | Pooled lamp light. Must load **before** the renderer |
+| `player-progression.js` | XP, levels, daily quests |
 | `asset-registry.js` | Manifest sprite lookup, **null means draw procedurally** |
 | `topdown-city-data.js` | 8 district layouts, pure data |
 | `topdown-city-renderer.js` | Draws the city; asset-first, procedural fallback |
@@ -194,6 +216,13 @@ exporting via `module.exports` for tests:
 | `weather-effects-system.js` | Rain/sirens/neon, composites onto the map canvas |
 | `first-miles-campaign.js` | Solo campaign content, own internal state |
 | `mini-games/` | 5 mini-games + manager/loop/input/UI |
+
+**Load order matters and is tested.** `animation-system.js` must precede everything
+that destructures `Animator`; `lightmap.js` must precede `topdown-city-renderer.js`,
+which resolves `window.TopDownLightmap` while parsing.
+`test/global-collisions.test.js` asserts both, and that no two `<script>`-loaded
+files declare the same top-level name — including via destructuring, which is how a
+browser-fatal `Animator` collision once shipped with a fully green suite.
 
 **Online multiplayer is not authoritative.** Each browser runs its own `Game`;
 the server only relays. O.G. powers, betting and alliances are hidden in online
@@ -214,6 +243,8 @@ result, and game over with full standings.
 | `judging` / `roundResult` / `gameOver` | Reuse the frame; measured, fine |
 | `blockMap` | Top-down walkable city, 8 districts. Fits exactly, no scroll |
 | `npcPoiScene` | NPC scenes with generated art backdrops |
+| `scenario` | **RUN IT** — complete a scenario, watch it happen, live with it |
+| `chronicle` | **THE RECORD** — what the block remembers. Reachable from the menu |
 | `minigameCatalog`, `deckBuilder`, `lobby`, `campaign*` | Measured, fine |
 
 **Top-level modals** (`shopModal`, `shopUnavailableModal`, `accessModal`) must
@@ -231,7 +262,7 @@ accessibility setting was unreachable. `test/cash-shop.test.js` guards placement
 | Path | State |
 |---|---|
 | `scenes/` (24) | Excellent 3/4 street-level art. **Cannot tile** — fixed perspective |
-| `scenes/web/` (9) | 960px PNG8 web copies, ~150KB. **These** are what the game loads |
+| `scenes/web/` (25) | 960px PNG8 web copies, ~150KB. **These** are what the game loads |
 | `topdown-recolor/` (12) | Right shapes, wrong palette. Recolourable via `SpriteRenderer` |
 | `props/web/` (5) | POI prop sprites, transparent PNG32, 80KB total. **Wired and drawing** |
 | `decals/` (4) | Usable |
@@ -244,10 +275,21 @@ accessibility setting was unreachable. `test/cash-shop.test.js` guards placement
 - Never load a raw (5-14MB) in the browser. Downscale:
   `magick in.png -resize 960x -strip -colors 160 out.png` → ~150KB.
   PNG8 beats JPEG here; JPEG artifacts show badly on pixel art.
-- **The master palette contains no greens.** Only `#47C2B3` and `#6FE8D8`, both
-  UI accent teals. Foliage uses the dark teal-green ramp in `cool_tones`
-  (`#0D2926 / #174540 / #246961`). Do not invent greens — a test rejects any
-  colour not in the master palette.
+- **The palette is 101 colours in 9 named ramps**, authored in `pixel-engine.js` and
+  exported to `assets/palettes/concrete_kings.json` by
+  `scripts/generate-palette-json.js`. **The code is the authority; the JSON is
+  generated** — a test asserts they match, because they had already drifted once.
+- **There is a `green` ramp now.** The old "do not invent greens" rule existed only
+  because the 64-colour palette had none, and it is why every park rendered as a
+  teal slab. Foliage uses `green`; `teal` is for verdigris and cold accents.
+- **Every adjacent pair in a ramp is within CIELAB dE 12**, and a test enforces it.
+  This is not cosmetic: `paletteShift(colour, ±1)` is used for grain, dither
+  partners and highlights, so a large step reads as a change of *hue* rather than
+  shade. One step off brick used to be dE 19, which made roofs look like red
+  confetti and parapets like signal-red selection boxes. All 64 original colours
+  survive at their original ramp positions and a test pins them individually.
+- Large fills (ground, asphalt, roofs) must stay under luminance 120. Bright hues
+  belong in `lane`, `zebra` and `accent` only. Tested.
 - Large fills (ground, asphalt, roofs) must stay under luminance 120. Bright hues
   belong in `lane`, `zebra` and `accent` only. Tested.
 - `assets/manifest.json` declares the 8 city sources plus 5 POI props. City
