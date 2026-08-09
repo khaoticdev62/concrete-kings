@@ -263,21 +263,56 @@ class TopDownCityRenderer {
 
   drawPoi(ctx, poi, active, p) {
     const col = active ? p.accent : p.walkHi;
-    const size = 30;
-    this.fill(ctx, poi.x - size / 2 + SHADOW_OFFSET, poi.y - size / 2 + SHADOW_OFFSET, size, size, p.shadow);
-    this.fill(ctx, poi.x - size / 2, poi.y - size / 2, size, size, p.ground);
-    ctx.strokeStyle = col;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(Math.round(poi.x - size / 2), Math.round(poi.y - size / 2), size, size);
+
+    // POI props are shared across all eight districts — the same five POIs
+    // appear everywhere — so the lookup is district-agnostic, unlike every
+    // other element which prefixes the district.
+    const slice = this.registry
+      ? this.registry.get('prop_poi_' + poi.id.toLowerCase())
+      : null;
+
+    let footprint = 30;
+
+    if (slice) {
+      // Anchor the sprite so its base sits on the POI point, the way a real
+      // object stands on the ground rather than floating centred on it.
+      const w = slice.w;
+      const h = slice.h;
+      const x = poi.x - w / 2;
+      const y = poi.y - h + 10;
+
+      ctx.globalAlpha = 0.4;
+      ctx.fillStyle = p.shadow;
+      ctx.beginPath();
+      ctx.ellipse(poi.x, poi.y + 4, w * 0.42, 7, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      ctx.drawImage(slice.image, slice.x, slice.y, slice.w, slice.h, x, y, w, h);
+      this.stats.assetDraws++;
+
+      // Active POIs get an accent underline rather than a box, so the art is
+      // never boxed in by UI chrome.
+      if (active) this.fill(ctx, poi.x - w / 2, poi.y + 8, w, 3, col);
+
+      footprint = h;
+    } else {
+      this.fill(ctx, poi.x - footprint / 2 + SHADOW_OFFSET, poi.y - footprint / 2 + SHADOW_OFFSET, footprint, footprint, p.shadow);
+      this.fill(ctx, poi.x - footprint / 2, poi.y - footprint / 2, footprint, footprint, p.ground);
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(Math.round(poi.x - footprint / 2), Math.round(poi.y - footprint / 2), footprint, footprint);
+    }
 
     // Name renders on the map — this is what replaces the deleted legend.
     const label = POI_LABELS[poi.id] || poi.id;
     ctx.font = 'bold 11px monospace';
     ctx.textAlign = 'center';
     const w = ctx.measureText(label).width + 12;
-    this.fill(ctx, poi.x - w / 2, poi.y + size / 2 + 4, w, 15, p.ground);
+    const labelY = slice ? poi.y + 14 : poi.y + footprint / 2 + 4;
+    this.fill(ctx, poi.x - w / 2, labelY, w, 15, p.ground);
     ctx.fillStyle = col;
-    ctx.fillText(label, Math.round(poi.x), Math.round(poi.y + size / 2 + 15));
+    ctx.fillText(label, Math.round(poi.x), Math.round(labelY + 11));
     ctx.textAlign = 'left';
   }
 
