@@ -106,18 +106,40 @@ const PAL_NOLA = {
  * Every district shares this street skeleton: one horizontal avenue and one
  * vertical street. Districts differ by parcels, decoration and POI placement,
  * which is what makes them read as different places.
- *
- * The skeleton leaves four buildable quadrants:
- *   NW x 40..1080  y 60..560     NE x 1280..2360 y 60..560
- *   SW x 40..1080  y 770..1260   SE x 1280..2360 y 770..1260
- *
- * The sidewalk lanes at y=590 / y=726 and x=1110 / x=1234 are always clear of
- * parcels, so they are the safe places to anchor POIs.
  */
 const AVENUE_Y = 600;
 const AVENUE_H = 116;
 const STREET_X = 1120;
 const STREET_W = 104;
+
+/**
+ * Pavement depth on each frontage.
+ *
+ * These were 20px, and the tree, lamp and dumpster lines were placed OUTSIDE
+ * them — trees at y=566 and y=752 against a pavement of 580..600 and 716..736.
+ * So every district carried an unarticulated verge: a 60-90px band of bare
+ * `ground` between the back of the pavement and the building line, holding the
+ * street furniture and rendering as a featureless black gutter running the whole
+ * width of the map. It was the largest single reason the map read as flat, and no
+ * amount of shading fixes it, because there was nothing there to shade.
+ *
+ * The pavement now extends back to include those lines. A real street seen from
+ * above is a wide footway with a tree row on it and then the building frontage —
+ * so the trees stand on pavement, and the blocks come out to meet it.
+ */
+const PAVE_AVENUE = 60;   // covers the y=566 and y=752 tree lines
+const PAVE_STREET = 44;   // covers the x=1110 and x=1234 POI anchors
+
+/**
+ * Narrowest alley a player can actually walk down.
+ *
+ * PLAYER_BOX is 16x10 and movement is axis-separated, so a vertical slot needs
+ * more than 16px to pass sideways and a horizontal one more than 10px to pass
+ * through. Anything tighter is scenery pretending to be a route, and any POI
+ * behind it is unreachable — test/map-layout.test.js flood-fills the map to prove
+ * that cannot happen.
+ */
+const MIN_ALLEY = 20;
 
 function streetSkeleton() {
   return {
@@ -126,12 +148,174 @@ function streetSkeleton() {
       { x: STREET_X, y: 0, w: STREET_W, h: WORLD.height, dir: 'v' }
     ],
     sidewalks: [
-      { x: 0, y: AVENUE_Y - 20, w: WORLD.width, h: 20 },
-      { x: 0, y: AVENUE_Y + AVENUE_H, w: WORLD.width, h: 20 },
-      { x: STREET_X - 20, y: 0, w: 20, h: WORLD.height },
-      { x: STREET_X + STREET_W, y: 0, w: 20, h: WORLD.height }
+      { x: 0, y: AVENUE_Y - PAVE_AVENUE, w: WORLD.width, h: PAVE_AVENUE },
+      { x: 0, y: AVENUE_Y + AVENUE_H, w: WORLD.width, h: PAVE_AVENUE },
+      { x: STREET_X - PAVE_STREET, y: 0, w: PAVE_STREET, h: WORLD.height },
+      { x: STREET_X + STREET_W, y: 0, w: PAVE_STREET, h: WORLD.height }
     ]
   };
+}
+
+/**
+ * The four buildable blocks, as exact rectangles running from the back of the
+ * pavement to the edge of the world.
+ *
+ * Districts used to hand-place parcels inside these with ad-hoc margins — 60px on
+ * the left, 90px at the top, whatever fell out at the bottom — and every one of
+ * those margins rendered as bare ground. Parcels are now fitted to these bounds
+ * (see fitToQuadrants) so the margins cannot exist.
+ */
+const QUAD_TOP = AVENUE_Y - PAVE_AVENUE;
+const QUAD_BOTTOM = AVENUE_Y + AVENUE_H + PAVE_AVENUE;
+const QUAD_LEFT = STREET_X - PAVE_STREET;
+const QUAD_RIGHT = STREET_X + STREET_W + PAVE_STREET;
+
+const QUADRANTS = [
+  { id: 'NW', x: 0, y: 0, w: QUAD_LEFT, h: QUAD_TOP },
+  { id: 'NE', x: QUAD_RIGHT, y: 0, w: WORLD.width - QUAD_RIGHT, h: QUAD_TOP },
+  { id: 'SW', x: 0, y: QUAD_BOTTOM, w: QUAD_LEFT, h: WORLD.height - QUAD_BOTTOM },
+  { id: 'SE', x: QUAD_RIGHT, y: QUAD_BOTTOM, w: WORLD.width - QUAD_RIGHT, h: WORLD.height - QUAD_BOTTOM }
+];
+
+/** Which block a point belongs to, by which side of each road it falls on. */
+function quadrantOf(x, y) {
+  const id = (y < AVENUE_Y ? 'N' : 'S') + (x < STREET_X ? 'W' : 'E');
+  return QUADRANTS.find(q => q.id === id);
+}
+
+/**
+ * Promotes every gap left between a block's parcels into an explicit alley.
+ *
+ * The gaps were always meant to be alleys — Baltimore's own comment calls them
+ * "alley communal space" — but nothing declared them, so they fell through to the
+ * bare `ground` fill and read as holes in the map rather than as service lanes
+ * behind the buildings. Detecting them from the parcels instead of listing them
+ * by hand means a district cannot gain a void by having its numbers adjusted.
+ *
+ * Rectangles are found greedily on a 2px grid: take the first uncovered cell,
+ * run right while uncovered, then extend down while that whole run stays
+ * uncovered. An L-shaped gap comes out as two rectangles, which is fine — they
+ * abut, and an alley is drawn as a flat surface.
+ */
+function alleysIn(parcels, quad) {
+  // The grid is the parcels' own edge coordinates, not a fixed pixel step.
+  //
+  // A fixed step has to round each parcel edge onto it, and an edge landing between
+  // two grid lines then over- or under-reports coverage, leaving 1px slivers of bare
+  // ground running the length of every block — 18,000px of them in Baltimore at a
+  // 2px step. Dropping to a 1px grid is exact but rasterises 2.3 million cells per
+  // district and cost 183ms at module load. Splitting on the edges themselves is
+  // exact for the same reason a 1px grid is — no parcel boundary can fall inside a
+  // cell, so every cell is wholly covered or wholly empty — while producing about
+  // fifty columns instead of eleven hundred.
+  const xs = [quad.x, quad.x + quad.w];
+  const ys = [quad.y, quad.y + quad.h];
+  parcels.forEach(p => {
+    xs.push(p.x, p.x + p.w);
+    ys.push(p.y, p.y + p.h);
+  });
+  const axis = (vals, lo, hi) => [...new Set(vals)]
+    .filter(v => v >= lo && v <= hi)
+    .sort((a, b) => a - b);
+  const gx = axis(xs, quad.x, quad.x + quad.w);
+  const gy = axis(ys, quad.y, quad.y + quad.h);
+
+  const cols = gx.length - 1;
+  const rows = gy.length - 1;
+  if (cols < 1 || rows < 1) return [];
+  const ix = new Map(gx.map((v, i) => [v, i]));
+  const iy = new Map(gy.map((v, i) => [v, i]));
+  const filled = new Uint8Array(cols * rows);
+
+  parcels.forEach(p => {
+    const c0 = ix.get(p.x);
+    const c1 = ix.get(p.x + p.w);
+    const r0 = iy.get(p.y);
+    const r1 = iy.get(p.y + p.h);
+    if (c0 === undefined || c1 === undefined || r0 === undefined || r1 === undefined) return;
+    for (let r = r0; r < r1; r++) for (let c = c0; c < c1; c++) filled[r * cols + c] = 1;
+  });
+
+  const out = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (filled[r * cols + c]) continue;
+      let cEnd = c;
+      while (cEnd < cols && !filled[r * cols + cEnd]) cEnd++;
+      let rEnd = r + 1;
+      for (; rEnd < rows; rEnd++) {
+        let clear = true;
+        for (let cc = c; cc < cEnd && clear; cc++) if (filled[rEnd * cols + cc]) clear = false;
+        if (!clear) break;
+      }
+      for (let rr = r; rr < rEnd; rr++) {
+        for (let cc = c; cc < cEnd; cc++) filled[rr * cols + cc] = 1;
+      }
+      out.push({
+        x: gx[c], y: gy[r], w: gx[cEnd] - gx[c], h: gy[rEnd] - gy[r],
+        kind: 'alley', roof: 'asphalt', solid: false
+      });
+      c = cEnd - 1;
+    }
+  }
+  return out;
+}
+
+/**
+ * Fits each block's hand-authored parcels to its exact bounds, then fills what is
+ * left with alleys.
+ *
+ * The transform is a single affine map from the parcels' own bounding box onto the
+ * block, applied per block. That is deliberately chosen over rewriting the
+ * districts as generated recipes: every district's character lives in the relative
+ * proportions of its parcels — Harlem's narrow brownstone runs, Detroit's vast
+ * lots, Baltimore's rowhouse strips — and an affine map preserves all of it exactly
+ * while removing the margins. Gaps scale with everything else, so an authored
+ * 40px alley stays an alley.
+ *
+ * Decor and POIs inside the original bounding box move with it. Anything outside —
+ * the tree and lamp lines, which sit on the pavement — is left where it is, which
+ * is why the pavement had to grow to include them first.
+ */
+function fitToQuadrants(district) {
+  const added = [];
+
+  QUADRANTS.forEach(quad => {
+    const own = district.parcels.filter(p => quadrantOf(p.x + p.w / 2, p.y + p.h / 2) === quad);
+    if (!own.length) return;
+
+    const bx0 = Math.min(...own.map(p => p.x));
+    const bx1 = Math.max(...own.map(p => p.x + p.w));
+    const by0 = Math.min(...own.map(p => p.y));
+    const by1 = Math.max(...own.map(p => p.y + p.h));
+    const sx = quad.w / (bx1 - bx0);
+    const sy = quad.h / (by1 - by0);
+    // Both edges of a parcel go through the same map before the width is taken, so
+    // parcels that were exactly adjacent stay exactly adjacent and rounding cannot
+    // open a 1px seam that would then be promoted to an alley.
+    const mapX = (v) => Math.round(quad.x + (v - bx0) * sx);
+    const mapY = (v) => Math.round(quad.y + (v - by0) * sy);
+
+    own.forEach(p => {
+      const x0 = mapX(p.x);
+      const y0 = mapY(p.y);
+      p.w = mapX(p.x + p.w) - x0;
+      p.h = mapY(p.y + p.h) - y0;
+      p.x = x0;
+      p.y = y0;
+    });
+
+    const inside = (o) => o.x >= bx0 && o.x <= bx1 && o.y >= by0 && o.y <= by1;
+    district.decor.forEach(o => { if (inside(o)) { o.x = mapX(o.x); o.y = mapY(o.y); } });
+    district.pois.forEach(o => { if (inside(o)) { o.x = mapX(o.x); o.y = mapY(o.y); } });
+
+    added.push(...alleysIn(own, quad));
+  });
+
+  // Alleys go in front of the buildings so drawParcel lays their surface down
+  // before the neighbouring walls' ambient occlusion falls across it.
+  district.parcels.unshift(...added);
+  return district;
 }
 
 /** Evenly spaced street trees along a horizontal line. */
@@ -498,23 +682,27 @@ const DISTRICTS = {
     id: 'NOLA', city: 'NOLA', name: 'NOLA Balcony', palette: PAL_NOLA,
     roads: SK.roads, sidewalks: SK.sidewalks,
     parcels: [
-      { x: 60, y: 90, w: 1020, h: 100, kind: 'building', roof: 'roofB', solid: true },
-      { x: 60, y: 200, w: 140, h: 250, kind: 'building', roof: 'roofA', solid: true },
-      { x: 800, y: 200, w: 280, h: 250, kind: 'building', roof: 'roofA', solid: true },
-      { x: 210, y: 200, w: 580, h: 250, kind: 'park', roof: 'grass', solid: false },
-      { x: 60, y: 460, w: 1020, h: 100, kind: 'building', roof: 'roofC', solid: true },
-      { x: 1290, y: 90, w: 1070, h: 100, kind: 'building', roof: 'roofA', solid: true },
-      { x: 1290, y: 200, w: 160, h: 250, kind: 'building', roof: 'roofB', solid: true },
-      { x: 2200, y: 200, w: 160, h: 250, kind: 'building', roof: 'roofB', solid: true },
-      { x: 1460, y: 200, w: 730, h: 250, kind: 'lot', roof: 'asphalt', solid: false },
-      { x: 1290, y: 460, w: 1070, h: 100, kind: 'building', roof: 'roofC', solid: true },
-      { x: 60, y: 790, w: 1020, h: 100, kind: 'building', roof: 'roofA', solid: true },
-      { x: 60, y: 900, w: 150, h: 240, kind: 'building', roof: 'roofC', solid: true },
-      { x: 790, y: 900, w: 290, h: 240, kind: 'building', roof: 'roofC', solid: true },
-      { x: 220, y: 900, w: 560, h: 240, kind: 'park', roof: 'grass', solid: false },
-      { x: 60, y: 1150, w: 1020, h: 100, kind: 'building', roof: 'roofB', solid: true },
-      { x: 1290, y: 790, w: 1070, h: 110, kind: 'building', roof: 'roofB', solid: true },
-      { x: 1290, y: 910, w: 520, h: 340, kind: 'building', roof: 'roofA', solid: true },
+      // Courtyard openings are 30px, not the 10px they were. A 10px slot is
+      // narrower than the 16x10 player box in one axis and exactly equal in the
+      // other, so the courtyard — and the POI standing in it — could not be walked
+      // into at all. The alley fill turns these gaps into real service lanes.
+      { x: 60, y: 90, w: 1020, h: 90, kind: 'building', roof: 'roofB', solid: true },
+      { x: 60, y: 210, w: 120, h: 230, kind: 'building', roof: 'roofA', solid: true },
+      { x: 810, y: 210, w: 270, h: 230, kind: 'building', roof: 'roofA', solid: true },
+      { x: 210, y: 210, w: 570, h: 230, kind: 'park', roof: 'grass', solid: false },
+      { x: 60, y: 470, w: 1020, h: 90, kind: 'building', roof: 'roofC', solid: true },
+      { x: 1290, y: 90, w: 1070, h: 90, kind: 'building', roof: 'roofA', solid: true },
+      { x: 1290, y: 210, w: 150, h: 230, kind: 'building', roof: 'roofB', solid: true },
+      { x: 2200, y: 210, w: 160, h: 230, kind: 'building', roof: 'roofB', solid: true },
+      { x: 1470, y: 210, w: 700, h: 230, kind: 'lot', roof: 'asphalt', solid: false },
+      { x: 1290, y: 470, w: 1070, h: 90, kind: 'building', roof: 'roofC', solid: true },
+      { x: 60, y: 790, w: 1020, h: 90, kind: 'building', roof: 'roofA', solid: true },
+      { x: 60, y: 910, w: 120, h: 230, kind: 'building', roof: 'roofC', solid: true },
+      { x: 810, y: 910, w: 270, h: 230, kind: 'building', roof: 'roofC', solid: true },
+      { x: 210, y: 910, w: 570, h: 230, kind: 'park', roof: 'grass', solid: false },
+      { x: 60, y: 1170, w: 1020, h: 80, kind: 'building', roof: 'roofB', solid: true },
+      { x: 1290, y: 790, w: 1070, h: 90, kind: 'building', roof: 'roofB', solid: true },
+      { x: 1290, y: 910, w: 510, h: 340, kind: 'building', roof: 'roofA', solid: true },
       { x: 1830, y: 910, w: 530, h: 340, kind: 'building', roof: 'roofC', solid: true }
     ],
     decor: [
@@ -539,6 +727,10 @@ const DISTRICTS = {
   }
 };
 
+// Every district is laid out through the same pass, so none can drift back to
+// hand-placed margins. Runs once at module load: the result is static data.
+Object.keys(DISTRICTS).forEach(key => fitToQuadrants(DISTRICTS[key]));
+
 const CITY_TO_DISTRICT = {
   'Harlem': 'HARLEM',
   'Detroit': 'DETROIT',
@@ -559,7 +751,11 @@ function getDistrict(key) {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { DISTRICTS, WORLD, VIEWPORT, POI_IDS, getDistrict, districtKeys, CITY_TO_DISTRICT };
+  module.exports = {
+    DISTRICTS, WORLD, VIEWPORT, POI_IDS, getDistrict, districtKeys, CITY_TO_DISTRICT,
+    QUADRANTS, quadrantOf, MIN_ALLEY, PAVE_AVENUE, PAVE_STREET,
+    AVENUE_Y, AVENUE_H, STREET_X, STREET_W
+  };
 }
 if (typeof window !== 'undefined') {
   window.TOPDOWN_DISTRICTS = DISTRICTS;

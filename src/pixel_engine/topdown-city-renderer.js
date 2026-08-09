@@ -122,6 +122,18 @@ const MAX_FLOORS = 6;
 const MAX_FACE_FRACTION = 0.42;
 
 /**
+ * Frontage of one house within a wide parcel, in world pixels.
+ *
+ * Baltimore and NOLA are authored as rowhouse strips, and now that blocks are
+ * fitted to their full bounds those strips are over 1000px wide. Drawn as a single
+ * mass a strip that wide stops being a terrace and becomes one megastructure, which
+ * is both wrong for the district and flattening — nothing in the silhouette gives
+ * the eye a scale. Party walls every PARTY_BAY divide it into houses, on the roof and
+ * down the face, and window bays are held clear of them.
+ */
+const PARTY_BAY = 96;
+
+/**
  * World pixels of shadow thrown per pixel of prop height.
  *
  * Slightly shallower than the buildings' SHADOW_PER_STOREY/STOREY_PX (0.78), and
@@ -410,6 +422,24 @@ class TopDownCityRenderer {
    */
   static shadowOffsetOf(parcel) {
     return TopDownCityRenderer.floorsOf(parcel) * SHADOW_PER_STOREY;
+  }
+
+  /**
+   * X positions of the party walls dividing a wide parcel into houses.
+   *
+   * Bays are distributed evenly across the frontage rather than stepped at a fixed
+   * PARTY_BAY from the west edge, so a strip never ends in a 12px offcut house.
+   * Empty for anything too narrow to be a terrace. Static and pure so drawParcel and
+   * drawFace derive the same positions independently — a face divided on different
+   * lines from its own roof is worse than no division at all.
+   */
+  static partyWallsOf(parcel) {
+    if (!parcel || parcel.w < PARTY_BAY * 1.8) return [];
+    const bays = Math.round(parcel.w / PARTY_BAY);
+    const step = parcel.w / bays;
+    const out = [];
+    for (let i = 1; i < bays; i++) out.push(parcel.x + Math.round(i * step));
+    return out;
   }
 
   render(ctx, controller) {
@@ -757,9 +787,46 @@ class TopDownCityRenderer {
     // Shadows are laid down in their own pass by drawSurface, before any building
     // is drawn — see the comment there.
 
-    if (parcel.kind === 'park' || parcel.kind === 'lot' || parcel.kind === 'court') {
+    if (parcel.kind === 'park' || parcel.kind === 'lot' || parcel.kind === 'court'
+        || parcel.kind === 'alley') {
       if (!this.tryAsset(ctx, key, `ground_${parcel.kind}`, parcel.x, parcel.y, parcel.w, parcel.h)) {
         this.fill(ctx, parcel.x, parcel.y, parcel.w, parcel.h, roofCol);
+
+        if (parcel.kind === 'alley') {
+          // A service lane behind the buildings. These used to be undeclared gaps
+          // between parcels that fell through to the bare `ground` fill, so they
+          // read as black holes in the block rather than as somewhere you can walk.
+          //
+          // What identifies an alley from above is that it is dirtier than the road
+          // and darker at its walls than down its middle: a drainage channel along
+          // the centre line, grime banked up both long sides. Drawn along the alley's
+          // own long axis so a north-south lane is not striped east-west.
+          const long = parcel.w >= parcel.h;
+          const grime = RND_paletteShift(roofCol, -1);
+          this.grain(ctx, parcel.x, parcel.y, parcel.w, parcel.h, roofCol, 0.09,
+            'alley' + parcel.x + parcel.y, { cluster: 2, lightBias: 0.08 });
+
+          // Grime against both walls, heavier on the shaded side.
+          if (long) {
+            this.fill(ctx, parcel.x, parcel.y, parcel.w, 3, grime);
+            this.fill(ctx, parcel.x, parcel.y + parcel.h - 4, parcel.w, 4, grime);
+          } else {
+            this.fill(ctx, parcel.x, parcel.y, 3, parcel.h, grime);
+            this.fill(ctx, parcel.x + parcel.w - 4, parcel.y, 4, parcel.h, grime);
+          }
+
+          // Centre drainage channel, broken into slabs so it reads as laid concrete.
+          const chan = RND_paletteShift(roofCol, -2);
+          if (long && parcel.h >= 14) {
+            const cy = parcel.y + Math.floor(parcel.h / 2) - 1;
+            this.fill(ctx, parcel.x, cy, parcel.w, 3, chan);
+            this.seams(ctx, parcel.x, cy, parcel.w, 3, roofCol, 34, 0);
+          } else if (!long && parcel.w >= 14) {
+            const cx = parcel.x + Math.floor(parcel.w / 2) - 1;
+            this.fill(ctx, cx, parcel.y, 3, parcel.h, chan);
+            this.seams(ctx, cx, parcel.y, 3, parcel.h, roofCol, 0, 34);
+          }
+        }
 
         if (parcel.kind === 'lot') {
           // Asphalt texture first, or the field under the markings is a flat slab —
@@ -768,17 +835,30 @@ class TopDownCityRenderer {
           this.grain(ctx, parcel.x, parcel.y, parcel.w, parcel.h, roofCol, 0.06,
             'lot' + parcel.x + parcel.y, { cluster: 3, lightBias: 0.10 });
 
-          // Two banks of stalls with a driving aisle between them, and the lines
-          // worn rather than crisp. Full-depth lines in walkHi across the whole
-          // parcel — which is what this drew — have no aisle to park off and read as
-          // prison bars, brightly, at every zoom.
+          // Two banks of stalls with a driving aisle between them, laid out along the
+          // lot's LONG axis so the aisle runs the way a car would drive in.
+          //
+          // Full-depth lines in walkHi across the whole parcel — which is what this
+          // drew — have no aisle to park off and read as prison bars, brightly, at
+          // every zoom. Fixing that but always banking north/south was still wrong
+          // for the tall narrow lots (Oakland and Chicago both have them): the stalls
+          // ended up side-on to the only edge the lot is entered from.
           const line = RND_paletteShift(p.walk, -1);
-          const bank = Math.max(10, Math.floor((parcel.h - 16) * 0.36));
-          const northY = parcel.y + 6;
-          const southY = parcel.y + parcel.h - 6 - bank;
-          for (let x = parcel.x + 16; x < parcel.x + parcel.w - 10; x += 26) {
-            this.fill(ctx, x, northY, 2, bank, line);
-            this.fill(ctx, x, southY, 2, bank, line);
+          const alongX = parcel.w >= parcel.h;
+          const span = alongX ? parcel.h : parcel.w;
+          const bank = Math.max(10, Math.floor((span - 16) * 0.36));
+          const nearEdge = (alongX ? parcel.y : parcel.x) + 6;
+          const farEdge = (alongX ? parcel.y + parcel.h : parcel.x + parcel.w) - 6 - bank;
+          const runFrom = (alongX ? parcel.x : parcel.y) + 16;
+          const runTo = (alongX ? parcel.x + parcel.w : parcel.y + parcel.h) - 10;
+          for (let t = runFrom; t < runTo; t += 26) {
+            if (alongX) {
+              this.fill(ctx, t, nearEdge, 2, bank, line);
+              this.fill(ctx, t, farEdge, 2, bank, line);
+            } else {
+              this.fill(ctx, nearEdge, t, bank, 2, line);
+              this.fill(ctx, farEdge, t, bank, 2, line);
+            }
           }
           // Kerb: lit on the north edge, shaded on the south, like every other
           // horizontal surface on the map.
@@ -789,16 +869,52 @@ class TopDownCityRenderer {
         }
 
         if (parcel.kind === 'park') {
-          // Break the flat fill with darker undergrowth patches and a path.
-          for (let gy = parcel.y + 10; gy < parcel.y + parcel.h - 14; gy += 38) {
-            for (let gx = parcel.x + 12; gx < parcel.x + parcel.w - 16; gx += 46) {
-              const jitter = ((gx + gy) % 3) * 6;
-              this.fill(ctx, gx + jitter, gy, 22, 12, p.treeDk);
-            }
+          // Parks are much larger now that blocks are fitted to their full bounds,
+          // and the old treatment did not survive the change: a regular lattice of
+          // 22x12 dark rectangles plus one full-width bar of pavement colour. At
+          // courtyard size that read as a flat slab with a grid stamped on it and a
+          // bright stripe through the middle.
+          const grassDk = RND_paletteShift(roofCol, -1);
+          const grassLt = RND_paletteShift(roofCol, 1);
+          this.grain(ctx, parcel.x, parcel.y, parcel.w, parcel.h, roofCol, 0.10,
+            'park' + parcel.x + parcel.y, { cluster: 3, lightBias: 0.16 });
+
+          // Hedge along the boundary: darker, with the north and west edges catching
+          // the light like every other raised thing on the map.
+          this.fill(ctx, parcel.x, parcel.y, parcel.w, 5, grassDk);
+          this.fill(ctx, parcel.x, parcel.y + parcel.h - 5, parcel.w, 5, grassDk);
+          this.fill(ctx, parcel.x, parcel.y, 5, parcel.h, grassDk);
+          this.fill(ctx, parcel.x + parcel.w - 5, parcel.y, 5, parcel.h, grassDk);
+          this.fill(ctx, parcel.x, parcel.y, parcel.w, 1, grassLt);
+          this.fill(ctx, parcel.x, parcel.y, 1, parcel.h, grassLt);
+
+          // Undergrowth as irregular clumps rather than a lattice.
+          const rand = this.seeded('grass' + parcel.x + ':' + parcel.y);
+          const clumps = Math.floor((parcel.w * parcel.h) / 5200);
+          for (let i = 0; i < clumps; i++) {
+            const gx = parcel.x + 10 + Math.floor(rand() * Math.max(1, parcel.w - 20));
+            const gy = parcel.y + 10 + Math.floor(rand() * Math.max(1, parcel.h - 20));
+            const gr = 5 + Math.floor(rand() * 6);
+            this.oval(ctx, gx, gy, gr, Math.max(3, Math.floor(gr * 0.6)),
+              rand() < 0.12 ? grassLt : grassDk);
           }
+
+          // Worn desire-line across the park, and a spur if there is room for one.
+          //
+          // Derived from `walk`, two steps down. The obvious-looking choice was
+          // `roofBDk` for an earthy brown, but roof colours are per-district and
+          // arbitrary: that key is a brown in Harlem, grey in Detroit, navy in Miami
+          // and #4D1414 in NOLA, where it painted blood-red paths across the
+          // courtyard. Stepping the pavement colour down is the only derivation that
+          // lands on a dark neutral in all eight palettes.
+          const dirt = RND_paletteShift(p.walk, -2);
           const pathY = parcel.y + Math.floor(parcel.h / 2) - 5;
-          this.fill(ctx, parcel.x + 4, pathY, parcel.w - 8, 11, p.walk);
-          this.fill(ctx, parcel.x + 4, pathY, parcel.w - 8, 2, p.walkHi);
+          this.fill(ctx, parcel.x + 5, pathY, parcel.w - 10, 10, dirt);
+          this.dither(ctx, parcel.x + 5, pathY + 10, parcel.w - 10, 3, dirt, roofCol, 1);
+          if (parcel.w > 260 && parcel.h > 160) {
+            const spurX = parcel.x + Math.floor(parcel.w * 0.38);
+            this.fill(ctx, spurX, parcel.y + 5, 9, parcel.h - 10, dirt);
+          }
         }
 
         if (parcel.kind === 'court') {
@@ -865,6 +981,14 @@ class TopDownCityRenderer {
       this.fill(ctx, parcel.x + 2, parcel.y + 2, 3, roofH - 2, cast);
       this.fill(ctx, parcel.x, faceY - 2, parcel.w, 2, shade);              // south cap
       this.fill(ctx, parcel.x + parcel.w - 2, parcel.y, 2, roofH, shade);   // east cap
+
+      // Party walls: a wide parcel is a ROW of houses, not one building. Each
+      // division is a shaded groove with a lit ridge on its east side, so it reads
+      // as a raised wall between two roofs rather than a line drawn on one.
+      TopDownCityRenderer.partyWallsOf(parcel).forEach(bx => {
+        this.fill(ctx, bx, parcel.y + 2, 2, roofH - 4, shade);
+        this.fill(ctx, bx + 2, parcel.y + 2, 1, roofH - 4, lit);
+      });
     }
 
     this.drawFace(ctx, parcel, faceY, faceH, roofCol, p);
@@ -992,6 +1116,14 @@ class TopDownCityRenderer {
     const frame = RND_paletteShift(roofCol, -1);
     const pier = (Math.floor(parcel.w / PITCH) % 3) + 5;   // 5-7 bays between piers
 
+    // Party walls carry down the face as pilasters, on exactly the lines the roof
+    // used. Windows that would straddle one are dropped rather than clipped.
+    const party = TopDownCityRenderer.partyWallsOf(parcel);
+    party.forEach(bx => {
+      this.fill(ctx, bx, faceY, 2, faceH, wallDk);
+      this.fill(ctx, bx + 2, faceY, 1, faceH, RND_paletteShift(roofCol, -1));
+    });
+
     for (let f = 0; f < floors; f++) {
       const wy = Math.round(faceY + f * storey + Math.max(1, (storey - winH) / 2));
       if (wy + winH > faceY + faceH - 1) break;
@@ -1002,6 +1134,7 @@ class TopDownCityRenderer {
         const wx = startX + i * PITCH;
         const ww = ground ? WIN_W + 3 : WIN_W;
         if (wx + ww > parcel.x + parcel.w - inset) continue;
+        if (party.some(bx => bx >= wx - 2 && bx <= wx + ww + 1)) continue;
         const roll = rand();
         const tone = ground
           ? (roll < 0.62 ? bright : roll < 0.85 ? dim : glass)
