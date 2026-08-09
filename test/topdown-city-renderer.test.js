@@ -9,13 +9,19 @@ function recordingCtx() {
   // fill/beginPath/ellipse are counted because the procedural ground decals draw
   // with paths rather than rects, so an uncounted no-op would make "did it draw
   // anything?" unanswerable.
-  const calls = { fillRect: 0, drawImage: 0, arc: 0, fillText: 0, fill: 0, beginPath: 0, ellipse: 0 };
+  // moveTo/lineTo are recorded too: building shadows are swept polygons rather than
+  // rects, so a context without them throws instead of silently drawing nothing.
+  const calls = {
+    fillRect: 0, drawImage: 0, arc: 0, fillText: 0, fill: 0, beginPath: 0, ellipse: 0,
+    moveTo: 0, lineTo: 0
+  };
   return {
     calls,
     canvas: { width: 960, height: 520 },
     fillStyle: '', strokeStyle: '', font: '', textAlign: 'left', lineWidth: 1,
     imageSmoothingEnabled: true,
     save() {}, restore() {}, translate() {}, beginPath() { calls.beginPath++; }, closePath() {},
+    moveTo() { calls.moveTo++; }, lineTo() { calls.lineTo++; },
     fill() { calls.fill++; }, stroke() {}, clip() {},
     fillRect() { calls.fillRect++; },
     strokeRect() {},
@@ -99,17 +105,26 @@ test('Renderer: draws in the prompt pack layer order — ground before flora', (
   // Pack section 6.3: ground/roads 0, props/furniture 1, flora/weather 2,
   // building decals 3, roof details 4. Flora drawn under a roof looks wrong,
   // and the player must never be occluded.
+  //
+  // Flora is identified by the renderer calling drawTree, NOT by ctx.arc. It used to
+  // be keyed to arc because canopies were drawn with paths; when they moved to
+  // hard-edged spans this test failed, which is the good outcome — but the same
+  // coupling would have let it pass on some other element's stray arc while flora
+  // drew nothing at all.
   const order = [];
   const ctx = recordingCtx();
   ctx.fillRect = () => { order.push('rect'); };
-  ctx.arc = () => { order.push('arc'); };
 
   const r = new TopDownCityRenderer({});
+  const realDrawTree = r.drawTree.bind(r);
+  r.drawTree = (...args) => { order.push('tree'); return realDrawTree(...args); };
   r.render(ctx, controller());
 
   assert.equal(order[0], 'rect', 'ground fill must be the first draw of the frame');
-  assert.ok(order.includes('arc'), 'flora (circles) must be drawn');
-  assert.ok(order.lastIndexOf('arc') > order.indexOf('rect'), 'flora must come after ground');
+  assert.ok(order.includes('tree'), 'flora must be drawn');
+  assert.ok(order.indexOf('tree') > order.indexOf('rect'), 'flora must come after ground');
+  assert.ok(order.lastIndexOf('rect') > order.indexOf('tree'),
+    'canopies must actually paint pixels, not leave an unfilled path');
 });
 
 test('Renderer: stats reset between frames', () => {

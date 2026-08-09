@@ -178,6 +178,7 @@ test('Lightmap: the renderer still draws a full frame when lighting is disabled'
     canvas: { width: 960, height: 520 }, fillStyle: '', strokeStyle: '', font: '', textAlign: 'left',
     lineWidth: 1, imageSmoothingEnabled: true, globalAlpha: 1, globalCompositeOperation: 'source-over',
     save() {}, restore() {}, translate() {}, beginPath() {}, closePath() {}, fill() {}, stroke() {},
+    moveTo() {}, lineTo() {},
     clip() {}, fillRect() {}, strokeRect() {}, drawImage() {}, arc() {}, ellipse() {}, fillText() {},
     measureText() { return { width: 20 }; }, createLinearGradient() { return { addColorStop() {} }; }
   };
