@@ -462,15 +462,36 @@ class FirstMilesCampaign {
 
   resolveEnding() {
     this.active = false;
-    const trustTotal = Object.values(this.state.trust).reduce((a, b) => a + b, 0);
-    const highestTrustNpc = Object.entries(this.state.trust).sort((a, b) => b[1] - a[1])[0];
-    if (this.state.heat >= 8) return { ending: 'DEATH', title: 'DEATH', text: 'Heat claimed you before the block could.' };
-    if (this.state.flags.includes('evidence') && trustTotal >= 6 && this.state.heat <= 5) return { ending: 'JUSTICE', title: 'Justice', text: 'The block reforms around your choices.' };
-    if ((this.state.trust[highestTrustNpc[0]] || 0) >= 5 && this.state.heat >= 8) return { ending: 'POWER', title: 'Power', text: 'You become the unspoken authority on 125th.' };
-    if (this.state.flags.includes('origin_secret_used') && this.state.heat <= 3 && this.state.reputation <= 2) return { ending: 'GHOST', title: 'Ghost', text: 'You vanish with the receipts.' };
-    if (this.state.receipts.length >= 6 && this.state.flags.includes('all_secrets') && this.trustBalanced()) return { ending: 'RECEIPT_KING', title: 'Receipt King', text: 'You break the block curse.' };
-    if ((this.state.trust[highestTrustNpc[0]] || 0) >= 3 && this.state.heat < 7) return { ending: 'JUSTICE', title: 'Justice', text: 'You rebuild what was broken.' };
-    return { ending: 'HUSTLE', title: 'Hustle', text: 'The grind continues on 125th.' };
+    const trustTotal = Object.values(this.state.trust || {}).reduce((a, b) => a + b, 0);
+    const highestTrustNpc = Object.entries(this.state.trust || {}).sort((a, b) => b[1] - a[1])[0];
+    const highestVal = highestTrustNpc ? highestTrustNpc[1] : 0;
+
+    let res = { ending: 'HUSTLE', title: 'Hustle', text: 'The grind continues on 125th.' };
+
+    if (this.state.heat >= 8) {
+      res = { ending: 'DEATH', title: 'DEATH', text: 'Heat claimed you before the block could.' };
+    } else if (this.state.flags.includes('evidence') && trustTotal >= 6 && this.state.heat <= 5) {
+      res = { ending: 'JUSTICE', title: 'Justice', text: 'The block reforms around your choices.' };
+    } else if (highestVal >= 5 && this.state.heat >= 8) {
+      res = { ending: 'POWER', title: 'Power', text: 'You become the unspoken authority on 125th.' };
+    } else if (this.state.flags.includes('origin_secret_used') && this.state.heat <= 3 && (this.state.reputation || 0) <= 2) {
+      res = { ending: 'GHOST', title: 'Ghost', text: 'You vanish with the receipts.' };
+    } else if (this.state.receipts && this.state.receipts.length >= 6 && this.state.flags.includes('all_secrets') && this.trustBalanced()) {
+      res = { ending: 'RECEIPT_KING', title: 'Receipt King', text: 'You break the block curse.' };
+    } else if (highestVal >= 3 && this.state.heat < 7) {
+      res = { ending: 'JUSTICE', title: 'Justice', text: 'You rebuild what was broken.' };
+    }
+
+    const sq = this.state.sideQuestsCompleted || [];
+    const trust = this.state.trust || {};
+    res.epilogueCards = [
+      { npc: 'Ray', text: sq.includes('SQ2_RAYS_DEBT') || (trust.ray || 0) >= 3 ? 'Ray’s shop chair remains a sanctuary.' : 'Ray kept his doors open.' },
+      { npc: 'Marquez', text: res.ending === 'POWER' || (trust.marquez || 0) >= 4 ? 'Marquez maintains unspoken control.' : 'Marquez pulled back into the shadows.' },
+      { npc: 'Jada', text: (trust.jada || 0) >= 3 ? 'Jada’s bar thrives as the social heart of Harlem.' : 'Jada keeps her bar running.' },
+      { npc: 'The Block', text: 'Your receipts become part of Harlem’s permanent folklore.' }
+    ];
+
+    return res;
   }
 
   highestTrustNpcKey() {

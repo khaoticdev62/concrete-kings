@@ -63,19 +63,57 @@ function resolveActBreak(state) {
   return null;
 }
 
+function generateEpilogueCards(state, endingKey) {
+  const cards = [];
+  const trust = state.trust || {};
+  const sq = state.sideQuestsCompleted || [];
+
+  if (sq.includes('SQ2_RAYS_DEBT') || (trust.ray || 0) >= 3) {
+    cards.push({ npc: 'Ray', text: 'Ray’s barbershop chair remains a sanctuary for the block.' });
+  } else {
+    cards.push({ npc: 'Ray', text: 'Ray struggled with debt, but kept his doors open.' });
+  }
+
+  if (endingKey === 'POWER' || (trust.marquez || 0) >= 4) {
+    cards.push({ npc: 'Marquez', text: 'Marquez maintains an unspoken authority behind 125th Street.' });
+  } else {
+    cards.push({ npc: 'Marquez', text: 'Marquez pulled back into the shadows after the raid.' });
+  }
+
+  if ((trust.jada || 0) >= 3) {
+    cards.push({ npc: 'Jada', text: 'Jada’s bar thrives as the social heart of Harlem.' });
+  } else {
+    cards.push({ npc: 'Jada', text: 'Jada keeps her bar running with a watchful eye.' });
+  }
+
+  cards.push({ npc: 'The Block', text: 'Your receipts become part of Harlem’s permanent folklore.' });
+
+  return cards;
+}
+
 function resolveEnding(state) {
-  const trustTotal = Object.values(state.trust).reduce((a, b) => a + b, 0);
-  const highestTrustNpc = Object.entries(state.trust).sort((a, b) => b[1] - a[1])[0];
-  const highestTrustKey = highestTrustNpc ? highestTrustNpc[0] : null;
+  const trustTotal = Object.values(state.trust || {}).reduce((a, b) => a + b, 0);
+  const highestTrustNpc = Object.entries(state.trust || {}).sort((a, b) => b[1] - a[1])[0];
   const highestTrustValue = highestTrustNpc ? highestTrustNpc[1] : 0;
 
-  if (state.heat >= 8) return { ending: 'DEATH', title: 'DEATH', text: 'Heat claimed you before the block could.' };
-  if (state.flags.includes('evidence') && trustTotal >= 6 && state.heat <= 5) return { ending: 'JUSTICE', title: 'Justice', text: 'The block reforms around your choices.' };
-  if (highestTrustValue >= 5 && state.heat >= 8) return { ending: 'POWER', title: 'Power', text: 'You become the unspoken authority on 125th.' };
-  if (state.flags.includes('origin_secret_used') && state.heat <= 3 && state.reputation <= 2) return { ending: 'GHOST', title: 'Ghost', text: 'You vanish with the receipts.' };
-  if (state.receipts && state.receipts.length >= 6 && state.flags.includes('all_secrets') && trustBalanced(state.trust)) return { ending: 'RECEIPT_KING', title: 'Receipt King', text: 'You break the block curse.' };
-  if (highestTrustValue >= 3 && state.heat < 7) return { ending: 'JUSTICE', title: 'Justice', text: 'You rebuild what was broken.' };
-  return { ending: 'HUSTLE', title: 'Hustle', text: 'The grind continues on 125th.' };
+  let endingRes = { ending: 'HUSTLE', title: 'Hustle', text: 'The grind continues on 125th.' };
+
+  if (state.heat >= 8) {
+    endingRes = { ending: 'DEATH', title: 'DEATH', text: 'Heat claimed you before the block could.' };
+  } else if (state.flags.includes('evidence') && trustTotal >= 6 && state.heat <= 5) {
+    endingRes = { ending: 'JUSTICE', title: 'Justice', text: 'The block reforms around your choices.' };
+  } else if (highestTrustValue >= 5 && state.heat >= 8) {
+    endingRes = { ending: 'POWER', title: 'Power', text: 'You become the unspoken authority on 125th.' };
+  } else if (state.flags.includes('origin_secret_used') && state.heat <= 3 && (state.reputation || 0) <= 2) {
+    endingRes = { ending: 'GHOST', title: 'Ghost', text: 'You vanish with the receipts.' };
+  } else if (state.receipts && state.receipts.length >= 6 && state.flags.includes('all_secrets') && trustBalanced(state.trust)) {
+    endingRes = { ending: 'RECEIPT_KING', title: 'Receipt King', text: 'You break the block curse.' };
+  } else if (highestTrustValue >= 3 && state.heat < 7) {
+    endingRes = { ending: 'JUSTICE', title: 'Justice', text: 'You rebuild what was broken.' };
+  }
+
+  endingRes.epilogueCards = generateEpilogueCards(state, endingRes.ending);
+  return endingRes;
 }
 
 function trustBalanced(trust) {

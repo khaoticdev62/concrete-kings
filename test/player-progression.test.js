@@ -61,6 +61,10 @@ test('PlayerProgression: updateQuestProgress increments progress and awards rewa
   const storage = mockStorage({ 'ck-dust-balance': '100' });
   const prog = new PlayerProgression({ storage, initialXp: 0 });
 
+  prog.quests = [
+    { id: 'win_rounds', title: 'BLOCK RULER', desc: 'Win 3 card game rounds', target: 3, progress: 0, rewardXp: 50, rewardCash: 25, completed: false }
+  ];
+
   const targetQuest = prog.quests[0];
   assert.equal(targetQuest.progress, 0);
   assert.equal(targetQuest.completed, false);
@@ -81,9 +85,12 @@ test('PlayerProgression: updateQuestProgress increments progress and awards rewa
 });
 
 test('PlayerProgression: loads saved state from storage', () => {
+  const dummyProg = new PlayerProgression();
+  const todayStr = dummyProg.getTodayDateString();
+
   const storage = mockStorage({
     'ck-player-xp': '250',
-    'ck-quests-date': '2026-08-09',
+    'ck-quests-date': todayStr,
     'ck-daily-quests': JSON.stringify([
       { id: 'win_rounds', title: 'BLOCK RULER', desc: 'Win 3 card game rounds', target: 3, progress: 2, rewardXp: 50, rewardCash: 25, completed: false }
     ])
