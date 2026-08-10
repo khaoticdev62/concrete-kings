@@ -115,6 +115,82 @@ class MiniGameUI {
     ctx.lineWidth = 2;
     ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
   }
+
+  /* CARD RPG SPEC v3.0 (#71-#74 & #118): INSTANT INTRO HEADER */
+  drawMiniGameHeader(title, subtitle, controlsHint) {
+    const ctx = this.virtualCtx;
+
+    // Top banner panel (1280x80)
+    ctx.fillStyle = '#101116';
+    ctx.fillRect(20, 16, 1240, 70);
+    ctx.strokeStyle = '#ffcd68';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(20, 16, 1240, 70);
+
+    // Title & Subtitle
+    ctx.fillStyle = '#ffcd68';
+    ctx.font = '20px "Press Start 2P", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(title.toUpperCase(), 36, 40);
+
+    ctx.fillStyle = '#6fe8d8';
+    ctx.font = '14px "JetBrains Mono", monospace';
+    ctx.fillText(subtitle, 36, 64);
+
+    // Controls badge on right
+    if (controlsHint) {
+      ctx.fillStyle = '#151821';
+      ctx.fillRect(940, 26, 300, 50);
+      ctx.strokeStyle = '#339488';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(940, 26, 300, 50);
+
+      ctx.fillStyle = '#ffcd68';
+      ctx.font = '11px "Press Start 2P", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(controlsHint, 1090, 48);
+    }
+  }
+
+  /* CARD RPG SPEC v3.0 (#73): DUAL-BAR MINIMAL HUD */
+  drawDualHudBars(playerLabel, playerPct, threatLabel, threatPct) {
+    // Player progress bar (top left under banner)
+    this.drawText(playerLabel.toUpperCase(), 36, 100, { font: 'Press Start 2P', size: '10px', color: '#6fe8d8' });
+    this.drawTimerBar(36, 116, 400, 16, playerPct, { color: '#6fe8d8', bg: '#151821', border: '#339488' });
+
+    // Threat / Timer bar (top right under banner)
+    this.drawText(threatLabel.toUpperCase(), 840, 100, { font: 'Press Start 2P', size: '10px', color: '#ff7fbf' });
+    this.drawTimerBar(840, 116, 400, 16, threatPct, { color: '#ff7fbf', bg: '#151821', border: '#f25438' });
+  }
+
+  /* CARD RPG SPEC v3.0 (#74 & #1007): INSTANT OUTCOME OVERLAY */
+  drawOutcomeOverlay(resultType, narrativeText) {
+    const ctx = this.virtualCtx;
+
+    // Centered result panel (700x220)
+    const x = (1280 - 700) / 2;
+    const y = (720 - 220) / 2;
+
+    ctx.fillStyle = '#101116';
+    ctx.fillRect(x, y, 700, 220);
+    const borderColor = resultType.includes('FAIL') ? '#f25438' : '#ffcd68';
+    ctx.strokeStyle = borderColor;
+    ctx.lineWidth = 4;
+    ctx.strokeRect(x, y, 700, 220);
+
+    ctx.fillStyle = borderColor;
+    ctx.font = '24px "Press Start 2P", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(resultType.toUpperCase(), 1280 / 2, y + 40);
+
+    ctx.fillStyle = '#cbd5ed';
+    ctx.font = '14px "JetBrains Mono", monospace';
+    ctx.fillText(narrativeText || 'The story continues...', 1280 / 2, y + 100);
+
+    ctx.fillStyle = '#6fe8d8';
+    ctx.font = '10px "Press Start 2P", monospace';
+    ctx.fillText('RESUMING SCENE PLAYBACK...', 1280 / 2, y + 160);
+  }
 }
 
 if (typeof module !== 'undefined' && module.exports) {

@@ -113,8 +113,21 @@ class MiniGameManager {
     // Render underlying active game mechanics
     this.activeGame.render(this.ui.virtualCtx);
 
+    // CARD RPG SPEC v3.0 (#71-#74): Draw Header Banner
+    const title = this.activeGame.name || 'MINI-GAME';
+    const subtitle = this.activeGame.description || 'Complete the challenge!';
+    const controls = this.activeGame.controls || 'SPACE / CLICK: ACTION';
+    this.ui.drawMiniGameHeader(title, subtitle, controls);
+
     // Render standard layout HUD bounds
     this.drawHUD(this.activeGame.getHUD());
+
+    // CARD RPG SPEC v3.0 (#74): Draw Outcome Overlay on completion
+    if (this.activeGame.state === 'complete' || this.activeGame.isFinished) {
+      const resultType = this.activeGame.victory ? 'SUCCESS!' : 'PARTIAL SUCCESS';
+      const narrative = this.activeGame.resultNarrative || 'The scenario outcome is locked into the story.';
+      this.ui.drawOutcomeOverlay(resultType, narrative);
+    }
 
     // Blit scaled
     this.ui.present();
