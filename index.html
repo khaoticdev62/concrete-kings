@@ -59,6 +59,32 @@
     0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
     20%, 24%, 55% { opacity: 0.95; }
   }
+  @keyframes ckCanonPulse {
+    0% { box-shadow: 0 0 8px #ffcd68; border-color: #ffcd68; }
+    100% { box-shadow: 0 0 20px #ffcd68, 0 0 30px #f25438; border-color: #f25438; }
+  }
+  
+  /* CARD DESIGN & STATES (SPEC v3.0 #7-#10) */
+  .ck-card:hover, .ck-card.card-state-focused, .ck-card.controller-focused {
+    transform: translateY(-8px) scale(1.05) !important;
+    outline: 3px solid #ffcd68 !important;
+    outline-offset: 2px !important;
+    z-index: 100 !important;
+  }
+  .ck-card.card-state-selected {
+    transform: translateY(-12px) scale(1.10) !important;
+    box-shadow: 0 0 16px #6fe8d8 !important;
+    border-color: #6fe8d8 !important;
+    z-index: 101 !important;
+  }
+  .ck-card.card-state-locked {
+    opacity: 0.8;
+    filter: grayscale(20%);
+    border-style: solid;
+  }
+  .ck-card.ck-card-canon {
+    animation: ckCanonPulse 2s infinite alternate !important;
+  }
   h2, h3 {
     font-family: 'Press Start 2P', monospace;
     letter-spacing: 0.3px;
@@ -1953,6 +1979,7 @@
 <script src="src/pixel_engine/quick-chat-system.js"></script>
 <script src="src/pixel_engine/tutorial-onboarding-engine.js"></script>
 <script src="src/pixel_engine/player-customization-engine.js"></script>
+<script src="src/pixel_engine/card-component.js"></script>
 <script src="src/pixel_engine/scenario-compiler.js"></script>
 <script>
 /* ==================================
