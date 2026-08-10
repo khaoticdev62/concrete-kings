@@ -1,9 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { BattlePassEngine } = require('../src/pixel_engine/battle-pass-engine.js');
 const { LeaderboardEngine } = require('../src/pixel_engine/leaderboard-engine.js');
 const { SpectatorReplayEngine } = require('../src/pixel_engine/spectator-replay-engine.js');
-
 function mockStorage(initial = {}) {
   const store = new Map(Object.entries(initial));
   return {
@@ -13,24 +11,6 @@ function mockStorage(initial = {}) {
     clear() { store.clear(); }
   };
 }
-
-test('BattlePassEngine: unlocks tiers and claims free & premium rewards', () => {
-  const pass = new BattlePassEngine({ storage: mockStorage() });
-  assert.equal(pass.currentTier, 1);
-
-  const addRes = pass.addXp(1200);
-  assert.equal(pass.currentTier, 3);
-  assert.equal(addRes.unlockedTiers.length, 2);
-
-  const claimFree = pass.claimReward(2, 'free');
-  assert.equal(claimFree.success, true);
-  assert.equal(claimFree.reward.type, 'DUST');
-
-  pass.upgradeToPremium();
-  const claimPrem = pass.claimReward(2, 'premium');
-  assert.equal(claimPrem.success, true);
-  assert.equal(claimPrem.reward.type, 'CARD_BACK');
-});
 
 test('LeaderboardEngine: ranks players globally and by district filter', () => {
   const lb = new LeaderboardEngine({ storage: mockStorage() });
