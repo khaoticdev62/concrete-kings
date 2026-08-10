@@ -1975,6 +1975,9 @@
 <script src="src/pixel_engine/mini-games/games/studio-session.js"></script>
 <script src="src/pixel_engine/mini-games/games/block-territory.js"></script>
 <script src="src/pixel_engine/mini-games/games/funeral-eulogy.js"></script>
+<script src="src/pixel_engine/mini-games/games/graffiti-tagging.js"></script>
+<script src="src/pixel_engine/mini-games/games/dj-battle.js"></script>
+<script src="src/pixel_engine/mini-games/games/police-interrogation.js"></script>
 <script src="src/pixel_engine/player-progression.js"></script>
 <script src="src/pixel_engine/scenario-ui-engine.js"></script>
 <script src="src/pixel_engine/ai-personality-engine.js"></script>
@@ -2823,6 +2826,9 @@ const app = {
       if (typeof StudioSession !== 'undefined') this.miniGameManager.registerGame('studio_session', StudioSession);
       if (typeof BlockTerritory !== 'undefined') this.miniGameManager.registerGame('block_territory', BlockTerritory);
       if (typeof FuneralEulogy !== 'undefined') this.miniGameManager.registerGame('funeral_eulogy', FuneralEulogy);
+      if (typeof GraffitiTagging !== 'undefined') this.miniGameManager.registerGame('graffiti_tagging', GraffitiTagging);
+      if (typeof DJBattle !== 'undefined') this.miniGameManager.registerGame('dj_battle', DJBattle);
+      if (typeof PoliceInterrogation !== 'undefined') this.miniGameManager.registerGame('police_interrogation', PoliceInterrogation);
     }
     
     // Bind global mini-game completion listener
