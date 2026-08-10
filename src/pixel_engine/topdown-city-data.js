@@ -108,6 +108,133 @@ const PAL_NOLA = {
 };
 
 /**
+ * URBAN CITY RESEARCH GUIDE (URBAN_CITY_RESEARCH_GUIDE.md v1.0)
+ * Source of truth for real-world city visual characteristics.
+ */
+const CITY_RESEARCH_PROFILES = {
+  Detroit: {
+    city: 'Detroit',
+    signature: 'Brutalist concrete, boarded industrial brick, radial avenues, empty lots turning to prairie.',
+    materials: ['red brick', 'concrete block', 'steel frame', 'corrugated metal', 'broken glass'],
+    lighting: 'Sodium-vapor amber, flickering neon from surviving storefronts, headlights on wide empty avenues.',
+    colors: ['#b85c38', '#3b3b4f', '#2a2a3a', '#ff9944', '#140a07'],
+    mood: 'Post-industrial resilience, hidden value, quiet danger.',
+    timeCue: '10 PM, almost all storefronts closed.',
+    keyDetail: 'Half-lots with tall grass, hand-painted signs, security grilles with local slogans.'
+  },
+  Miami: {
+    city: 'Miami',
+    signature: 'Art Deco geometry, pastel stucco, palm canopies, neon hotel signage, oceanfront humidity.',
+    materials: ['stucco', 'terrazzo', 'glass block', 'neon', 'palm wood', 'chrome'],
+    lighting: 'Neon pink/blue, fluorescent motel signs, streetlamp halos through humidity.',
+    colors: ['#ff7fbf', '#00e5ff', '#ffcc88', '#ff4d2a', '#26120b'],
+    mood: 'Surface glamour, latent heat, tourist vs local tension.',
+    timeCue: '11 PM, clubs letting out, ocean still warm.',
+    keyDetail: 'Pastel buildings with geometric borders, mosquitoes, steam from street drains.'
+  },
+  NewOrleans: {
+    city: 'New Orleans',
+    signature: 'French/Spanish iron balconies, pastel brick, gas lamps, live oaks, jazz residue.',
+    materials: ['brick', 'cast iron', 'cypress', 'slate', 'gas glass', 'wrought iron'],
+    lighting: 'Warm gas lamps, neon bar signs, porch lights through foliage, streetcar arcs.',
+    colors: ['#d9382e', '#854224', '#ffcc00', '#140a07', '#26120b'],
+    mood: 'Memory, ritual, celebration and ruin intertwined.',
+    timeCue: 'Midnight, bars closing, humidity heavy.',
+    keyDetail: 'Balcony beads, second-line footprints, jukebox glow from corner bars.'
+  },
+  Houston: {
+    city: 'Houston',
+    signature: 'Sprawl fragments, glass-and-steel towers, strip megastructures, bayou mist, highway underpasses.',
+    materials: ['glass', 'steel', 'stucco', 'concrete panel', 'vinyl', 'sheet metal'],
+    lighting: 'Parking-lot floods, highway orange glow, skyscraper spire LEDs, neon bodega signs.',
+    colors: ['#9c5c1d', '#ffcc88', '#393e4d', '#2a2a3a', '#d9382e'],
+    mood: 'Ambition without grid, hidden in plain sight, humidity and concrete.',
+    timeCue: '1 AM, city still moving but emptying.',
+    keyDetail: 'Freeway sound walls, taco trucks under floodlights, water stains on stucco.'
+  },
+  Baltimore: {
+    city: 'Baltimore',
+    signature: 'Marble-fronted downtown, painted formstone row houses, harbor cranes, alley markets.',
+    materials: ['formstone', 'yellow Roman brick', 'marble', 'slate', 'iron', 'painted wood'],
+    lighting: 'Sodium streetlights, harbor spotlights, rowhouse porch lamps, neon from corner bars.',
+    colors: ['#274f80', '#ffcc88', '#be6436', '#3b3b4f', '#d9382e'],
+    mood: 'Hard-edged charm, neighborhood loyalty, water and brick.',
+    timeCue: '9 PM, row-house lights on, alleys active.',
+    keyDetail: 'Painted screens on windows, white marble steps, alley communal space.'
+  },
+  Chicago: {
+    city: 'Chicago',
+    signature: 'Steel-and-glass canyon, WPA stonework, elevated train tracks, lake wind, gritty riverwalk.',
+    materials: ['limestone', 'steel', 'glass', 'terra cotta', 'concrete', 'weathered bronze'],
+    lighting: 'Cool fluorescent under the L, amber storefronts, lakefront blue-white, neon theater marquees.',
+    colors: ['#393e4d', '#00e5ff', '#ff9944', '#181920', '#d9382e'],
+    mood: 'Cold ambition, layered history, transit-driven urgency.',
+    timeCue: '11 PM, trains still running, wind off the lake.',
+    keyDetail: 'El tracks shadowing side streets, alley garages, hot dog stands under heat lamps.'
+  },
+  NewYork: {
+    city: 'New York',
+    signature: 'Dense vertical layering, bodega awnings, subway entrances, stacked signage, brownstone stoops.',
+    materials: ['brick', 'stone', 'cast iron', 'glass', 'fire escape steel', 'asphalt'],
+    lighting: 'Mixed: fluorescent bodegas, sodium avenues, neon bars, apartment window grids.',
+    colors: ['#181920', '#ffcc88', '#d9382e', '#00e5ff', '#393e4d'],
+    mood: 'Information overload, anonymity, proximity and distance.',
+    timeCue: '1 AM, city still noisy but shifting to backstage.',
+    keyDetail: 'Stacked signs, fire escapes, steam from manholes, stoop culture.'
+  },
+  LosAngeles: {
+    city: 'Los Angeles',
+    signature: 'Low-rise sprawl, palm canyons, drive-in architecture, mural walls, smog horizons.',
+    materials: ['stucco', 'glass', 'steel', 'concrete', 'tile', 'spray paint'],
+    lighting: 'Car headlight canyons, neon motel signs, billboard flood, streetlight pools.',
+    colors: ['#ff7fbf', '#ffcc00', '#393e4d', '#be6436', '#3b3b4f'],
+    mood: 'Desire and distance, performance, sunburned nightlife.',
+    timeCue: '10 PM, nightlife still starting, traffic still heavy.',
+    keyDetail: 'Taco stand smoke, palm trunks, mural eyes, freeway sound.'
+  },
+  Philadelphia: {
+    city: 'Philadelphia',
+    signature: 'Row-house rivers, stoop culture, Masonic stonework, Market-Frankford el, graffiti layers.',
+    materials: ['red brick', 'brownstone', 'granite', 'iron', 'concrete', 'paint'],
+    lighting: 'Orange sodium, bar neon, porch lights, el shadows.',
+    colors: ['#b85c38', '#ff9944', '#2a2a3a', '#d9382e', '#26120b'],
+    mood: 'Stubborn history, neighborhood fortress, working-class grit.',
+    timeCue: '10 PM, stoops still active, el rattling.',
+    keyDetail: 'Painted doors, graffiti tags over historic stone, cheesesteak steam.'
+  },
+  Atlanta: {
+    city: 'Atlanta',
+    signature: 'Marble facade downtown, split-level suburbs, kudzu overtaking brick, hip-hop mural corridors.',
+    materials: ['marble', 'brick', 'stucco', 'kudzu', 'steel', 'glass'],
+    lighting: 'Warm porch lights, MARTA fluorescents, neon strip clubs, highway halos.',
+    colors: ['#854224', '#ffcc00', '#3b3b4f', '#d9382e', '#26120b'],
+    mood: 'Southern noir, old money vs new hustle, red clay after rain.',
+    timeCue: '11 PM, clubs active, suburbs quiet.',
+    keyDetail: 'Kudzu on abandoned structures, peach-tinted streetlights, church fan hum.'
+  },
+  Phoenix: {
+    city: 'Phoenix',
+    signature: 'Desert sprawl, concrete washes, mountain silhouettes, neon drive-ins, ADU backyards.',
+    materials: ['concrete block', 'stucco', 'steel', 'desert tile', 'glass', 'adobe'],
+    lighting: 'Cool white LEDs, neon motel signs, mountain shadows, parking-lot floods.',
+    colors: ['#d9382e', '#ff9944', '#2a2a3a', '#393e4d', '#26120b'],
+    mood: 'Heat after dark, isolation in plain sight, mirage commerce.',
+    timeCue: '9 PM, still hot, neon active.',
+    keyDetail: 'Palm shadows on concrete, saguaro silhouettes, swim bars after dark.'
+  },
+  Seattle: {
+    city: 'Seattle',
+    signature: 'Pioneer Square brick, water under piers, evergreen backdrops, Pike Place neon, ferry headlights.',
+    materials: ['brick', 'timber', 'water-stained concrete', 'marine steel', 'glass', 'moss'],
+    lighting: 'Cool green-white LEDs, neon pub signs, ferry spotlights, rain reflections.',
+    colors: ['#00e5ff', '#3b3b4f', '#393e4d', '#26120b', '#ff9944'],
+    mood: 'Wet darkness, coffee-warm interiors, water and forest pressure.',
+    timeCue: '10 PM, rain, bars closing, ferries still running.',
+    keyDetail: 'Neon reflected on wet brick, salmon tiles, coffee cup steam.'
+  }
+};
+
+/**
  * Every district shares this street skeleton: one horizontal avenue and one
  * vertical street. Districts differ by parcels, decoration and POI placement,
  * which is what makes them read as different places.
@@ -759,7 +886,7 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     DISTRICTS, WORLD, VIEWPORT, POI_IDS, getDistrict, districtKeys, CITY_TO_DISTRICT,
     QUADRANTS, quadrantOf, MIN_ALLEY, PAVE_AVENUE, PAVE_STREET,
-    AVENUE_Y, AVENUE_H, STREET_X, STREET_W
+    AVENUE_Y, AVENUE_H, STREET_X, STREET_W, CITY_RESEARCH_PROFILES
   };
 }
 if (typeof window !== 'undefined') {
@@ -770,4 +897,5 @@ if (typeof window !== 'undefined') {
   window.getTopDownDistrict = getDistrict;
   window.topDownDistrictKeys = districtKeys;
   window.CITY_TO_DISTRICT = CITY_TO_DISTRICT;
+  window.CITY_RESEARCH_PROFILES = CITY_RESEARCH_PROFILES;
 }
