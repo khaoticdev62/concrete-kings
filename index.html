@@ -1970,6 +1970,11 @@
 <script src="src/pixel_engine/mini-games/games/freestyle-cipher.js"></script>
 <script src="src/pixel_engine/mini-games/games/diss-track-showdown.js"></script>
 <script src="src/pixel_engine/mini-games/games/package-run.js"></script>
+<script src="src/pixel_engine/mini-games/games/sample-clearance.js"></script>
+<script src="src/pixel_engine/mini-games/games/stash-house.js"></script>
+<script src="src/pixel_engine/mini-games/games/studio-session.js"></script>
+<script src="src/pixel_engine/mini-games/games/block-territory.js"></script>
+<script src="src/pixel_engine/mini-games/games/funeral-eulogy.js"></script>
 <script src="src/pixel_engine/player-progression.js"></script>
 <script src="src/pixel_engine/scenario-ui-engine.js"></script>
 <script src="src/pixel_engine/ai-personality-engine.js"></script>
@@ -2811,6 +2816,11 @@ const app = {
       if (typeof FreestyleCipher !== 'undefined') this.miniGameManager.registerGame('freestyle_cipher', FreestyleCipher);
       if (typeof DissTrackShowdown !== 'undefined') this.miniGameManager.registerGame('diss_track_showdown', DissTrackShowdown);
       if (typeof PackageRun !== 'undefined') this.miniGameManager.registerGame('package_run', PackageRun);
+      if (typeof SampleClearance !== 'undefined') this.miniGameManager.registerGame('sample_clearance', SampleClearance);
+      if (typeof StashHouse !== 'undefined') this.miniGameManager.registerGame('stash_house', StashHouse);
+      if (typeof StudioSession !== 'undefined') this.miniGameManager.registerGame('studio_session', StudioSession);
+      if (typeof BlockTerritory !== 'undefined') this.miniGameManager.registerGame('block_territory', BlockTerritory);
+      if (typeof FuneralEulogy !== 'undefined') this.miniGameManager.registerGame('funeral_eulogy', FuneralEulogy);
     }
     
     // Bind global mini-game completion listener
