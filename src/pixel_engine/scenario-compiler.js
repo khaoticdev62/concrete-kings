@@ -267,16 +267,17 @@ function compileScenario(scenarioLike, originKey, secretKey) {
   return sim;
 }
 
-module.exports = {
-  Simulation,
-  compileScenario,
-  inferCategory,
-  originTagAffinity,
-  resolveEnding,
-  createDefaultState,
-  highestTrustNpcKey
-};
-
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    Simulation,
+    compileScenario,
+    inferCategory,
+    originTagAffinity,
+    resolveEnding,
+    createDefaultState,
+    highestTrustNpcKey
+  };
+}
 if (typeof window !== 'undefined') {
   window.ScenarioCompiler = {
     Simulation,
@@ -284,6 +285,7 @@ if (typeof window !== 'undefined') {
     inferCategory,
     originTagAffinity,
     resolveEnding,
-    createDefaultState
+    createDefaultState,
+    highestTrustNpcKey
   };
 }
