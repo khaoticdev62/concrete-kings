@@ -1772,6 +1772,90 @@
     <p style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; margin-bottom:16px;">The Shop opens once you're on a run. Start a Journey to earn CASH, then spend it from the STAT HUD.</p>
     <button onclick="app.closeShopUnavailableModal(); app.showCharacterCreation();" style="width:100%; margin-bottom:8px; font-family:'Press Start 2P', monospace; font-size:8px;">PLAY / CREATE CHARACTER</button>
     <button class="secondary" onclick="app.closeShopUnavailableModal()" style="width:100%; font-family:'Press Start 2P', monospace; font-size:8px;">CLOSE</button>
+</div>
+
+<!-- CARD RPG SCENARIO BUILDER MODAL (SPEC v3.0 #12) -->
+<div id="scenarioModal" class="panel" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:10002; width:520px; max-width:94vw; max-height:90vh; overflow-y:auto; box-shadow: 0 0 24px rgba(0,0,0,0.9); border: 3px solid #ffcd68; background:#101116; padding: 16px; box-sizing:border-box;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #2d313d; padding-bottom:6px;">
+    <div>
+      <span style="font-family:'Press Start 2P', monospace; font-size:8px; color:#6fe8d8;">SCENARIO BUILDER</span>
+      <h3 id="scenarioModalTitle" style="margin:2px 0 0 0; font-family:'Press Start 2P', monospace; font-size:11px; color:#ffcd68;">THE MAYOR PROBLEM</h3>
+    </div>
+    <button class="secondary" onclick="app.closeScenarioModal()" style="font-size:9px; padding:2px 6px;">X</button>
+  </div>
+
+  <p id="scenarioModalDescription" style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#cbd5ed; margin-bottom:12px; line-height:1.4;">The mayor knows you were involved. Build your plan using card slots below.</p>
+
+  <!-- 4 CARD SLOTS -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+    <!-- WHO -->
+    <div style="background:#151821; border:2px dashed #339488; padding:10px; border-radius:4px; text-align:center;">
+      <div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#6fe8d8; margin-bottom:4px;">1. WHO confronts him?</div>
+      <div id="slotWhoContent" style="font-family:'JetBrains Mono', monospace; font-size:10px; color:#a0aac2;">[ EMPTY SLOT ]</div>
+    </div>
+    <!-- WHAT -->
+    <div style="background:#151821; border:2px dashed #339488; padding:10px; border-radius:4px; text-align:center;">
+      <div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#6fe8d8; margin-bottom:4px;">2. WHAT do you want?</div>
+      <div id="slotWhatContent" style="font-family:'JetBrains Mono', monospace; font-size:10px; color:#a0aac2;">[ EMPTY SLOT ]</div>
+    </div>
+    <!-- HOW -->
+    <div style="background:#151821; border:2px dashed #339488; padding:10px; border-radius:4px; text-align:center;">
+      <div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#6fe8d8; margin-bottom:4px;">3. HOW do you approach?</div>
+      <div id="slotHowContent" style="font-family:'JetBrains Mono', monospace; font-size:10px; color:#a0aac2;">[ EMPTY SLOT ]</div>
+    </div>
+    <!-- TWIST -->
+    <div style="background:#151821; border:2px dashed #ffcd68; padding:10px; border-radius:4px; text-align:center;">
+      <div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#ffcd68; margin-bottom:4px;">4. What TWIST occurs?</div>
+      <div id="slotTwistContent" style="font-family:'JetBrains Mono', monospace; font-size:10px; color:#a0aac2;">[ EMPTY SLOT ]</div>
+    </div>
+  </div>
+
+  <!-- AI PARTY THINKING STATUS BAR (SPEC #16) -->
+  <div style="background:#151821; border:1px solid #2d313d; padding:8px 12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; font-size:10px; font-family:'Press Start 2P', monospace;">
+    <span style="color:#a0aac2;">PARTY STATUS:</span>
+    <span id="aiPartyStatusText" style="color:#ffcd68;">MARCUS: ● THINKING | TASHA: ✓ SUBMITTED | RICO: ● THINKING</span>
+  </div>
+
+  <!-- LOCK IN FOOTER -->
+  <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #2d313d; padding-top:10px;">
+    <span id="scenarioProgressLabel" style="font-family:'Press Start 2P', monospace; font-size:8px; color:#6fe8d8;">0 / 4 SLOTS COMPLETE</span>
+    <button id="scenarioLockInBtn" onclick="app.lockInScenario()" style="font-family:'Press Start 2P', monospace; font-size:9px; padding:6px 16px; background:#ffcd68; color:#101116;">LOCK IN</button>
+  </div>
+</div>
+
+<!-- STAGED REVEAL MODAL (SPEC v3.0 #20) -->
+<div id="stagedRevealModal" class="panel" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:10003; width:480px; max-width:92vw; border: 3px solid #6fe8d8; background:#101116; padding: 20px; text-align:center; box-shadow: 0 0 30px rgba(0,0,0,0.95); box-sizing:border-box;">
+  <div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#6fe8d8; margin-bottom:8px;">STAGED REVEAL SEQUENCE</div>
+  <h2 id="stagedRevealStageLabel" style="font-family:'Press Start 2P', monospace; font-size:14px; color:#ffcd68; margin:0 0 12px 0;">SCENARIO TITLE</h2>
+  <div id="stagedRevealContent" style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#cbd5ed; min-height:80px; display:flex; align-items:center; justify-content:center; padding:10px; background:#151821; border:1px solid #2d313d; margin-bottom:14px;">Loading reveal beat...</div>
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <button class="secondary" onclick="app.setRevealSpeed(2.0)" style="font-size:8px; padding:4px 8px;">[ 2X SPEED ]</button>
+    <button class="secondary" onclick="app.skipReveal()" style="font-size:8px; padding:4px 8px;">[ SKIP ]</button>
+  </div>
+</div>
+
+<!-- CAMPAIGN CHRONICLE MODAL (SPEC v3.0 #42) -->
+<div id="chronicleModal" class="panel" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:10004; width:520px; max-width:94vw; max-height:85vh; overflow-y:auto; border: 3px solid #ffcd68; background:#101116; padding: 16px; box-sizing:border-box;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #2d313d; padding-bottom:6px;">
+    <h3 style="margin:0; font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68;">CAMPAIGN CHRONICLE</h3>
+    <button class="secondary" onclick="app.closeChronicleModal()" style="font-size:9px; padding:2px 6px;">X</button>
+  </div>
+
+  <!-- CANON EVENTS CAROUSEL/GRID -->
+  <div style="margin-bottom:14px;">
+    <div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#6fe8d8; margin-bottom:6px;">THE WORLD REMEMBERS (CANON EVENTS):</div>
+    <div id="chronicleCanonEventsList" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:6px;">
+      <div style="background:#151821; border:2px solid #ffcd68; padding:8px; min-width:140px; border-radius:4px; font-size:9px; font-family:'JetBrains Mono', monospace; color:#cbd5ed;">
+        <div style="color:#ffcd68; font-weight:bold;">The Mayor's Betrayal</div>
+        <div style="color:#8b95ab; font-size:8px;">Day 3 - Harlem</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMELINE LIST -->
+  <div style="font-family:'Press Start 2P', monospace; font-size:8px; color:#6fe8d8; margin-bottom:6px;">TIMELINE HISTORY:</div>
+  <div id="chronicleTimelineList" style="display:flex; flex-direction:column; gap:6px; font-family:'JetBrains Mono', monospace; font-size:10px; color:#cbd5ed;">
+    <div style="background:#151821; padding:6px 8px; border-left:3px solid #339488;">Day 1: Met Master Barber Ray at 125th Street.</div>
   </div>
 </div>
 
@@ -2728,6 +2812,126 @@ const app = {
     if (typeof PlayerProgression !== 'undefined') {
       this.progression = new PlayerProgression();
       this.renderProgressionUI();
+    }
+
+    this.initCardRpgEngines();
+  },
+
+  initCardRpgEngines() {
+    try {
+      if (typeof ScenarioUIEngine !== 'undefined') this.scenarioEngine = new ScenarioUIEngine();
+      if (typeof AIPersonalityEngine !== 'undefined') this.aiPersonalityEngine = new AIPersonalityEngine();
+      if (typeof StagedRevealEngine !== 'undefined') {
+        this.stagedRevealEngine = new StagedRevealEngine({
+          onStageChange: (info) => this.renderStagedRevealBeat(info)
+        });
+      }
+      if (typeof ChronicleCanonEngine !== 'undefined') this.chronicleEngine = new ChronicleCanonEngine();
+      if (typeof ControllerFocusGraph !== 'undefined') this.focusGraph = new ControllerFocusGraph();
+      if (typeof UIScalingEngine !== 'undefined') this.uiScaling = new UIScalingEngine();
+      if (typeof SinglePlayerAICampaign !== 'undefined') this.singlePlayerAi = new SinglePlayerAICampaign();
+      if (typeof QuickChatSystem !== 'undefined') this.quickChat = new QuickChatSystem();
+      if (typeof ControllerHapticsEngine !== 'undefined') this.haptics = new ControllerHapticsEngine();
+      if (typeof TutorialOnboardingEngine !== 'undefined') this.tutorial = new TutorialOnboardingEngine();
+      if (typeof PlayerCustomizationEngine !== 'undefined') this.customization = new PlayerCustomizationEngine();
+    } catch(e) {}
+  },
+
+  openScenarioModal(title = 'THE MAYOR PROBLEM', description = 'The mayor knows you were involved.') {
+    const modal = document.getElementById('scenarioModal');
+    if (!modal) return;
+    if (this.scenarioEngine) {
+      this.scenarioEngine.setScenario(title, description);
+    }
+    const tEl = document.getElementById('scenarioModalTitle');
+    if (tEl) tEl.textContent = title;
+    const dEl = document.getElementById('scenarioModalDescription');
+    if (dEl) dEl.textContent = description;
+
+    modal.style.display = 'block';
+    if (this.haptics) this.haptics.trigger('CARD_SELECTED');
+  },
+
+  closeScenarioModal() {
+    const modal = document.getElementById('scenarioModal');
+    if (modal) modal.style.display = 'none';
+  },
+
+  lockInScenario() {
+    if (!this.scenarioEngine) return;
+    const lockRes = this.scenarioEngine.lockIn();
+    if (!lockRes.success) {
+      alert(lockRes.reason);
+      return;
+    }
+    this.closeScenarioModal();
+    if (this.haptics) this.haptics.trigger('CARD_LOCKED');
+    if (this.stagedRevealEngine) {
+      this.openStagedRevealModal(lockRes.scenarioPackage);
+    }
+  },
+
+  openStagedRevealModal(scenarioPackage) {
+    const modal = document.getElementById('stagedRevealModal');
+    if (!modal) return;
+    modal.style.display = 'block';
+    if (this.stagedRevealEngine) {
+      this.stagedRevealEngine.startReveal(scenarioPackage);
+    }
+  },
+
+  renderStagedRevealBeat(info) {
+    const stageEl = document.getElementById('stagedRevealStageLabel');
+    const contentEl = document.getElementById('stagedRevealContent');
+    if (stageEl) stageEl.textContent = info.stage.label;
+    if (contentEl) {
+      contentEl.textContent = `${info.stage.label}: ${info.scenarioPackage ? info.scenarioPackage.title : 'Executing...'}`;
+    }
+    if (this.haptics) this.haptics.trigger('REVEAL_BEAT');
+    if (info.stage.id === 'COMPLETE') {
+      setTimeout(() => {
+        const modal = document.getElementById('stagedRevealModal');
+        if (modal) modal.style.display = 'none';
+      }, 1000);
+    }
+  },
+
+  setRevealSpeed(speed) {
+    if (this.stagedRevealEngine) this.stagedRevealEngine.setSpeed(speed);
+  },
+
+  skipReveal() {
+    if (this.stagedRevealEngine) this.stagedRevealEngine.skip();
+  },
+
+  openChronicleModal() {
+    const modal = document.getElementById('chronicleModal');
+    if (!modal) return;
+    modal.style.display = 'block';
+    this.renderChronicleUI();
+    if (this.haptics) this.haptics.trigger('CARD_SELECTED');
+  },
+
+  closeChronicleModal() {
+    const modal = document.getElementById('chronicleModal');
+    if (modal) modal.style.display = 'none';
+  },
+
+  renderChronicleUI() {
+    if (!this.chronicleEngine) return;
+    const canonList = document.getElementById('chronicleCanonEventsList');
+    if (canonList) {
+      const events = this.chronicleEngine.getCanonEvents();
+      if (events.length === 0) {
+        canonList.innerHTML = `<div style="font-size:10px; color:#8b95ab;">No canon events recorded yet.</div>`;
+      } else {
+        canonList.innerHTML = events.map(e => `
+          <div style="background:#151821; border:2px solid #ffcd68; padding:8px; min-width:140px; border-radius:4px; font-size:9px; font-family:'JetBrains Mono', monospace; color:#cbd5ed;">
+            <div style="color:#ffcd68; font-weight:bold;">${e.title}</div>
+            <div style="color:#8b95ab; font-size:8px;">Day ${e.day} - ${e.districtKey}</div>
+          </div>
+        `).join('');
+      }
     }
   },
 
