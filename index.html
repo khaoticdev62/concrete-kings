@@ -1967,6 +1967,9 @@
 <script src="src/pixel_engine/mini-games/games/haircut-challenge.js"></script>
 <script src="src/pixel_engine/mini-games/games/lockpicking.js"></script>
 <script src="src/pixel_engine/mini-games/games/negotiation.js"></script>
+<script src="src/pixel_engine/mini-games/games/freestyle-cipher.js"></script>
+<script src="src/pixel_engine/mini-games/games/diss-track-showdown.js"></script>
+<script src="src/pixel_engine/mini-games/games/package-run.js"></script>
 <script src="src/pixel_engine/player-progression.js"></script>
 <script src="src/pixel_engine/scenario-ui-engine.js"></script>
 <script src="src/pixel_engine/ai-personality-engine.js"></script>
@@ -2805,6 +2808,9 @@ const app = {
       this.miniGameManager.registerGame('haircut_challenge', HaircutChallenge);
       this.miniGameManager.registerGame('lockpicking', Lockpicking);
       this.miniGameManager.registerGame('negotiation', Negotiation);
+      if (typeof FreestyleCipher !== 'undefined') this.miniGameManager.registerGame('freestyle_cipher', FreestyleCipher);
+      if (typeof DissTrackShowdown !== 'undefined') this.miniGameManager.registerGame('diss_track_showdown', DissTrackShowdown);
+      if (typeof PackageRun !== 'undefined') this.miniGameManager.registerGame('package_run', PackageRun);
     }
     
     // Bind global mini-game completion listener
