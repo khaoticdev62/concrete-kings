@@ -7,7 +7,10 @@
  * authored data compiled into deterministic state transitions.
  */
 
-const { FIRST_MILES_BEATS, FIRST_MILES_SIDE_QUESTS, FIRST_MILES_ORIGIN_SECRETS } = require('./first-miles-campaign.js');
+const FMC = typeof require === 'function' ? require('./first-miles-campaign.js') : (typeof window !== 'undefined' ? window.FirstMilesCampaign : {});
+const FMC_BEATS = FMC.FIRST_MILES_BEATS || (typeof FIRST_MILES_BEATS !== 'undefined' ? FIRST_MILES_BEATS : {});
+const FMC_SIDE_QUESTS = FMC.FIRST_MILES_SIDE_QUESTS || (typeof FIRST_MILES_SIDE_QUESTS !== 'undefined' ? FIRST_MILES_SIDE_QUESTS : {});
+const FMC_ORIGIN_SECRETS = FMC.FIRST_MILES_ORIGIN_SECRETS || (typeof FIRST_MILES_ORIGIN_SECRETS !== 'undefined' ? FIRST_MILES_ORIGIN_SECRETS : {});
 
 const DEFAULT_ORIGIN_TRUST = ['ray','jada','marquez','chen','kid','jenkins'];
 
@@ -22,7 +25,7 @@ function createDefaultState(originKey, secretKey) {
     receipts: [],
     sideQuestsCompleted: [],
     origin: originKey || null,
-    originSecret: FIRST_MILES_ORIGIN_SECRETS[originKey] || null,
+    originSecret: FMC_ORIGIN_SECRETS[originKey] || null,
     currentBeat: 1,
     act1ClimaxOutcome: null,
     act2Betrayer: null,
@@ -50,7 +53,7 @@ function originTagAffinity(origin) {
   return map[origin] || 'food';
 }
 
-function clamp(value, min, max) {
+function scClamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
@@ -89,7 +92,7 @@ class Simulation {
   }
 
   currentBeatData() {
-    return FIRST_MILES_BEATS[this.state.currentBeat] || null;
+    return FMC_BEATS[this.state.currentBeat] || null;
   }
 
   tick(cardText) {
@@ -108,11 +111,11 @@ class Simulation {
     const heatDelta = originBonus ? Math.max(0, consequence.heat - 1) : consequence.heat;
     const trustDelta = originBonus ? consequence.trust + 1 : consequence.trust;
 
-    this.state.heat = clamp(this.state.heat + heatDelta, 0, 10);
+    this.state.heat = scClamp(this.state.heat + heatDelta, 0, 10);
     if (trustDelta) {
       const npc = beat.trustNpc || highestTrustNpcKey(this.state.trust);
       if (npc && this.state.trust.hasOwnProperty(npc)) {
-        this.state.trust[npc] = clamp(this.state.trust[npc] + trustDelta, 0, 5);
+        this.state.trust[npc] = scClamp(this.state.trust[npc] + trustDelta, 0, 5);
       }
     }
 
@@ -173,13 +176,13 @@ class Simulation {
   }
 
   autoCompleteSideQuest(sideQuestId) {
-    const quest = FIRST_MILES_SIDE_QUESTS[sideQuestId];
+    const quest = FMC_SIDE_QUESTS[sideQuestId];
     if (!quest) return;
     if (this.state.sideQuestsCompleted.includes(sideQuestId)) return;
     if (quest.day && this.state.day < quest.day[0]) return;
     this.state.sideQuestsCompleted.push(sideQuestId);
     if (quest.trustNpc && quest.trustNpc !== 'none') {
-      this.state.trust[quest.trustNpc] = clamp((this.state.trust[quest.trustNpc] || 0) + quest.rewardTrust, 0, 5);
+      this.state.trust[quest.trustNpc] = scClamp((this.state.trust[quest.trustNpc] || 0) + quest.rewardTrust, 0, 5);
     }
     if (quest.rewardFlag) this.state.flags.push(quest.rewardFlag);
   }
