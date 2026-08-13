@@ -43,6 +43,28 @@ class MiniGameUI {
       };
     }
 
+    // calculateIntegerScale clamps scale to a minimum of 1, so on any viewport
+    // narrower or shorter than 1280x720 it returns a 1280x720 frame that does not
+    // fit and present() then silently clips it. The HUD bars sit at y=0..54 and
+    // y=666..720, so the first thing lost is the score and the controls.
+    //
+    // Below native, fit fractionally instead. A soft-scaled frame is worse than a
+    // pixel-exact one and better than an invisible one. calculateIntegerScale is
+    // shared with the map and card renderers and pinned by tests, so the fallback
+    // lives here rather than in it.
+    if (this.scaleInfo.renderWidth > vpW || this.scaleInfo.renderHeight > vpH) {
+      const fit = Math.min(vpW / this.nativeWidth, vpH / this.nativeHeight);
+      const renderWidth = Math.max(1, Math.floor(this.nativeWidth * fit));
+      const renderHeight = Math.max(1, Math.floor(this.nativeHeight * fit));
+      this.scaleInfo = {
+        scale: fit,
+        renderWidth,
+        renderHeight,
+        marginX: Math.floor((vpW - renderWidth) / 2),
+        marginY: Math.floor((vpH - renderHeight) / 2)
+      };
+    }
+
     this.canvas.width = vpW;
     this.canvas.height = vpH;
     this.ctx.imageSmoothingEnabled = false;
@@ -120,35 +142,47 @@ class MiniGameUI {
   drawMiniGameHeader(title, subtitle, controlsHint) {
     const ctx = this.virtualCtx;
 
-    // Top banner panel (1280x80)
+    // Top banner panel, seated in the gap between the HUD bar and the play area.
+    //
+    // MiniGameManager.render() draws this header and THEN drawHUD, whose top bar
+    // is an opaque box spanning y=0..54. At the original y=16 the banner's title
+    // and its controls badge were painted over by that bar every frame — the
+    // game's name and how to play it were both half-buried. Nobody saw it while
+    // the frame was being clipped to its top 100px; it showed up the moment the
+    // stage got a real viewport.
+    //
+    // The band is 58..122, which is tighter than the original 70px. It has to
+    // clear the HUD bar at 54 and still finish above y=130, where the individual
+    // games start drawing their own titles — they were authored against a banner
+    // ending at 86 and there is only so much room between the two.
     ctx.fillStyle = '#101116';
-    ctx.fillRect(20, 16, 1240, 70);
+    ctx.fillRect(20, 58, 1240, 64);
     ctx.strokeStyle = '#ffcd68';
     ctx.lineWidth = 3;
-    ctx.strokeRect(20, 16, 1240, 70);
+    ctx.strokeRect(20, 58, 1240, 64);
 
     // Title & Subtitle
     ctx.fillStyle = '#ffcd68';
     ctx.font = '20px "Press Start 2P", monospace';
     ctx.textAlign = 'left';
-    ctx.fillText(title.toUpperCase(), 36, 40);
+    ctx.fillText(title.toUpperCase(), 36, 82);
 
     ctx.fillStyle = '#6fe8d8';
     ctx.font = '14px "JetBrains Mono", monospace';
-    ctx.fillText(subtitle, 36, 64);
+    ctx.fillText(subtitle, 36, 104);
 
     // Controls badge on right
     if (controlsHint) {
       ctx.fillStyle = '#151821';
-      ctx.fillRect(940, 26, 300, 50);
+      ctx.fillRect(940, 66, 300, 48);
       ctx.strokeStyle = '#339488';
       ctx.lineWidth = 2;
-      ctx.strokeRect(940, 26, 300, 50);
+      ctx.strokeRect(940, 66, 300, 48);
 
       ctx.fillStyle = '#ffcd68';
       ctx.font = '11px "Press Start 2P", monospace';
       ctx.textAlign = 'center';
-      ctx.fillText(controlsHint, 1090, 48);
+      ctx.fillText(controlsHint, 1090, 88);
     }
   }
 

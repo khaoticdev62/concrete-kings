@@ -14,6 +14,26 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/pixel_engine/pixel-engine.css">
+<script src="src/pixel_engine/dynamic-map-state.js"></script>
+<script src="src/pixel_engine/dynamic-map-camera.js"></script>
+<script src="src/pixel_engine/dynamic-map-assets.js"></script>
+<script src="src/pixel_engine/dynamic-map-eventbus.js"></script>
+<script src="src/pixel_engine/dynamic-map-services.js"></script>
+<script src="src/pixel_engine/dynamic-map-ux.js"></script>
+<script src="src/pixel_engine/dynamic-map-quality.js"></script>
+<script src="src/pixel_engine/dynamic-map-renderer.js"></script>
+<script src="src/pixel_engine/dynamic-map-ui.js"></script>
+<script src="src/pixel_engine/level-loader.js"></script>
+<script src="src/pixel_engine/dynamic-map-system.js"></script>
+<script src="src/pixel_engine/dynamic-world-map.js"></script>
+<script src="src/pixel_engine/dynamic-world-map-renderer.js"></script>
+<script src="src/pixel_engine/asset-pipeline.js"></script>
+<script src="src/pixel_engine/map-asset-registry.js"></script>
+<script src="assets/generated/registry-manifest.js"></script>
+<script src="assets/generated/map-slice.js"></script>
+<script src="assets/generated/level-the-block.js"></script>
+<script src="src/pixel_engine/dynamic-map-devtools.js"></script>
+<script src="src/pixel_engine/dynamic-map-testharness.js"></script>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -106,6 +126,51 @@
     padding: 10px 14px;
     margin-top: 0px;
     border-radius: 0px;
+  }
+
+  /* The card table's stage strip. Here rather than inline on the element so the
+     overlay rule below can override it — an inline style beats every rule. */
+  #stagePanel {
+    height: 116px;
+  }
+
+  /* Mini-games render at a native 1280x720 and MiniGameManager pins HUD bars to
+     y=0..54 and y=666..720. #stagePanel is 116px tall because it shares the card
+     table screen, so presenting a game into it clipped everything below y~100 —
+     every mini-game shipped unplayable while all 551 tests passed, because
+     nothing about this is visible from node.
+
+     Shaving the panel is not the fix and neither is growing it: the card table
+     needs that strip small (see the height comment on #stagePanel itself). So a
+     running game is promoted out of the strip to a fixed full-viewport overlay
+     instead. position:fixed leaves normal flow entirely, so the card table's
+     measured layout is untouched whether a game is running or not. No ancestor
+     sets transform/filter/perspective, so fixed stays viewport-relative here. */
+  #stagePanel.minigame-stage {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    z-index: 900;
+    background: #08080a;
+    border: none;
+    box-shadow: none;
+  }
+
+  /* A catalog mini-game had no exit at all: MiniGameManager only stops on its
+     own 'minigame:complete', and whether 'cancel' does anything is per-game. */
+  #minigameExitBtn {
+    display: none;
+    position: fixed;
+    top: 14px;
+    right: 18px;
+    z-index: 901;
+  }
+  #minigameExitBtn:focus-visible {
+    outline-offset: 3px;
   }
   .screen {
     display: none;
@@ -730,11 +795,12 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px;">
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showDeckBuilder()">DECK BUILDER</button>
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showBoosterShop()">SHOP</button>
-          <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showBlockMap()">BLOCK MAP</button>
+          <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showMap('STORY')">BLOCK MAP</button>
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showLexicon()">LEXICON</button>
           <button class="secondary" style="font-size:8px; padding:8px; background:#339488; border-color:#6fe8d8; color:#08080a;" onclick="app.newScenario()">RUN IT</button>
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showCrew()">THE CREW</button>
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showChronicle()">THE RECORD</button>
+          <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.openSceneEditor()">SCENE EDITOR</button>
           <button class="secondary" style="font-size:8px; padding:8px;" onclick="app.showMinigameCatalog()">MINI-GAMES</button>
         </div>
 
@@ -1154,8 +1220,12 @@
     <!-- Narrative Text Box & Minigame Mount Point -->
     <!-- 130px, not 300px: the hard-coded 300 was 300 of the 1386px overflow.
          Long story beats scroll inside #narrativeTextBox instead of pushing the
-         table off-screen. -->
-    <div class="panel" id="stagePanel" style="margin-top:0; padding:0; overflow:hidden; display:none; flex-direction:column; height:116px;">
+         table off-screen.
+         The height lives in the stylesheet, not here: an inline declaration wins
+         over any rule regardless of specificity, so #stagePanel.minigame-stage
+         could not take the panel full-screen while the strip height sat in this
+         attribute. -->
+    <div class="panel" id="stagePanel" style="margin-top:0; padding:0; overflow:hidden; display:none; flex-direction:column;">
       <div class="canvas-mount-point crt-screen" style="position: relative; flex:1; width:100%; overflow:hidden;">
         <canvas id="minigame-canvas" class="pixel-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: auto; display: none; background: transparent; image-rendering: pixelated;"></canvas>
         <div id="narrativeTextBox" style="display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:#08080a; padding:16px; box-sizing:border-box; color:#f4f7ff; font-family:'JetBrains Mono', monospace; font-size:12px; line-height:1.5; overflow-y:auto; border:3px solid #393e4d;">
@@ -1175,7 +1245,7 @@
             <div style="display:flex; gap:8px;">
               <button class="secondary" onclick="app.showAbilityMenu()" style="font-size:8px; padding:4px 8px;">[ USE ABILITY ]</button>
               <button class="secondary" onclick="app.showSecretOverlay()" style="font-size:8px; padding:4px 8px;">[ VIEW SECRET ]</button>
-              <button class="secondary" onclick="app.showBlockMap()" style="font-size:8px; padding:4px 8px;">[ OPEN MAP ]</button>
+              <button class="secondary" onclick="app.showMap('STORY')" style="font-size:8px; padding:4px 8px;">[ OPEN MAP ]</button>
             </div>
           </div>
 
@@ -1260,7 +1330,7 @@
               <div class="save-bar">
                 <button id="submitBtn" onclick="app.submitSelection()" disabled style="flex:1;">SUBMIT SELECTION</button>
                 <button class="secondary" onclick="app.passTurn()">PASS / END TURN</button>
-                <button class="secondary" onclick="app.showBlockMap()" style="font-size:9px; white-space:nowrap;">[ MAP ]</button>
+                <button class="secondary" onclick="app.showMap('STORY')" style="font-size:9px; white-space:nowrap;">[ MAP ]</button>
               </div>
             </div>
           </div>
@@ -1606,43 +1676,69 @@
     </div>
   </div>
 
-  <!-- BLOCK MAP — top-down walkable district -->
+  <!-- DYNAMIC NARRATIVE MAP -->
   <section id="blockMap" class="screen">
-    <div class="panel" style="position:relative;">
-      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px;">
-        <h2 id="mapDistrictTitle" style="margin:0; font-family:'Press Start 2P', monospace; font-size:12px;">HARLEM STOOP</h2>
-        <span class="status-pill">Reputation: <b id="mapRep" style="color:#ffcd68;">0</b> · Weather: <b id="mapWeather" style="color:#ff7a45;">CLEAR</b></span>
+    <div class="panel" style="position:relative; display:flex; flex-direction:column; gap:8px;">
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center;">
+        <h2 id="mapDistrictTitle" style="margin:0; font-family:'Press Start 2P', monospace; font-size:12px;">NARRATIVE MAP</h2>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="status-pill" id="topBarLocation" style="color:#ffcd68;">UNKNOWN</span>
+          <span class="status-pill" id="topBarTime" style="color:#ffc475;">DAY</span>
+          <span class="status-pill" id="topBarStatus">REP 0 · CLEAR</span>
+        </div>
       </div>
-      <p class="muted" style="margin-top:0; margin-bottom:8px; font-size:10px;">Walk the block with WASD or arrows. Pick a district on the left to travel — active heat locks a district.</p>
 
       <div style="display:flex; gap:12px; align-items:flex-start;">
-        <!-- Left: district rail (this is fast travel) -->
-        <div class="panel" style="flex:0 0 200px; background:#101116; border:2px solid #2d313d; padding:10px;">
-          <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68; border-bottom:1px solid #2d313d; padding-bottom:6px;">DISTRICTS</h3>
-          <div id="districtRail" style="display:flex; flex-direction:column; gap:6px;"></div>
+        <!-- Left rail -->
+        <div class="panel" style="flex:0 0 200px; background:#101116; border:2px solid #2d313d; padding:10px; display:flex; flex-direction:column; gap:10px;">
+          <div>
+            <h3 style="margin:0 0 6px 0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68;">MODES</h3>
+            <div id="mapModeRail" style="display:flex; flex-direction:column; gap:6px;"></div>
+          </div>
+          <div>
+            <h3 style="margin:0 0 6px 0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68;">FILTERS</h3>
+            <div id="mapFilterWrap" style="display:flex; flex-direction:column; gap:6px;"></div>
+          </div>
         </div>
 
-        <!-- Centre: the walkable map -->
-        <div style="flex:1; min-width:0;">
-          <!-- max-height keeps the whole screen inside 720px: without it the
-               canvas scales to ~520px tall and pushes the exit buttons past the
-               viewport bottom, where the clipped body makes them unreachable. -->
+        <!-- Center map -->
+        <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:6px;">
           <div class="crt-screen" style="border:3px solid #ffcd68; background:#08080a; display:flex; justify-content:center; position:relative;">
-            <canvas id="topDownMapCanvas" tabindex="0" width="960" height="520" class="pixel-canvas" style="max-width:100%; max-height:calc(100vh - 290px); width:auto; height:auto; display:block; image-rendering:pixelated;"></canvas>
-            <!-- Arrival splash. Inside the frame on purpose: an overlay here cannot
-                 add height, and the block map has no spare height at 720p. -->
-            <div id="districtArrival" role="dialog" aria-modal="true" aria-labelledby="districtArrivalTitle" tabindex="-1" onclick="app.dismissDistrictArrival()">
-              <img id="districtArrivalImg" src="" alt="" />
-              <div id="districtArrivalTitle"></div>
-              <div id="districtArrivalHint">CLICK OR PRESS ENTER TO WALK</div>
+            <canvas id="narrativeMapCanvas" tabindex="0" width="960" height="540" class="pixel-canvas" style="max-width:100%; max-height:calc(100vh - 260px); width:auto; height:auto; display:block; image-rendering:pixelated; image-rendering:crisp-edges;"></canvas>
+            <div id="mapOverlay" role="dialog" aria-modal="true" tabindex="-1" style="display:none; position:absolute; inset:0; background:rgba(8,8,10,0.92); color:#cbd5ed; padding:24px; overflow:auto;">
+              <h3 id="mapOverlayTitle" style="font-family:'Press Start 2P',monospace; font-size:12px; color:#ffcd68; margin-top:0;"></h3>
+              <div id="mapOverlayBody"></div>
+              <button class="primary" onclick="app.dismissMapOverlay()" style="margin-top:12px;">CLOSE</button>
             </div>
           </div>
-          <div id="mapPromptLine" style="margin-top:6px; min-height:16px; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68; text-align:center;">Walk with WASD / Arrows.</div>
+          <!-- CRPG-MAP-PRD-002 living-world controls (§5/§22/§23/§72) -->
+          <div id="worldMapControls" style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:center; background:#0c0e14; border:1px solid #2d313d; padding:6px;">
+            <span style="font-family:'Press Start 2P',monospace; font-size:8px; color:#6fe8d8;">WORLD</span>
+            <button class="secondary" style="font-size:8px; padding:6px;" onclick="app.worldZoomOut()">ZOOM −</button>
+            <button class="secondary" style="font-size:8px; padding:6px;" onclick="app.worldZoomIn()">ZOOM +</button>
+            <select id="worldWeather" style="font-size:8px;" onchange="app.worldSetWeather(this.value)">
+              <option value="CLEAR">CLEAR</option><option value="RAIN">RAIN</option><option value="HEAVY_RAIN">HEAVY RAIN</option><option value="FOG">FOG</option><option value="STORM">STORM</option>
+            </select>
+            <select id="worldTime" style="font-size:8px;" onchange="app.worldSetTime(this.value)">
+              <option value="DAY">DAY</option><option value="EVENING">EVENING</option><option value="NIGHT">NIGHT</option><option value="LATE_NIGHT">LATE NIGHT</option>
+            </select>
+            <button class="secondary" style="font-size:8px; padding:6px;" onclick="app.worldToggleLayer('STORY')">STORY</button>
+            <button class="secondary" style="font-size:8px; padding:6px;" onclick="app.worldToggleLayer('PEOPLE')">PEOPLE</button>
+            <button class="secondary" style="font-size:8px; padding:6px;" onclick="app.worldToggleLayer('RUMORS')">RUMORS</button>
+            <button class="secondary" style="font-size:8px; padding:6px;" onclick="app.worldToggleLayer('FACTIONS')">FACTIONS</button>
+            <button class="secondary" style="font-size:8px; padding:6px;" onclick="app.worldTickAmbient()">AMBIENT</button>
+          </div>
+          <div id="mapNodeDetails" style="min-height:16px; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68; text-align:left;"></div>
         </div>
       </div>
 
-      <div style="margin-top:10px; display:flex; gap:10px;">
-        <button class="secondary" onclick="app.showGame()">BACK TO TABLE</button>
+      <div id="worldActivityFeed" style="background:#08080a; border:1px solid #2d313d; padding:8px; max-height:80px; overflow-y:auto; font-family:'JetBrains Mono', monospace; font-size:9px; color:#cbd5ed;"></div>
+
+      <div id="mapControllerHint" style="font-family:'JetBrains Mono', monospace; font-size:8px; color:#9aa0b5; margin-top:4px;"></div>
+      <div id="mapDebug" style="display:none; font-family:'JetBrains Mono', monospace; font-size:8px; color:#5bd97a; white-space:pre-wrap; margin-top:4px; border:1px solid #2d313d; padding:6px;"></div>
+
+      <div style="margin-top:4px; display:flex; gap:10px;">
+        <button class="secondary" onclick="app.mapDismiss()">BACK TO TABLE</button>
         <button onclick="app.showSetup()">EXIT TO MENU</button>
       </div>
     </div>
@@ -1661,7 +1757,11 @@
         <!-- Left Column: NPC Details -->
         <div class="panel" style="flex:0 0 240px; display:flex; flex-direction:column; align-items:center; background:#101116; border:2px solid #2d313d; padding:12px; min-width:200px; text-align:center;">
           <h3 style="margin-top:0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68;">NPC PORTRAIT</h3>
-          <canvas id="npcScenePortrait" width="96" height="96" style="width:128px; height:128px; border:3px solid #ffcd68; background:#08080a; image-rendering:pixelated; display:block; margin:8px 0;"></canvas>
+          <!-- 128 native, not 96: the portrait art is 128x128 and the CSS box is
+               128px, so source -> canvas -> screen is 1:1 and nothing resamples.
+               At 96 the art lost a quarter of its pixels on the way in and the
+               browser then stretched the result by a non-integer 1.33x. -->
+          <canvas id="npcScenePortrait" width="128" height="128" style="width:128px; height:128px; border:3px solid #ffcd68; background:#08080a; image-rendering:pixelated; display:block; margin:8px 0;"></canvas>
           <div id="npcSceneName" style="font-family:'Press Start 2P', monospace; font-size:10px; font-weight:bold; color:#ffffff; margin:6px 0;">Ray</div>
           <div style="margin:4px 0;">
             <span id="npcSceneMood" class="status-pill" style="font-family:'Press Start 2P', monospace; font-size:7px; padding:4px 8px; border-radius:4px;">FRIENDLY</span>
@@ -1776,6 +1876,10 @@
   </section>
 </div>
 
+<!-- MINI-GAME EXIT: top level for the same reason as the modals below — it sits
+     above the promoted #stagePanel overlay, which is itself position:fixed. -->
+<button id="minigameExitBtn" class="secondary" type="button" onclick="app.exitMiniGame()" aria-label="Quit mini-game and go back" style="font-family:'Press Start 2P', monospace; font-size:8px; padding:8px 12px;">[ QUIT ]</button>
+
 <!-- STREET SHOP MODAL: must live at top level, outside every .screen section and
      outside the dev-console <details>, so it renders whatever screen is active. -->
 <div id="shopModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(16, 17, 22, 0.9); z-index:10000; align-items:center; justify-content:center;">
@@ -1861,6 +1965,14 @@
 </div>
 
 <!-- CAMPAIGN CHRONICLE MODAL (SPEC v3.0 #42) -->
+<div id="sceneEditorModal" class="panel" style="display:none; position:fixed; top:2%; left:50%; transform:translate(-50%, 0); z-index:10005; width:1000px; max-width:96vw; border:3px solid #ffcd68; background:#101116; padding:12px; box-sizing:border-box;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid #2d313d; padding-bottom:6px;">
+    <h3 style="margin:0; font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68;">SCENE EDITOR</h3>
+    <button class="secondary" onclick="app.closeSceneEditor()" style="font-size:9px; padding:2px 6px;">X</button>
+  </div>
+  <div id="sceneEditorRoot"></div>
+</div>
+
 <div id="chronicleModal" class="panel" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:10004; width:520px; max-width:94vw; max-height:85vh; overflow-y:auto; border: 3px solid #ffcd68; background:#101116; padding: 16px; box-sizing:border-box;">
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #2d313d; padding-bottom:6px;">
     <h3 style="margin:0; font-family:'Press Start 2P', monospace; font-size:10px; color:#ffcd68;">CAMPAIGN CHRONICLE</h3>
@@ -2008,6 +2120,9 @@
 <script src="src/pixel_engine/campaign-story-engine.js"></script>
 <script src="src/pixel_engine/custom-scenario-editor.js"></script>
 <script src="src/pixel_engine/scenario-compiler.js"></script>
+<script src="src/pixel_engine/scene-machine.js"></script>
+<script src="src/pixel_engine/scene-content.js"></script>
+<script src="src/pixel_engine/scene-editor.js"></script>
 <script>
 /* ==================================
    CONCRETE KINGS - 16-Bit Retro Game
@@ -2499,6 +2614,41 @@ function resolveNpcBackdrop(npcId, city) {
 }
 
 /**
+ * Portrait art for the NPC scene, keyed by npcId.
+ *
+ * Files are the processed 128x128 copies in assets/portraits/web/, built by
+ * scripts/process-portraits.sh. The sources next to them are 1024x1024 JPEGs
+ * carrying a .png extension, 600-830KB each — never point this at those.
+ *
+ * Chosen on what each image SHOWS, matched against the scene backdrop the same
+ * NPC already gets, so portrait and background read as one place:
+ *
+ *   ray     barber in a leather apron, shop shelves behind  -> barber-shop-interior
+ *   chen    grocer in a stocked corner store                -> deli-grocer-storefront
+ *   gate    hooded man on a brownstone stoop after dark     -> bar-hotel-corner-steam
+ *
+ * TBONE IS DELIBERATELY ABSENT. He is the chess-park old head and there is no
+ * chess-park or older-man portrait in the set — marquez is thirty and hooded,
+ * kid is a teenager, jada is a woman. A wrong face is worse than none, and the
+ * procedural fallback below is what he keeps. Same call as his backdrop
+ * approximation and the missing Atlanta arrival art.
+ *
+ * jada and kid are processed and available but map to no current NPC.
+ */
+const NPC_SCENE_PORTRAITS = {
+  ray: 'ray',
+  chen: 'chen',
+  gate: 'marquez'
+};
+
+const NPC_SCENE_PORTRAIT_DIR = 'assets/portraits/web/';
+
+/** Resolve an npcId to a portrait file name, or null if unmapped. */
+function resolveNpcPortrait(npcId) {
+  return NPC_SCENE_PORTRAITS[npcId] || null;
+}
+
+/**
  * One establishing scene per district, shown on first arrival.
  *
  * Keyed by district key rather than city because arrival is per district. Chosen
@@ -2706,11 +2856,57 @@ const app = {
     this.show('minigameCatalog');
   },
 
-  launchCatalogMinigame(gameId) {
+  /**
+   * The single entry point for every mini-game launch.
+   *
+   * Order matters. MiniGameManager.start() calls ui.resize() itself, and resize
+   * measures canvas.parentElement.clientWidth/clientHeight. If the stage panel
+   * is still display:none at that moment those are both 0 and the game is laid
+   * out against a zero viewport. So the panel is shown and promoted to the
+   * overlay BEFORE start(), not after.
+   *
+   * Records the screen the launch came from so the exit and completion paths
+   * have somewhere to return to — the catalog, a scenario, or the card table.
+   */
+  startMiniGame(gameId, params = {}) {
+    if (!this.miniGameManager || !this.miniGameManager.start) return false;
+
+    // The return target and the overlay are both presentation. Launching a game
+    // must not depend on either being available, which is also what lets the
+    // node suite exercise this path with no document at all.
+    const current = (typeof document !== 'undefined' && document.querySelector)
+      ? document.querySelector('.screen.active')
+      : null;
+    this.miniGameReturnScreen = (current && current.id !== 'game') ? current.id : 'game';
+
     this.show('game');
-    if (this.miniGameManager && this.miniGameManager.start) {
-      this.miniGameManager.start(gameId);
+    this.miniGameActive = true;
+    this.syncStagePanel();
+
+    // Only an explicit refusal counts. MiniGameManager returns false for an
+    // unregistered id and true otherwise.
+    const started = this.miniGameManager.start(gameId, params);
+    if (started === false) {
+      // Unregistered id: MiniGameManager warns and returns false. Take the
+      // overlay back down rather than leaving an empty black screen up.
+      this.miniGameActive = false;
+      this.syncStagePanel();
+      return false;
     }
+    return true;
+  },
+
+  /** Quit a running mini-game without finishing it, and restore the layout. */
+  exitMiniGame() {
+    if (this.miniGameManager && this.miniGameManager.stop) this.miniGameManager.stop();
+    this.miniGameActive = false;
+    this.syncStagePanel();
+    this.show(this.miniGameReturnScreen || 'game');
+    if (this.miniGameReturnScreen === 'game' || !this.miniGameReturnScreen) this.renderGame();
+  },
+
+  launchCatalogMinigame(gameId) {
+    return this.startMiniGame(gameId);
   },
 
   showGame() { this.show('game'); },
@@ -2864,6 +3060,33 @@ const app = {
           });
         }
       }
+
+      // MiniGameManager.stop() already cleared miniGameActive, so the animation
+      // loop would take the overlay down on its next tick anyway. Do it here too
+      // and synchronously: the rewards above have just changed what the returned-
+      // to screen should show, and it should not render behind a black overlay
+      // for a frame first.
+      this.miniGameActive = false;
+      this.syncStagePanel();
+      this.show(this.miniGameReturnScreen || 'game');
+      if (!this.miniGameReturnScreen || this.miniGameReturnScreen === 'game') this.renderGame();
+    });
+
+    // Escape quits a running mini-game. Without it a catalog launch had no exit
+    // at all — 'cancel' is routed to the active game and handling it is optional.
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.miniGameActive) {
+        e.preventDefault();
+        this.exitMiniGame();
+      }
+    });
+
+    // The overlay is sized in vw/vh, so the canvas backing store has to follow
+    // the viewport or the game renders at the size the window was on launch.
+    window.addEventListener('resize', () => {
+      if (this.miniGameActive && this.miniGameManager && this.miniGameManager.ui) {
+        this.miniGameManager.ui.resize();
+      }
     });
     
     this.renderSetupCampaignActs();
@@ -2892,6 +3115,8 @@ const app = {
         });
       }
       if (typeof ChronicleCanonEngine !== 'undefined') this.chronicleEngine = new ChronicleCanonEngine();
+      if (typeof SceneMachine !== 'undefined') this.sceneMachine = new SceneMachine({ bus: (typeof DMEventBus !== 'undefined' && this.bus) ? this.bus : null });
+      if (typeof SceneContent !== 'undefined' && this.sceneMachine) SceneContent.registerSceneContent(this.sceneMachine);
       if (typeof ControllerFocusGraph !== 'undefined') this.focusGraph = new ControllerFocusGraph();
       if (typeof UIScalingEngine !== 'undefined') this.uiScaling = new UIScalingEngine();
       if (typeof SinglePlayerAICampaign !== 'undefined') this.singlePlayerAi = new SinglePlayerAICampaign();
@@ -2954,11 +3179,44 @@ const app = {
     }
     if (this.haptics) this.haptics.trigger('REVEAL_BEAT');
     if (info.stage.id === 'COMPLETE') {
+      // v2 CARD RPG: after WATCH IT HAPPEN, feed consequences back into the MAP world state.
+      if (this._mapScenarioReturn && this.dynamicMapSystem && this._mapHandoff) {
+        const pkg = info.scenarioPackage || (this.lastScenarioPackage || null);
+        const result = this._buildMapResultFromScenario(this._mapHandoff, pkg);
+        this._mapScenarioReturn = false;
+        const handoff = this._mapHandoff;
+        this._mapHandoff = null;
+        setTimeout(() => {
+          this.dynamicMapSystem.returnFromScene(result);
+          this.showMap(this.dynamicMapSystem.state.mode);
+        }, 1100);
+      }
       setTimeout(() => {
         const modal = document.getElementById('stagedRevealModal');
         if (modal) modal.style.display = 'none';
       }, 1000);
     }
+  },
+
+  // Translate a completed CARD RPG scenario package into a map consequence result.
+  _buildMapResultFromScenario(handoff, pkg) {
+    const scenarioId = handoff && handoff.scenarioId;
+    const filled = pkg && pkg.slots ? Object.values(pkg.slots).filter(s => s && s.card).length : 0;
+    const total = pkg && pkg.slots ? Object.keys(pkg.slots).length : 4;
+    let outcome = 'complete';
+    if (filled < total) outcome = 'partial';
+    // Consequences become map effects: complete the scenario and nudge the world.
+    const effects = [{
+      completeScenario: scenarioId,
+      locationState: null,
+      relationship: null
+    }];
+    // If the scenario carried a derived consequence, surface it on the map.
+    const sc = this.dynamicMapSystem && this.dynamicMapSystem.state.getScenario(scenarioId);
+    if (sc && Array.isArray(sc.consequences) && sc.consequences.length) {
+      sc.consequences.forEach(c => effects.push(c));
+    }
+    return { scenarioId, outcome, effects };
   },
 
   setRevealSpeed(speed) {
@@ -2979,6 +3237,28 @@ const app = {
 
   closeChronicleModal() {
     const modal = document.getElementById('chronicleModal');
+    if (modal) modal.style.display = 'none';
+  },
+
+  openSceneEditor() {
+    const modal = document.getElementById('sceneEditorModal');
+    if (!modal) return;
+    modal.style.display = 'block';
+    const root = document.getElementById('sceneEditorRoot');
+    if (!root) return;
+    if (typeof SceneEditorModule === 'undefined' || !this.sceneMachine) return;
+    const ed = new SceneEditorModule.SceneEditor({
+      sm: this.sceneMachine,
+      root: root,
+      onSave: (id, def) => { /* persisted via loader.register inside editor.save() */ }
+    });
+    this.sceneEditor = ed;
+    ed.mount(root);
+    if (this.haptics) this.haptics.trigger('CARD_SELECTED');
+  },
+
+  closeSceneEditor() {
+    const modal = document.getElementById('sceneEditorModal');
     if (modal) modal.style.display = 'none';
   },
 
@@ -4142,7 +4422,7 @@ const app = {
         
         // 1.75 Top-down district map
         if (document.getElementById('blockMap').classList.contains('active')) {
-          this.renderTopDownFrame();
+          this.mapFrameTick();
         }
 
         // Keep the stage panel in step with the mini-game. Driven from the loop
@@ -4511,10 +4791,23 @@ const app = {
    * app.miniGameActive, which MiniGameManager already maintains.
    */
   syncStagePanel() {
+    if (typeof document === 'undefined') return;
     const panel = document.getElementById('stagePanel');
     if (!panel) return;
-    const want = this.miniGameActive ? 'flex' : 'none';
+    const active = !!this.miniGameActive;
+    const want = active ? 'flex' : 'none';
     if (panel.style.display !== want) panel.style.display = want;
+
+    // Promote the strip to a full-viewport overlay while a game is running. The
+    // strip is 116px and mini-games render at 1280x720; see the CSS rule.
+    if (panel.classList.contains('minigame-stage') !== active) {
+      panel.classList.toggle('minigame-stage', active);
+    }
+    const exit = document.getElementById('minigameExitBtn');
+    if (exit) {
+      const exitWant = active ? 'block' : 'none';
+      if (exit.style.display !== exitWant) exit.style.display = exitWant;
+    }
   },
 
   switchRightTab(tabId) {
@@ -5574,8 +5867,7 @@ const app = {
       
       // Hook: Intercept progression at Beat 3 ("The Checkpoint") with a mini-game check
       if (beat && beat.beat === 3 && this.miniGameManager) {
-        this.show('game');
-        this.miniGameManager.start('street_dice', {
+        this.startMiniGame('street_dice', {
           npc: { id: 'tbone', name: 'T-Bone' },
           location: 'Chess Park Corner',
           stake: 20,
@@ -6357,17 +6649,12 @@ const app = {
     this.game.players[0].stats.reputation += origin.startingStats.reputation;
     this.game.players[0].attributes = { ...origin.attributes };
     
-    // Move canvas to game view and switch screen
-    this.show('game');
-    
-    if (this.miniGameManager) {
-      this.miniGameManager.start('street_dice', {
-        npc: { id: 'tbone', name: 'T-Bone' },
-        location: 'Chess Park Corner',
-        stake: 20,
-        dc: 12
-      });
-    }
+    this.startMiniGame('street_dice', {
+      npc: { id: 'tbone', name: 'T-Bone' },
+      location: 'Chess Park Corner',
+      stake: 20,
+      dc: 12
+    });
   },
 
   startBodegaRunSandbox() {
@@ -6388,17 +6675,12 @@ const app = {
     this.game.players[0].stats.reputation += origin.startingStats.reputation;
     this.game.players[0].attributes = { ...origin.attributes };
     
-    // Move canvas to game view and switch screen
-    this.show('game');
-    
-    if (this.miniGameManager) {
-      this.miniGameManager.start('bodega_run', {
-        npc: { id: 'chen', name: 'Mr. Chen' },
-        location: 'Corner Bodega',
-        stake: 20,
-        difficulty: 'medium'
-      });
-    }
+    this.startMiniGame('bodega_run', {
+      npc: { id: 'chen', name: 'Mr. Chen' },
+      location: 'Corner Bodega',
+      stake: 20,
+      difficulty: 'medium'
+    });
   },
 
   startHaircutChallengeSandbox() {
@@ -6419,17 +6701,12 @@ const app = {
     this.game.players[0].stats.reputation += origin.startingStats.reputation;
     this.game.players[0].attributes = { ...origin.attributes };
     
-    // Move canvas to game view and switch screen
-    this.show('game');
-    
-    if (this.miniGameManager) {
-      this.miniGameManager.start('haircut_challenge', {
-        npc: { id: 'barber', name: 'Master Barber' },
-        location: 'Barbershop',
-        stake: 20,
-        difficulty: 'medium'
-      });
-    }
+    this.startMiniGame('haircut_challenge', {
+      npc: { id: 'barber', name: 'Master Barber' },
+      location: 'Barbershop',
+      stake: 20,
+      difficulty: 'medium'
+    });
   },
 
   startLockpickingSandbox() {
@@ -6450,17 +6727,12 @@ const app = {
     this.game.players[0].stats.reputation += origin.startingStats.reputation;
     this.game.players[0].attributes = { ...origin.attributes };
     
-    // Move canvas to game view and switch screen
-    this.show('game');
-    
-    if (this.miniGameManager) {
-      this.miniGameManager.start('lockpicking', {
-        npc: { id: 'lock', name: 'Lock cylinder' },
-        location: 'Back Alley Gate',
-        stake: 20,
-        difficulty: 'hard'
-      });
-    }
+    this.startMiniGame('lockpicking', {
+      npc: { id: 'lock', name: 'Lock cylinder' },
+      location: 'Back Alley Gate',
+      stake: 20,
+      difficulty: 'hard'
+    });
   },
 
   startNegotiationSandbox() {
@@ -6481,17 +6753,12 @@ const app = {
     this.game.players[0].stats.reputation += origin.startingStats.reputation;
     this.game.players[0].attributes = { ...origin.attributes };
     
-    // Move canvas to game view and switch screen
-    this.show('game');
-    
-    if (this.miniGameManager) {
-      this.miniGameManager.start('negotiation', {
-        npc: { id: 'chen', name: 'Mr. Chen' },
-        location: 'Corner Bodega',
-        stake: 20,
-        difficulty: 'medium'
-      });
-    }
+    this.startMiniGame('negotiation', {
+      npc: { id: 'chen', name: 'Mr. Chen' },
+      location: 'Corner Bodega',
+      stake: 20,
+      difficulty: 'medium'
+    });
   },
   
   renderNarrativeBeat() {
@@ -7084,211 +7351,80 @@ const app = {
   topDownController: null,
   topDownRenderer: null,
   assetRegistry: null,
+  dynamicMapSystem: null,
 
-  initTopDownCity() {
-    if (this.topDownController) return;
-
-    this.assetRegistry = new AssetRegistry();
-    fetch('assets/manifest.json')
-      .then(r => r.json())
-      .then(m => {
-        this.assetRegistry.loadManifest(m);
-        return this.assetRegistry.preload();
-      })
-      .catch(() => {
-        // No manifest, or it failed to parse: the map renders procedurally.
-      });
-
-    const startCity = (this.game && this.game.activeCity) || 'Harlem';
-    const startKey = CITY_TO_DISTRICT[startCity] || 'HARLEM';
-
-    this.topDownController = new TopDownCityController({ districtKey: startKey });
-    this.topDownRenderer = new TopDownCityRenderer({ registry: this.assetRegistry });
-
-    // The starting district counts as already arrived. Otherwise opening the map
-    // for the first time greets the player with a splash they did not travel to,
-    // and the feature reads as an intro screen rather than as arrival.
-    if (!this.arrivedDistricts) this.arrivedDistricts = new Set();
-    this.arrivedDistricts.add(startKey);
+  initDynamicMap() {
+    if (this.dynamicMapSystem) return;
+    this.dynamicMapSystem = new DynamicMapSystem({ app: this });
+    this.dynamicMapSystem.init(this);
   },
 
-  showBlockMap() {
-    this.initTopDownCity();
+  showMap(mode) {
+    this.initDynamicMap();
     this.show('blockMap');
-    this.renderDistrictRail();
-
-    const rep = document.getElementById('mapRep');
-    const weather = document.getElementById('mapWeather');
-    const player = this.game.players[this.humanIndex];
-    if (rep) rep.textContent = (player && player.stats ? player.stats.reputation : 0);
-    if (weather) weather.textContent = this.game.weatherMode || 'CLEAR';
+    const m = typeof mode === 'string' ? mode : 'STORY';
+    this.dynamicMapSystem.setMode(m);
+    this.dynamicMapSystem.show();
   },
 
-  renderDistrictRail() {
-    const rail = document.getElementById('districtRail');
-    if (!rail) return;
-    rail.innerHTML = '';
+  // CRPG-MAP-PRD-002 living-world control delegators (§5/§22/§23/§72)
+  worldZoomIn() { this.initDynamicMap(); this.dynamicMapSystem.worldZoomIn(); },
+  worldZoomOut() { this.initDynamicMap(); this.dynamicMapSystem.worldZoomOut(); },
+  worldSetWeather(w) { this.initDynamicMap(); this.dynamicMapSystem.worldSetWeather(w); },
+  worldSetTime(t) { this.initDynamicMap(); this.dynamicMapSystem.worldSetTime(t); },
+  worldToggleLayer(layer) { this.initDynamicMap(); this.dynamicMapSystem.worldToggleLayer(layer); },
+  worldSetDistrict(id) { this.initDynamicMap(); this.dynamicMapSystem.worldSetDistrict(id); },
+  worldTickAmbient() { this.initDynamicMap(); this.dynamicMapSystem.worldTickAmbient(); },
 
-    districtKeys().forEach(key => {
-      const d = getTopDownDistrict(key);
-      const travelable = this.isLocationFastTravelable(d.city);
-      const heat = this.locationHeat[d.city] || 0;
-      const isHere = this.topDownController && this.topDownController.districtKey === key;
-
-      const btn = document.createElement('button');
-      btn.className = 'secondary';
-      btn.style.fontSize = '7px';
-      btn.style.width = '100%';
-      btn.style.textAlign = 'left';
-      btn.style.padding = '6px 4px';
-      btn.textContent = d.name.toUpperCase();
-
-      if (isHere) {
-        btn.style.borderColor = '#6fe8d8';
-        btn.style.color = '#6fe8d8';
-        btn.disabled = true;
-      } else if (travelable) {
-        btn.onclick = () => this.travelToDistrict(key);
-      } else {
-        btn.disabled = true;
-        btn.style.opacity = '0.5';
-        btn.style.color = '#f25438';
-        btn.textContent = `${d.name.toUpperCase()} · HEAT ${heat}`;
-      }
-      rail.appendChild(btn);
-    });
+  // Bridge from the Dynamic Narrative Map (PRD §143 / CARD RPG v2 §1-§3):
+  // MAP scenario -> CARD RPG scenario completion (WHO/WHAT/HOW/TWIST) -> WATCH -> CONSEQUENCE -> WORLD STATE -> MAP.
+  launchScenarioScene(handoff) {
+    if (!handoff) return;
+    const sys = this.dynamicMapSystem;
+    if (!sys) return;
+    const sc = sys.state.getScenario(handoff.scenarioId);
+    const title = (sc && sc.title) || handoff.scenarioId;
+    const description = (sc && sc.summary) || 'A situation unfolds. Complete it with your cards, then watch what happens.';
+    this._mapHandoff = handoff;
+    this._mapScenarioReturn = true;
+    // mark the first-time "scenario discovery" milestone
+    if (sys.playerExperience) sys.playerExperience.mark('first_scenario_discovery');
+    // open the CARD RPG scenario modal so the player completes it with cards
+    this.openScenarioModal(title, description);
   },
 
-  travelToDistrict(districtKey) {
-    const d = getTopDownDistrict(districtKey);
-    if (!d) return false;
-    if (!this.isLocationFastTravelable(d.city)) return false;
-
-    this.initTopDownCity();
-    if (!this.topDownController.setDistrict(districtKey)) return false;
-
-    this.game.activeCity = d.city;
-    this.setWeather('CLEAR');
-    if (this.audioEngine && this.audioEngine.isPlayingBGM) this.audioEngine.startBGM(d.city);
-
-    const title = document.getElementById('mapDistrictTitle');
-    if (title) title.textContent = d.name.toUpperCase();
-    this.renderDistrictRail();
-    this.showDistrictArrival(districtKey, d.name);
-    return true;
+  buildMapRail() {
+    if (!this.dynamicMapSystem) return;
+    this.dynamicMapSystem.ui._buildModeRail();
   },
 
-  /**
-   * Establishing scene on first arrival at a district.
-   *
-   * Once per district per run: every arrival would turn it into a loading screen,
-   * while the first makes it discovery. The starting district is marked seen when
-   * the map initialises, so the splash is only ever a consequence of travelling.
-   *
-   * Never blocks travel. If there is no art for the district, or the image has not
-   * decoded, the map simply appears — which is also how Atlanta behaves, since it
-   * has no scene at all.
-   */
-  showDistrictArrival(districtKey, districtName) {
-    const overlay = document.getElementById('districtArrival');
-    if (!overlay) return false;
-    if (!this.arrivedDistricts) this.arrivedDistricts = new Set();
-    if (this.arrivedDistricts.has(districtKey)) return false;
-    this.arrivedDistricts.add(districtKey);
-
-    const file = resolveDistrictArrival(districtKey);
-    if (!file) return false;
-
-    const img = document.getElementById('districtArrivalImg');
-    const titleEl = document.getElementById('districtArrivalTitle');
-    if (!img || !titleEl) return false;
-
-    img.src = NPC_SCENE_BACKDROP_DIR + file + '.png';
-    // Describes the place, not the file. A screen reader announcing
-    // "bodega-corner-night" conveys nothing.
-    img.alt = `Arriving in ${districtName}`;
-    titleEl.textContent = districtName.toUpperCase();
-
-    overlay.classList.add('active');
-    this.districtArrivalOpen = true;
-    overlay.focus();
-    return true;
+  mapTravelTo(locationId) {
+    if (!this.dynamicMapSystem) return false;
+    const result = this.dynamicMapSystem.travelTo(locationId);
+    if (result && typeof result.then === 'function') {
+      result.then(r => { if (r) this.mapDismiss(); });
+      return result;
+    }
+    if (result) this.mapDismiss();
+    return result;
   },
 
-  dismissDistrictArrival() {
-    const overlay = document.getElementById('districtArrival');
-    if (!overlay || !this.districtArrivalOpen) return false;
-    overlay.classList.remove('active');
-    this.districtArrivalOpen = false;
-    // Focus returns to the canvas or WASD stops reaching the map.
-    const canvas = document.getElementById('topDownMapCanvas');
+  dismissMapOverlay() {
+    const overlay = document.getElementById('mapOverlay');
+    if (overlay) overlay.style.display = 'none';
+    this.dynamicMapSystem.dismissOverlay();
+    const canvas = document.getElementById('narrativeMapCanvas');
     if (canvas) canvas.focus();
-    return true;
   },
 
-  renderTopDownFrame() {
-    if (!this.topDownController || !this.topDownRenderer) return;
-    const canvas = document.getElementById('topDownMapCanvas');
-    if (!canvas || !canvas.getContext) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  mapDismiss() {
+    this.dynamicMapSystem.hide();
+    this.showGame();
+  },
 
-    this.topDownController.update();
-    this.topDownRenderer.render(ctx, this.topDownController);
-
-    // Weather composites over the city, in world space so it tracks the camera.
-    if (this.weatherSystem) {
-      this.weatherSystem.advanceFrame();
-      ctx.save();
-      ctx.translate(-this.topDownController.camera.x, -this.topDownController.camera.y);
-      this.weatherSystem.render(ctx);
-      ctx.restore();
-    }
-
-    // Remote players, drawn in world space alongside the local player.
-    if (this.game.mode === MODE.ONLINE && this.remoteAvatars) {
-      ctx.save();
-      ctx.translate(-this.topDownController.camera.x, -this.topDownController.camera.y);
-      this.remoteAvatars.forEach((p, name) => {
-        const origin = CHARACTER_ORIGINS[p.origin] || CHARACTER_ORIGINS.BARBER;
-        drawHighDetailCharacterSprite(ctx, origin, Math.floor(p.x), Math.floor(p.y), p.frame, false, true, name);
-      });
-      ctx.restore();
-    }
-
-    const prompt = document.getElementById('mapPromptLine');
-    const spot = this.topDownController.activePoi;
-    if (prompt) {
-      prompt.textContent = spot
-        ? (TOPDOWN_POI_LABELS[spot.id] || spot.id) + ' — press ENTER'
-        : 'Walk with WASD / Arrows.';
-    }
-
-    if (spot && this.topDownController.keys['enter']) {
-      this.topDownController.keys['enter'] = false;
-      const hotspot = this.mapController.hotspots.find(h => h.id === spot.id);
-      if (hotspot) this.triggerHotspot(hotspot);
-    }
-
-    // Broadcast top-down coordinates so remote avatars stay in sync.
-    if (this.game.mode === MODE.ONLINE && this.ws && this.ws.readyState === 1) {
-      const c = this.topDownController;
-      if (c.isMoving || this.lastX !== c.x || this.lastY !== c.y) {
-        this.ws.send(JSON.stringify({
-          type: 'avatar_update',
-          x: c.x,
-          y: c.y,
-          // Must stay a CHARACTER_ORIGINS key ('BARBER', 'STREET_SCHOLAR', ...):
-          // the receiver does CHARACTER_ORIGINS[p.origin]. Sending a city name
-          // here silently falls every remote avatar back to BARBER.
-          origin: this.mapController.origin.id,
-          frame: c.animFrame,
-          cityTheme: this.game.activeCity || 'Harlem'
-        }));
-        this.lastX = c.x;
-        this.lastY = c.y;
-      }
-    }
+  mapFrameTick() {
+    if (!this.dynamicMapSystem) return;
+    this.dynamicMapSystem.tick(16);
   },
 
   /* ---------- NPC / POI SCENES ---------- */
@@ -7347,6 +7483,9 @@ const app = {
   },
 
   enterNpcScene(npcId, npcName, mood = 'friendly', trustMax = 5, trustCur = 3) {
+    // The animation loop redraws the portrait every frame with no arguments, so
+    // who is on screen has to live somewhere it can read.
+    this.currentNpcId = npcId;
     const location = ((this.game && this.game.activeCity) || 'Harlem').toUpperCase();
     const heatVal = this.storyEngine ? this.storyEngine.heat : 0;
     
@@ -7374,7 +7513,7 @@ const app = {
     }
 
     this.applyNpcSceneBackdrop(npcId);
-    this.drawNpcScenePortrait();
+    this.drawNpcScenePortrait(npcId);
 
     const choicesDiv = document.getElementById('npcSceneChoices');
     if (choicesDiv) {
@@ -7414,31 +7553,82 @@ const app = {
     this.show('npcPoiScene');
   },
 
-  drawNpcScenePortrait() {
+  /**
+   * Cached portrait lookup for the NPC scene.
+   *
+   * null means "no art for this NPC" — either unmapped or the file failed to
+   * load — and is cached as such so a miss is never retried. drawNpcScenePortrait
+   * runs once per animation frame, and constructing an Image per call would
+   * re-enter the loader sixty times a second for art that is already resolved.
+   */
+  getNpcPortraitImage(npcId) {
+    if (!npcId) return null;
+    this._npcPortraitCache = this._npcPortraitCache || {};
+    if (npcId in this._npcPortraitCache) return this._npcPortraitCache[npcId];
+
+    const file = resolveNpcPortrait(npcId);
+    if (!file || typeof Image === 'undefined') {
+      this._npcPortraitCache[npcId] = null;
+      return null;
+    }
+
+    // Seed the entry before the request goes out. Without it the `in` check
+    // above misses on every frame the load is still in flight and each one
+    // queues another Image for the same file.
+    this._npcPortraitCache[npcId] = null;
+    const img = new Image();
+    img.onload = () => { this._npcPortraitCache[npcId] = img; };
+    img.onerror = () => { this._npcPortraitCache[npcId] = null; };
+    img.src = NPC_SCENE_PORTRAIT_DIR + file + '.png';
+    return null;
+  },
+
+  /**
+   * Draw the portrait for the NPC currently on screen.
+   *
+   * Asset-first with a procedural fallback, per HANDOFF section 7: an NPC with
+   * no mapped art keeps the drawn face rather than blanking the panel, which is
+   * what T-Bone gets and is meant to get.
+   *
+   * The fallback's rectangles are derived from the canvas size rather than
+   * hard-coded, because they were authored against a 96px canvas and the canvas
+   * is now 128 to match the portrait art 1:1.
+   */
+  drawNpcScenePortrait(npcId) {
     const canvas = document.getElementById('npcScenePortrait');
     if (!canvas) return;
+    const id = npcId || this.currentNpcId || null;
     const ctx = canvas.getContext('2d');
+    const W = canvas.width;
+    const H = canvas.height;
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = '#08080a';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
+    ctx.fillRect(0, 0, W, H);
+
     // Use the NPC idle animator for a subtle idle bob when available.
     const bobOffsets = [0, 1, 0, -1];
     let bob = 0;
     if (this.npcIdleAnimator && typeof this.npcIdleAnimator.currentFrame === 'function') {
       bob = bobOffsets[this.npcIdleAnimator.currentFrame() % 4];
     }
-    
+
+    const art = this.getNpcPortraitImage(id);
+    if (art) {
+      ctx.drawImage(art, 0, bob, W, H);
+      return;
+    }
+
     // Draw simple pixel outline face
+    const px = (n) => Math.round(n * (W / 96));
     ctx.fillStyle = '#3d2218'; // hair
-    ctx.fillRect(16, 10 + bob, 64, 64);
+    ctx.fillRect(px(16), px(10) + bob, px(64), px(64));
     ctx.fillStyle = '#be6436'; // skin warm umber
-    ctx.fillRect(24, 20 + bob, 48, 48);
+    ctx.fillRect(px(24), px(20) + bob, px(48), px(48));
     ctx.fillStyle = '#f4f7ff'; // apron crisp white
-    ctx.fillRect(16, 68 + bob, 64, 28);
+    ctx.fillRect(px(16), px(68) + bob, px(64), px(28));
     ctx.fillStyle = '#22252e'; // eyes
-    ctx.fillRect(34, 34 + bob, 6, 6);
-    ctx.fillRect(56, 34 + bob, 6, 6);
+    ctx.fillRect(px(34), px(34) + bob, px(6), px(6));
+    ctx.fillRect(px(56), px(34) + bob, px(6), px(6));
   },
 
   clickNpcInteraction(npcId, type) {
@@ -7454,14 +7644,12 @@ const app = {
     } else if (type === 'Quest') {
       dialog.textContent = `"${npcId.toUpperCase()} nods: I've got a challenge for you. Prove you can roll under pressure."`;
       setTimeout(() => {
-        if (this.miniGameManager) {
-          this.miniGameManager.start('street_dice', {
-            npc: { id: npcId, name: npcId.toUpperCase() },
-            location: 'Corner Alley',
-            stake: 20,
-            dc: 12
-          });
-        }
+        this.startMiniGame('street_dice', {
+          npc: { id: npcId, name: npcId.toUpperCase() },
+          location: 'Corner Alley',
+          stake: 20,
+          dc: 12
+        });
       }, 1800);
     } else if (type === 'Trade') {
       dialog.textContent = `"${npcId.toUpperCase()} grunts: My catalog is cleaned out today. Check back tomorrow."`;
@@ -7492,6 +7680,13 @@ document.getElementById('blackCard').addEventListener('click', () => {
 
 /* Start game initializer */
 window.addEventListener('load', () => {
+  window.app = app;
+  // Bridge for the Dynamic Narrative Map's [PLAY SCENE] button -> CARD RPG v2 loop.
+  window.__dmPlay = (scenarioId) => {
+    if (window.app && window.app.dynamicMapSystem) {
+      window.app.dynamicMapSystem.playScenario(scenarioId);
+    }
+  };
   app.init();
 });
 
@@ -7512,19 +7707,28 @@ document.addEventListener('keydown', (e) => {
  * keeps every key away from the controller while the splash is up.
  */
 window.addEventListener('keydown', (e) => {
-  if (!app.districtArrivalOpen) return;
-  // stopPropagation alone is not enough. It stops the event reaching OTHER nodes,
-  // but the controller's listener is on window too, and listeners on the same node
-  // still run — so with the event at window the player walked around behind the
-  // splash. stopImmediatePropagation makes this independent of both the event's
-  // target and the order the two listeners happened to be registered in.
+  const overlay = document.getElementById('mapOverlay');
+  const isActive = overlay && overlay.style.display !== 'none';
+  if (!isActive) return;
   e.stopPropagation();
   e.stopImmediatePropagation();
   if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar' || e.key === 'Escape') {
     e.preventDefault();
-    app.dismissDistrictArrival();
+    app.dismissMapOverlay();
   }
 }, true);
+
+// Dev-only: backtick (`) toggles the §112/§113 map dev tools when the map is up.
+window.addEventListener('keydown', (e) => {
+  if (e.key === '`' || e.key === '~') {
+    const map = document.getElementById('blockMap');
+    if (!map || map.style.display === 'none') return;
+    if (window.app && window.app.dynamicMapSystem) {
+      if (!window.app.dynamicMapSystem._devTools) window.app.dynamicMapSystem.openDevTools('blockMap');
+      else { const dt = window.app.dynamicMapSystem._devTools; const r = dt.root; if (r) r.style.display = (r.style.display === 'none' ? 'block' : 'none'); }
+    }
+  }
+});
 </script>
 </body>
 </html>
