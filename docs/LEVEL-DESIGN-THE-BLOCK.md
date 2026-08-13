@@ -141,7 +141,7 @@ The map is **960 × 540 in level coordinates** (the renderer's native space). Fi
 | `east_side` | Baltimore Steps, Miami Cut | The Cut. TENSION → DECISION. | 0.6 – 0.7 |
 | `industrial` | Rail Yards | Escape valve. | 0.4 – 0.5 |
 
-▲ **Change:** the Precinct is reassigned from unassigned to `downtown` and given routes (§6). In shipped v1 it has **zero routes and is unreachable** — see §16-A.
+▲ **Change:** two locations sat in the wrong district and broke the gradient — `rooftop` was `downtown` (it is directly above the Stash, which is `harlem`) and `bmore_steps` was `downtown` despite being the threshold to the Cut at danger 0.60. Both corrected. The Precinct was already `downtown`; what it lacked was routes — see §16-A.
 
 ### Spatial element purposes
 
@@ -777,6 +777,23 @@ Detroit Lot and Rail Yards render as geometric glyphs. This was a deliberate cal
 ### G. Scenario clustering — **verified clean**
 Measured: max 2 scenarios per location, 12/12 locations non-empty after fix D. No cluster.
 
+### H. Four scenarios could never fire — **found during implementation, fixed**
+Not in the original review; surfaced only once QA #16 was written and run. Four scenarios required an NPC to be present at a location that NPC's routine never visits:
+
+| Scenario | Required | Reality |
+|---|---|---|
+| `block_fame` | Marcus at Chicago Greystone | **The level's climax.** Marcus' routine never went there. |
+| `snitch_or_silent` | Reyes at the Blue Plate | Reyes had **no routine at all** |
+| `clique_war` | Ty at Miami Cut | Ty never leaves Detroit and the Steps |
+| `train_heist` | Ty at Rail Yards | same |
+
+**Fixed two ways, on story grounds rather than uniformly.** Marcus now moves to the Greystone at NIGHT — he records in the evening and celebrates after, so the routine tells the arc. Reyes gains the AFTERNOON patrol the design already specified. For Ty, the requirement was the bug: arriving for the war and the heist is a *story summons*, not a place he stands, so `ty_present` is dropped and he remains in `participants`.
+
+Mr. Chen was named in the design but absent from the level data entirely; added as the static Corner Store fixed point.
+
+### I. Route B had no chain — **found during implementation, fixed**
+`heat_check` shipped hidden with no rumor and no chain pointing at it, so it could never be revealed. Fixing it exposed a structural asymmetry: Route A had `marcus_arc` and Route C had `cut_arc`, but the Law route had no chain at all. Added `law_arc` = `officer_trust` → `heat_check` → `snitch_or_silent`, which completes the three-route symmetry §10 describes.
+
 ---
 
 ## 17. Art requirements
@@ -875,7 +892,8 @@ Every criterion is measurable and most are automatable in the existing harness (
 
 | # | Test | Acceptance criterion | Automatable |
 |---|---|---|---|
-| 1 | Graph connectivity | Every location reachable from `stoop` without secret routes | ✅ node |
+| 1 | Graph connectivity | Every location reachable from `stoop` using all routes | ✅ node |
+| 1b | Open connectivity | Every location that has an open route is reachable on open routes; **exactly** `stash_spot` and `rooftop` may be secret-gated | ✅ node |
 | 2 | No dead ends | Every location degree ≥ 2 | ✅ node |
 | 3 | Scenario coverage | Every location has ≥ 1 scenario | ✅ node |
 | 4 | No clustering | No location has > 2 scenarios | ✅ node |
@@ -924,7 +942,7 @@ Tests 1–11 and 15–17 and 22 are **new and should be written as `test/level-t
 
 ### MVP scope (3 sprints)
 
-**Sprint 1 — structural fixes.** Ship §16-A/B/D/E: five routes, two scenarios, `precinct` district assignment. Write `test/level-the-block.test.js` (QA 1–11, 15–17). Zero new art. *This sprint alone makes the shipped level structurally sound.*
+**Sprint 1 — structural fixes. ✅ SHIPPED.** §16-A/B/D/E/H/I: five routes, three scenarios, two district corrections, two NPC routine fixes, one new NPC, one new chain. `scripts/generate-level.js` (the "level build step" the file header referenced but which did not exist). `test/level-the-block.test.js` — 21 checks covering QA 1–10, 15–17 plus referential integrity and design conformance. Zero new art. *This sprint alone makes the shipped level structurally sound.*
 
 **Sprint 2 — the dead data.** Extend `loadLevel` for `pois` and `consequence_matrix`. Author 24 POIs. Build `scripts/process-poi-decals.sh` and the 8×3 decal sheet. Render decals in `_drawLocations`. Extend the consequence matrix to all 8 major scenarios.
 
