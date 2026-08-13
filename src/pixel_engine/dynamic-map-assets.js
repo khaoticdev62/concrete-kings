@@ -77,6 +77,11 @@ const DM_LOCATION_ID_ASSETS = {
   chi_grey: DM_MAP_SPRITE_DIR + 'building_loc_chi_grey.png',
   bmore_steps: DM_MAP_SPRITE_DIR + 'building_loc_bmore_steps.png',
   miami_cut: DM_MAP_SPRITE_DIR + 'building_loc_miami_cut.png',
+  train_yard: DM_MAP_SPRITE_DIR + 'building_loc_train_yard.png',
+  // Present and null on purpose. Not for want of art — a vacant lot has no
+  // building, and the geometric node (a flat plate with a state-coloured ring)
+  // is a more accurate picture of open ground than any facade would be. Its
+  // story is told by its POIs: tags on the back wall, a burnt hulk after the war.
   detroit_lot: null
 };
 

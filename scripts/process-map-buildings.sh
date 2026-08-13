@@ -22,30 +22,31 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-SRC=assets/Buildings/Pngs
+# Sources are repo-relative per row: the buildings come from assets/Buildings
+# and the train car is a crop out of a 1536x8880 station sheet.
 OUT=assets/map/web
 BOX=64
 
 mkdir -p "$OUT"
 
-# location id | source | why this building for this place
+# location id | source (repo-relative) | crop or "-" | why this art for this place
 #
 # Matched on what each image SHOWS against what the level calls the place. The
 # level's own names are doing the work here — "Chicago Greystone" wants stone,
 # "The Blue Plate" wants a diner, "Harlem Stoop" wants a walk-up.
 #
-# detroit_lot IS DELIBERATELY ABSENT and keeps the geometric glyph. It is a
-# vacant lot, and the only lot-adjacent art in the whole drop is a red roadworks
-# barrier and construction scaffolding — both read as "roadworks", not as the
-# empty lot the block gathers on. A wrong building is worse than an honest
-# glyph. Same call as TRANSITION, T-Bone's portrait and the Atlanta arrival art.
+# detroit_lot IS DELIBERATELY ABSENT, and not because the art is missing — that
+# was the earlier reasoning and it was the weaker argument. A vacant lot has no
+# building. Drawing one there is the wrong instinct: the geometric node, which
+# is a flat plate with a state-coloured ring, is a more accurate picture of open
+# ground than any facade in the drop would be. Its story is told by its POIs —
+# tags on the back wall, and a burnt hulk once the war comes through.
 # Read line by line rather than `for entry in $TABLE`: the sibling scripts get
 # away with word splitting because none of their fields contain spaces, and the
 # "why" column here does. Word splitting turned every word of it into its own
 # bogus iteration looking for a file called "red-brick".
-while IFS='|' read -r id file why; do
+while IFS='|' read -r id src crop why; do
   [ -n "$id" ] || continue
-  src="$SRC/$file"
   out="$OUT/building_loc_$id.png"
 
   if [ ! -f "$src" ]; then
@@ -62,22 +63,25 @@ while IFS='|' read -r id file why; do
   fi
 
   before=$(magick identify -format '%wx%h' "$src")
+  args=("$src")
+  [ "$crop" != "-" ] && args+=(-crop "$crop" +repage)
   # Box for the downscale (area average, no ringing on flat colour) and a binary
   # alpha afterwards, so no soft fringe survives to read as a halo against the
   # dark asphalt these are drawn on.
-  magick "$src" \
+  magick "${args[@]}" \
     -background none -alpha set \
     -filter Box -resize "${BOX}x${BOX}" \
     \( +clone -alpha extract -threshold 50% -write mpr:a +delete \) \
     mpr:a -compose CopyOpacity -composite \
     -strip PNG32:"$out"
 
-  echo "$id: $before -> $(magick identify -format '%wx%h' "$out")  $(du -k "$out" | cut -f1)KB  <- $file ($why)"
+  echo "$id: $before -> $(magick identify -format '%wx%h' "$out")  $(du -k "$out" | cut -f1)KB  <- $(basename "$src") ($why)"
 done <<'TABLE'
-stoop|Building7.png|narrow red-brick walk-up with a stooped base
-blue_plate|Building4.png|blue roof, red-and-white striped awning, deep windows - a diner
-corner_store|Building2.png|brick shopfront under twin awnings
-chi_grey|Building5.png|tan stone with arched windows - a greystone
-bmore_steps|Building1.png|red-brick rowhouse with rooftop units
-miami_cut|Building6.png|columned storefront, the closest thing here to deco
+stoop|assets/Buildings/Pngs/Building7.png|-|narrow red-brick walk-up with a stooped base
+blue_plate|assets/Buildings/Pngs/Building4.png|-|blue roof, red-and-white striped awning, deep windows - a diner
+corner_store|assets/Buildings/Pngs/Building2.png|-|brick shopfront under twin awnings
+chi_grey|assets/Buildings/Pngs/Building5.png|-|tan stone with arched windows - a greystone
+bmore_steps|assets/Buildings/Pngs/Building1.png|-|red-brick rowhouse with rooftop units
+miami_cut|assets/Buildings/Pngs/Building6.png|-|columned storefront, the closest thing here to deco
+train_yard|assets/20_Subway_and_Train_Station_48x48.png|300x215+245+5930|one graffitied car section - the block's writing, on something leaving
 TABLE

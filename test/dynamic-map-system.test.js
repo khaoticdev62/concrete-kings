@@ -682,3 +682,48 @@ test('consequences: applyScenarioOutcome runs the authored branch and its POIs',
   assert.equal(s.getLocation('miami_cut').state, 'TENSE');
   assert.deepEqual(s.activeMarksFor('miami_cut'), ['graffiti'], 'the branch POI turned on with the branch');
 });
+
+/* ==================== Scene playback (Sprint 3) ==================== */
+
+const { CardCompiler, SM_TEMPLATES, SM_TYPE_TAGS } = require('../src/pixel_engine/scene-machine.js');
+
+test('scenes: card tags still decide the template — cards are intent', () => {
+  const c = new CardCompiler(SM_TEMPLATES);
+  const cards = { what: { id: 'w', text: 'break in', tags: ['theft'] } };
+  // Even though the scenario says SOCIAL, the card takes it somewhere else.
+  const t = c.selectTemplate(cards, { type: 'SOCIAL' });
+  assert.ok(t.match.includes('theft') || t.match.includes('crime'), `expected a crime scene, got ${t.id}`);
+});
+
+test('scenes: the scenario type breaks the tie when no card tag matches', () => {
+  // Regression. selectTemplate took `cards` alone and fell to
+  // GENERIC_INTERACTION whenever the player's four cards carried no recognised
+  // tag — so an INVESTIGATION played as a generic conversation and the scene
+  // forgot what it was about. The type was a fact the compiler already had.
+  const c = new CardCompiler(SM_TEMPLATES);
+  const untagged = { what: { id: 'w', text: 'something', tags: [] } };
+
+  assert.equal(c.selectTemplate(untagged, { type: 'INVESTIGATION' }).id, 'investigation_search');
+  assert.equal(c.selectTemplate(untagged, { type: 'NEGOTIATION' }).id, 'negotiation');
+  assert.equal(c.selectTemplate(untagged, { type: 'HEIST' }).id, 'crime_theft');
+  assert.equal(c.selectTemplate(untagged, { type: 'BOSS' }).id, 'social_confrontation');
+});
+
+test('scenes: an unknown or absent scenario type still lands on generic, never throws', () => {
+  const c = new CardCompiler(SM_TEMPLATES);
+  const untagged = { what: { id: 'w', text: 'something', tags: [] } };
+  assert.equal(c.selectTemplate(untagged, { type: 'NOT_A_TYPE' }).id, 'GENERIC_INTERACTION');
+  assert.equal(c.selectTemplate(untagged, null).id, 'GENERIC_INTERACTION');
+  assert.equal(c.selectTemplate(untagged).id, 'GENERIC_INTERACTION');
+});
+
+test('scenes: every scenario type in the level maps to a real scene tag', () => {
+  // A type with no mapping is a scenario that can only ever play generic.
+  const fs = require('fs');
+  const path = require('path');
+  const level = JSON.parse(fs.readFileSync(
+    path.join(__dirname, '..', 'assets/generated/level-the-block.json'), 'utf8'));
+  const types = [...new Set(level.scenarios.map(s => s.type))];
+  const unmapped = types.filter(t => t !== 'MINIGAME' && !SM_TYPE_TAGS[t]);
+  assert.deepEqual(unmapped, [], `scenario types with no scene mapping: ${unmapped.join(', ')}`);
+});

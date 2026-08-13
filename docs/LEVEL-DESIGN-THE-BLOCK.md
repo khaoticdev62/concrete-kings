@@ -771,8 +771,10 @@ Zero scenarios, despite being named in `experience.pacing` as a TENSION beat. It
 Degree 1 each. A leaf location is one the player visits once and never routes through.
 **Fix:** `rec_stoop` closes the west social loop; `roof_blue` turns the Rooftop from a viewpoint into a shortcut. Both make the west side re-traversable.
 
-### F. Two locations have no art — **open, scoped**
-Detroit Lot and Rail Yards render as geometric glyphs. This was a deliberate call (no honest vacant-lot or rail-yard art exists in the vendor drop), but they are TENSION and ESCAPE beats and deserve art. Scoped in §17 as the only two new-art tasks.
+### F. Two locations have no art — **one fixed, one closed as correct**
+Rail Yards now has art: a single graffitied car section cut from a 1536×8880 station sheet. It is also the location's own POI made literal — *"a freight car carrying tags from this block. The writing left before you did."*
+
+**Detroit Lot keeps its glyph, and the earlier reasoning for that was the weaker argument.** It is not that no vacant-lot art exists. It is that **a vacant lot has no building** — drawing a facade on open ground is the wrong instinct, and the geometric node (a flat plate with a state-coloured ring) is a more accurate picture of it than any building in the drop. Its story is told by its POIs instead: tags on the back wall, and a burnt hulk once the war comes through. Closed as designed rather than deferred.
 
 ### G. Scenario clustering — **verified clean**
 Measured: max 2 scenarios per location, 12/12 locations non-empty after fix D. No cluster.
@@ -795,6 +797,13 @@ Mr. Chen was named in the design but absent from the level data entirely; added 
 The third piece of dead data, and the worst of them, because unlike the other two it *looked* like it worked. `applyConsequence` handled `locationState`, `relationship`, `newScenario`, `factionControl`, `triggerEvent` and four more — but there was **no branch for `worldMark` at all**. Every mark authored in every level file was silently discarded, including the two that shipped in v1. The consequence applied, the numbers moved, and the world never changed.
 
 The marks live on `DMWorldMap`; consequences are applied on `DMMapState`, which is display-agnostic by design ("map stays display-only", per its own comment). Fixed by having state **announce** `worldMarkAdded` and `dynamic-map-system` relay it to the world map. Conditional POIs use the same relay, so a POI that turns on cannot turn on invisibly.
+
+### K. The scene compiler discarded the scenario type — **found during implementation, fixed**
+Sprint 3's plan was to "wire playback" for the two new scenarios. Reading `CardCompiler.selectTemplate` showed there was nothing per-scenario to wire, and a root defect instead: it took `cards` alone, matched on card tags, and fell straight to `GENERIC_INTERACTION` when none matched. **An INVESTIGATION scenario played as a generic conversation whenever the player's four cards happened to carry no recognised tag** — the scene forgot what kind of situation it was. The scenario's `type` was a fact the compiler already had in hand and threw away.
+
+Fixed as a tiebreak, not an override. Order is: exact card id → card tags → scenario type → generic. Cards are intent and still win, so a theft card can still take a SOCIAL scenario somewhere unexpected; it just can no longer land nowhere. `SM_TYPE_TAGS` maps all 15 `DMScenarioTypes` through the existing `match` vocabulary rather than a parallel id list, so templates registered later by `scene-content.js` keep working.
+
+This is why the two new scenarios needed no bespoke playback: fixing the compiler fixed every scenario in the level at once, including the eleven that shipped before them.
 
 ### I. Route B had no chain — **found during implementation, fixed**
 `heat_check` shipped hidden with no rumor and no chain pointing at it, so it could never be revealed. Fixing it exposed a structural asymmetry: Route A had `marcus_arc` and Route C had `cut_arc`, but the Law route had no chain at all. Added `law_arc` = `officer_trust` → `heat_check` → `snitch_or_silent`, which completes the three-route symmetry §10 describes.
@@ -828,7 +837,15 @@ The original plan here was 24 bespoke decals, one per POI. Implementation showed
 
 Only four have honest art in the drop; the other four draw as palette shapes, which is the asset-first / procedural-fallback rule from HANDOFF §7. Built by `scripts/process-poi-decals.sh`, ~2 KB total.
 
-### C. Existing, no work needed
+### C. Time of day — a rule, not 18 sprites ▲
+
+The plan called for per-location day/evening/night variants for the six busiest locations. **Cut, and replaced with a lighting rule.** Eighteen more PNGs buy almost nothing over the scene-wide wash already in `_drawTimeOfDay`, and nothing at all that a player can act on.
+
+What ships instead: after dark, locations tagged `social` or `nightlife` show lit windows — gold for social, orange and one window wider for nightlife. Driven by the level's own tags, so it stays true when the data changes, and it costs no art. A shuttered or destroyed location goes dark, so the Corner Store closing is visible at a glance.
+
+Drawn **after** the night wash, not with the buildings. The first pass drew it with them and the wash dimmed the very thing that makes it worth drawing — a lit window should be the brightest thing on a night map.
+
+### D. Existing, no work needed
 
 `ground_asphalt` (48×48 seamless), 10 building sprites, `character_fallback`, 6 HUD icons, 7 generated characters, 4 vehicles, 13 props.
 
@@ -926,7 +943,7 @@ Every criterion is measurable and most are automatable in the existing harness (
 | 20 | Steam Deck | Playable at 1280×800, all text ≥ 8px, no overflow | ✅ Playwright + manual |
 | 21 | Controller | Every action reachable without a pointer | ❌ manual |
 | 22 | Palette | No sprite introduces a colour outside the 101 ramps | ✅ node |
-| 23 | Performance | Map frame < 16 ms at 1080p on integrated graphics | ❌ manual |
+| 23 | Performance | Map frame median < 32 ms at 1920x1080 (16 ms target) | ✅ Playwright |
 | 24 | Replay | Two runs of A-first vs C-first differ in ≥ 4 scenario outcomes | ❌ manual |
 
 Tests 1–11 and 15–17 and 22 are **new and should be written as `test/level-the-block.test.js`** — pure data validation against the shipped level file, no browser needed. They would have caught §16-A, B, D at authoring time.
@@ -957,7 +974,7 @@ Tests 1–11 and 15–17 and 22 are **new and should be written as `test/level-t
 
 **Sprint 2 — the dead data. ✅ SHIPPED.** `loadLevel` reads `pois` and `consequence_matrix`; `DMMapState` gained `addPoi` / `activeMarksFor` / `activatePoiCondition` / `setConsequenceMatrix` / `consequencesFor` / `applyScenarioOutcome`. 27 POIs authored across all 12 locations, 8 of them conditional on a named scenario branch. Consequence matrix extended from 2 scenarios to 9. `scripts/process-poi-decals.sh` derives 4 mark decals; 4 more draw procedurally. Marks render in their own row under each location label. Plus §16-J — the `worldMark` relay that never existed.
 
-**Sprint 3 — art and polish.** Author the two missing buildings. Wire `the_steps_watch` and `gram_asks` playback. Time-of-day location variants for the six highest-traffic locations. Manual QA 18–24.
+**Sprint 3 — art and playback. ✅ SHIPPED.** Rail Yards art (§16-F); Detroit Lot closed as correct-by-design. Scene playback fixed at the root (§16-K) rather than per-scenario — `the_steps_watch` and `gram_asks` needed no bespoke wiring once the compiler stopped discarding the scenario type. Time-of-day delivered as a lighting **rule** rather than 18 sprites (§17-C). QA 23 automated. QA 18/19/21/24 remain genuinely human.
 
 ### Post-MVP
 Interior scenes for Blue Plate and Miami Cut · NPC pathing animation along routes · dynamic faction territory shading · a second level reusing this schema (the courier thread already seeds it).

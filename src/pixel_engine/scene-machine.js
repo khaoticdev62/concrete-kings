@@ -157,11 +157,50 @@ const SM_TEMPLATES = {
   }
 };
 
+/**
+ * DMScenarioTypes -> preferred scene tags, best first.
+ *
+ * Only used when the player's cards carry no recognised tag at all. Listed as
+ * tags rather than template ids so this survives templates being renamed or
+ * added in data (scene-content.js registers more at runtime).
+ */
+const SM_TYPE_TAGS = {
+  INVESTIGATION: ['investigation', 'search'],
+  MYSTERY: ['investigation', 'search'],
+  HEIST: ['crime', 'theft', 'stealth'],
+  ESCAPE: ['action', 'chase', 'escape'],
+  COMBAT: ['action', 'confrontation'],
+  NEGOTIATION: ['negotiation', 'deal'],
+  FACTION: ['negotiation', 'confrontation'],
+  BOSS: ['confrontation', 'aggressive'],
+  SOCIAL: ['social', 'persuasion'],
+  CHARACTER: ['persuasion', 'social'],
+  ROMANCE: ['persuasion', 'charm'],
+  STORY: ['social'],
+  RANDOM_EVENT: ['chaos', 'wild'],
+  TRAVEL: ['action']
+};
+
 // ----------------------------- Card Compiler (§35/§36/§41) -----------------------------
 class CardCompiler {
   constructor(templates) { this.templates = templates || SM_TEMPLATES; }
 
-  selectTemplate(cards) {
+  /**
+   * Cards are intent, so card tags still decide the scene. The scenario only
+   * breaks the tie.
+   *
+   * This used to take `cards` alone and fall straight to GENERIC_INTERACTION
+   * when no tag matched, which meant an INVESTIGATION scenario played as a
+   * generic conversation whenever the player's four cards happened to carry no
+   * recognised tag — the scene forgot what it was about. The scenario's own
+   * type is a fact the compiler already had and was throwing away.
+   *
+   * Order is deliberate and unchanged at the top: exact card id, then card
+   * tags, then scenario type, then generic. A card can still take an
+   * INVESTIGATION somewhere unexpected, which is the whole point of the card
+   * system; it just can no longer land nowhere.
+   */
+  selectTemplate(cards, scenario) {
     const tags = this._collectTags(cards);
     // EXACT: a template whose id matches a card id
     for (const t of Object.values(this.templates)) {
@@ -173,8 +212,28 @@ class CardCompiler {
       if (t.id === 'GENERIC_INTERACTION') continue;
       if (t.match.some(m => tags.includes(m))) return t;
     }
+    // SCENARIO TYPE: the scene should still know what kind of situation it is.
+    const byType = this._templateForScenarioType(scenario && scenario.type);
+    if (byType) return byType;
     // CONTEXT / GENERIC fallback (§41: never crash)
     return this.templates.GENERIC_INTERACTION;
+  }
+
+  /**
+   * Scenario type -> the tag its scene is closest to. Mapped through the
+   * existing `match` vocabulary rather than a parallel id list, so a template
+   * renamed or replaced in data keeps working without touching this.
+   */
+  _templateForScenarioType(type) {
+    const wanted = SM_TYPE_TAGS[type];
+    if (!wanted) return null;
+    for (const tag of wanted) {
+      for (const t of Object.values(this.templates)) {
+        if (t.id === 'GENERIC_INTERACTION') continue;
+        if (t.match.includes(tag)) return t;
+      }
+    }
+    return null;
   }
 
   _collectTags(cards) {
@@ -189,7 +248,7 @@ class CardCompiler {
   // cards -> scene graph (list of beats) (§35). Beats are derived from the
   // selected template's `beats` array (data), so new scenes need no engine change.
   compile(scenario, cards) {
-    const template = this.selectTemplate(cards);
+    const template = this.selectTemplate(cards, scenario);
     const seed = smSeed(scenario, cards);
     const who = (cards && cards.who && (cards.who.text || cards.who.id)) || 'someone';
     const what = (cards && cards.what && (cards.what.text || cards.what.id)) || 'do something';
@@ -530,7 +589,7 @@ if (typeof module !== 'undefined' && module.exports) {
     SM_BEAT_TYPES, SM_PLAYBACK_STATES, SM_OUTCOMES,
     ActorManager, AnimationManager, CameraManager, DialogueManager, AudioManager, VFXManager,
     ChronicleManager, SaveManager, smEmit, smSeed, smHash,
-    SM_TEMPLATES, CardCompiler, SceneValidator, SceneLoader, SM_MiniGameManager, ConsequenceManager
+    SM_TEMPLATES, SM_TYPE_TAGS, CardCompiler, SceneValidator, SceneLoader, SM_MiniGameManager, ConsequenceManager
   };
 }
 

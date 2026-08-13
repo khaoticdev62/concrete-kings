@@ -198,6 +198,38 @@ test('E2E Audit: UI, Navigation Flow, Gameplay Loop, and Mini-Game Functionality
     assert.equal(fit.ratio, 1.78, `map canvas must keep its 16:9 aspect at ${at}, got ${fit.ratio}`);
   }
 
+  // 8. Map frame budget (QA 23).
+  //
+  // Listed as manual in the level design's QA plan; it does not need to be.
+  // The renderer is a pure function of state, so timing renderFrame directly
+  // measures the thing that matters without needing a human to watch for
+  // stutter. Budget is 16ms for 60fps; asserted at 32ms so the test reports a
+  // real regression rather than failing on a busy CI box.
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.evaluate(() => window.app && window.app.showMap && window.app.showMap('STORY'));
+  await page.waitForTimeout(1200);
+
+  const frame = await page.evaluate(() => {
+    const sys = window.app.dynamicMapSystem;
+    if (!sys || typeof sys.worldRenderer?.render !== 'function') return null;
+    // Render directly rather than through renderFrame, which defers to rAF.
+    for (let i = 0; i < 5; i++) sys.worldRenderer.render(i);   // warm the caches
+    const samples = [];
+    for (let i = 0; i < 30; i++) {
+      const t0 = performance.now();
+      sys.worldRenderer.render(i);
+      samples.push(performance.now() - t0);
+    }
+    samples.sort((a, b) => a - b);
+    return { median: samples[15], worst: samples[29] };
+  });
+
+  if (frame) {
+    console.log(`Map frame at 1920x1080: median ${frame.median.toFixed(2)}ms, worst ${frame.worst.toFixed(2)}ms`);
+    assert.ok(frame.median < 32,
+      `map frame median ${frame.median.toFixed(2)}ms exceeds the 32ms ceiling (16ms target)`);
+  }
+
   // Assert No Uncaught Console Errors
   assert.equal(consoleErrors.length, 0, `Uncaught console errors detected: ${consoleErrors.join(', ')}`);
   } finally {

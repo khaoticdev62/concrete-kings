@@ -321,6 +321,61 @@
     }
 
     /**
+     * Lit windows after dark, for places with people in them.
+     *
+     * This is the time-of-day work, done as a rule instead of as art. The
+     * alternative on the plan was per-location day / evening / night sprites —
+     * 18 more PNGs for the six busiest locations. That buys almost nothing over
+     * the scene-wide wash in _drawTimeOfDay, and it buys nothing at all that a
+     * player can act on.
+     *
+     * What a lit window says is different: somebody is in there now. It is
+     * driven by the location's own `social` / `nightlife` tags, so it stays
+     * true when the level data changes and costs no art at all.
+     *
+     * Deliberately not driven by NPC presence — a lit window is the building
+     * being open, not a specific person being home, and the map already draws
+     * character sprites for that.
+     *
+     * Runs from _drawTimeOfDay, AFTER the night wash. Drawn with the buildings
+     * it was dimmed by the very wash that makes it worth drawing, which is
+     * backwards: a lit window should be the brightest thing on a night map.
+     */
+    _drawWindowLights(ctx, w, h) {
+      const tod = this.world.timeOfDay;
+      if (tod !== 'EVENING' && tod !== 'NIGHT' && tod !== 'LATE_NIGHT') return;
+      if (this.world.zoom === 'CITY') return;
+
+      const state = this.world.state;
+      const locs = state && state.locations ? Object.values(state.locations) : [];
+      const size = this.world.zoom === 'DISTRICT' ? 40 : 64;
+
+      locs.forEach(loc => {
+        if (!loc.discovered) return;
+        const tags = loc.tags || [];
+        const lively = tags.includes('social') || tags.includes('nightlife');
+        if (!lively) return;
+        // A shuttered or emptied place does not glow.
+        if (loc.state === 'DESTROYED' || loc.state === 'LOCKED') return;
+
+        const p = this._locScreen(loc, w, h);
+        const warm = tags.includes('nightlife') ? '#ff9f43' : '#ffcd68';
+        const n = tags.includes('nightlife') ? 3 : 2;
+        const ww = Math.max(2, Math.round(size * 0.1));
+        const hh = Math.max(2, Math.round(size * 0.08));
+        const gap = Math.round(ww * 1.9);
+        const startX = Math.round(p.x - ((n - 1) * gap + ww) / 2);
+        const y = Math.round(p.y - size * 0.42);
+
+        ctx.save();
+        ctx.globalAlpha = tod === 'EVENING' ? 0.7 : 1;
+        ctx.fillStyle = warm;
+        for (let i = 0; i < n; i++) ctx.fillRect(startX + i * gap, y, ww, hh);
+        ctx.restore();
+      });
+    }
+
+    /**
      * Environmental storytelling: the marks a location carries.
      *
      * Authored POIs and consequence-added marks both live in world.worldMarks,
@@ -452,6 +507,9 @@
         ctx.fillRect(0, 0, w, h);
         ctx.restore();
       }
+
+      // Lit windows go on top of the wash, not under it.
+      this._drawWindowLights(ctx, w, h);
 
       // subtle vignette by time (§23)
       if (this.world.timeOfDay === 'NIGHT' || this.world.timeOfDay === 'LATE_NIGHT') {
