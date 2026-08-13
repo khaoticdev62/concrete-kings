@@ -156,6 +156,48 @@ test('E2E Audit: UI, Navigation Flow, Gameplay Loop, and Mini-Game Functionality
     }
   });
 
+  // 7. The narrative map must fit its frame.
+  //
+  // This is measured rather than static because it cannot be seen any other way:
+  // HANDOFF trap 2.1 is that documentElement.scrollHeight always reports the
+  // viewport height here, so every screen looks like a perfect fit unless you
+  // measure the .screen element itself.
+  //
+  // #blockMap ran 277px past its frame. Two causes, both of which can come back
+  // silently: the world control bar wrapping to four rows under the canvas, and
+  // the canvas sizing itself from a fixed calc(100vh - Npx) that no longer
+  // matched the chrome around it.
+  // Both the short and the tall viewport, because the two failure modes appear
+  // at opposite ends and neither viewport catches both.
+  //
+  // Overflow shows where vertical space is SCARCE. Stretch shows where it is
+  // SPARE: the canvas is capped at its native 540, so a frame that grows past it
+  // pulls the canvas with it via the flex align-self:stretch default. At
+  // 1920x1080 that produced a 960x703 canvas — 1.37 on 16:9 art. At 1280x720
+  // there is no spare height, the canvas measures 643x362 either way, and an
+  // aspect assertion there passes whether the bug is present or not.
+  const measure = () => {
+    const s = document.getElementById('blockMap');
+    const c = document.getElementById('narrativeMapCanvas');
+    const r = c.getBoundingClientRect();
+    return {
+      overflow: s.scrollHeight - s.clientHeight,
+      ratio: r.height ? +(r.width / r.height).toFixed(2) : 0,
+      hScroll: document.body.scrollWidth > document.body.clientWidth
+    };
+  };
+
+  for (const vp of [{ width: 1280, height: 720 }, { width: 1920, height: 1080 }]) {
+    await page.setViewportSize(vp);
+    await page.evaluate(() => window.app && window.app.showMap && window.app.showMap('STORY'));
+    await page.waitForTimeout(1000);
+    const fit = await page.evaluate(measure);
+    const at = `${vp.width}x${vp.height}`;
+    assert.equal(fit.overflow, 0, `#blockMap must fit its frame at ${at}; overflows by ${fit.overflow}px`);
+    assert.equal(fit.hScroll, false, `the map screen must not cause horizontal page scroll at ${at}`);
+    assert.equal(fit.ratio, 1.78, `map canvas must keep its 16:9 aspect at ${at}, got ${fit.ratio}`);
+  }
+
   // Assert No Uncaught Console Errors
   assert.equal(consoleErrors.length, 0, `Uncaught console errors detected: ${consoleErrors.join(', ')}`);
   } finally {

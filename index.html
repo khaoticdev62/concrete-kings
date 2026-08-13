@@ -130,6 +130,53 @@
     border-radius: 0px;
   }
 
+  /* The narrative map fills its frame instead of overflowing it.
+
+     This screen used to run 277px past the 595px frame. Roughly 160 of that was
+     the world control bar wrapping to four rows under the canvas while the rail
+     beside it sat half empty — that moved into the rail (HANDOFF trap 2.12,
+     beside rather than below). The rest was the canvas sizing itself from
+     calc(100vh - 260px), a fixed subtraction that was wrong by about 100px.
+
+     Fixed subtractions cannot survive the chrome around them changing, so the
+     canvas row is flexed instead: the panel fills the screen, the row takes what
+     is left after the header, feed, hint and buttons, and the canvas fits inside
+     that. min-height:0 on each flex level is what actually allows the shrink —
+     a flex item's default min-height:auto refuses to go below its content size,
+     and a 540px-tall canvas would push straight back through the frame. */
+  #blockMap > .panel {
+    height: 100%;
+    box-sizing: border-box;
+  }
+  #mapMainRow {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  #mapCenterCol {
+    min-height: 0;
+  }
+  #mapCenterCol > .crt-screen {
+    /* 0 1 auto, not 1 1 auto: the bezel may shrink but must not grow past the
+       canvas. Growing stretched the scanline overlay and the gold border over
+       ~160px of bare black at 1080p, where the map stays at its native 960x540
+       because upscaling pixel art needs 2x the room and there is only ~1x. */
+    flex: 0 1 auto;
+    min-height: 0;
+    /* The canvas is a flex item in a row container, so it defaults to
+       align-self:stretch and gets pulled to the container's full height. At
+       1920x1080 that gave a 960x703 canvas — a 1.37 ratio on 16:9 art, i.e. a
+       vertically stretched map. Centring it keeps its intrinsic aspect and lets
+       max-height:100% do the shrinking on its own terms. */
+    align-items: center;
+    /* Shrink the gold frame to the canvas rather than to the column. The canvas
+       is now height-limited, so at most viewports it is narrower than the space
+       available and the frame was drawing ~160px of bare black either side of
+       it. In a column flex container align-self controls the cross axis, so
+       this is the width. */
+    align-self: center;
+    max-width: 100%;
+  }
+
   /* HUD icons, built from the vendor UI kit by scripts/process-ui-icons.sh and
      recoloured into this palette. They replace colour emoji, which render from
      the OS emoji font — ignoring the palette, differing per platform, and
@@ -1731,45 +1778,73 @@
         </div>
       </div>
 
-      <div style="display:flex; gap:12px; align-items:flex-start;">
-        <!-- Left rail -->
-        <div class="panel" style="flex:0 0 200px; background:#101116; border:2px solid #2d313d; padding:10px; display:flex; flex-direction:column; gap:10px;">
+      <div id="mapMainRow" style="display:flex; gap:12px; align-items:stretch;">
+        <!-- Left rail.
+             overflow-y:auto is a floor, not a layout choice: the rail stretches
+             to the row height, and if its content ever exceeds that again it
+             must scroll rather than spill over the activity feed below. That is
+             what happened the first time the row was flexed. -->
+        <div class="panel" style="flex:0 0 210px; background:#101116; border:2px solid #2d313d; padding:8px; display:flex; flex-direction:column; gap:8px; overflow-y:auto; min-height:0;">
           <div>
             <h3 style="margin:0 0 6px 0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68;">MODES</h3>
-            <div id="mapModeRail" style="display:flex; flex-direction:column; gap:6px;"></div>
+            <!-- Two columns, not one. Five stacked mode buttons were 219px of a
+                 rail that now has to fit the row height alongside the canvas;
+                 in a grid they are ~135px and the WORLD section below stops
+                 being clipped. DMUI._buildModeRail only appends children, so
+                 the layout is entirely this container's business. -->
+            <div id="mapModeRail" style="display:grid; grid-template-columns:1fr 1fr; gap:6px;"></div>
           </div>
           <div>
             <h3 style="margin:0 0 6px 0; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68;">FILTERS</h3>
             <div id="mapFilterWrap" style="display:flex; flex-direction:column; gap:6px;"></div>
           </div>
+
+          <!-- CRPG-MAP-PRD-002 living-world controls (§5/§22/§23/§72).
+               These sat under the canvas as a wrapping horizontal bar. At 818px
+               wide the eleven buttons and two selects wrapped to four rows and
+               ate 154px of the 277px this screen used to overflow by, while the
+               rail beside them had ~380px of dead space. They are map controls
+               like MODES and FILTERS, so they belong in the rail with them —
+               see HANDOFF trap 2.12 on preferring beside over below. -->
+          <div>
+            <h3 style="margin:0 0 6px 0; font-family:'Press Start 2P', monospace; font-size:9px; color:#6fe8d8;">WORLD</h3>
+            <div id="worldMapControls" style="display:flex; flex-direction:column; gap:5px;">
+              <div style="display:flex; gap:5px;">
+                <button class="secondary" style="font-size:8px; padding:5px; flex:1;" onclick="app.worldZoomOut()">ZOOM −</button>
+                <button class="secondary" style="font-size:8px; padding:5px; flex:1;" onclick="app.worldZoomIn()">ZOOM +</button>
+              </div>
+              <select id="worldWeather" aria-label="Weather" style="font-size:8px;" onchange="app.worldSetWeather(this.value)">
+                <option value="CLEAR">CLEAR</option><option value="RAIN">RAIN</option><option value="HEAVY_RAIN">HEAVY RAIN</option><option value="FOG">FOG</option><option value="STORM">STORM</option>
+              </select>
+              <select id="worldTime" aria-label="Time of day" style="font-size:8px;" onchange="app.worldSetTime(this.value)">
+                <option value="DAY">DAY</option><option value="EVENING">EVENING</option><option value="NIGHT">NIGHT</option><option value="LATE_NIGHT">LATE NIGHT</option>
+              </select>
+              <div style="display:flex; flex-wrap:wrap; gap:5px;">
+                <button class="secondary" style="font-size:8px; padding:5px; flex:1 1 46%;" onclick="app.worldToggleLayer('STORY')">STORY</button>
+                <button class="secondary" style="font-size:8px; padding:5px; flex:1 1 46%;" onclick="app.worldToggleLayer('PEOPLE')">PEOPLE</button>
+                <button class="secondary" style="font-size:8px; padding:5px; flex:1 1 46%;" onclick="app.worldToggleLayer('RUMORS')">RUMORS</button>
+                <button class="secondary" style="font-size:8px; padding:5px; flex:1 1 46%;" onclick="app.worldToggleLayer('FACTIONS')">FACTIONS</button>
+              </div>
+              <button class="secondary" style="font-size:8px; padding:5px;" onclick="app.worldTickAmbient()">AMBIENT</button>
+            </div>
+          </div>
         </div>
 
         <!-- Center map -->
-        <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:6px;">
+        <div id="mapCenterCol" style="flex:1; min-width:0; display:flex; flex-direction:column; gap:6px;">
           <div class="crt-screen" style="border:3px solid #ffcd68; background:#08080a; display:flex; justify-content:center; position:relative;">
-            <canvas id="narrativeMapCanvas" tabindex="0" width="960" height="540" class="pixel-canvas" style="max-width:100%; max-height:calc(100vh - 260px); width:auto; height:auto; display:block; image-rendering:pixelated; image-rendering:crisp-edges;"></canvas>
+            <!-- max-height is 100% of a flexed parent, not calc(100vh - 260px).
+                 That constant was wrong by ~100px and, being a fixed subtraction,
+                 could only ever be right for one arrangement of the chrome around
+                 it. The canvas now takes whatever height the row has left, so the
+                 screen fits by construction at any viewport rather than by a
+                 number someone has to keep in sync. See #blockMap in the CSS. -->
+            <canvas id="narrativeMapCanvas" tabindex="0" width="960" height="540" class="pixel-canvas" style="max-width:100%; max-height:100%; width:auto; height:auto; display:block; image-rendering:pixelated; image-rendering:crisp-edges;"></canvas>
             <div id="mapOverlay" role="dialog" aria-modal="true" tabindex="-1" style="display:none; position:absolute; inset:0; background:rgba(8,8,10,0.92); color:#cbd5ed; padding:24px; overflow:auto;">
               <h3 id="mapOverlayTitle" style="font-family:'Press Start 2P',monospace; font-size:12px; color:#ffcd68; margin-top:0;"></h3>
               <div id="mapOverlayBody"></div>
               <button class="primary" onclick="app.dismissMapOverlay()" style="margin-top:12px;">CLOSE</button>
             </div>
-          </div>
-          <!-- CRPG-MAP-PRD-002 living-world controls (§5/§22/§23/§72) -->
-          <div id="worldMapControls" style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:center; background:#0c0e14; border:1px solid #2d313d; padding:6px;">
-            <span style="font-family:'Press Start 2P',monospace; font-size:8px; color:#6fe8d8;">WORLD</span>
-            <button class="secondary" style="font-size:8px; padding:6px;" onclick="app.worldZoomOut()">ZOOM −</button>
-            <button class="secondary" style="font-size:8px; padding:6px;" onclick="app.worldZoomIn()">ZOOM +</button>
-            <select id="worldWeather" style="font-size:8px;" onchange="app.worldSetWeather(this.value)">
-              <option value="CLEAR">CLEAR</option><option value="RAIN">RAIN</option><option value="HEAVY_RAIN">HEAVY RAIN</option><option value="FOG">FOG</option><option value="STORM">STORM</option>
-            </select>
-            <select id="worldTime" style="font-size:8px;" onchange="app.worldSetTime(this.value)">
-              <option value="DAY">DAY</option><option value="EVENING">EVENING</option><option value="NIGHT">NIGHT</option><option value="LATE_NIGHT">LATE NIGHT</option>
-            </select>
-            <button class="secondary" style="font-size:8px; padding:6px;" onclick="app.worldToggleLayer('STORY')">STORY</button>
-            <button class="secondary" style="font-size:8px; padding:6px;" onclick="app.worldToggleLayer('PEOPLE')">PEOPLE</button>
-            <button class="secondary" style="font-size:8px; padding:6px;" onclick="app.worldToggleLayer('RUMORS')">RUMORS</button>
-            <button class="secondary" style="font-size:8px; padding:6px;" onclick="app.worldToggleLayer('FACTIONS')">FACTIONS</button>
-            <button class="secondary" style="font-size:8px; padding:6px;" onclick="app.worldTickAmbient()">AMBIENT</button>
           </div>
           <div id="mapNodeDetails" style="min-height:16px; font-family:'Press Start 2P', monospace; font-size:9px; color:#ffcd68; text-align:left;"></div>
         </div>
