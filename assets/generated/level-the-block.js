@@ -98,8 +98,8 @@ window.MAP_LEVEL = {
       "type": "HOME",
       "district_id": "harlem",
       "coordinates": {
-        "x": 160,
-        "y": 200
+        "x": 130,
+        "y": 265
       },
       "tags": [
         "safe",
@@ -116,8 +116,8 @@ window.MAP_LEVEL = {
       "type": "SOCIAL",
       "district_id": "harlem",
       "coordinates": {
-        "x": 220,
-        "y": 150
+        "x": 110,
+        "y": 400
       },
       "tags": [
         "safe",
@@ -134,8 +134,8 @@ window.MAP_LEVEL = {
       "type": "HIDDEN",
       "district_id": "harlem",
       "coordinates": {
-        "x": 120,
-        "y": 280
+        "x": 140,
+        "y": 160
       },
       "tags": [
         "hidden",
@@ -152,8 +152,8 @@ window.MAP_LEVEL = {
       "type": "RESTAURANT",
       "district_id": "downtown",
       "coordinates": {
-        "x": 420,
-        "y": 260
+        "x": 400,
+        "y": 240
       },
       "tags": [
         "food",
@@ -172,8 +172,8 @@ window.MAP_LEVEL = {
       "type": "STORE",
       "district_id": "downtown",
       "coordinates": {
-        "x": 380,
-        "y": 320
+        "x": 330,
+        "y": 350
       },
       "tags": [
         "supplies",
@@ -190,8 +190,8 @@ window.MAP_LEVEL = {
       "type": "LANDMARK",
       "district_id": "harlem",
       "coordinates": {
-        "x": 470,
-        "y": 200
+        "x": 140,
+        "y": 70
       },
       "tags": [
         "vantage",
@@ -208,8 +208,8 @@ window.MAP_LEVEL = {
       "type": "INSTITUTION",
       "district_id": "downtown",
       "coordinates": {
-        "x": 500,
-        "y": 330
+        "x": 345,
+        "y": 455
       },
       "tags": [
         "police",
@@ -227,7 +227,7 @@ window.MAP_LEVEL = {
       "district_id": "detroit",
       "coordinates": {
         "x": 620,
-        "y": 360
+        "y": 175
       },
       "tags": [
         "studio",
@@ -244,8 +244,8 @@ window.MAP_LEVEL = {
       "type": "APARTMENT",
       "district_id": "detroit",
       "coordinates": {
-        "x": 700,
-        "y": 180
+        "x": 780,
+        "y": 80
       },
       "tags": [
         "safe",
@@ -262,8 +262,8 @@ window.MAP_LEVEL = {
       "type": "ALLEY",
       "district_id": "east_side",
       "coordinates": {
-        "x": 360,
-        "y": 440
+        "x": 660,
+        "y": 360
       },
       "tags": [
         "criminal",
@@ -280,8 +280,8 @@ window.MAP_LEVEL = {
       "type": "CLUB",
       "district_id": "east_side",
       "coordinates": {
-        "x": 800,
-        "y": 520
+        "x": 860,
+        "y": 470
       },
       "tags": [
         "nightlife",
@@ -299,8 +299,8 @@ window.MAP_LEVEL = {
       "type": "TRANSITION",
       "district_id": "industrial",
       "coordinates": {
-        "x": 360,
-        "y": 560
+        "x": 455,
+        "y": 470
       },
       "tags": [
         "freight",

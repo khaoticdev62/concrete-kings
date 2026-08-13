@@ -448,6 +448,63 @@ test('design: districts match the west-to-east danger gradient', () => {
   assert.deepEqual(wrong, [], 'district drift:\n  ' + wrong.join('\n  '));
 });
 
+test('design: the map layout matches the blockout, west to east', () => {
+  // The design's single readable idea is a west-to-east gradient. It only
+  // exists if the coordinates say so.
+  //
+  // This caught the level and the design disagreeing outright: bmore_steps was
+  // authored at x=360, west of the Blue Plate, while the design puts it in
+  // east_side as the threshold to the Cut; and train_yard sat at y=560 on a
+  // 540-tall canvas.
+  const x = id => level.locations.find(l => l.id === id).coordinates.x;
+  const order = [
+    ['stoop', 'corner_store'], ['corner_store', 'blue_plate'],
+    ['blue_plate', 'detroit_lot'], ['detroit_lot', 'bmore_steps'],
+    ['bmore_steps', 'miami_cut']
+  ];
+  const wrong = order
+    .filter(([w, e]) => x(w) >= x(e))
+    .map(([w, e]) => `${w} (x=${x(w)}) must be west of ${e} (x=${x(e)})`);
+  assert.deepEqual(wrong, [], 'gradient broken:\n  ' + wrong.join('\n  '));
+
+  // The payoff spur is north of the tension it pays off.
+  const y = id => level.locations.find(l => l.id === id).coordinates.y;
+  assert.ok(y('chi_grey') < y('detroit_lot'), 'Chicago Greystone is the northern payoff spur');
+  assert.ok(y('train_yard') > y('blue_plate'), 'the Rail Yards escape valve is south');
+  assert.ok(y('rooftop') < y('stash_spot'), 'the Rooftop is above the Stash it is reached through');
+});
+
+test('design: every location renders inside the canvas at every zoom', () => {
+  // Mirrors _locScreen in dynamic-world-map-renderer.js. The renderer used to
+  // compute district.x + nx * spread, which put east_side locations at x=1226
+  // on a 960px canvas and the Rail Yards at y=723 on a 540px one — authored,
+  // loaded, and drawn off the edge of the map.
+  const W = 960, H = 540, PAD = 0.06;
+  const fit = v => PAD + v * (1 - PAD * 2);
+  const bad = [];
+  for (const [zoom, scale] of [['CITY', 0.55], ['DISTRICT', 0.82], ['STREET', 1.0]]) {
+    level.locations.forEach(l => {
+      const nx = l.coordinates.x / 960, ny = l.coordinates.y / 540;
+      const sx = (0.5 + (fit(nx) - 0.5) * scale) * W;
+      const sy = (0.5 + (fit(ny) - 0.5) * scale) * H;
+      if (sx < 0 || sx > W || sy < 0 || sy > H) {
+        bad.push(`${l.id} at ${zoom}: (${Math.round(sx)}, ${Math.round(sy)})`);
+      }
+    });
+  }
+  assert.deepEqual(bad, [], 'off-canvas:\n  ' + bad.join('\n  '));
+});
+
+test('design: coordinates are authored in level space, not normalized', () => {
+  // A location carrying loc.x / loc.y (0..1) instead of coordinates (0..960)
+  // silently takes a different branch in _locScreen. Keep one convention.
+  const bad = level.locations
+    .filter(l => typeof l.x === 'number' || typeof l.y === 'number' ||
+                 !l.coordinates || typeof l.coordinates.x !== 'number')
+    .map(l => l.id);
+  assert.deepEqual(bad, [], `mixed coordinate conventions: ${bad.join(', ')}`);
+});
+
 test('design: danger rises from west to east', () => {
   const band = { harlem: 0, downtown: 1, detroit: 2, industrial: 2, east_side: 3 };
   const districtOf = id => (level.locations.find(l => l.id === id) || {}).district_id;

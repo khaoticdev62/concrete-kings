@@ -147,19 +147,41 @@
     }
 
     // ----- helpers -----
+    /**
+     * Level coordinates -> screen. THE LAYOUT IS ABSOLUTE.
+     *
+     * This used to be `district.x + nx * spread`, which was wrong twice over
+     * and is why the rendered map did not resemble the level design's blockout:
+     *
+     * 1. It read `loc.districtId`. The loader writes `district_id`. The camel
+     *    -case property never existed, so EVERY location fell back to
+     *    activeDistrictId and all twelve were laid out from the Harlem origin —
+     *    the five designed districts had no effect on position at all, and the
+     *    map rendered as one cluster instead of a west-to-east gradient.
+     *
+     * 2. Even with that typo fixed it overflows. district.x runs to 0.86 and
+     *    `nx * spread` adds up to another 0.5, so east_side locations land at
+     *    x = 1.36 of a 960px canvas — Miami Cut at 1226, Baltimore Steps at
+     *    1006, Rail Yards at y = 723 on a 540px canvas. Off-screen.
+     *
+     * A district is a grouping and a danger band, not an offset. The level
+     * already authors absolute coordinates in 0..960 / 0..540 and those encode
+     * the designed layout directly, so they are used directly. Zoom scales the
+     * whole arrangement about its centre rather than changing its shape, which
+     * also makes overflow impossible: nx and ny are 0..1 and scale is <= 1.
+     */
     _locScreen(loc, w, h) {
-      // normalized 0..1 positions -> screen, with zoom/detail scaling.
-      // Prefer explicit loc.x / loc.y (0..1); fall back to pixel-space
-      // loc.coordinates (0..960 / 0..540) so levels that only set coordinates
-      // still spread correctly across the map instead of stacking.
       const zoom = this.world.zoom;
-      const district = this.world.districts.find(d => d.id === (loc.districtId || this.world.activeDistrictId)) || { x: 0.5, y: 0.5 };
-      let nx = (typeof loc.x === 'number') ? loc.x : (loc.coordinates && loc.coordinates.x != null ? loc.coordinates.x / 960 : 0.5);
-      let ny = (typeof loc.y === 'number') ? loc.y : (loc.coordinates && loc.coordinates.y != null ? loc.coordinates.y / 540 : 0.5);
-      const spread = zoom === 'CITY' ? 0.12 : zoom === 'DISTRICT' ? 0.5 : zoom === 'STREET' ? 0.85 : 1.0;
-      const baseX = district.x + nx * spread;
-      const baseY = district.y + ny * spread;
-      return { x: baseX * w, y: baseY * h };
+      const nx = (typeof loc.x === 'number') ? loc.x : (loc.coordinates && loc.coordinates.x != null ? loc.coordinates.x / 960 : 0.5);
+      const ny = (typeof loc.y === 'number') ? loc.y : (loc.coordinates && loc.coordinates.y != null ? loc.coordinates.y / 540 : 0.5);
+      const scale = zoom === 'CITY' ? 0.55 : zoom === 'DISTRICT' ? 0.82 : 1.0;
+      // Inset so a 64px sprite drawn from its centre still clears the edges.
+      const pad = 0.06;
+      const fit = v => pad + (v * (1 - pad * 2));
+      return {
+        x: (0.5 + (fit(nx) - 0.5) * scale) * w,
+        y: (0.5 + (fit(ny) - 0.5) * scale) * h
+      };
     }
 
     _drawSky(ctx, w, h) {
