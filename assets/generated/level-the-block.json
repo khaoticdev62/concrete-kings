@@ -1,0 +1,140 @@
+{
+  "id": "the-block",
+  "title": "THE BLOCK",
+  "tagline": "Run your block. Keep your people. Don't let the Cut take it.",
+  "design_pillar": "Experience-first neighborhood: comfort -> curiosity -> tension -> choice -> consequence.",
+  "experience": {
+    "emotion": ["comfort", "curiosity", "paranoia", "pride"],
+    "fantasy": "running your home block — relationships, reputation, and territory",
+    "pacing": {
+      "CALM": "stoop / rec_center — home turf, safe",
+      "CURIOSITY": "corner_store / blue_plate — rumors, info",
+      "DISCOVERY": "stash_spot (rumor-gated) / rooftop (secret route)",
+      "TENSION": "detroit_lot / bmore_steps — corner crew vs royal clique",
+      "DECISION": "miami_cut — the Quiet Meet / clique war",
+      "PAYOFF": "block_fame — your track blows up",
+      "RECOVERY": "return to stoop, world changed by your choices"
+    }
+  },
+  "startLocationId": "stoop",
+  "activeDistrictId": "harlem",
+  "weather": "CLEAR",
+  "timeOfDay": "EVENING",
+  "districts": [
+    { "id": "harlem", "name": "Harlem Stoop", "x": 0.18, "y": 0.34, "blurb": "Your block. Home, the rec center, the stash." },
+    { "id": "downtown", "name": "Downtown", "x": 0.5, "y": 0.42, "blurb": "The Blue Plate, the precinct, the corner store, the rooftop." },
+    { "id": "detroit", "name": "Detroit Lot", "x": 0.72, "y": 0.6, "blurb": "The studio. Corner Crew turf." },
+    { "id": "east_side", "name": "East Side / The Cut", "x": 0.86, "y": 0.7, "blurb": "Miami Cut. Royal Clique owns the night." },
+    { "id": "industrial", "name": "Rail Yards", "x": 0.3, "y": 0.82, "blurb": "Freight, escape routes, the train heist." }
+  ],
+  "factions": [
+    { "id": "neutral", "name": "Unaffiliated", "influence": 0, "territory": "NEUTRAL" },
+    { "id": "corner_crew", "name": "Corner Crew", "influence": 3, "territory": "CONTROLLED" },
+    { "id": "royal_clique", "name": "Royal Clique", "influence": 5, "territory": "CONTROLLED" },
+    { "id": "block_fam", "name": "Block Family", "influence": 2, "territory": "CONTROLLED" }
+  ],
+  "locations": [
+    { "id": "stoop", "name": "The Stoop", "type": "HOME", "district_id": "harlem", "coordinates": { "x": 160, "y": 200 }, "tags": ["safe", "social", "hub"], "state": "SAFE", "faction": "block_fam", "discovered": true },
+    { "id": "rec_center", "name": "Rec Center", "type": "SOCIAL", "district_id": "harlem", "coordinates": { "x": 220, "y": 150 }, "tags": ["safe", "social", "community"], "state": "SAFE", "faction": "block_fam", "discovered": true },
+    { "id": "stash_spot", "name": "The Stash", "type": "HIDDEN", "district_id": "harlem", "coordinates": { "x": 120, "y": 280 }, "tags": ["hidden", "secret", "criminal"], "state": "ACTIVE", "faction": "block_fam", "discovered": false },
+    { "id": "blue_plate", "name": "The Blue Plate", "type": "RESTAURANT", "district_id": "downtown", "coordinates": { "x": 420, "y": 260 }, "tags": ["food", "social", "rumor", "nightlife", "info"], "state": "ACTIVE", "faction": "neutral", "discovered": true },
+    { "id": "corner_store", "name": "Corner Store", "type": "STORE", "district_id": "downtown", "coordinates": { "x": 380, "y": 320 }, "tags": ["supplies", "social", "minor"], "state": "ACTIVE", "faction": "neutral", "discovered": true },
+    { "id": "rooftop", "name": "The Rooftop", "type": "LANDMARK", "district_id": "downtown", "coordinates": { "x": 470, "y": 200 }, "tags": ["vantage", "secret", "lookout"], "state": "ACTIVE", "faction": "neutral", "discovered": false },
+    { "id": "precinct", "name": "12th Precinct", "type": "INSTITUTION", "district_id": "downtown", "coordinates": { "x": 500, "y": 330 }, "tags": ["police", "risk", "escape"], "state": "UNDER_SURVEILLANCE", "faction": "neutral", "discovered": true },
+    { "id": "detroit_lot", "name": "Detroit Lot", "type": "PARK", "district_id": "detroit", "coordinates": { "x": 620, "y": 360 }, "tags": ["studio", "criminal", "corner_crew"], "state": "TENSE", "faction": "corner_crew", "discovered": true },
+    { "id": "chi_grey", "name": "Chicago Greystone", "type": "APARTMENT", "district_id": "detroit", "coordinates": { "x": 700, "y": 180 }, "tags": ["safe", "social", "buyer"], "state": "SAFE", "faction": "neutral", "discovered": true },
+    { "id": "bmore_steps", "name": "Baltimore Steps", "type": "ALLEY", "district_id": "downtown", "coordinates": { "x": 360, "y": 440 }, "tags": ["criminal", "dangerous", "shortcut"], "state": "UNDER_SURVEILLANCE", "faction": "neutral", "discovered": true },
+    { "id": "miami_cut", "name": "Miami Cut", "type": "CLUB", "district_id": "east_side", "coordinates": { "x": 800, "y": 520 }, "tags": ["nightlife", "criminal", "royal_clique", "deal"], "state": "DANGEROUS", "faction": "royal_clique", "discovered": true },
+    { "id": "train_yard", "name": "Rail Yards", "type": "TRANSITION", "district_id": "industrial", "coordinates": { "x": 360, "y": 560 }, "tags": ["freight", "escape", "heist"], "state": "TENSE", "faction": "neutral", "discovered": true }
+  ],
+  "routes": [
+    { "id": "stoop_blue", "origin": "stoop", "destination": "blue_plate", "travel_time": 1, "cost": 2, "danger": 0.2, "tags": ["safe", "fast", "primary"], "role": "primary", "condition": "OPEN" },
+    { "id": "blue_detroit", "origin": "blue_plate", "destination": "detroit_lot", "travel_time": 2, "cost": 5, "danger": 0.45, "tags": ["criminal", "secondary"], "role": "secondary", "condition": "OPEN" },
+    { "id": "detroit_chi", "origin": "detroit_lot", "destination": "chi_grey", "travel_time": 1, "cost": 4, "danger": 0.3, "tags": ["fast", "secondary"], "role": "secondary", "condition": "OPEN" },
+    { "id": "blue_bmore", "origin": "blue_plate", "destination": "bmore_steps", "travel_time": 1, "cost": 3, "danger": 0.6, "tags": ["alley", "shortcut", "risky"], "role": "risky_shortcut", "condition": "OPEN" },
+    { "id": "bmore_miami", "origin": "bmore_steps", "destination": "miami_cut", "travel_time": 2, "cost": 6, "danger": 0.7, "tags": ["alley", "dangerous", "risky"], "role": "risky_shortcut", "condition": "OPEN" },
+    { "id": "stoop_stash", "origin": "stoop", "destination": "stash_spot", "travel_time": 1, "cost": 1, "danger": 0.1, "tags": ["secret", "hidden"], "role": "secret", "discovered": false, "condition": "SECRET" },
+    { "id": "stash_roof", "origin": "stash_spot", "destination": "rooftop", "travel_time": 1, "cost": 1, "danger": 0.15, "tags": ["secret", "vantage"], "role": "secret", "discovered": false, "condition": "SECRET" },
+    { "id": "blue_store", "origin": "blue_plate", "destination": "corner_store", "travel_time": 1, "cost": 1, "danger": 0.2, "tags": ["social", "supplies"], "role": "social", "condition": "OPEN" },
+    { "id": "store_rec", "origin": "corner_store", "destination": "rec_center", "travel_time": 1, "cost": 1, "danger": 0.2, "tags": ["social", "community"], "role": "social", "condition": "OPEN" },
+    { "id": "detroit_train", "origin": "detroit_lot", "destination": "train_yard", "travel_time": 2, "cost": 3, "danger": 0.5, "tags": ["escape", "freight"], "role": "emergency_escape", "condition": "OPEN" },
+    { "id": "train_chi", "origin": "train_yard", "destination": "chi_grey", "travel_time": 2, "cost": 4, "danger": 0.4, "tags": ["escape", "safe"], "role": "emergency_escape", "condition": "OPEN" }
+  ],
+  "characters": [
+    { "id": "player", "name": "You", "locationId": "stoop", "state": "PRESENT", "color": "#d98a5a" },
+    { "id": "marcus", "name": "Marcus", "locationId": "detroit_lot", "state": "PRESENT", "color": "#c8a06a", "routine": { "MORNING": { "location": "stoop" }, "AFTERNOON": { "location": "blue_plate" }, "EVENING": { "location": "detroit_lot" }, "NIGHT": { "location": "detroit_lot" }, "LATE_NIGHT": { "location": "stoop" } }, "goal": { "primary": "build_career", "current": { "location": "detroit_lot" } } },
+    { "id": "luna", "name": "Luna", "locationId": "blue_plate", "state": "PRESENT", "color": "#caa0c8", "routine": { "MORNING": { "location": "blue_plate" }, "AFTERNOON": { "location": "blue_plate" }, "EVENING": { "location": "miami_cut" }, "NIGHT": { "location": "miami_cut" }, "LATE_NIGHT": { "location": "blue_plate" } } },
+    { "id": "officer_01", "name": "Officer Reyes", "locationId": "precinct", "state": "PRESENT", "color": "#3a4a80" },
+    { "id": "ty", "name": "Ty", "locationId": "detroit_lot", "state": "PRESENT", "color": "#a0b07a", "routine": { "MORNING": { "location": "detroit_lot" }, "AFTERNOON": { "location": "detroit_lot" }, "EVENING": { "location": "bmore_steps" }, "NIGHT": { "location": "detroit_lot" }, "LATE_NIGHT": { "location": "detroit_lot" } } },
+    { "id": "dove", "name": "Dove", "locationId": "miami_cut", "state": "PRESENT", "color": "#b07a5a", "routine": { "MORNING": { "location": "miami_cut" }, "AFTERNOON": { "location": "miami_cut" }, "EVENING": { "location": "miami_cut" }, "NIGHT": { "location": "miami_cut" }, "LATE_NIGHT": { "location": "bmore_steps" } } },
+    { "id": "gram", "name": "Gram", "locationId": "rec_center", "state": "PRESENT", "color": "#c8c0a0", "routine": { "MORNING": { "location": "stoop" }, "AFTERNOON": { "location": "rec_center" }, "EVENING": { "location": "rec_center" }, "NIGHT": { "location": "stoop" }, "LATE_NIGHT": { "location": "stoop" } } }
+  ],
+  "relationships": [
+    { "from": "player", "to": "marcus", "value": 35 },
+    { "from": "player", "to": "luna", "value": 20 },
+    { "from": "player", "to": "officer_01", "value": -10 },
+    { "from": "player", "to": "ty", "value": 10 },
+    { "from": "player", "to": "dove", "value": -15 },
+    { "from": "player", "to": "gram", "value": 40 },
+    { "from": "marcus", "to": "luna", "value": 25 }
+  ],
+  "scenarios": [
+    { "id": "corner_hustle", "locationId": "stoop", "type": "SOCIAL", "title": "Corner Hustle", "summary": "Run your block. Build rep with the family.", "participants": ["player"], "urgency": { "level": "moderate" }, "requirements": ["player_present"], "priority": 1 },
+    { "id": "community_block", "locationId": "rec_center", "type": "SOCIAL", "title": "Block Cookout", "summary": "Gram wants the block fed. Show up.", "participants": ["player", "gram"], "urgency": { "level": "moderate" }, "requirements": ["player_present", "gram_present"], "priority": 1 },
+    { "id": "supply_run", "locationId": "corner_store", "type": "MINIGAME", "title": "Supply Run", "summary": "Grab what the studio needs.", "participants": ["player"], "urgency": { "level": "low" }, "requirements": ["player_present"], "priority": 1 },
+    { "id": "studio_session", "locationId": "detroit_lot", "type": "STORY", "title": "Studio Session", "summary": "Lay the track with Marcus.", "participants": ["player", "marcus"], "urgency": { "level": "high" }, "requirements": ["player_present", "marcus_present"], "priority": 2 },
+    { "id": "block_fame", "locationId": "chi_grey", "type": "STORY", "title": "Block Fame", "summary": "The track blew up. Chicago wants in.", "participants": ["player", "marcus"], "urgency": { "level": "moderate" }, "requirements": ["player_present", "marcus_present"], "hidden": true, "priority": 2 },
+    { "id": "police_raid", "locationId": "blue_plate", "type": "ESCAPE", "title": "Police Raid", "summary": "Reyes kicks the door. Get out or talk down.", "participants": ["player", "marcus", "officer_01"], "urgency": { "level": "high" }, "expiration": { "time_block": "NIGHT" }, "requirements": ["player_present", "marcus_present"], "priority": 3 },
+    { "id": "hidden_meet", "locationId": "miami_cut", "type": "FACTION", "title": "The Quiet Meet", "summary": "A rumored deal at the Cut.", "participants": ["player", "dove"], "urgency": { "level": "moderate" }, "hidden": true, "priority": 1 },
+    { "id": "clique_war", "locationId": "miami_cut", "type": "BOSS", "title": "Clique War", "summary": "The Cut erupts. Take it or lose it.", "participants": ["player", "dove", "ty"], "urgency": { "level": "high" }, "requirements": ["player_present", "dove_present", "ty_present"], "priority": 3 },
+    { "id": "rooftop_lookout", "locationId": "rooftop", "type": "INVESTIGATION", "title": "Rooftop Lookout", "summary": "See the whole block. Spot the move.", "participants": ["player"], "urgency": { "level": "low" }, "requirements": ["player_present"], "priority": 1 },
+    { "id": "stash_discovery", "locationId": "stash_spot", "type": "MYSTERY", "title": "The Stash", "summary": "Someone left you something.", "participants": ["player"], "urgency": { "level": "low" }, "hidden": true, "priority": 1 },
+    { "id": "train_heist", "locationId": "train_yard", "type": "HEIST", "title": "Freight Heist", "summary": "Off the rails, off the radar.", "participants": ["player", "ty"], "urgency": { "level": "moderate" }, "requirements": ["player_present", "ty_present"], "priority": 2 },
+    { "id": "officer_trust", "locationId": "precinct", "type": "NEGOTIATION", "title": "Cop a Favor", "summary": "Reyes owes nobody. Make an exception.", "participants": ["player", "officer_01"], "urgency": { "level": "moderate" }, "requirements": ["player_present", "officer_01_present"], "priority": 2 },
+    { "id": "snitch_or_silent", "locationId": "blue_plate", "type": "CHARACTER", "title": "Snitch or Silent", "summary": "Reyes asks about the Cut. Your call.", "participants": ["player", "officer_01"], "urgency": { "level": "moderate" }, "requirements": ["player_present", "officer_01_present"], "priority": 2 }
+  ],
+  "rumors": [
+    { "id": "miami_deal", "text": "Someone is watching the Miami Cut.", "truth": "UNVERIFIED", "discovered": false, "reveals": "hidden_meet", "children": ["rumor_courier", "rumor_buyer"] },
+    { "id": "rumor_courier", "text": "A courier moves product through the Cut.", "truth": "UNVERIFIED", "discovered": false },
+    { "id": "rumor_buyer", "text": "A buyer from Chicago is interested.", "truth": "UNVERIFIED", "discovered": false },
+    { "id": "stash_whisper", "text": "Gram says there's a spot behind the stoop.", "truth": "TRUE", "discovered": true, "reveals": "stash_discovery" },
+    { "id": "roof_legend", "text": "The roof looks out over the whole block.", "truth": "TRUE", "discovered": true, "reveals": "rooftop_lookout" }
+  ],
+  "chains": [
+    { "id": "marcus_arc", "nodes": ["corner_hustle", "studio_session", "block_fame"] },
+    { "id": "cut_arc", "nodes": ["hidden_meet", "clique_war"] }
+  ],
+  "threads": [
+    { "id": "block_power", "title": "Who Runs The Block?", "status": "active", "current_stage": "corner_hustle", "available": ["studio_session", "block_fame", "clique_war"], "locked": [] }
+  ],
+  "obligations": [
+    { "id": "ob_cookout", "target": "rec_center", "label": "Show face at the cookout", "deadline": "EVENING", "importance": "moderate", "consequence_if_broken": "Gram loses faith (-relationship)" }
+  ],
+  "events": [
+    { "id": "city_blackout", "name": "City Blackout", "duration": 2, "effects": { "security": -0.3, "activity": -0.2 }, "unlocks": [] },
+    { "id": "police_sweep", "name": "Police Sweep", "duration": 1, "effects": { "security": 0.4 }, "unlocks": ["police_raid"] },
+    { "id": "gang_war", "name": "Gang War", "duration": 2, "effects": { "security": -0.5 }, "unlocks": [] }
+  ],
+  "vehicles": [
+    { "id": "player_car", "name": "Your Ride", "locationId": "stoop", "color": "#c25b4a" },
+    { "id": "police_sedan", "name": "Precinct Cruiser", "locationId": "precinct", "color": "#3a4a80" },
+    { "id": "civilian_sedan", "name": "Courier Car", "locationId": "miami_cut", "color": "#a0a0a0" },
+    { "id": "van", "name": "Freight Van", "locationId": "train_yard", "color": "#8a6a3a" }
+  ],
+  "pois": [
+    { "id": "poi_stoop_mural", "locationId": "stoop", "type": "graffiti", "meaning": "Block Family colors — territory claimed, not contested." },
+    { "id": "poi_blue_tape", "locationId": "blue_plate", "type": "police_tape", "meaning": "Appears after police_raid resolves; visible consequence." },
+    { "id": "poi_detroit_burn", "locationId": "detroit_lot", "type": "burn_marks", "meaning": "Appears if clique_war escalates; world changed." },
+    { "id": "poi_cut_mark", "locationId": "miami_cut", "type": "faction_marking", "meaning": "Royal Clique mark; flips to Block Family if you take the Cut." }
+  ],
+  "consequence_matrix": {
+    "police_raid": {
+      "success": [{ "locationState": { "locationId": "blue_plate", "locationState": "TENSE" } }, { "relationship": { "from": "player", "to": "officer_01", "value": 5 } }, { "newScenario": { "id": "snitch_or_silent", "locationId": "blue_plate", "type": "CHARACTER", "title": "Snitch or Silent", "summary": "Reyes asks about the Cut.", "participants": ["player", "officer_01"], "requirements": ["player_present", "officer_01_present"] } }],
+      "fail": [{ "locationState": { "locationId": "blue_plate", "locationState": "UNDER_SURVEILLANCE" } }, { "relationship": { "from": "player", "to": "officer_01", "value": -20 } }]
+    },
+    "clique_war": {
+      "success": [{ "factionControl": { "locationId": "miami_cut", "factionId": "block_fam" } }, { "locationState": { "locationId": "miami_cut", "locationState": "TENSE" } }, { "worldMark": { "locationId": "miami_cut", "mark": "faction_marking" } }],
+      "fail": [{ "locationState": { "locationId": "detroit_lot", "locationState": "DANGEROUS" } }, { "worldMark": { "locationId": "detroit_lot", "mark": "burn_marks" } }, { "triggerEvent": "gang_war" }]
+    }
+  }
+}
