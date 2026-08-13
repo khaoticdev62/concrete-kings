@@ -1,0 +1,28 @@
+{
+  "_comment": [
+    "Aseprite MCP server, used to convert and organise the itch.io pixel packs",
+    "in assets/ and wire them into the map and card systems.",
+    "",
+    "This file previously ran `uv run -m aseprite_mcp` with no cwd, which fails:",
+    "there is no aseprite_mcp module on the default interpreter. The working",
+    "install lives at C:/Users/thecr/aseprite-mcp with its own virtualenv, and",
+    "that is what the user-level registration in ~/.claude.json already points",
+    "at. This file now matches it so the repo is not carrying a second, broken",
+    "copy of the same config.",
+    "",
+    "Claude Code reads USER-level servers from ~/.claude.json and PROJECT-level",
+    "servers from .mcp.json (leading dot) — not from this file. Keep this as the",
+    "documented reference; run `claude mcp list` to see what is actually loaded."
+  ],
+  "mcpServers": {
+    "aseprite": {
+      "type": "stdio",
+      "command": "C:\\Users\\thecr\\aseprite-mcp\\.venv\\Scripts\\python.exe",
+      "args": ["-m", "aseprite_mcp"],
+      "cwd": "C:\\Users\\thecr\\aseprite-mcp",
+      "env": {
+        "ASEPRITE_PATH": "C:\\Program Files\\Aseprite.v1.3.17\\Aseprite.exe"
+      }
+    }
+  }
+}
