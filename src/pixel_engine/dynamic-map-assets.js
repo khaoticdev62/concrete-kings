@@ -52,6 +52,34 @@ const DM_LOCATION_ASSETS = {
   _default: [DM_MAP_SPRITE_DIR + 'building_default.png']
 };
 
+/**
+ * Per-location building art, keyed by the level's own location id.
+ *
+ * Checked BEFORE the generated registry, and that order is the point. The
+ * generated set (assets/generated/map_building_*.png) is 32x32 PNGs of 113
+ * bytes: one flat colour each, drawn at 40 and 64px, so every location on the
+ * map was a slightly blurry coloured square. Its day / evening / night variants
+ * are the same size and evening and night are the same colour, so collapsing
+ * three files per location to one loses nothing that was there.
+ *
+ * Built by scripts/process-map-buildings.sh, which records why each building
+ * was matched to each place.
+ *
+ * detroit_lot is present and null: a vacant lot, and the only lot-adjacent art
+ * in the drop is a roadworks barrier and scaffolding. Null suppresses the flat
+ * placeholder too, so it falls all the way through to the geometric glyph
+ * rather than being "rescued" by the thing this table exists to replace.
+ */
+const DM_LOCATION_ID_ASSETS = {
+  stoop: DM_MAP_SPRITE_DIR + 'building_loc_stoop.png',
+  blue_plate: DM_MAP_SPRITE_DIR + 'building_loc_blue_plate.png',
+  corner_store: DM_MAP_SPRITE_DIR + 'building_loc_corner_store.png',
+  chi_grey: DM_MAP_SPRITE_DIR + 'building_loc_chi_grey.png',
+  bmore_steps: DM_MAP_SPRITE_DIR + 'building_loc_bmore_steps.png',
+  miami_cut: DM_MAP_SPRITE_DIR + 'building_loc_miami_cut.png',
+  detroit_lot: null
+};
+
 const DM_TERRAIN_ASSET = DM_MAP_SPRITE_DIR + 'ground_asphalt.png';
 const DM_POLICE_ASSET = DM_MAP_SPRITE_DIR + 'building_institution.png';
 const DM_CHARACTER_ASSET = DM_MAP_SPRITE_DIR + 'character_fallback.png';
@@ -128,6 +156,19 @@ class DMAssetManager {
     return DM_LOCATION_ASSETS._default[0];
   }
 
+  /**
+   * Per-location art, or null.
+   *
+   * Returns { path } for a mapped id, { path: null } for an id mapped to no art
+   * on purpose, and null for an id this table says nothing about. The caller
+   * needs all three: the middle case must skip the generated fallback, the last
+   * case must use it.
+   */
+  getLocationAssetById(id) {
+    if (!id || !Object.prototype.hasOwnProperty.call(DM_LOCATION_ID_ASSETS, id)) return null;
+    return { path: DM_LOCATION_ID_ASSETS[id] || null };
+  }
+
   getTerrain() { return DM_TERRAIN_ASSET; }
   getPolice() { return DM_POLICE_ASSET; }
   getCharacter() { return DM_CHARACTER_ASSET; }
@@ -139,8 +180,9 @@ class DMAssetManager {
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
-    DMAssetManager, DM_LOCATION_ASSETS, DM_ASSET_BASE, DM_MAP_SPRITE_DIR,
-    DM_TERRAIN_ASSET, DM_CHARACTER_ASSET, DM_POLICE_ASSET, dmFitSprite
+    DMAssetManager, DM_LOCATION_ASSETS, DM_LOCATION_ID_ASSETS, DM_ASSET_BASE,
+    DM_MAP_SPRITE_DIR, DM_TERRAIN_ASSET, DM_CHARACTER_ASSET, DM_POLICE_ASSET,
+    dmFitSprite
   };
 }
 if (typeof window !== 'undefined') {

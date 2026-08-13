@@ -50,6 +50,21 @@
     EVENING: 0.6, NIGHT: 0.75, LATE_NIGHT: 0.85
   };
 
+  /**
+   * How strongly the tint sits over the whole scene, per time block.
+   *
+   * Much lighter than the ground values above, and separate from them because
+   * the two are doing different jobs. The ground is one flat tile at a fixed
+   * daylight luminance and needs a heavy multiply to read as night. The
+   * buildings are detailed art that only needs an atmospheric cast: reusing the
+   * ground alphas over them desaturated every facade to the same grey-blue and
+   * threw away the thing that distinguishes one location from another.
+   */
+  const DM_TOD_SCENE_ALPHA = {
+    DAWN: 0.18, DAY: 0, DUSK: 0.2,
+    EVENING: 0.25, NIGHT: 0.4, LATE_NIGHT: 0.5
+  };
+
   class DMWorldMapRenderer {
     constructor(options) {
       options = options || {};
@@ -165,9 +180,11 @@
         const tw = tile.width, th = tile.height;
         for (let x = 0; x < w; x += tw) for (let y = 0; y < h; y += th) ctx.drawImage(tile, x, y, tw, th);
 
-        // _drawSky's tint is painted UNDER this layer, so an opaque ground hides
-        // it completely and every clock looked like noon. Composite it back on
-        // top. _drawTimeOfDay only vignettes at NIGHT and never covered this.
+        // Ground-only tint. _drawSky's tint is painted UNDER this layer, so an
+        // opaque tile hides it completely and every clock looked like noon. This
+        // one is heavy because the tile is a fixed daylight luminance 81 and has
+        // to reach ~33 at night; the scene-wide wash in _drawTimeOfDay is much
+        // lighter and does not have to carry that.
         const tod = this.world.timeOfDay;
         const alpha = DM_TOD_GROUND_ALPHA[tod];
         if (alpha) {
@@ -210,11 +227,29 @@
         const vis = this.world.locationVisualState(loc.id);
         // building body: prefer a generated §59 asset, else CraftPix, else glyph (§18/§59)
         const size = this.world.zoom === 'CITY' ? 22 : this.world.zoom === 'DISTRICT' ? 40 : 64;
-        // _gen() resolves a generated §59 asset to a cached HTMLImageElement
-        // (already loaded, or null). Don't re-resolve the Image as a path.
-        const gen = this._gen('location', loc.type, loc.id, loc.name, this.world.timeOfDay);
-        const sprite = (gen && typeof gen === "object" && typeof gen.width === "number" && typeof gen !== "string") ? gen
-          : (this.assets && this.assets.getLocationAsset ? this._loadLegacy(this.assets.getLocationAsset(loc.type)) : null);
+        // Resolution order: this location's own art, then the generated set,
+        // then the type fallback, then the glyph below.
+        //
+        // Per-location art comes FIRST because the generated set it displaces is
+        // a flat 32x32 colour square per location — it would otherwise win on
+        // every id that has one, which is every id this table covers.
+        //
+        // byId returning { path: null } means "this location is mapped to no art
+        // deliberately"; that must skip the generated fallback as well, or the
+        // placeholder simply comes back. byId returning null means the table has
+        // no opinion, and the old chain runs unchanged.
+        const byId = (this.assets && this.assets.getLocationAssetById)
+          ? this.assets.getLocationAssetById(loc.id) : null;
+        let sprite = null;
+        if (byId) {
+          sprite = byId.path ? this._loadLegacy(byId.path) : null;
+        } else {
+          // _gen() resolves a generated §59 asset to a cached HTMLImageElement
+          // (already loaded, or null). Don't re-resolve the Image as a path.
+          const gen = this._gen('location', loc.type, loc.id, loc.name, this.world.timeOfDay);
+          sprite = (gen && typeof gen === "object" && typeof gen.width === "number" && typeof gen !== "string") ? gen
+            : (this.assets && this.assets.getLocationAsset ? this._loadLegacy(this.assets.getLocationAsset(loc.type)) : null);
+        }
         if (sprite) {
           // Fitted, not stretched: these sprites are 64x55, 40x64, 32x64 and so
           // on. Forcing them square turned a storefront into a smear.
@@ -345,6 +380,26 @@
     }
 
     _drawTimeOfDay(ctx, w, h) {
+      // Time-of-day wash over the whole world layer (§23).
+      //
+      // Needed because buildings no longer carry their own day / evening / night
+      // files — one sprite per location now — so without this they read as noon
+      // over an evening street. Deliberately much lighter than the ground tint;
+      // see DM_TOD_SCENE_ALPHA for why the two cannot share a value.
+      //
+      // Runs after ground, roads, buildings, characters and vehicles, and before
+      // _drawHUD — so the scene shares one wash and the HUD stays legible on top
+      // of it rather than being dimmed with everything else.
+      const tod = this.world.timeOfDay;
+      const alpha = DM_TOD_SCENE_ALPHA[tod];
+      if (alpha) {
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = DM_TOD_TINTS[tod] || DM_TOD_TINTS.EVENING;
+        ctx.fillRect(0, 0, w, h);
+        ctx.restore();
+      }
+
       // subtle vignette by time (§23)
       if (this.world.timeOfDay === 'NIGHT' || this.world.timeOfDay === 'LATE_NIGHT') {
         const g = ctx.createRadialGradient(w / 2, h / 2, h * 0.2, w / 2, h / 2, h * 0.8);

@@ -39,7 +39,8 @@ Asset build steps, all idempotent and safe to re-run:
 
 ```bash
 bash scripts/process-portraits.sh     # -> assets/portraits/web/   NPC scene portraits
-bash scripts/process-map-sprites.sh   # -> assets/map/web/         narrative map sprites
+bash scripts/process-map-sprites.sh    # -> assets/map/web/        map terrain + type sprites
+bash scripts/process-map-buildings.sh  # -> assets/map/web/        per-location building art
 bash scripts/process-ui-icons.sh      # -> assets/ui/web/          HUD icons
 bash scripts/process-props.sh         # -> assets/props/web/       top-down POI props
 ```
@@ -383,9 +384,9 @@ accessibility setting was unreachable. `test/cash-shop.test.js` guards placement
 | `topdown-recolor/` (12) | Right shapes, wrong palette. Recolourable via `SpriteRenderer` |
 | `props/web/` (5) | POI prop sprites, transparent PNG32, 80KB total. **Wired and drawing** |
 | `portraits/web/` (5) | 128x128 NPC scene portraits, ~12KB each. **Wired.** Sources beside them are 1024px JPEGs named `.png` |
-| `map/web/` (7) | Narrative map sprites, 37KB total. **Wired.** Long edge 64, ground tile exactly 48x48 |
+| `map/web/` (13) | Narrative map sprites, ~65KB total. **Wired.** Long edge 64, ground tile exactly 48x48. `building_loc_*` are per-location and resolve **before** `generated/` |
 | `ui/web/` (6) | HUD icons, 16x16, ~300B each. **Wired.** Replaced the colour emoji |
-| `generated/` (65 PNG) | Aseprite-produced map art at **32x32**, upscaled 2x at closest zoom. Resolved before `map/web/` |
+| `generated/` (65 PNG) | Aseprite output. The `map_building_*` files are **113-byte flat colour squares**, not art — placeholders, superseded per location by `map/web/building_loc_*`. Characters, vehicles and props here are real |
 | `decals/` (4) | Usable |
 | `ui-mockups/` (5) | HUD explorations, **not** game art |
 | `*_raw.png` (8) | Failed tile generations, neon on black. Not sliceable |

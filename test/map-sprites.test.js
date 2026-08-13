@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const {
-  DM_LOCATION_ASSETS, DM_ASSET_BASE, DM_MAP_SPRITE_DIR,
+  DM_LOCATION_ASSETS, DM_LOCATION_ID_ASSETS, DM_ASSET_BASE, DM_MAP_SPRITE_DIR,
   DM_TERRAIN_ASSET, DM_CHARACTER_ASSET, DM_POLICE_ASSET,
   DMAssetManager, dmFitSprite
 } = require('../src/pixel_engine/dynamic-map-assets.js');
@@ -17,6 +17,9 @@ function allPaths() {
   for (const list of Object.values(DM_LOCATION_ASSETS)) {
     if (!list) continue;               // TRANSITION is null on purpose
     out.push(...list);
+  }
+  for (const p of Object.values(DM_LOCATION_ID_ASSETS)) {
+    if (p) out.push(p);                // detroit_lot is null on purpose
   }
   return [...new Set(out)];
 }
@@ -96,6 +99,46 @@ test('map sprites: types with generated art are not duplicated in this manifest'
   for (const type of ['HOME', 'RESTAURANT', 'STORE', 'PARK', 'APARTMENT', 'ALLEY', 'CLUB']) {
     assert.ok(!(type in DM_LOCATION_ASSETS), `${type} has generated art; drop it from DM_LOCATION_ASSETS`);
   }
+});
+
+test('map sprites: every location in the shipped level has art or a deliberate glyph', () => {
+  // The level is the authority on what the map has to draw. A location that is
+  // neither in DM_LOCATION_ID_ASSETS nor in DM_LOCATION_ASSETS falls through to
+  // assets/generated/, which is 32x32 flat colour squares — the placeholder this
+  // whole table exists to replace. Adding a location without deciding its art is
+  // the way that regresses, and it regresses silently.
+  const levelSrc = fs.readFileSync(path.join(ROOT, 'assets/generated/level-the-block.js'), 'utf8');
+  const level = JSON.parse(levelSrc.match(/window\.MAP_LEVEL\s*=\s*([\s\S]*);\s*$/)[1]);
+
+  const undecided = level.locations.filter(loc =>
+    !Object.prototype.hasOwnProperty.call(DM_LOCATION_ID_ASSETS, loc.id) &&
+    !Object.prototype.hasOwnProperty.call(DM_LOCATION_ASSETS, loc.type)
+  ).map(loc => `${loc.id} (${loc.type})`);
+
+  assert.deepEqual(undecided, [],
+    'every level location needs an entry in DM_LOCATION_ID_ASSETS (by id) or ' +
+    'DM_LOCATION_ASSETS (by type) — null is a valid answer and means "draw the glyph"');
+});
+
+test('map sprites: detroit_lot is mapped to no art and keeps its glyph', () => {
+  // A vacant lot. The only lot-adjacent art in the drop is a roadworks barrier
+  // and construction scaffolding, neither of which is an empty lot. Present and
+  // null so it suppresses the generated placeholder too, rather than being
+  // "rescued" by the flat square this table replaces.
+  assert.ok('detroit_lot' in DM_LOCATION_ID_ASSETS, 'must be present, not merely absent');
+  const byId = new DMAssetManager().getLocationAssetById('detroit_lot');
+  assert.deepEqual({ ...byId }, { path: null }, 'mapped, but to no art');
+});
+
+test('map sprites: getLocationAssetById separates "no art" from "no opinion"', () => {
+  // The renderer needs all three answers. A mapped id draws its sprite; a
+  // null-mapped id skips straight to the glyph; an unknown id must fall through
+  // to the generated set and the type table, which is the old behaviour.
+  const mgr = new DMAssetManager();
+  assert.equal(mgr.getLocationAssetById('stoop').path, DM_LOCATION_ID_ASSETS.stoop);
+  assert.equal(mgr.getLocationAssetById('detroit_lot').path, null);
+  assert.equal(mgr.getLocationAssetById('no_such_place'), null, 'unknown id must return null, not { path: null }');
+  assert.equal(mgr.getLocationAssetById(undefined), null);
 });
 
 test('dmFitSprite: preserves aspect ratio and sits the sprite on the box floor', () => {
