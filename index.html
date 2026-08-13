@@ -27,7 +27,9 @@
 <script src="src/pixel_engine/dynamic-map-system.js"></script>
 <script src="src/pixel_engine/dynamic-world-map.js"></script>
 <script src="src/pixel_engine/dynamic-world-map-renderer.js"></script>
-<script src="src/pixel_engine/asset-pipeline.js"></script>
+<!-- UNLOADED: asset-pipeline.js — 421 lines of Aseprite-MCP spec generation and
+     validation. A build-time tool that has no business in the browser bundle;
+     it is required directly by test/asset-pipeline.test.js. -->
 <script src="src/pixel_engine/map-asset-registry.js"></script>
 <script src="assets/generated/registry-manifest.js"></script>
 <script src="assets/generated/map-slice.js"></script>
@@ -127,6 +129,44 @@
     margin-top: 0px;
     border-radius: 0px;
   }
+
+  /* HUD icons, built from the vendor UI kit by scripts/process-ui-icons.sh and
+     recoloured into this palette. They replace colour emoji, which render from
+     the OS emoji font — ignoring the palette, differing per platform, and
+     sitting at a visual weight nothing else in the game shares.
+
+     Delivered as ::before rather than as a child <img> on purpose: the audio
+     toggles set button.textContent, which would delete any element child. A
+     generated pseudo-element survives that, so the icon and the label stay
+     independent of each other. */
+  .ico {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    vertical-align: -3px;
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    image-rendering: pixelated;
+  }
+  .ico-lock { background-image: url('assets/ui/web/lock.png'); }
+  .ico-trophy { background-image: url('assets/ui/web/trophy.png'); }
+
+  #bgmToggleBtn::before,
+  #sfxToggleBtn::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    vertical-align: -3px;
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    image-rendering: pixelated;
+  }
+  #bgmToggleBtn::before { background-image: url('assets/ui/web/music_off.png'); }
+  #bgmToggleBtn.audio-on::before { background-image: url('assets/ui/web/music_on.png'); }
+  #sfxToggleBtn::before { background-image: url('assets/ui/web/sound_off.png'); }
+  #sfxToggleBtn.audio-on::before { background-image: url('assets/ui/web/sound_on.png'); }
 
   /* The card table's stage strip. Here rather than inline on the element so the
      overlay rule below can override it — an inline style beats every rule. */
@@ -764,8 +804,11 @@
   <header>
     <h1>CONCRETE KINGS</h1>
     <div class="topbar">
-      <button id="bgmToggleBtn" class="secondary" onclick="app.toggleBGM()">🎵 Music: OFF</button>
-      <button id="sfxToggleBtn" class="secondary" onclick="app.toggleSFX()">🔊 Sound: ON</button>
+      <button id="bgmToggleBtn" class="secondary" onclick="app.toggleBGM()">Music: OFF</button>
+      <button id="sfxToggleBtn" class="secondary audio-on" onclick="app.toggleSFX()">Sound: ON</button>
+      <!-- ♿ stays an emoji. It is the internationally recognised accessibility
+           symbol and the kit's nearest equivalent is a generic person glyph,
+           which would be less clear, not more. A worse icon is not an upgrade. -->
       <button class="secondary" onclick="app.toggleAccessModal()">♿ Accessibility</button>
       <div class="pill" id="modeBadge">Offline</div>
       <button class="secondary" onclick="app.showSetup()">Menu</button>
@@ -2052,12 +2095,18 @@
 <script src="src/pixel_engine/pixel-engine.js"></script>
 <script src="src/pixel_engine/card-visual-system.js"></script>
 <script src="src/pixel_engine/weather-effects-system.js"></script>
+<!-- Kept for CHARACTER_ORIGINS, which it declares and index.html reads 20 times.
+     Its BlockMapController is dead like the rest of the top-down stack below,
+     but the file cannot be unloaded until the origins move somewhere honest. -->
 <script src="src/pixel_engine/block-map-navigation.js"></script>
-<script src="src/pixel_engine/asset-registry.js"></script>
-<script src="src/pixel_engine/topdown-city-data.js"></script>
-<script src="src/pixel_engine/topdown-city-controller.js"></script>
-<script src="src/pixel_engine/lightmap.js"></script>
-<script src="src/pixel_engine/topdown-city-renderer.js"></script>
+
+<!-- UNLOADED: the top-down city map, superseded by DynamicMapSystem.
+     asset-registry.js, topdown-city-data.js, topdown-city-controller.js,
+     lightmap.js and topdown-city-renderer.js are still in src/ and still under
+     test, but nothing references them any more — the live map is the
+     dynamic-map-* stack loaded at the top of this file. They were 1954 lines
+     parsed on every page load for nothing. See HANDOFF section 3. -->
+
 <script src="src/pixel_engine/canon-engine.js"></script>
 <script src="src/pixel_engine/scenario-engine.js"></script>
 <script src="src/pixel_engine/ai-party.js"></script>
@@ -2099,26 +2148,33 @@
 <script src="src/pixel_engine/controller-haptics-engine.js"></script>
 <script src="src/pixel_engine/ui-scaling-engine.js"></script>
 <script src="src/pixel_engine/single-player-ai-campaign.js"></script>
-<script src="src/pixel_engine/ai-behavior-tree-engine.js"></script>
+<!-- UNLOADED: ai-behavior-tree-engine.js — built and tested, referenced nowhere.
+     The AI that actually runs is ai-party.js plus ai-personality-engine.js. -->
 <script src="src/pixel_engine/quick-chat-system.js"></script>
 <script src="src/pixel_engine/tutorial-onboarding-engine.js"></script>
 <script src="src/pixel_engine/player-customization-engine.js"></script>
-<script src="src/pixel_engine/card-component.js"></script>
-<script src="src/pixel_engine/card-holofoil-engine.js"></script>
-<script src="src/pixel_engine/semantic-motion-engine.js"></script>
-<script src="src/pixel_engine/cinematic-camera-engine.js"></script>
-<script src="src/pixel_engine/layered-inspector-engine.js"></script>
-<script src="src/pixel_engine/controller-focus-engine.js"></script>
-<script src="src/pixel_engine/audio-haptics-engine.js"></script>
-<script src="src/pixel_engine/deck-builder-engine.js"></script>
-<script src="src/pixel_engine/card-crafting-engine.js"></script>
-<script src="src/pixel_engine/friends-list-engine.js"></script>
-<script src="src/pixel_engine/matchmaking-reconnection-engine.js"></script>
-<script src="src/pixel_engine/multiplayer-session-engine.js"></script>
-<script src="src/pixel_engine/leaderboard-engine.js"></script>
-<script src="src/pixel_engine/spectator-replay-engine.js"></script>
-<script src="src/pixel_engine/campaign-story-engine.js"></script>
-<script src="src/pixel_engine/custom-scenario-editor.js"></script>
+<!-- UNLOADED: built, tested, wired to nothing.
+     Sixteen engines that no line of index.html or any other engine file
+     references. They are NOT deleted — every one has passing test coverage, so
+     removing the files would be throwing away working code, which is a product
+     call rather than a cleanup. They are simply no longer parsed on every page
+     load. Restoring one is a matter of adding its tag back and calling it.
+
+       card-component, card-holofoil-engine, semantic-motion-engine,
+       cinematic-camera-engine, layered-inspector-engine,
+       controller-focus-engine, audio-haptics-engine, deck-builder-engine,
+       card-crafting-engine, campaign-story-engine, custom-scenario-editor
+
+     and the online social layer, which is the largest single gap — it is
+     complete and tested but has no UI at all:
+
+       friends-list-engine, matchmaking-reconnection-engine,
+       multiplayer-session-engine, leaderboard-engine, spectator-replay-engine
+
+     Note deck-builder-engine is unused but the DECK BUILDER screen works: it is
+     implemented directly in index.html and never adopted this module.
+     See HANDOFF section 3. -->
+
 <script src="src/pixel_engine/scenario-compiler.js"></script>
 <script src="src/pixel_engine/scene-machine.js"></script>
 <script src="src/pixel_engine/scene-content.js"></script>
@@ -4148,23 +4204,33 @@ const app = {
   },
 
   /* ---------- Sound and Music Toggles ---------- */
+  /**
+   * The icon is a ::before on the button and is selected by the audio-on class,
+   * so setting textContent here cannot destroy it. Writing an <img> into the
+   * label instead would be wiped on the very next toggle.
+   */
   toggleBGM() {
     this.audioEngine.init();
     const isPlaying = this.audioEngine.isPlayingBGM;
+    const btn = document.getElementById('bgmToggleBtn');
     if (isPlaying) {
       this.audioEngine.stopBGM();
-      document.getElementById('bgmToggleBtn').textContent = '🎵 Music: OFF';
+      if (btn) { btn.textContent = 'Music: OFF'; btn.classList.remove('audio-on'); }
     } else {
       const city = this.game.activeCity || 'Harlem';
       this.audioEngine.startBGM(city);
-      document.getElementById('bgmToggleBtn').textContent = '🎵 Music: ON';
+      if (btn) { btn.textContent = 'Music: ON'; btn.classList.add('audio-on'); }
     }
   },
   toggleSFX() {
     this.audioEngine.init();
     const isMuted = this.audioEngine.isMuted;
     this.audioEngine.setMuted(!isMuted);
-    document.getElementById('sfxToggleBtn').textContent = !isMuted ? '🔊 Sound: OFF' : '🔊 Sound: ON';
+    const btn = document.getElementById('sfxToggleBtn');
+    if (!btn) return;
+    const nowOn = isMuted;   // setMuted(!isMuted) just flipped it
+    btn.textContent = nowOn ? 'Sound: ON' : 'Sound: OFF';
+    btn.classList.toggle('audio-on', nowOn);
   },
 
   /* ---------- Campaign Act chronicle selector ---------- */
@@ -4184,7 +4250,7 @@ const app = {
       el.innerHTML = `
         <div class="act-header">
           <span class="act-num">ACT ${act.act}</span>
-          <span class="act-status">${isCompleted ? '👑 COMPLETED' : (isUnlocked ? 'UNLOCKED' : '🔒 LOCKED')}</span>
+          <span class="act-status">${isCompleted ? '<span class="ico ico-trophy"></span> COMPLETED' : (isUnlocked ? 'UNLOCKED' : '<span class="ico ico-lock"></span> LOCKED')}</span>
         </div>
         <div class="act-title">${act.title}</div>
         ${isUnlocked ? `<div class="act-city">${act.city} · Target: ${act.pointsToWin} pts</div>` : ''}
@@ -7182,7 +7248,10 @@ const app = {
       }
       const readyBtn = document.getElementById('lobbyReadyBtn');
       if (readyBtn) {
-        readyBtn.textContent = myPlayer.ready ? 'READY! 👑' : 'TIGHTEN UP (READY)';
+        // textContent, not innerHTML: this label is built from player state and
+        // must never become an HTML injection point. The crown is dropped rather
+        // than iconised for that reason — "READY!" already carries the meaning.
+        readyBtn.textContent = myPlayer.ready ? 'READY!' : 'TIGHTEN UP (READY)';
         readyBtn.style.borderColor = myPlayer.ready ? '#10b981' : '';
       }
       this.renderLobbyPlayers();

@@ -107,9 +107,17 @@ test('Browser globals: every declared script file exists, so none 404s at load',
 });
 
 test('Browser globals: a dependency is loaded before the file that reads it at parse time', () => {
-  // lightmap.js must precede topdown-city-renderer.js, which resolves
-  // window.TopDownLightmap while parsing. Reversing them silently disables
-  // lighting rather than erroring.
+  // scenario-compiler.js binds FIRST_MILES_BEATS, FIRST_MILES_SIDE_QUESTS and
+  // FIRST_MILES_ORIGIN_SECRETS into top-level consts while it parses. If
+  // first-miles-campaign.js has not run yet those are all undefined and the
+  // compiler silently produces empty scenarios rather than throwing.
+  //
+  // This used to pin lightmap.js before topdown-city-renderer.js, and
+  // topdown-city-data.js before topdown-city-controller.js. All four files are
+  // now unloaded — the top-down city map was superseded by DynamicMapSystem —
+  // so those assertions could only ever fail on a file that is not there. The
+  // rule they encoded still holds for anything that resolves a global at parse
+  // time; add the pair here when you introduce one.
   const order = [...INDEX.matchAll(/<script src="([^"]+\.js)"><\/script>/g)].map(m => m[1]);
   const before = (a, b) => {
     const i = order.findIndex(p => p.endsWith(a));
@@ -118,6 +126,5 @@ test('Browser globals: a dependency is loaded before the file that reads it at p
     assert.notEqual(j, -1, `${b} must be loaded`);
     assert.ok(i < j, `${a} must load before ${b}`);
   };
-  before('lightmap.js', 'topdown-city-renderer.js');
-  before('topdown-city-data.js', 'topdown-city-controller.js');
+  before('first-miles-campaign.js', 'scenario-compiler.js');
 });

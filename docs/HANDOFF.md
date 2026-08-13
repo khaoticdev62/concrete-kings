@@ -32,8 +32,17 @@ node server/server.js        # serves index.html + WS relay on port 3001
 
 Open `http://localhost:3001`. **Port is 3001, not 3000.**
 
-Current state: **433 tests across 64 files, all passing. Zero console errors on
+Current state: **561 tests across 91 files, all passing. Zero console errors on
 load** — check the browser console, not just the suite; see trap 2.5.
+
+Asset build steps, all idempotent and safe to re-run:
+
+```bash
+bash scripts/process-portraits.sh     # -> assets/portraits/web/   NPC scene portraits
+bash scripts/process-map-sprites.sh   # -> assets/map/web/         narrative map sprites
+bash scripts/process-ui-icons.sh      # -> assets/ui/web/          HUD icons
+bash scripts/process-props.sh         # -> assets/props/web/       top-down POI props
+```
 
 Always run `npm test` and not just `node --test` — the npm script also
 syntax-checks `index.html`'s inline `<script>`, `cards.js` and `server/server.js`,
@@ -272,28 +281,64 @@ exporting via `module.exports` for tests:
 | `animation-system.js` | `Animator`. **Must load first** — others resolve it at parse time |
 | `canon-engine.js` | The block ledger: motifs, legends, callbacks, chronicle |
 | `scenario-engine.js` | Scenario slots, resolution, outcome tiers, scene beats |
+| `scenario-compiler.js` | Compiles campaign beats into scenarios. Reads `FIRST_MILES_*` **at parse time** |
 | `ai-party.js` | The AI crew: archetypes, decisions, relationships, memory, betrayal |
 | `crew-dialogue.js` | What the crew say. Lines are SELECTED by state, never authored ahead of it |
 | `crew-jobs.js` | Jobs the crew propose, and party news between them |
-| `scenario-engine.js` | Scenario slots, resolution, outcome tiers, scene beats |
-| `lightmap.js` | Pooled lamp light. Must load **before** the renderer |
 | `player-progression.js` | XP, levels, daily quests |
-| `asset-registry.js` | Manifest sprite lookup, **null means draw procedurally** |
-| `topdown-city-data.js` | 8 district layouts, pure data |
-| `topdown-city-renderer.js` | Draws the city; asset-first, procedural fallback |
-| `topdown-city-controller.js` | Movement, per-axis collision, camera, POI proximity |
-| `block-map-navigation.js` | **Retained only** for its 5 hotspot definitions |
+| `block-map-navigation.js` | **Retained for `CHARACTER_ORIGINS`**, which it declares and `index.html` reads 20 times. Its `BlockMapController` is dead |
 | `pixel-engine.js` | Canvas engine + `SpriteRenderer` with palette swapping |
 | `weather-effects-system.js` | Rain/sirens/neon, composites onto the map canvas |
 | `first-miles-campaign.js` | Solo campaign content, own internal state |
-| `mini-games/` | 5 mini-games + manager/loop/input/UI |
+| `scene-machine.js` / `scene-content.js` / `scene-editor.js` | Scene definitions and the in-app editor |
+| `mini-games/` | **16** mini-games + manager/loop/input/UI. The catalog exposes 5 |
+
+**The live map is the `dynamic-map-*` stack**, loaded first in `index.html`:
+
+| File | Role |
+|---|---|
+| `dynamic-map-system.js` | Owns the map. `app.dynamicMapSystem`; `useWorldView` defaults true |
+| `dynamic-map-state.js` | Locations, scenarios, characters, rumors, factions, time, weather |
+| `dynamic-world-map.js` / `dynamic-world-map-renderer.js` | The renderer that actually draws (`useWorldView`) |
+| `dynamic-map-renderer.js` | The non-world renderer. Only runs with `useWorldView` false |
+| `dynamic-map-assets.js` | Sprite manifest + `dmFitSprite`. **Paths must stay inside `assets/map/web/`** |
+| `map-asset-registry.js` | Resolves the generated art in `assets/generated/` |
+| `dynamic-map-camera / eventbus / services / ux / quality / ui / devtools / testharness` | Supporting layers |
+| `level-loader.js` | Loads `assets/generated/level-*.js` |
 
 **Load order matters and is tested.** `animation-system.js` must precede everything
-that destructures `Animator`; `lightmap.js` must precede `topdown-city-renderer.js`,
-which resolves `window.TopDownLightmap` while parsing.
-`test/global-collisions.test.js` asserts both, and that no two `<script>`-loaded
-files declare the same top-level name — including via destructuring, which is how a
-browser-fatal `Animator` collision once shipped with a fully green suite.
+that destructures `Animator`; `first-miles-campaign.js` must precede
+`scenario-compiler.js`, which binds `FIRST_MILES_BEATS` and friends into top-level
+consts while it parses, and silently compiles empty scenarios if they are not there
+yet. `test/global-collisions.test.js` asserts that, and that no two
+`<script>`-loaded files declare the same top-level name — including via
+destructuring, which is how a browser-fatal `Animator` collision once shipped with a
+fully green suite.
+
+**22 modules are deliberately NOT loaded.** They are still in `src/` and still under
+test; they are simply not parsed on every page load, because nothing referenced them
+— 4221 lines of dead weight. `index.html` carries a comment at each removal point,
+and `test/e2e-audit.test.js` asserts a sample of them stay off `window` so the tags
+cannot drift back unnoticed.
+
+- **The top-down city map** — `asset-registry.js`, `topdown-city-data.js`,
+  `topdown-city-controller.js`, `topdown-city-renderer.js`, `lightmap.js`.
+  Superseded by the dynamic map above. Earlier versions of this file and of
+  `docs/CLAUDE.md` described this as the live map; it has not been since the
+  dynamic map landed.
+- **The online social layer** — `friends-list-engine.js`,
+  `matchmaking-reconnection-engine.js`, `multiplayer-session-engine.js`,
+  `leaderboard-engine.js`, `spectator-replay-engine.js`. Complete and tested, no UI
+  at all. The largest single built-but-unreachable gap in the repo.
+- **Eleven standalone engines** — `card-component`, `card-holofoil-engine`,
+  `semantic-motion-engine`, `cinematic-camera-engine`, `layered-inspector-engine`,
+  `controller-focus-engine`, `audio-haptics-engine`, `deck-builder-engine`,
+  `card-crafting-engine`, `campaign-story-engine`, `custom-scenario-editor`,
+  plus `ai-behavior-tree-engine` and the build-time `asset-pipeline.js`.
+
+Note `deck-builder-engine.js` is unused but the DECK BUILDER screen works: it is
+implemented directly in `index.html` and never adopted the module. Do not read
+"module unused" as "feature missing" — check the screen first.
 
 **Online multiplayer is not authoritative.** Each browser runs its own `Game`;
 the server only relays. O.G. powers, betting and alliances are hidden in online
@@ -337,10 +382,21 @@ accessibility setting was unreachable. `test/cash-shop.test.js` guards placement
 | `scenes/web/` (25) | 960px PNG8 web copies, ~150KB. **These** are what the game loads |
 | `topdown-recolor/` (12) | Right shapes, wrong palette. Recolourable via `SpriteRenderer` |
 | `props/web/` (5) | POI prop sprites, transparent PNG32, 80KB total. **Wired and drawing** |
+| `portraits/web/` (5) | 128x128 NPC scene portraits, ~12KB each. **Wired.** Sources beside them are 1024px JPEGs named `.png` |
+| `map/web/` (7) | Narrative map sprites, 37KB total. **Wired.** Long edge 64, ground tile exactly 48x48 |
+| `ui/web/` (6) | HUD icons, 16x16, ~300B each. **Wired.** Replaced the colour emoji |
+| `generated/` (65 PNG) | Aseprite-produced map art at **32x32**, upscaled 2x at closest zoom. Resolved before `map/web/` |
 | `decals/` (4) | Usable |
 | `ui-mockups/` (5) | HUD explorations, **not** game art |
 | `*_raw.png` (8) | Failed tile generations, neon on black. Not sliceable |
 | `palettes/concrete_kings.json` | The real deal. Canonical gamut |
+
+**The vendor drop is not in git.** `assets/` holds ~511,000 PNGs and git tracks
+~600 of them: the Modern Exteriors / Interiors library is an untracked local drop.
+**Never point runtime code at it** — the game will resolve on your machine and 404
+on a fresh clone, which is exactly how the map's art shipped once. Cut what you
+need into a tracked `*/web/` directory with a `scripts/process-*.sh` step.
+`test/map-sprites.test.js` enforces this for the map and is the pattern to copy.
 
 **Rules:**
 
@@ -360,8 +416,6 @@ accessibility setting was unreachable. `test/cash-shop.test.js` guards placement
   shade. One step off brick used to be dE 19, which made roofs look like red
   confetti and parapets like signal-red selection boxes. All 64 original colours
   survive at their original ramp positions and a test pins them individually.
-- Large fills (ground, asphalt, roofs) must stay under luminance 120. Bright hues
-  belong in `lane`, `zebra` and `accent` only. Tested.
 - Large fills (ground, asphalt, roofs) must stay under luminance 120. Bright hues
   belong in `lane`, `zebra` and `accent` only. Tested.
 - `assets/manifest.json` declares the 8 city sources plus 5 POI props. City

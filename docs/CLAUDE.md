@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> **Read `HANDOFF.md` in the repo root first.** It documents twelve failure modes in this
+> **Read `docs/HANDOFF.md` first.** It documents twelve failure modes in this
 > codebase that fail *silently*, several of which the test suite cannot catch by
 > construction. Its section 0 is two rules that would have saved more time than everything
 > else in it. This file describes what the project **is**; HANDOFF.md describes the
@@ -22,12 +22,15 @@ largely closed on the mechanics side. Built and working:
 - **RPG layer** — `TRUST / HEAT / REP / CASH`, `str/wit/soul` attributes, origins and a
   4-step character-creation wizard, XP and levels, receipts, Cookout Alliances,
   corner-hustle betting, O.G. Judge veto and double-down.
-- **A top-down walkable city** — 8 districts, per-axis collision, camera, travel gated on
-  heat, weather, lamp lighting, district arrival art. **Entirely procedural**: there is no
-  district terrain art at all, and the renderer's asset branches have never run against
-  real terrain sprites. See HANDOFF section 5.
-- **Five mini-games** with a shared manager, and a CASH shop selling prep items that
-  modify them.
+- **A narrative world map** (`dynamic-map-system.js`) — locations, routes, scenarios,
+  characters, rumors, factions, time of day and weather, in five modes
+  (STORY/WORLD/PEOPLE/RUMORS/FACTIONS). Draws real pixel-art sprites from
+  `assets/map/web/` and `assets/generated/`, falling back to geometric glyphs.
+  **This replaced the top-down walkable city.** Those modules (`topdown-city-*`,
+  `lightmap.js`, `asset-registry.js`) still exist and are still tested but are no
+  longer loaded in the browser — see HANDOFF section 3.
+- **Sixteen mini-games** with a shared manager, and a CASH shop selling prep items that
+  modify them. Only five are reachable from the catalog screen.
 - **A solo campaign** (`first-miles-campaign.js`) with beats, choices, flags and endings.
 - **The block ledger** (`canon-engine.js`) — every crowned card is recorded, motifs
   accumulate into block legends, a prompt naming one pays a callback bonus, and THE RECORD
@@ -64,7 +67,7 @@ node scripts/generate-palette-json.js   # regenerate assets/palettes/concrete_ki
 node scripts/generate-cards.js          # regenerate cards.js from the card database
 ```
 
-No build step, bundler, transpiler or lint config. Current state: **433 tests across 64 files, all passing**. Always run `npm test` rather than `node --test` — the npm script also
+No build step, bundler, transpiler or lint config. Current state: **561 tests across 91 files, all passing**. Always run `npm test` rather than `node --test` — the npm script also
 syntax-checks `index.html`'s inline `<script>`, which the test runner never sees.
 
 ## Architecture
@@ -82,7 +85,10 @@ and also export via `module.exports` for tests. That dual nature is the source o
 bug class that node cannot see — HANDOFF trap 2.4. Engine files use file-prefixed locals
 (`CTRL_WORLD`, `RND_WORLD`, `SCN_SLOTS`, `CANON_TIERS`) for exactly this reason.
 
-The module table lives in HANDOFF section 3 rather than being duplicated here.
+The module table lives in HANDOFF section 3 rather than being duplicated here. So does
+the list of **22 modules that exist and are tested but are deliberately not loaded** —
+check it before concluding a feature is missing, and before "fixing" a module by wiring
+it up. Several were superseded rather than abandoned.
 
 **Online multiplayer is not authoritative.** Each browser runs its own `Game`; the server
 only relays. O.G. powers, betting and alliances are hidden in online mode because they
