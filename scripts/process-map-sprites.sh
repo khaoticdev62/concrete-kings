@@ -41,7 +41,7 @@ ground_asphalt|2_City_Terrains_48x48.png|48x48+0+192|tile
 building_hidden|Condo_6_Garage_Door_48x48.png|192x144+0+0|fit
 building_landmark|ME_Singles_Generic_Building_48x48_Condo_1_1.png|144x288+0+288|fit
 character_fallback|2_Characters/Old/Single_Characters_Legacy/48x48/Adam_idle_48x48.png|48x96+0+0|fit
-building_institution|Modern_Exteriors_Complete_Singles_48x48_ME_Singles_Police_Station_48x48_Police_Station_1.png|-|fit
+building_institution|ME_Singles_Police_Station_48x48_Police_Station_1.png|-|fit
 building_social|ME_Singles_School_48x48_Basketball_Court_1.png|-|fit
 building_default|ME_Singles_Shopping_Center_and_Markets_48x48_Market_Small_1.png|-|fit
 "

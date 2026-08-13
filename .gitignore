@@ -9,3 +9,24 @@ assets/unusable/
 # originals. Anything worth keeping gets trimmed, named and moved into assets/scenes/
 # or assets/props/ first — see assets/ASSET_INVENTORY.md.
 assets/Gemini_Generated_Image_*
+
+# Extraction scratch. scripts/aseprite/convert_new_assets*.js unzip itch.io packs
+# into assets/tmp_*, and three separate runs left three copies of the same packs
+# (_probe, _single, _2zips) totalling ~800MB. Nothing here is authored — every
+# pack is reproducible from a zip on disk. See scripts/triage-assets.sh.
+assets/tmp_*/
+tmp_aseprite_work/
+assets/__MACOSX/
+
+# Vendor archives. 48 zips, ~920MB, and the packs they contain are ~680MB
+# extracted. The repo's .git is already ~330MB and a single asset commit once
+# moved 379MB (HANDOFF section 4). The convention that keeps this workable:
+# vendor source stays OUT of git, derived sprites go in — assets/*/web/ and
+# assets/generated/ are tracked and total well under a megabyte.
+*.zip
+
+# Approved-source root, per scripts/aseprite/README.md. Untracked for the same
+# reason: it is extracted itch.io material, not authored work. The .aseprite
+# files a human actually makes are the exception and are force-added.
+raw_assets/
+!raw_assets/**/*.aseprite
