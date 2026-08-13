@@ -267,10 +267,7 @@
           ctx.fillStyle = '#ffcd68';
           ctx.fillRect(p.x - size / 2, p.y - size * 0.5, size, 3);
         }
-        if (this.world.worldMarksFor(loc.id).includes('broken_windows')) {
-          ctx.fillStyle = '#1a1a1a';
-          ctx.fillRect(p.x - size / 4, p.y - size * 0.7, 4, 4);
-        }
+        this._drawMarks(ctx, loc, p, size);
         // label (§18: identity should read even before text, but we add a small tag)
         if (this.world.zoom !== 'CITY') {
           ctx.fillStyle = '#cbd5ed';
@@ -321,6 +318,62 @@
           ctx.fillText(c.name || c.id, cx - size, cy - size / 2 - 2);
         }
       });
+    }
+
+    /**
+     * Environmental storytelling: the marks a location carries.
+     *
+     * Authored POIs and consequence-added marks both live in world.worldMarks,
+     * so this draws them identically — the player cannot tell which arrived
+     * how, and should not be able to. This is the "block remembers" pillar's
+     * only rendering surface: without it a consequence exists solely as a
+     * number, which is the thing the level design forbids.
+     *
+     * Skipped entirely at CITY zoom. A 22px location with decals beside it is
+     * noise, not information.
+     */
+    _drawMarks(ctx, loc, p, size) {
+      if (this.world.zoom === 'CITY') return;
+      const marks = this.world.worldMarksFor(loc.id);
+      if (!marks || !marks.length) return;
+
+      // A row of their own, under the name label rather than over the building.
+      // Drawn at the base first, which put them on top of the facade art and
+      // through the label text — at 40px a location has no spare room inside
+      // its own silhouette, so the marks get a band instead of an overlay.
+      const d = Math.max(7, Math.round(size * 0.26));
+      const shown = marks.slice(0, 3);
+      let x = Math.round(p.x - (shown.length * (d + 2) - 2) / 2);
+      const y = Math.round(p.y + 7);
+
+      for (const mark of shown) {
+        const path = (this.assets && this.assets.getMarkAsset) ? this.assets.getMarkAsset(mark) : null;
+        const img = path ? this._loadLegacy(path) : null;
+        if (img && img.width) {
+          const f = this._fit(img, d);
+          ctx.drawImage(img, x + f.ox, y + f.oy, f.dw, f.dh);
+        } else {
+          // Procedural fallback for the four marks with no art. Palette colours,
+          // distinct shapes — a mark still has to be identifiable without art.
+          ctx.save();
+          if (mark === 'police_tape') {
+            ctx.fillStyle = '#ffcd68';
+            ctx.fillRect(x, y + d * 0.4, d, Math.max(2, d * 0.18));
+          } else if (mark === 'broken_windows') {
+            ctx.fillStyle = '#0b0c11';
+            ctx.fillRect(x + d * 0.2, y + d * 0.2, d * 0.6, d * 0.6);
+          } else if (mark === 'missing_sign') {
+            ctx.strokeStyle = '#8b95ab';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x + d * 0.2, y + d * 0.15, d * 0.6, d * 0.55);
+          } else if (mark === 'new_guards') {
+            ctx.fillStyle = '#f25438';
+            ctx.fillRect(x + d * 0.35, y + d * 0.1, d * 0.3, d * 0.75);
+          }
+          ctx.restore();
+        }
+        x += d + 2;
+      }
     }
 
     _drawVehicles(ctx, w, h) {

@@ -125,7 +125,8 @@
   "events": [
     { "id": "city_blackout", "name": "City Blackout", "duration": 2, "effects": { "security": -0.3, "activity": -0.2 }, "unlocks": [] },
     { "id": "police_sweep", "name": "Police Sweep", "duration": 1, "effects": { "security": 0.4 }, "unlocks": ["police_raid"] },
-    { "id": "gang_war", "name": "Gang War", "duration": 2, "effects": { "security": -0.5 }, "unlocks": [] }
+    { "id": "gang_war", "name": "Gang War", "duration": 2, "effects": { "security": -0.5 }, "unlocks": [] },
+    { "id": "cookout", "name": "Block Cookout", "duration": 1, "effects": { "security": 0.2, "activity": 0.4 }, "unlocks": [] }
   ],
   "vehicles": [
     { "id": "player_car", "name": "Your Ride", "locationId": "stoop", "color": "#c25b4a" },
@@ -135,9 +136,43 @@
   ],
   "pois": [
     { "id": "poi_stoop_mural", "locationId": "stoop", "type": "graffiti", "meaning": "Block Family colors — territory claimed, not contested." },
-    { "id": "poi_blue_tape", "locationId": "blue_plate", "type": "police_tape", "meaning": "Appears after police_raid resolves; visible consequence." },
-    { "id": "poi_detroit_burn", "locationId": "detroit_lot", "type": "burn_marks", "meaning": "Appears if clique_war escalates; world changed." },
-    { "id": "poi_cut_mark", "locationId": "miami_cut", "type": "faction_marking", "meaning": "Royal Clique mark; flips to Block Family if you take the Cut." }
+    { "id": "poi_stoop_names", "locationId": "stoop", "type": "missing_sign", "meaning": "Three names painted small, and a fourth space left blank." },
+    { "id": "poi_stoop_tagged", "locationId": "stoop", "type": "faction_marking", "meaning": "The mural tagged over. The Cut came west.", "condition": "clique_war:fail" },
+
+    { "id": "poi_rec_chairs", "locationId": "rec_center", "type": "missing_sign", "meaning": "Folding chairs stacked against the fence. Somebody is expecting a crowd." },
+    { "id": "poi_rec_fence", "locationId": "rec_center", "type": "broken_windows", "meaning": "One bent panel in the chain-link. Everybody gets in the same way." },
+    { "id": "poi_rec_contested", "locationId": "rec_center", "type": "faction_marking", "meaning": "Corner Crew tags on the court. The cookout does not happen here now.", "condition": "clique_war:fail" },
+
+    { "id": "poi_store_prices", "locationId": "corner_store", "type": "missing_sign", "meaning": "Hand-lettered price list. Chen sets them himself." },
+    { "id": "poi_store_tag", "locationId": "corner_store", "type": "faction_marking", "meaning": "Clique tag on the side wall. Chen has been paying somebody." },
+    { "id": "poi_store_shutter", "locationId": "corner_store", "type": "broken_windows", "meaning": "Shutter down in the middle of the day. He stopped serving you.", "condition": "clique_war:fail" },
+
+    { "id": "poi_blue_tape", "locationId": "blue_plate", "type": "police_tape", "meaning": "Tape across the door. The raid happened, and the block saw it.", "condition": "police_raid:success" },
+    { "id": "poi_blue_cups", "locationId": "blue_plate", "type": "missing_sign", "meaning": "Two coffee cups in one booth. Reyes meets somebody here." },
+    { "id": "poi_blue_watched", "locationId": "blue_plate", "type": "new_guards", "meaning": "A cruiser idling across the street, every night now.", "condition": "police_raid:fail" },
+
+    { "id": "poi_stash_padlock", "locationId": "stash_spot", "type": "missing_sign", "meaning": "Fresh padlock on an old shutter. Somebody still uses this." },
+    { "id": "poi_stash_butts", "locationId": "stash_spot", "type": "broken_windows", "meaning": "A pile of cigarettes by the recess. Somebody waits here regularly." },
+
+    { "id": "poi_roof_chair", "locationId": "rooftop", "type": "missing_sign", "meaning": "One folding chair facing the block. This is somebody's spot." },
+    { "id": "poi_roof_coop", "locationId": "rooftop", "type": "broken_windows", "meaning": "An empty pigeon coop. An older use of this roof." },
+
+    { "id": "poi_precinct_board", "locationId": "precinct", "type": "missing_sign", "meaning": "Community notice board. Names of the missing, none of them taken down." },
+    { "id": "poi_precinct_cruiser", "locationId": "precinct", "type": "damaged_vehicle", "meaning": "Cruiser parked nose-out. Ready to leave in a hurry." },
+
+    { "id": "poi_detroit_drum", "locationId": "detroit_lot", "type": "graffiti", "meaning": "Tags across the back wall. The lot is somebody's, even empty." },
+    { "id": "poi_detroit_burn", "locationId": "detroit_lot", "type": "burn_marks", "meaning": "A burnt hulk where the drum fire was. The war came through here.", "condition": "clique_war:fail" },
+
+    { "id": "poi_chi_quiet", "locationId": "chi_grey", "type": "missing_sign", "meaning": "Buzzer panel with one name taped over the old one." },
+
+    { "id": "poi_steps_marble", "locationId": "bmore_steps", "type": "missing_sign", "meaning": "Marble steps scrubbed white. Somebody's grandmother still cleans them." },
+    { "id": "poi_steps_watched", "locationId": "bmore_steps", "type": "new_guards", "meaning": "Somebody on the corner who was not there last week.", "condition": "the_steps_watch:fail" },
+
+    { "id": "poi_cut_mark", "locationId": "miami_cut", "type": "faction_marking", "meaning": "Royal Clique mark over the door. Flips if you take the Cut." },
+    { "id": "poi_cut_taken", "locationId": "miami_cut", "type": "graffiti", "meaning": "Block Family colors where the Clique mark was.", "condition": "clique_war:success" },
+
+    { "id": "poi_train_tags", "locationId": "train_yard", "type": "graffiti", "meaning": "A freight car carrying tags from this block. The writing left before you did." },
+    { "id": "poi_train_wreck", "locationId": "train_yard", "type": "damaged_vehicle", "meaning": "A stripped car nobody reported. The yard eats things." }
   ],
   "consequence_matrix": {
     "police_raid": {
@@ -145,8 +180,36 @@
       "fail": [{ "locationState": { "locationId": "blue_plate", "locationState": "UNDER_SURVEILLANCE" } }, { "relationship": { "from": "player", "to": "officer_01", "value": -20 } }]
     },
     "clique_war": {
-      "success": [{ "factionControl": { "locationId": "miami_cut", "factionId": "block_fam" } }, { "locationState": { "locationId": "miami_cut", "locationState": "TENSE" } }, { "worldMark": { "locationId": "miami_cut", "mark": "faction_marking" } }],
-      "fail": [{ "locationState": { "locationId": "detroit_lot", "locationState": "DANGEROUS" } }, { "worldMark": { "locationId": "detroit_lot", "mark": "burn_marks" } }, { "triggerEvent": "gang_war" }]
+      "success": [{ "factionControl": { "locationId": "miami_cut", "factionId": "block_fam" } }, { "locationState": { "locationId": "miami_cut", "locationState": "TENSE" } }, { "worldMark": { "locationId": "miami_cut", "mark": "graffiti" } }],
+      "fail": [{ "locationState": { "locationId": "detroit_lot", "locationState": "DANGEROUS" } }, { "worldMark": { "locationId": "detroit_lot", "mark": "burn_marks" } }, { "worldMark": { "locationId": "stoop", "mark": "faction_marking" } }, { "worldMark": { "locationId": "corner_store", "mark": "broken_windows" } }, { "triggerEvent": "gang_war" }]
+    },
+    "corner_hustle": {
+      "success": [{ "relationship": { "from": "player", "to": "marcus", "value": 8 } }, { "locationState": { "locationId": "stoop", "locationState": "SAFE" } }],
+      "fail": [{ "relationship": { "from": "player", "to": "marcus", "value": -5 } }]
+    },
+    "community_block": {
+      "success": [{ "relationship": { "from": "player", "to": "gram", "value": 12 } }, { "locationState": { "locationId": "rec_center", "locationState": "SAFE" } }, { "triggerEvent": "cookout" }],
+      "fail": [{ "relationship": { "from": "player", "to": "gram", "value": -8 } }, { "locationState": { "locationId": "rec_center", "locationState": "TENSE" } }]
+    },
+    "studio_session": {
+      "success": [{ "relationship": { "from": "player", "to": "marcus", "value": 15 } }, { "newScenario": { "id": "block_fame", "locationId": "chi_grey", "type": "STORY", "title": "Block Fame", "summary": "The track blew up. Chicago wants in.", "participants": ["player", "marcus"], "requirements": ["player_present", "marcus_present"] } }],
+      "fail": [{ "relationship": { "from": "player", "to": "marcus", "value": -10 } }, { "locationState": { "locationId": "detroit_lot", "locationState": "TENSE" } }]
+    },
+    "block_fame": {
+      "success": [{ "relationship": { "from": "player", "to": "marcus", "value": 20 } }, { "locationState": { "locationId": "chi_grey", "locationState": "ACTIVE" } }],
+      "fail": [{ "relationship": { "from": "player", "to": "marcus", "value": -15 } }, { "locationState": { "locationId": "chi_grey", "locationState": "LOCKED" } }]
+    },
+    "the_steps_watch": {
+      "success": [{ "relationship": { "from": "player", "to": "dove", "value": -5 } }, { "newScenario": { "id": "hidden_meet", "locationId": "miami_cut", "type": "FACTION", "title": "The Quiet Meet", "summary": "You know who carries now.", "participants": ["player", "dove"], "requirements": ["player_present", "dove_present"] } }],
+      "fail": [{ "locationState": { "locationId": "bmore_steps", "locationState": "DANGEROUS" } }, { "worldMark": { "locationId": "bmore_steps", "mark": "new_guards" } }, { "relationship": { "from": "player", "to": "dove", "value": -15 } }]
+    },
+    "officer_trust": {
+      "success": [{ "relationship": { "from": "player", "to": "officer_01", "value": 15 } }, { "locationState": { "locationId": "precinct", "locationState": "ACTIVE" } }],
+      "fail": [{ "relationship": { "from": "player", "to": "officer_01", "value": -12 } }, { "triggerEvent": "police_sweep" }]
+    },
+    "train_heist": {
+      "success": [{ "relationship": { "from": "player", "to": "ty", "value": 10 } }, { "worldMark": { "locationId": "train_yard", "mark": "damaged_vehicle" } }],
+      "fail": [{ "locationState": { "locationId": "train_yard", "locationState": "UNDER_SURVEILLANCE" } }, { "worldMark": { "locationId": "train_yard", "mark": "new_guards" } }, { "triggerEvent": "police_sweep" }]
     }
   }
 }

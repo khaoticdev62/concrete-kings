@@ -343,6 +343,95 @@ class DMMapState {
     this.emit('scenarioMissed', { id: s.id });
   }
 
+  // ---- environmental storytelling: authored world marks ----
+  //
+  // A POI is a world mark the level ships with, as opposed to one a consequence
+  // adds later. Both end up in the same place — DMWorldMap.worldMarks — so the
+  // renderer draws them identically and nothing has to know which is which.
+  //
+  // These were authored in the level file from the beginning and loadLevel
+  // never read them, so no POI had ever rendered. `meaning` is the story the
+  // object tells; it is kept for inspection UI rather than thrown away at load.
+
+  /** @returns the stored POI record, or null if it names an unknown location. */
+  addPoi(p) {
+    if (!p || !p.id || !p.locationId) return null;
+    if (!this._locations[p.locationId]) return null;
+    const poi = {
+      id: p.id,
+      locationId: p.locationId,
+      type: p.type || 'graffiti',
+      meaning: p.meaning || '',
+      // A conditional POI is authored now and shown when its condition fires —
+      // burn marks exist in the file before anything has burned.
+      condition: p.condition || null,
+      active: !p.condition
+    };
+    this._pois[poi.id] = poi;
+    this.emit('poiAdded', poi);
+    return poi;
+  }
+
+  poisFor(locationId) {
+    return Object.values(this._pois).filter(p => p.locationId === locationId);
+  }
+
+  /** Marks that should be drawn right now: unconditional, or condition met. */
+  activeMarksFor(locationId) {
+    return [...new Set(
+      this.poisFor(locationId).filter(p => p.active).map(p => p.type)
+    )];
+  }
+
+  /**
+   * Turn on every POI whose condition matches. Called when a consequence fires,
+   * so the world visibly changes rather than only the numbers.
+   */
+  activatePoiCondition(condition) {
+    const turned = [];
+    Object.values(this._pois).forEach(p => {
+      if (!p.active && p.condition === condition) { p.active = true; turned.push(p); }
+    });
+    // Same relay as applyConsequence: activating a POI has to reach the world's
+    // mark layer or the object turns "on" in state and stays invisible.
+    turned.forEach(p => this.emit('worldMarkAdded', { locationId: p.locationId, mark: p.type }));
+    if (turned.length) this.emit('poiActivated', turned);
+    return turned;
+  }
+
+  // ---- consequence matrix ----
+  //
+  // Authored per scenario as { scenarioId: { success: [...], fail: [...] } }.
+  // Also never read by loadLevel until now, so every consequence in the level
+  // file was inert.
+
+  setConsequenceMatrix(matrix) {
+    this._consequenceMatrix = matrix && typeof matrix === 'object' ? matrix : {};
+    return this._consequenceMatrix;
+  }
+
+  /** @returns the effect list for an outcome, or [] when nothing is authored. */
+  consequencesFor(scenarioId, outcome) {
+    const entry = this._consequenceMatrix[scenarioId];
+    if (!entry) return [];
+    const list = entry[outcome];
+    return Array.isArray(list) ? list : [];
+  }
+
+  /**
+   * Apply an authored outcome. Each effect goes through applyConsequence, which
+   * already understands locationState / relationship / newScenario /
+   * factionControl / worldMark / triggerEvent.
+   */
+  applyScenarioOutcome(scenarioId, outcome) {
+    const effects = this.consequencesFor(scenarioId, outcome);
+    effects.forEach(e => { try { this.applyConsequence(e); } catch (err) {} });
+    // Conditions are keyed "<scenarioId>:<outcome>" so a POI can name exactly
+    // the branch that reveals it.
+    this.activatePoiCondition(`${scenarioId}:${outcome}`);
+    return effects.length;
+  }
+
   // ---- story threads (PRD §40-§42) ----
   addThread(t) {
     const th = this._normalizeThread(t);
@@ -520,6 +609,14 @@ class DMMapState {
     if (effect.failScenario) { const s = this.getScenario(effect.failScenario); if (s) s.status = DMScenarioStates.FAILED; }
     if (effect.metObligation) { const o = this.getObligation(effect.metObligation); if (o) o.met = true; }
     if (effect.factionControl) this.changeFactionControl(effect.factionControl.locationId, effect.factionControl.factionId);
+    // worldMark had NO branch here at all, so every mark authored in every
+    // level file was silently discarded — including the two that shipped in v1.
+    // The marks themselves live on DMWorldMap, not on state, and this class is
+    // deliberately display-agnostic ("map stays display-only", above), so it
+    // announces the mark and dynamic-map-system relays it.
+    if (effect.worldMark && effect.worldMark.locationId && effect.worldMark.mark) {
+      this.emit('worldMarkAdded', { locationId: effect.worldMark.locationId, mark: effect.worldMark.mark });
+    }
     if (effect.triggerEvent) this.triggerEvent(effect.triggerEvent);
     if (effect.newScenario) { this._scenarios[effect.newScenario.id] = this._normalizeScenario(effect.newScenario); this._evalScenario(this._scenarios[effect.newScenario.id]); this.pushFeed({ text: `New situation: ${effect.newScenario.title}`, kind: 'consequence' }); }
     this.emit('consequenceApplied', effect);
@@ -589,6 +686,8 @@ class DMMapState {
     this._threads = migrated.threads || {};
     this._events = migrated.events || {};
     this._chains = migrated.chains || {};
+    this._pois = migrated.pois || {};
+    this._consequenceMatrix = migrated.consequenceMatrix || {};
     this._seed = migrated.seed || this._seed;
     this.emit('restored', this.snapshot());
   }
@@ -631,6 +730,8 @@ class DMMapState {
     this._threads = {};
     this._events = {};
     this._chains = {};
+    this._pois = {};
+    this._consequenceMatrix = {};
     this._seed = 'level-loaded';
     this.mode = DMMapModes.STORY;
     this.activeLocationId = null;
@@ -988,6 +1089,8 @@ class DMMapState {
     this._threads = {};
     this._events = {};
     this._chains = {};
+    this._pois = {};
+    this._consequenceMatrix = {};
     // Phase 3 seed: a procedural scenario chain + rumor network + an NPC goal
     this._scenarios.block_fame = this._normalizeScenario({ id: 'block_fame', locationId: 'chi_grey', type: 'STORY', title: 'Block Fame', summary: 'Blow up.', participants: ['player', 'marcus'], urgency: { level: 'moderate' }, requirements: ['player_present', 'marcus_present'], hidden: true, priority: 2 });
     this.addScenarioChain({ id: 'marcus_arc', nodes: ['corner_hustle', 'studio_session', 'block_fame'] });

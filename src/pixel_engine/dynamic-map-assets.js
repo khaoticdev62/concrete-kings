@@ -80,6 +80,29 @@ const DM_LOCATION_ID_ASSETS = {
   detroit_lot: null
 };
 
+/**
+ * World-mark decals, keyed by the DM_WORLD_MARKS type.
+ *
+ * Eight mark types exist; four have honest art in the vendor drop and are
+ * derived by scripts/process-poi-decals.sh. The other four resolve to null and
+ * the renderer draws them as palette shapes — asset-first with a procedural
+ * fallback, so a missing decal never blanks a location (HANDOFF section 7).
+ *
+ * One sprite per TYPE, not per POI. Twenty-four POI records share these four:
+ * at a 22-64px location sprite a bespoke 16px decal per POI is noise, and the
+ * POI's story lives in its `meaning` string rather than in unique pixels.
+ */
+const DM_MARK_ASSETS = {
+  graffiti: DM_MAP_SPRITE_DIR + 'mark_graffiti.png',
+  faction_marking: DM_MAP_SPRITE_DIR + 'mark_faction_marking.png',
+  burn_marks: DM_MAP_SPRITE_DIR + 'mark_burn_marks.png',
+  damaged_vehicle: DM_MAP_SPRITE_DIR + 'mark_damaged_vehicle.png',
+  police_tape: null,
+  broken_windows: null,
+  missing_sign: null,
+  new_guards: null
+};
+
 const DM_TERRAIN_ASSET = DM_MAP_SPRITE_DIR + 'ground_asphalt.png';
 const DM_POLICE_ASSET = DM_MAP_SPRITE_DIR + 'building_institution.png';
 const DM_CHARACTER_ASSET = DM_MAP_SPRITE_DIR + 'character_fallback.png';
@@ -169,6 +192,11 @@ class DMAssetManager {
     return { path: DM_LOCATION_ID_ASSETS[id] || null };
   }
 
+  /** Sprite path for a world mark, or null when it is drawn procedurally. */
+  getMarkAsset(type) {
+    return DM_MARK_ASSETS[type] || null;
+  }
+
   getTerrain() { return DM_TERRAIN_ASSET; }
   getPolice() { return DM_POLICE_ASSET; }
   getCharacter() { return DM_CHARACTER_ASSET; }
@@ -180,9 +208,9 @@ class DMAssetManager {
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
-    DMAssetManager, DM_LOCATION_ASSETS, DM_LOCATION_ID_ASSETS, DM_ASSET_BASE,
-    DM_MAP_SPRITE_DIR, DM_TERRAIN_ASSET, DM_CHARACTER_ASSET, DM_POLICE_ASSET,
-    dmFitSprite
+    DMAssetManager, DM_LOCATION_ASSETS, DM_LOCATION_ID_ASSETS, DM_MARK_ASSETS,
+    DM_ASSET_BASE, DM_MAP_SPRITE_DIR, DM_TERRAIN_ASSET, DM_CHARACTER_ASSET,
+    DM_POLICE_ASSET, dmFitSprite
   };
 }
 if (typeof window !== 'undefined') {

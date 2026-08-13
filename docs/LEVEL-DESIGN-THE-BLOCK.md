@@ -791,6 +791,11 @@ Not in the original review; surfaced only once QA #16 was written and run. Four 
 
 Mr. Chen was named in the design but absent from the level data entirely; added as the static Corner Store fixed point.
 
+### J. `applyConsequence` had no `worldMark` branch — **found during implementation, fixed**
+The third piece of dead data, and the worst of them, because unlike the other two it *looked* like it worked. `applyConsequence` handled `locationState`, `relationship`, `newScenario`, `factionControl`, `triggerEvent` and four more — but there was **no branch for `worldMark` at all**. Every mark authored in every level file was silently discarded, including the two that shipped in v1. The consequence applied, the numbers moved, and the world never changed.
+
+The marks live on `DMWorldMap`; consequences are applied on `DMMapState`, which is display-agnostic by design ("map stays display-only", per its own comment). Fixed by having state **announce** `worldMarkAdded` and `dynamic-map-system` relay it to the world map. Conditional POIs use the same relay, so a POI that turns on cannot turn on invisibly.
+
 ### I. Route B had no chain — **found during implementation, fixed**
 `heat_check` shipped hidden with no rumor and no chain pointing at it, so it could never be revealed. Fixing it exposed a structural asymmetry: Route A had `marcus_arc` and Route C had `cut_arc`, but the Law route had no chain at all. Added `law_arc` = `officer_trust` → `heat_check` → `snitch_or_silent`, which completes the three-route symmetry §10 describes.
 
@@ -809,13 +814,19 @@ The pipeline is established and idempotent: `scripts/process-*.sh` cut tracked s
 
 Both must be authored — no source in the drop matches. Aseprite MCP task: a fenced vacant lot with an oil-drum fire (front elevation, 3/4), and a freight car end with gravel apron.
 
-### B. New art required — 24 POI decals
+### B. World-mark decals — **8 types, not 24 sprites** ▲
 
-| Asset ID | Category | Dimensions | Anim | Variants | Reuse | Priority |
-|---|---|---|---|---|---|---|
-| `decal_poi_*` (×24) | Prop decal | 16×16 | none | per §14 | High — graffiti/tags reused across 6 locations | **P1** |
+The original plan here was 24 bespoke decals, one per POI. Implementation showed that was wrong on two counts: the engine already keys environmental marks on a **type** (`DM_WORLD_MARKS` — eight of them), and at a 22–64px location sprite a unique 16px decal per POI is noise rather than information. The POI record carries the story in its `meaning`; the sprite carries the category. 24 POI records share 8 sprites.
 
-Authored as **one 8×3 sheet at 16px**, sliced by a new `scripts/process-poi-decals.sh` following the established pattern. 24 decals ≈ 6 KB total.
+| Asset ID | Source | Dimensions | Priority |
+|---|---|---|---|
+| `mark_graffiti` | wildstyle piece | ≤16×16 | ✅ shipped |
+| `mark_faction_marking` | character throw-up, deliberately unlike the piece | ≤16×16 | ✅ shipped |
+| `mark_burn_marks` | burnt car hulk, top-down | ≤16×16 | ✅ shipped |
+| `mark_damaged_vehicle` | abandoned wreck, top-down | ≤16×16 | ✅ shipped |
+| `police_tape`, `broken_windows`, `missing_sign`, `new_guards` | — | procedural | P2 |
+
+Only four have honest art in the drop; the other four draw as palette shapes, which is the asset-first / procedural-fallback rule from HANDOFF §7. Built by `scripts/process-poi-decals.sh`, ~2 KB total.
 
 ### C. Existing, no work needed
 
@@ -944,7 +955,7 @@ Tests 1–11 and 15–17 and 22 are **new and should be written as `test/level-t
 
 **Sprint 1 — structural fixes. ✅ SHIPPED.** §16-A/B/D/E/H/I: five routes, three scenarios, two district corrections, two NPC routine fixes, one new NPC, one new chain. `scripts/generate-level.js` (the "level build step" the file header referenced but which did not exist). `test/level-the-block.test.js` — 21 checks covering QA 1–10, 15–17 plus referential integrity and design conformance. Zero new art. *This sprint alone makes the shipped level structurally sound.*
 
-**Sprint 2 — the dead data.** Extend `loadLevel` for `pois` and `consequence_matrix`. Author 24 POIs. Build `scripts/process-poi-decals.sh` and the 8×3 decal sheet. Render decals in `_drawLocations`. Extend the consequence matrix to all 8 major scenarios.
+**Sprint 2 — the dead data. ✅ SHIPPED.** `loadLevel` reads `pois` and `consequence_matrix`; `DMMapState` gained `addPoi` / `activeMarksFor` / `activatePoiCondition` / `setConsequenceMatrix` / `consequencesFor` / `applyScenarioOutcome`. 27 POIs authored across all 12 locations, 8 of them conditional on a named scenario branch. Consequence matrix extended from 2 scenarios to 9. `scripts/process-poi-decals.sh` derives 4 mark decals; 4 more draw procedurally. Marks render in their own row under each location label. Plus §16-J — the `worldMark` relay that never existed.
 
 **Sprint 3 — art and polish.** Author the two missing buildings. Wire `the_steps_watch` and `gram_asks` playback. Time-of-day location variants for the six highest-traffic locations. Manual QA 18–24.
 

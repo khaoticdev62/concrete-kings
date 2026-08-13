@@ -332,6 +332,105 @@ test('QA17: no route is gated behind a scenario that route is needed to reach', 
 // Design conformance — the level file must match the design document
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// QA 11 — environmental storytelling and consequences
+// ---------------------------------------------------------------------------
+
+const MARK_TYPES = new Set([
+  'burn_marks', 'broken_windows', 'police_tape', 'graffiti',
+  'missing_sign', 'damaged_vehicle', 'new_guards', 'faction_marking'
+]);
+
+test('QA11: every POI names a real location and a real mark type', () => {
+  // POI `type` is not free text — it must be one of DM_WORLD_MARKS, or
+  // world.addWorldMark rejects it and the POI silently never renders.
+  const bad = [];
+  (level.pois || []).forEach(p => {
+    if (!locIds.has(p.locationId)) bad.push(`${p.id} -> unknown location ${p.locationId}`);
+    if (!MARK_TYPES.has(p.type)) bad.push(`${p.id} -> "${p.type}" is not a DM_WORLD_MARKS value`);
+    if (!p.meaning) bad.push(`${p.id} has no meaning — a POI without a story is decoration`);
+  });
+  assert.deepEqual(bad, [], 'bad POIs:\n  ' + bad.join('\n  '));
+});
+
+test('QA11b: every conditional POI names a scenario branch that exists', () => {
+  // Conditions are "<scenarioId>:<outcome>". A typo here means the POI is
+  // authored, loaded, and can never turn on.
+  const bad = [];
+  (level.pois || []).filter(p => p.condition).forEach(p => {
+    const [scn, outcome] = String(p.condition).split(':');
+    if (!scnIds.has(scn)) bad.push(`${p.id} -> unknown scenario ${scn}`);
+    if (!['success', 'fail'].includes(outcome)) bad.push(`${p.id} -> unknown outcome "${outcome}"`);
+    const entry = (level.consequence_matrix || {})[scn];
+    if (entry && !entry[outcome]) bad.push(`${p.id} -> ${scn} has no "${outcome}" branch`);
+  });
+  assert.deepEqual(bad, [], 'unreachable POI conditions:\n  ' + bad.join('\n  '));
+});
+
+test('QA11c: every location the player can reach carries at least one POI', () => {
+  // The "block remembers" pillar. A location with nothing to look at cannot
+  // show the player anything about what they did there.
+  const byLoc = {};
+  (level.pois || []).forEach(p => { byLoc[p.locationId] = (byLoc[p.locationId] || 0) + 1; });
+  const bare = [...locIds].filter(id => !byLoc[id]);
+  assert.deepEqual(bare, [], `locations with no environmental storytelling: ${bare.join(', ')}`);
+});
+
+test('QA11d: every consequence effect points at something real', () => {
+  const bad = [];
+  const eventIds = new Set((level.events || []).map(e => e.id));
+  Object.entries(level.consequence_matrix || {}).forEach(([scnId, branches]) => {
+    if (!scnIds.has(scnId)) bad.push(`matrix key ${scnId} is not a scenario`);
+    Object.entries(branches).forEach(([outcome, effects]) => {
+      (effects || []).forEach((e, i) => {
+        const at = `${scnId}.${outcome}[${i}]`;
+        if (e.locationState && !locIds.has(e.locationState.locationId)) bad.push(`${at} -> location ${e.locationState.locationId}`);
+        if (e.worldMark) {
+          if (!locIds.has(e.worldMark.locationId)) bad.push(`${at} -> location ${e.worldMark.locationId}`);
+          if (!MARK_TYPES.has(e.worldMark.mark)) bad.push(`${at} -> mark "${e.worldMark.mark}"`);
+        }
+        if (e.factionControl) {
+          if (!locIds.has(e.factionControl.locationId)) bad.push(`${at} -> location ${e.factionControl.locationId}`);
+          if (!factionIds.has(e.factionControl.factionId)) bad.push(`${at} -> faction ${e.factionControl.factionId}`);
+        }
+        if (e.relationship) {
+          if (!charIds.has(e.relationship.from)) bad.push(`${at} -> character ${e.relationship.from}`);
+          if (!charIds.has(e.relationship.to)) bad.push(`${at} -> character ${e.relationship.to}`);
+        }
+        if (e.newScenario && !locIds.has(e.newScenario.locationId)) bad.push(`${at} -> location ${e.newScenario.locationId}`);
+        if (e.triggerEvent && !eventIds.has(e.triggerEvent)) bad.push(`${at} -> event ${e.triggerEvent}`);
+      });
+    });
+  });
+  assert.deepEqual(bad, [], 'dangling consequences:\n  ' + bad.join('\n  '));
+});
+
+test('QA11e: every major scenario has authored consequences for both outcomes', () => {
+  // The design's rule is that a decision the player cannot walk past was not
+  // designed. A scenario with no matrix entry produces no visible change.
+  const MAJOR = [
+    'corner_hustle', 'community_block', 'studio_session', 'block_fame',
+    'police_raid', 'the_steps_watch', 'officer_trust', 'clique_war', 'train_heist'
+  ];
+  const missing = MAJOR.filter(id => {
+    const e = (level.consequence_matrix || {})[id];
+    return !e || !Array.isArray(e.success) || !Array.isArray(e.fail) || !e.success.length || !e.fail.length;
+  });
+  assert.deepEqual(missing, [], `no success/fail consequences authored: ${missing.join(', ')}`);
+});
+
+test('QA11f: every permanent consequence is visible somewhere', () => {
+  // Design pillar 1. A consequence that only moves a number is not shipped —
+  // each fail branch of a territory scenario must leave a mark the player can
+  // walk past.
+  const bad = [];
+  ['clique_war', 'the_steps_watch', 'train_heist'].forEach(id => {
+    const fail = ((level.consequence_matrix || {})[id] || {}).fail || [];
+    if (!fail.some(e => e.worldMark)) bad.push(`${id}.fail leaves no visible mark`);
+  });
+  assert.deepEqual(bad, [], bad.join('\n  '));
+});
+
 test('design: districts match the west-to-east danger gradient', () => {
   // The level's single readable idea. If a location sits in the wrong district
   // the gradient stops being legible, which is the one thing the player is

@@ -23,20 +23,20 @@ const GEN_DIR = path.join(__dirname, '..', 'assets', 'generated');
 
 /**
  * Fields loadLevel() actually consumes, from level-loader.js. Anything in the
- * JSON outside this list is authoring metadata that never reaches the engine —
- * `title`, `tagline`, `design_pillar` and `experience` are documentation, and
- * `pois` / `consequence_matrix` are authored but not yet loaded (Sprint 2).
- * Listed here so the warning below can tell those two cases apart.
+ * JSON outside this list is authoring metadata that never reaches the engine.
+ * `title`, `tagline`, `design_pillar` and `experience` are documentation and
+ * always will be; the warning below exists so nothing else joins them by
+ * accident, which is exactly how `pois` and `consequence_matrix` sat unread.
  */
 const LOADED = new Set([
   'id', 'startLocationId', 'activeDistrictId', 'weather', 'timeOfDay',
   'districts', 'factions', 'locations', 'routes', 'characters',
   'scenarios', 'rumors', 'chains', 'threads', 'obligations',
-  'events', 'vehicles', 'relationships'
+  'events', 'vehicles', 'relationships',
+  'pois', 'consequence_matrix'
 ]);
 const KNOWN_UNLOADED = new Set([
-  'title', 'tagline', 'design_pillar', 'experience',   // documentation
-  'pois', 'consequence_matrix'                          // Sprint 2
+  'title', 'tagline', 'design_pillar', 'experience'    // documentation only
 ]);
 
 function generate(id) {

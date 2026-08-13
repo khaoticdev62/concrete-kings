@@ -125,6 +125,26 @@
     // 8. Scenario chains.
     (def.chains || []).forEach(ch => { state.addScenarioChain({ id: ch.id, nodes: ch.nodes || [] }); log.chains++; });
 
+    // 8b. Environmental storytelling + authored consequences.
+    //
+    // Both of these were present in every level file and read by nothing. POIs
+    // never rendered and the consequence matrix never fired, so the level's
+    // whole "the block remembers" pillar was inert data. Loaded here, and
+    // unconditional POIs are pushed straight into the world's mark layer so the
+    // renderer treats them exactly like marks a consequence adds later.
+    (def.pois || []).forEach(p => {
+      const poi = state.addPoi(p);
+      if (!poi) return;
+      log.pois = (log.pois || 0) + 1;
+      if (poi.active && world && typeof world.addWorldMark === 'function') {
+        world.addWorldMark(poi.locationId, poi.type);
+      }
+    });
+    if (def.consequence_matrix && typeof state.setConsequenceMatrix === 'function') {
+      state.setConsequenceMatrix(def.consequence_matrix);
+      log.consequences = Object.keys(def.consequence_matrix).length;
+    }
+
     // 9. Threads / obligations.
     (def.threads || []).forEach(t => { state.addThread(t); log.threads++; });
     (def.obligations || []).forEach(o => { state.addObligation(o); log.obligations++; });

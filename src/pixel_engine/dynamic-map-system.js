@@ -20,6 +20,20 @@ class DynamicMapSystem {
     this.ui = new deps.DMUI(this.state);
     // CRPG-MAP-PRD-002: living pixel-art world map layer over the existing state
     this.worldMap = (deps.DMWorldMap) ? new deps.DMWorldMap({ state: this.state }) : null;
+
+    // Relay world marks from state to the world map.
+    //
+    // The marks live on DMWorldMap and the consequences that create them are
+    // applied on DMMapState, which has no reference to the world by design.
+    // Without this bridge, applyConsequence's worldMark effects and every
+    // conditional POI turn on in state and never appear on the map — which is
+    // exactly how they behaved before: authored, applied, invisible.
+    if (this.worldMap && typeof this.state.on === 'function') {
+      this.state.on('worldMarkAdded', ({ locationId, mark }) => {
+        this.worldMap.addWorldMark(locationId, mark);
+        this.renderFrame();
+      });
+    }
     // §96/§134 — load the designed level (THE BLOCK) if a level definition is
     // provided (browser: window.MAP_LEVEL; Node: passed via options.levelDef).
     // This is the single source of truth for the playable level; it replaces the
